@@ -1,0 +1,406 @@
+// prisma/schema-mongodb.prisma
+// MongoDB-optimiertes Schema für Oriido
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// BENUTZER & AUTHENTIFIZIERUNG
+// ============================================
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  name          String?
+  phone         String?
+  image         String?
+  role          String    @default("RESTAURANT_OWNER") // SUPER_ADMIN, RESTAURANT_OWNER, RESTAURANT_STAFF
+  
+  // Relationen
+  ownedRestaurants Restaurant[] @relation("RestaurantOwner")
+  staffAt          RestaurantStaff[]
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // NextAuth
+  accounts Account[]
+  sessions Session[]
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// RESTAURANT
+// ============================================
+
+model Restaurant {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  slug        String   @unique
+  description String?
+  cuisine     String?
+  
+  // Adresse
+  street      String?
+  city        String?
+  postalCode  String?
+  country     String   @default("DE")
+  
+  // Kontakt
+  phone       String?
+  email       String?
+  website     String?
+  
+  // Aussehen
+  logo        String?
+  banner      String?
+  primaryColor String? @default("#3b82f6")
+  
+  // Status & Plan
+  status      String   @default("ACTIVE") // PENDING, ACTIVE, SUSPENDED, CANCELLED
+  plan        String   @default("TRIAL")  // TRIAL, STANDARD, PREMIUM
+  trialEndsAt DateTime?
+  
+  // Owner
+  ownerId     String   @db.ObjectId
+  owner       User     @relation("RestaurantOwner", fields: [ownerId], references: [id])
+  
+  // Relationen
+  staff       RestaurantStaff[]
+  categories  Category[]
+  menuItems   MenuItem[]
+  tables      Table[]
+  orders      Order[]
+  settings    RestaurantSettings?
+  
+  // Stripe
+  stripeCustomerId       String?
+  stripeSubscriptionId   String?
+  stripePriceId         String?
+  stripeCurrentPeriodEnd DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RestaurantStaff {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String   @db.ObjectId
+  userId       String   @db.ObjectId
+  role         String   @default("STAFF") // MANAGER, STAFF
+  
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([restaurantId, userId])
+}
+
+model RestaurantSettings {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String   @unique @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  // Bestelleinstellungen
+  orderingEnabled    Boolean @default(true)
+  requireTableNumber Boolean @default(true)
+  allowTakeaway     Boolean @default(false)
+  allowDelivery     Boolean @default(false)
+  autoAcceptOrders  Boolean @default(false)
+  orderPrefix       String  @default("ORD")
+  
+  // Benachrichtigungen
+  emailNotifications  Boolean @default(true)
+  soundNotifications  Boolean @default(true)
+  sendOrderEmails    Boolean @default(true)
+  sendStatusUpdates  Boolean @default(true)
+  notificationEmail  String?
+  
+  // Öffnungszeiten (als embedded document)
+  openingHours       String? // JSON String mit Öffnungszeiten
+  
+  // Zahlungen
+  acceptCash         Boolean @default(true)
+  acceptCard         Boolean @default(false)
+  acceptPaypal       Boolean @default(false)
+  acceptStripe       Boolean @default(false)
+  
+  // Steuern
+  taxRate            Float   @default(19)
+  includeTax         Boolean @default(true)
+  
+  // Sprache & Währung
+  currency          String  @default("EUR")
+  language          String  @default("de")
+  timezone          String  @default("Europe/Berlin")
+  
+  // POS Integration
+  posSystem         String?  // ready2order, orderbird, gastrofix
+  posApiKey         String?
+  posRestaurantId   String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// SPEISEKARTE
+// ============================================
+
+model Category {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String   @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  name         String
+  description  String?
+  icon         String?  // Icon-Name für UI
+  color        String?  // Hex-Farbe
+  image        String?  // Kategorie-Bild
+  
+  sortOrder    Int      @default(0)
+  isActive     Boolean  @default(true)
+  
+  // Relationen
+  menuItems    MenuItem[]
+  
+  // POS Mapping
+  posId        String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MenuItem {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId   String   @db.ObjectId
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  restaurantId String   @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  name         String
+  description  String?
+  price        Float
+  image        String?
+  
+  // Status
+  isActive     Boolean  @default(true)
+  isAvailable  Boolean  @default(true)
+  
+  // Zusatzinfos
+  allergens    String[] // Array von Allergenen
+  additives    String[] // Array von Zusatzstoffen
+  tags         String[] // vegan, vegetarisch, scharf, etc.
+  calories     Int?
+  
+  // Varianten & Extras (embedded documents)
+  variants     MenuItemVariant[]
+  extras       MenuItemExtra[]
+  
+  sortOrder    Int      @default(0)
+  
+  // POS Mapping
+  posId        String?
+  
+  // Relationen
+  orderItems   OrderItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+type MenuItemVariant {
+  id         String
+  name       String
+  price      Float
+  sortOrder  Int     @default(0)
+  posId      String?
+}
+
+type MenuItemExtra {
+  id         String
+  name       String
+  price      Float
+  sortOrder  Int     @default(0)
+  posId      String?
+}
+
+// ============================================
+// TISCHE & QR-CODES
+// ============================================
+
+model Table {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String   @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  number       Int      @unique
+  name         String   // z.B. "Tisch 1", "Terrasse 3"
+  seats        Int      @default(4)
+  area         String?  // Bereich: "Innen", "Terrasse", etc.
+  
+  qrCode       String   // URL zum QR-Code
+  isActive     Boolean  @default(true)
+  
+  // Relationen
+  orders       Order[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// BESTELLUNGEN
+// ============================================
+
+model Order {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId String   @db.ObjectId
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  orderNumber  Int      @unique
+  
+  // Optional: Tisch-Zuordnung
+  tableId      String?  @db.ObjectId
+  table        Table?   @relation(fields: [tableId], references: [id])
+  tableNumber  Int?
+  
+  // Bestelldetails
+  type         String   @default("DINE_IN") // DINE_IN, TAKEAWAY
+  status       String   @default("PENDING") // PENDING, CONFIRMED, PREPARING, READY, DELIVERED, CANCELLED, PAID
+  
+  // Preise
+  subtotal     Float
+  tax          Float
+  total        Float
+  
+  // Gast-Info (optional)
+  guestName    String?
+  guestPhone   String?
+  guestEmail   String?
+  notes        String?
+  
+  // Zahlungsinformationen
+  paymentStatus String  @default("PENDING") // PENDING, PAID, REFUNDED
+  paymentMethod String? // CASH, CARD, PAYPAL, STRIPE
+  paidAt       DateTime?
+  
+  // Zeiten
+  confirmedAt  DateTime?
+  preparedAt   DateTime?
+  readyAt      DateTime?
+  deliveredAt  DateTime?
+  completedAt  DateTime?
+  cancelledAt  DateTime?
+  
+  // Relationen
+  items        OrderItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId    String   @db.ObjectId
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  menuItemId String   @db.ObjectId
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  
+  name       String   // Snapshot des Namens
+  quantity   Int      @default(1)
+  unitPrice  Float
+  totalPrice Float
+  
+  // Ausgewählte Variante
+  variant      String?
+  variantPrice Float?
+  
+  // Ausgewählte Extras (als Array)
+  extras     OrderItemExtra[]
+  
+  // Notizen
+  notes      String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+type OrderItemExtra {
+  name  String
+  price Float
+}
+
+// ============================================
+// RECHNUNGEN & ZAHLUNGEN
+// ============================================
+
+model Invoice {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNumber String   @unique
+  restaurantId  String   @db.ObjectId
+  
+  // Beträge
+  amount        Float
+  tax           Float
+  total         Float
+  
+  // Status
+  status        String   @default("DRAFT") // DRAFT, SENT, PAID, OVERDUE, CANCELLED
+  
+  // Daten
+  periodStart   DateTime
+  periodEnd     DateTime
+  dueDate       DateTime
+  
+  // Zahlungsinformationen
+  paidAt        DateTime?
+  paymentMethod String?
+  
+  // Stripe
+  stripeInvoiceId String?
+  stripePdfUrl    String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,843 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import CheckoutWithTip from './checkout-with-tip'
+import StripeCheckout from './stripe-checkout-new'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Textarea } from '@/components/ui/textarea'
+import { 
+  ShoppingCart, 
+  Plus, 
+  Minus, 
+  X,
+  Info,
+  MapPin,
+  Phone,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { GuestLanguageProvider, useGuestLanguage } from '@/contexts/guest-language-context'
+import LanguageSelector from './language-selector'
+
+interface MenuItemVariant {
+  id: string
+  name: string
+  price: number
+}
+
+interface MenuItemExtra {
+  id: string
+  name: string
+  price: number
+}
+
+interface MenuItem {
+  id: string
+  name: string
+  description?: string | null
+  price: number
+  image?: string | null
+  allergens: string[]
+  tags: string[]
+  variants: MenuItemVariant[]
+  extras: MenuItemExtra[]
+}
+
+interface Category {
+  id: string
+  name: string
+  description?: string | null
+  menuItems: MenuItem[]
+}
+
+interface Restaurant {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  primaryColor?: string | null
+  cuisine?: string | null
+  street?: string | null
+  city?: string | null
+  postalCode?: string | null
+  phone?: string | null
+  categories: Category[]
+  settings: any
+}
+
+interface CartItem {
+  id: string
+  menuItem: MenuItem
+  quantity: number
+  variant?: MenuItemVariant
+  extras: MenuItemExtra[]
+  notes?: string
+}
+
+interface GuestMenuViewProps {
+  restaurant: Restaurant
+  table: any
+  tableNumber: number
+}
+
+const cuisineEmojis: { [key: string]: string } = {
+  'german': '🇩🇪',
+  'italian': '🇮🇹',
+  'asian': '🥢',
+  'greek': '🇬🇷',
+  'turkish': '🇹🇷',
+  'indian': '🇮🇳',
+  'mexican': '🇲🇽',
+  'american': '🍔',
+  'french': '🇫🇷',
+  'spanish': '🇪🇸',
+  'cafe': '☕',
+  'bakery': '🥐',
+  'other': '🍴'
+}
+
+export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: GuestMenuViewProps) {
+  const { t } = useGuestLanguage()
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isOrdering, setIsOrdering] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    restaurant.categories[0]?.id || ''
+  )
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
+  const [selectedVariant, setSelectedVariant] = useState<MenuItemVariant | null>(null)
+  const [selectedExtras, setSelectedExtras] = useState<MenuItemExtra[]>([])
+  const [itemNotes, setItemNotes] = useState('')
+  const [itemQuantity, setItemQuantity] = useState(1)
+  const [showCheckout, setShowCheckout] = useState(false)
+  const [showStripeCheckout, setShowStripeCheckout] = useState(false)
+  const [currentPaymentMethod, setCurrentPaymentMethod] = useState<string>('CASH')
+  const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
+
+  // Lade Warenkorb aus localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem(`cart-${restaurant.slug}-${tableNumber}`)
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart))
+      } catch (e) {
+        console.error('Error loading cart:', e)
+      }
+    }
+  }, [restaurant.slug, tableNumber])
+
+  // Speichere Warenkorb in localStorage
+  useEffect(() => {
+    if (cart.length > 0) {
+      localStorage.setItem(`cart-${restaurant.slug}-${tableNumber}`, JSON.stringify(cart))
+    } else {
+      localStorage.removeItem(`cart-${restaurant.slug}-${tableNumber}`)
+    }
+  }, [cart, restaurant.slug, tableNumber])
+
+  const openItemDialog = (item: MenuItem) => {
+    setSelectedItem(item)
+    setSelectedVariant(item.variants.length > 0 ? item.variants[0] : null)
+    setSelectedExtras([])
+    setItemNotes('')
+    setItemQuantity(1)
+  }
+
+  const addToCart = () => {
+    if (!selectedItem) return
+
+    const variantId = selectedVariant ? `-${selectedVariant.id}` : '-default'
+    const extrasId = selectedExtras.length > 0 
+      ? `-${selectedExtras.map(e => e.id).sort().join('-')}`
+      : ''
+    const timestamp = Date.now()
+    const cartId = `${selectedItem.id}${variantId}${extrasId}-${timestamp}`
+    
+    const existingItem = cart.find(c => 
+      c.menuItem.id === selectedItem.id && 
+      c.variant?.id === selectedVariant?.id &&
+      JSON.stringify(c.extras.map(e => e.id).sort()) === JSON.stringify(selectedExtras.map(e => e.id).sort()) &&
+      c.notes === itemNotes
+    )
+
+    if (existingItem) {
+      setCart(cart.map(c => 
+        c.id === existingItem.id
+          ? { ...c, quantity: c.quantity + itemQuantity }
+          : c
+      ))
+    } else {
+      setCart([...cart, {
+        id: cartId,
+        menuItem: selectedItem,
+        quantity: itemQuantity,
+        variant: selectedVariant || undefined,
+        extras: selectedExtras,
+        notes: itemNotes || undefined
+      }])
+    }
+
+    toast.success(`${itemQuantity}x ${selectedItem.name} ${t('common.addToCart')}`)
+    setSelectedItem(null)
+  }
+
+  const toggleExtra = (extra: MenuItemExtra) => {
+    setSelectedExtras(prev => {
+      const exists = prev.find(e => e.id === extra.id)
+      if (exists) {
+        return prev.filter(e => e.id !== extra.id)
+      } else {
+        return [...prev, extra]
+      }
+    })
+  }
+
+  const getDialogItemPrice = () => {
+    if (!selectedItem) return 0
+    const basePrice = selectedVariant?.price || selectedItem.price
+    const extrasPrice = selectedExtras.reduce((sum, extra) => sum + extra.price, 0)
+    return (basePrice + extrasPrice) * itemQuantity
+  }
+
+  const updateQuantity = (cartId: string, delta: number) => {
+    setCart(cart.map(item => {
+      if (item.id === cartId) {
+        const newQuantity = item.quantity + delta
+        if (newQuantity <= 0) return item
+        return { ...item, quantity: newQuantity }
+      }
+      return item
+    }).filter(item => item.quantity > 0))
+  }
+
+  const removeFromCart = (cartId: string) => {
+    setCart(cart.filter(item => item.id !== cartId))
+    toast.info(t('cart.removeItem'))
+  }
+
+  const getItemPrice = (item: CartItem) => {
+    const basePrice = item.variant?.price || item.menuItem.price
+    const extrasPrice = item.extras.reduce((sum, extra) => sum + extra.price, 0)
+    return (basePrice + extrasPrice) * item.quantity
+  }
+
+  const getCartTotal = () => {
+    return cart.reduce((sum, item) => sum + getItemPrice(item), 0)
+  }
+
+  const getCartItemCount = () => {
+    return cart.reduce((sum, item) => sum + item.quantity, 0)
+  }
+
+  const handleOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string) => {
+    if (cart.length === 0) return
+
+    // Speichere die aktuellen Zahlungsdetails
+    setCurrentPaymentMethod(paymentMethod)
+    setCurrentTipAmount(tipAmount)
+
+    // Wenn Kartenzahlung gewählt wurde, öffne Stripe Checkout
+    if (paymentMethod === 'CARD') {
+      setShowCheckout(false)
+      setShowStripeCheckout(true)
+      return
+    }
+
+    // Ansonsten normale Barzahlung verarbeiten
+    await processOrder(tipPercent, tipAmount, paymentMethod)
+  }
+
+  const processOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string, paymentIntentId?: string) => {
+    if (cart.length === 0) return
+
+    setIsOrdering(true)
+    
+    try {
+      const orderData = {
+        restaurantId: restaurant.id,
+        tableId: table?.id,
+        tableNumber,
+        type: 'DINE_IN',
+        items: cart.map(item => ({
+          menuItemId: item.menuItem.id,
+          quantity: item.quantity,
+          variant: item.variant?.name,
+          variantPrice: item.variant?.price,
+          extras: item.extras.map(e => ({
+            name: e.name,
+            price: e.price
+          })),
+          notes: item.notes
+        })),
+        tipPercent,
+        tipAmount,
+        paymentMethod,
+        paymentIntentId // Für Kartenzahlungen
+      }
+
+      const response = await fetch(`/api/public/${restaurant.slug}/order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      })
+
+      if (!response.ok) {
+        throw new Error(t('checkout.orderFailed'))
+      }
+
+      const result = await response.json()
+      
+      toast.success(`${t('guest.orderNumber')} #${result.data.orderNumber} - ${t('guest.orderConfirmed')}`)
+      setCart([])
+      setIsCartOpen(false)
+      setShowCheckout(false)
+      setShowStripeCheckout(false)
+      
+    } catch (error) {
+      toast.error(`${t('checkout.orderFailed')}. ${t('checkout.tryAgain')}.`)
+    } finally {
+      setIsOrdering(false)
+    }
+  }
+
+  const handleStripeSuccess = (paymentIntentId: string) => {
+    // Bestellung wurde bereits im Backend bestätigt, nur UI aufräumen
+    toast.success(t('guest.orderConfirmed'))
+    setCart([])
+    setIsCartOpen(false)
+    setShowStripeCheckout(false)
+  }
+
+  const handleStripeError = (error: string) => {
+    toast.error(error)
+    // Zurück zum normalen Checkout
+    setShowStripeCheckout(false)
+    setShowCheckout(true)
+  }
+
+  const handleStripeCancel = () => {
+    // Zurück zum normalen Checkout
+    setShowStripeCheckout(false)
+    setShowCheckout(true)
+  }
+
+  const calculateTax = () => {
+    const taxRate = restaurant.settings?.taxRate || 19
+    const includeTax = restaurant.settings?.includeTax ?? true
+    const subtotal = getCartTotal()
+    
+    if (includeTax) {
+      // Preise enthalten bereits MwSt
+      const tax = subtotal - (subtotal / (1 + taxRate / 100))
+      return {
+        subtotal: subtotal - tax,
+        tax
+      }
+    } else {
+      // Preise ohne MwSt
+      const tax = subtotal * (taxRate / 100)
+      return {
+        subtotal,
+        tax
+      }
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Header */}
+      <div className="bg-white shadow-lg sticky top-0 z-40 border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{restaurant.name}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-2xl">{cuisineEmojis[restaurant.cuisine || 'other']}</span>
+                <span className="text-sm text-gray-600">{t('guest.tableNumber')} {tableNumber}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <LanguageSelector />
+            <Button
+              onClick={() => setIsCartOpen(true)}
+              className="relative shadow-md hover:shadow-lg transition-shadow"
+              size="lg"
+              style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              {cart.length > 0 && (
+                <>
+                  <span className="ml-2 hidden sm:inline">€{getCartTotal().toFixed(2)}</span>
+                  <Badge 
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 flex items-center justify-center animate-pulse"
+                    variant="destructive"
+                  >
+                    {getCartItemCount()}
+                  </Badge>
+                </>
+              )}
+            </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Restaurant Info */}
+      {(restaurant.description || restaurant.street) && (
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4 py-3">
+            {restaurant.description && (
+              <p className="text-gray-600 mb-2">{restaurant.description}</p>
+            )}
+            <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+              {restaurant.street && (
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  <span>{restaurant.street}, {restaurant.postalCode} {restaurant.city}</span>
+                </div>
+              )}
+              {restaurant.phone && (
+                <div className="flex items-center gap-1">
+                  <Phone className="h-4 w-4" />
+                  <span>{restaurant.phone}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Categories */}
+      <div className="bg-white/95 backdrop-blur-sm border-b sticky top-[73px] sm:top-[81px] z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-2 py-3 overflow-x-auto scrollbar-hide">
+            {restaurant.categories.map((category) => {
+              const isSelected = selectedCategory === category.id
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-all flex items-center gap-2 ${
+                    isSelected 
+                      ? 'text-white shadow-lg transform scale-105' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  style={{
+                    backgroundColor: isSelected 
+                      ? (restaurant.primaryColor || '#3b82f6') 
+                      : undefined
+                  }}
+                >
+                  <span className="font-medium">{category.name}</span>
+                  <Badge 
+                    variant={isSelected ? "secondary" : "outline"}
+                    className={isSelected ? "bg-white/20 text-white border-white/30" : ""}
+                  >
+                    {category.menuItems.length}
+                  </Badge>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Menu Items */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        {restaurant.categories
+          .filter(cat => cat.id === selectedCategory)
+          .map((category) => (
+            <div key={category.id}>
+              {category.description && (
+                <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+                  <p className="text-gray-600">{category.description}</p>
+                </div>
+              )}
+              
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {category.menuItems.map((item) => (
+                  <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
+                    {item.image && (
+                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIwMCIgeT0iMTUwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjI1cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'
+                          }}
+                        />
+                        <div className="absolute top-2 right-2 flex flex-col gap-2">
+                          <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 font-bold shadow-md">
+                            €{item.price.toFixed(2)}
+                          </Badge>
+                          {item.variants && item.variants.length > 0 && (
+                            <Badge className="bg-blue-500/90 text-white backdrop-blur-sm shadow-md">
+                              {item.variants.length} Größen
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
+                          {item.variants && item.variants.length > 0 && (
+                            <p className="text-xs text-gray-500 mt-1">
+                              ab €{Math.min(...item.variants.map(v => v.price)).toFixed(2)}
+                            </p>
+                          )}
+                        </div>
+                        {!item.image && (
+                          <Badge className="font-bold text-lg" style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}>
+                            €{item.price.toFixed(2)}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {item.description && (
+                        <p className="text-sm text-gray-600 mb-3">
+                          {item.description}
+                        </p>
+                      )}
+                      
+                      {item.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {item.tags.map((tag) => (
+                            <Badge key={tag} variant="secondary" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {item.allergens.length > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
+                          <Info className="h-3 w-3" />
+                          <span>Allergene: {item.allergens.join(', ')}</span>
+                        </div>
+                      )}
+                      
+                      <Button
+                        className="w-full"
+                        style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
+                        onClick={() => openItemDialog(item)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        {item.variants.length > 0 || item.extras.length > 0 ? t('common.select') : t('common.addToCart')}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {/* Cart Sheet */}
+      <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+        <SheetContent className="w-full sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>{t('cart.title')}</SheetTitle>
+          </SheetHeader>
+          
+          <div className="mt-6 flex-1 overflow-y-auto">
+            {cart.length === 0 ? (
+              <div className="text-center py-8">
+                <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500">{t('cart.emptyCart')}</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {cart.map((item) => (
+                  <div key={item.id} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{item.menuItem.name}</h4>
+                        {item.variant && (
+                          <p className="text-sm text-gray-600">{item.variant.name}</p>
+                        )}
+                        {item.extras.length > 0 && (
+                          <p className="text-sm text-gray-600">
+                            + {item.extras.map(e => e.name).join(', ')}
+                          </p>
+                        )}
+                        {item.notes && (
+                          <p className="text-sm text-gray-500 italic">"{item.notes}"</p>
+                        )}
+                        <p className="text-sm text-gray-600 mt-1">
+                          €{((item.variant?.price || item.menuItem.price) + 
+                            item.extras.reduce((sum, e) => sum + e.price, 0)).toFixed(2)} pro Stück
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFromCart(item.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, -1)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, 1)}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <span className="font-bold">
+                        €{getItemPrice(item).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {cart.length > 0 && (
+            <SheetFooter className="mt-6">
+              <div className="w-full space-y-4">
+                <div className="bg-gray-100 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold">{t('common.total')}</span>
+                    <span className="text-xl font-bold">
+                      €{getCartTotal().toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => setShowCheckout(true)}
+                  style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
+                >
+                  {t('checkout.proceedToCheckout')}
+                </Button>
+              </div>
+            </SheetFooter>
+          )}
+        </SheetContent>
+      </Sheet>
+
+      {/* Item Detail Dialog */}
+      <Dialog open={!!selectedItem} onOpenChange={(open) => !open && setSelectedItem(null)}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          {selectedItem && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold">{selectedItem.name}</DialogTitle>
+                {selectedItem.image && (
+                  <div className="relative h-48 rounded-lg overflow-hidden mt-2">
+                    <img
+                      src={selectedItem.image}
+                      alt={selectedItem.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                {selectedItem.description && (
+                  <p className="text-sm text-gray-600">{selectedItem.description}</p>
+                )}
+                
+                {/* {t('item.variants')} */}
+                {selectedItem.variants.length > 0 && (
+                  <div>
+                    <Label className="text-base font-medium mb-3 block">{t('item.variants')}</Label>
+                    <RadioGroup
+                      value={selectedVariant?.id || ''}
+                      onValueChange={(value) => {
+                        const variant = selectedItem.variants.find(v => v.id === value)
+                        setSelectedVariant(variant || null)
+                      }}
+                    >
+                      {selectedItem.variants.map((variant) => (
+                        <div key={variant.id} className="flex items-center space-x-2 mb-2">
+                          <RadioGroupItem value={variant.id} id={variant.id} />
+                          <Label 
+                            htmlFor={variant.id} 
+                            className="flex-1 cursor-pointer flex justify-between"
+                          >
+                            <span>{variant.name}</span>
+                            <span className="font-medium">€{variant.price.toFixed(2)}</span>
+                          </Label>
+                        </div>
+                      ))}
+                    </RadioGroup>
+                  </div>
+                )}
+                
+                {/* {t('item.extras')} */}
+                {selectedItem.extras.length > 0 && (
+                  <div>
+                    <Label className="text-base font-medium mb-3 block">{t('item.extras')}</Label>
+                    <div className="space-y-2">
+                      {selectedItem.extras.map((extra) => (
+                        <div key={extra.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={extra.id}
+                            checked={selectedExtras.some(e => e.id === extra.id)}
+                            onCheckedChange={() => toggleExtra(extra)}
+                          />
+                          <Label 
+                            htmlFor={extra.id} 
+                            className="flex-1 cursor-pointer flex justify-between"
+                          >
+                            <span>{extra.name}</span>
+                            <span className="font-medium">+€{extra.price.toFixed(2)}</span>
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Notizen */}
+                <div>
+                  <Label htmlFor="notes" className="text-base font-medium mb-2 block">
+                    {t('item.specialRequest')}
+                  </Label>
+                  <Textarea
+                    id="notes"
+                    placeholder={t('common.optional')}
+                    value={itemNotes}
+                    onChange={(e) => setItemNotes(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                </div>
+                
+                {/* {t('common.quantity')} */}
+                <div>
+                  <Label className="text-base font-medium mb-3 block">{t('common.quantity')}</Label>
+                  <div className="flex items-center justify-center gap-4">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setItemQuantity(Math.max(1, itemQuantity - 1))}
+                      disabled={itemQuantity <= 1}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <span className="text-xl font-medium w-12 text-center">{itemQuantity}</span>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setItemQuantity(itemQuantity + 1)}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                
+                {/* Allergene */}
+                {selectedItem.allergens.length > 0 && (
+                  <div className="flex items-start gap-2 text-sm text-gray-500 pt-2 border-t">
+                    <Info className="h-4 w-4 mt-0.5" />
+                    <div>
+                      <span className="font-medium">Allergene:</span>
+                      <span className="ml-1">{selectedItem.allergens.join(', ')}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
+                  onClick={addToCart}
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  {t('common.addToCart')} ({t('common.currency')}{getDialogItemPrice().toFixed(2)})
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Checkout Dialog with Tip */}
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('checkout.title')}</DialogTitle>
+          </DialogHeader>
+          
+          {cart.length > 0 && (() => {
+            const { subtotal, tax } = calculateTax()
+            return (
+              <CheckoutWithTip
+                subtotal={subtotal}
+                tax={tax}
+                onConfirm={handleOrder}
+                isProcessing={isOrdering}
+              />
+            )
+          })()}
+        </DialogContent>
+      </Dialog>
+
+      {/* Stripe Checkout Dialog */}
+      <Dialog open={showStripeCheckout} onOpenChange={(open) => {
+        if (!open && !isOrdering) {
+          handleStripeCancel()
+        }
+      }}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              💳 {t('payment.cardPayment') || 'Kartenzahlung'}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {cart.length > 0 && (() => {
+            const { subtotal, tax } = calculateTax()
+            const baseAmount = subtotal + tax
+            
+            return (
+              <StripeCheckout
+                amount={baseAmount}
+                currency="EUR"
+                orderId={`temp-${Date.now()}`} // Wird durch echte Order ID ersetzt
+                restaurantId={restaurant.id}
+                tip={currentTipAmount}
+                onSuccess={handleStripeSuccess}
+                onError={handleStripeError}
+                onCancel={handleStripeCancel}
+              />
+            )
+          })()}
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

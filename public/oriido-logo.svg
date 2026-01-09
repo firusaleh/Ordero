@@ -1,0 +1,43 @@
+<svg width="320" height="100" viewBox="0 0 320 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Oriido Logo exactly as in the image -->
+  <g fill="#f97316">
+    <!-- Letter "o" -->
+    <ellipse cx="30" cy="55" rx="22" ry="28" fill="none" stroke="#f97316" stroke-width="6"/>
+    
+    <!-- Letter "r" -->
+    <path d="M 65 35 L 65 80 M 65 45 C 65 45, 75 35, 85 35 C 92 35, 95 40, 95 45 C 95 50, 92 55, 85 55 L 75 55" 
+          fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <!-- Fork icon (instead of first "i") -->
+    <g transform="translate(110, 25)">
+      <!-- Fork prongs -->
+      <rect x="0" y="0" width="3" height="15" fill="#f97316" rx="1.5"/>
+      <rect x="6" y="0" width="3" height="15" fill="#f97316" rx="1.5"/>
+      <rect x="12" y="0" width="3" height="15" fill="#f97316" rx="1.5"/>
+      
+      <!-- Fork neck -->
+      <rect x="0" y="13" width="15" height="8" fill="#f97316"/>
+      
+      <!-- Fork handle -->
+      <rect x="5.5" y="21" width="4" height="34" fill="#f97316" rx="2"/>
+      <circle cx="7.5" cy="57" r="4" fill="#f97316"/>
+    </g>
+    
+    <!-- Knife icon (instead of second "i") -->
+    <g transform="translate(135, 25)">
+      <!-- Knife blade -->
+      <path d="M 7 0 C 10 0, 15 3, 15 10 L 15 21 L 7 21 C 7 21, 5 18, 5 15 L 5 5 C 5 2, 6 0, 7 0 Z" fill="#f97316"/>
+      
+      <!-- Knife handle -->
+      <rect x="5.5" y="21" width="4" height="34" fill="#f97316" rx="2"/>
+      <circle cx="7.5" cy="57" r="4" fill="#f97316"/>
+    </g>
+    
+    <!-- Letter "d" -->
+    <circle cx="180" cy="55" r="22" fill="none" stroke="#f97316" stroke-width="6"/>
+    <rect x="199" y="25" width="6" height="55" fill="#f97316" rx="3"/>
+    
+    <!-- Letter "o" -->
+    <ellipse cx="240" cy="55" rx="22" ry="28" fill="none" stroke="#f97316" stroke-width="6"/>
+  </g>
+</svg>
