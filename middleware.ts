@@ -5,7 +5,7 @@ import { authEdge } from "@/lib/auth-edge"
 export default authEdge((req) => {
   const { nextUrl, auth } = req
   const isLoggedIn = !!auth?.user
-  const isAdmin = auth?.user?.role === "ADMIN"
+  const isAdmin = auth?.user?.role === "SUPER_ADMIN" || auth?.user?.role === "ADMIN"
   
   // Öffentliche Routen
   const publicRoutes = ["/", "/login", "/register", "/r"]
