@@ -39,3 +39,21 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+*.db
+*.db-journal
+/prisma/dev.db
+/prisma/migrations/dev
+
+# MongoDB local data
+mongodb-data/
+mongodb.log*
+mongod.lock
+
+# uploads
+/public/uploads/
+
+# IDE
+.vscode/
+.idea/
