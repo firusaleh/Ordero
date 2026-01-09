@@ -13,7 +13,8 @@ import {
   Palette,
   Globe,
   Shield,
-  Database
+  Database,
+  CreditCard
 } from 'lucide-react'
 
 
@@ -35,6 +36,14 @@ export default function SettingsPage() {
       href: '/dashboard/settings/features',
       icon: Bell,
       color: 'bg-purple-500'
+    },
+    {
+      title: 'Zahlungen',
+      description: 'Stripe Connect und Zahlungsmethoden verwalten',
+      href: '/dashboard/settings/payments',
+      icon: CreditCard,
+      color: 'bg-emerald-500',
+      badge: 'NEU'
     },
     {
       title: t('settings.pos.title'),

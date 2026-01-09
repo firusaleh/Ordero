@@ -113,7 +113,7 @@ model Restaurant {
   payments    Payment[]
   invoices    Invoice[]
   
-  // Stripe
+  // Stripe Platform (für Abonnements)
   stripeCustomerId       String?
   stripeSubscriptionId   String?
   stripePriceId         String?
@@ -121,6 +121,14 @@ model Restaurant {
   subscriptionStatus     String?   @default("FREE") // FREE, ACTIVE, CANCELLED, PAST_DUE
   subscriptionPlan       String?   @default("FREE") // FREE, STANDARD, PREMIUM
   subscriptionCurrentPeriodEnd DateTime?
+  
+  // Stripe Connect (für Zahlungsabwicklung)
+  stripeAccountId        String?   // Connected Stripe Account ID
+  stripeAccountStatus    String?   // restricted, enabled, complete
+  stripeChargesEnabled   Boolean   @default(false)
+  stripePayoutsEnabled   Boolean   @default(false)
+  stripeDetailsSubmitted Boolean   @default(false)
+  stripeOnboardingCompleted Boolean @default(false)
   
   // Timestamps
   createdAt DateTime @default(now())
