@@ -146,7 +146,7 @@ export function StripeConnectSettings({ restaurantId }: StripeConnectSettingsPro
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Verbindungsstatus</span>
-                  <Badge variant={accountStatus.onboardingCompleted ? "success" : "warning"}>
+                  <Badge variant={accountStatus.onboardingCompleted ? "default" : "secondary"}>
                     {accountStatus.onboardingCompleted ? "Verbunden" : "Einrichtung erforderlich"}
                   </Badge>
                 </div>

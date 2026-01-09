@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27.acacia',
+  apiVersion: '2025-12-15.clover',
 });
 
 export async function POST(req: NextRequest) {
@@ -39,10 +39,11 @@ export async function POST(req: NextRequest) {
 
     // Erstelle ein neues Stripe Connect Konto wenn noch keines existiert
     if (!accountId) {
+      const accountEmail = restaurant.email || session.user.email;
       const account = await stripe.accounts.create({
         type: 'express',
         country: 'DE',
-        email: restaurant.email || session.user.email,
+        email: accountEmail || undefined,
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
         business_type: 'individual',
         business_profile: {
           name: restaurant.name,
-          url: restaurant.website,
+          url: restaurant.website || undefined,
           mcc: '5812', // Restaurant MCC Code
         },
         metadata: {

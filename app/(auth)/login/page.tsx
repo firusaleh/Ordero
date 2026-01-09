@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
@@ -21,7 +21,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
@@ -47,104 +47,114 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        toast.error('Anmeldung fehlgeschlagen', {
-          description: 'Bitte überprüfen Sie Ihre E-Mail-Adresse und Ihr Passwort.',
-        })
+        toast.error('Ungültige Anmeldedaten')
       } else {
+        toast.success('Erfolgreich angemeldet!')
         router.push(callbackUrl)
         router.refresh()
       }
     } catch (error) {
-      toast.error('Ein Fehler ist aufgetreten', {
-        description: 'Bitte versuchen Sie es später erneut.',
-      })
+      toast.error('Ein Fehler ist aufgetreten')
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <Card className="w-full bg-white shadow-lg">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-gray-900">Anmelden</CardTitle>
-        <CardDescription className="text-gray-600">
-          Geben Sie Ihre E-Mail-Adresse und Ihr Passwort ein
-        </CardDescription>
-      </CardHeader>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-700 font-medium">E-Mail</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="restaurant@beispiel.de"
-              className="border-gray-300 focus:border-blue-500"
-              {...register('email')}
-              disabled={isLoading}
-            />
-            {errors.email && (
-              <p className="text-sm text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-          <div className="space-y-2">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">
+            Willkommen zurück
+          </CardTitle>
+          <CardDescription className="text-center">
+            Melden Sie sich bei Ihrem Konto an
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">E-Mail</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
+                disabled={isLoading}
+                {...register('email')}
+              />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Passwort</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  disabled={isLoading}
+                  {...register('password')}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              )}
+            </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-gray-700 font-medium">Passwort</Label>
-              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium">
+              <Link 
+                href="/forgot-password" 
+                className="text-sm text-blue-600 hover:underline"
+              >
                 Passwort vergessen?
               </Link>
             </div>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                className="border-gray-300 focus:border-blue-500"
-                {...register('password')}
-                disabled={isLoading}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Anmelden
+            </Button>
+            <div className="text-sm text-center text-gray-600">
+              Noch kein Konto?{' '}
+              <Link 
+                href="/register" 
+                className="text-blue-600 hover:underline font-medium"
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
+                Jetzt registrieren
+              </Link>
             </div>
-            {errors.password && (
-              <p className="text-sm text-red-500">{errors.password.message}</p>
-            )}
-          </div>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button
-            type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Anmelden...
-              </>
-            ) : (
-              'Anmelden'
-            )}
-          </Button>
-          <div className="text-sm text-center text-gray-700">
-            Noch kein Konto?{' '}
-            <Link href="/register" className="text-blue-600 hover:text-blue-800 hover:underline font-semibold">
-              Jetzt registrieren
-            </Link>
-          </div>
-        </CardFooter>
-      </form>
-    </Card>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   )
 }
