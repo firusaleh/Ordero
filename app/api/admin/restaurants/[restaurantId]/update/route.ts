@@ -21,7 +21,20 @@ export async function PATCH(
     const body = await request.json()
     const { type, data } = body
     
-    console.log('Update request - type:', type, 'data:', data)
+    console.log('Update request - restaurantId:', resolvedParams.restaurantId, 'type:', type, 'data:', data)
+    
+    // Prüfe ob Restaurant existiert
+    const existingRestaurant = await prisma.restaurant.findUnique({
+      where: { id: resolvedParams.restaurantId }
+    })
+    
+    if (!existingRestaurant) {
+      console.error('Restaurant not found:', resolvedParams.restaurantId)
+      return NextResponse.json(
+        { error: 'Restaurant nicht gefunden' },
+        { status: 404 }
+      )
+    }
     
     if (type === 'basic') {
       // Update Restaurant Grunddaten
@@ -75,25 +88,28 @@ export async function PATCH(
     
     // Wenn kein Type angegeben, versuche alle Felder zu updaten
     if (!type || type === 'all') {
+      // Bereite Update-Daten vor (nur nicht-null Werte)
+      const restaurantUpdateData: any = {}
+      if (data.name !== undefined) restaurantUpdateData.name = data.name
+      if (data.description !== undefined) restaurantUpdateData.description = data.description
+      if (data.cuisine !== undefined) restaurantUpdateData.cuisine = data.cuisine
+      if (data.street !== undefined) restaurantUpdateData.street = data.street
+      if (data.city !== undefined) restaurantUpdateData.city = data.city
+      if (data.postalCode !== undefined) restaurantUpdateData.postalCode = data.postalCode
+      if (data.phone !== undefined) restaurantUpdateData.phone = data.phone
+      if (data.email !== undefined) restaurantUpdateData.email = data.email
+      if (data.website !== undefined) restaurantUpdateData.website = data.website
+      if (data.logo !== undefined) restaurantUpdateData.logo = data.logo
+      if (data.banner !== undefined) restaurantUpdateData.banner = data.banner
+      if (data.primaryColor !== undefined) restaurantUpdateData.primaryColor = data.primaryColor
+      
+      console.log('Restaurant update data:', restaurantUpdateData)
+      
       // Update sowohl Restaurant als auch Settings
       const [restaurant, settings] = await prisma.$transaction([
         prisma.restaurant.update({
           where: { id: resolvedParams.restaurantId },
-          data: {
-            name: data.name,
-            description: data.description,
-            cuisine: data.cuisine,
-            street: data.street,
-            city: data.city,
-            postalCode: data.postalCode,
-            phone: data.phone,
-            email: data.email,
-            website: data.website,
-            // Füge weitere Felder hinzu falls vorhanden
-            ...(data.logo && { logo: data.logo }),
-            ...(data.banner && { banner: data.banner }),
-            ...(data.primaryColor && { primaryColor: data.primaryColor })
-          }
+          data: restaurantUpdateData
         }),
         prisma.restaurantSettings.upsert({
           where: { restaurantId: resolvedParams.restaurantId },
@@ -144,10 +160,35 @@ export async function PATCH(
       { status: 400 }
     )
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update error:', error)
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    })
+    
+    // Prisma-spezifische Fehlerbehandlung
+    if (error.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Restaurant nicht gefunden' },
+        { status: 404 }
+      )
+    }
+    
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Daten-Konflikt: Ein Restaurant mit diesen Daten existiert bereits' },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Fehler beim Aktualisieren' },
+      { 
+        error: 'Fehler beim Aktualisieren',
+        details: error.message,
+        code: error.code
+      },
       { status: 500 }
     )
   }
