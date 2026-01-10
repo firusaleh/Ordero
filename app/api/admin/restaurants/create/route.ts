@@ -167,18 +167,28 @@ export async function POST(request: NextRequest) {
       }
     })
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create restaurant error:', error)
     
     if (error instanceof z.ZodError) {
+      const firstError = error.errors[0]
+      const message = firstError ? `${firstError.path}: ${firstError.message}` : 'Ungültige Eingabedaten'
       return NextResponse.json(
-        { error: 'Ungültige Eingabedaten', details: (error as any).errors },
+        { error: message, details: error.errors },
+        { status: 400 }
+      )
+    }
+    
+    // Prisma unique constraint error
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Diese E-Mail-Adresse oder Restaurant-Name ist bereits vergeben' },
         { status: 400 }
       )
     }
     
     return NextResponse.json(
-      { error: 'Ein Fehler ist aufgetreten' },
+      { error: error.message || 'Ein Fehler ist aufgetreten' },
       { status: 500 }
     )
   }

@@ -120,6 +120,18 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
       toast.error('Bitte füllen Sie alle Pflichtfelder aus')
       return
     }
+    
+    if (newRestaurant.ownerPassword.length < 8) {
+      toast.error('Das Passwort muss mindestens 8 Zeichen lang sein')
+      return
+    }
+    
+    // Validiere E-Mail-Format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(newRestaurant.ownerEmail)) {
+      toast.error('Bitte geben Sie eine gültige E-Mail-Adresse ein')
+      return
+    }
 
     setIsCreating(true)
     try {
