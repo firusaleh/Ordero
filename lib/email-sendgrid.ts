@@ -10,6 +10,8 @@ if (apiKey) {
 }
 
 // E-Mail Konfiguration
+// WICHTIG: Diese E-Mail muss in SendGrid verifiziert sein!
+// Verwende die in Vercel konfigurierte Adresse
 const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@oriido.de'
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'Oriido'
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'support@oriido.com'

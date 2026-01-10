@@ -89,6 +89,9 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
     phone: ''
   })
   const [isCreating, setIsCreating] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [restaurantToDelete, setRestaurantToDelete] = useState<Restaurant | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const filteredRestaurants = restaurants.filter(restaurant =>
     restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -185,6 +188,32 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
       }
     } catch (error) {
       toast.error('Fehler beim Anmelden als Restaurant-Besitzer')
+    }
+  }
+
+  const handleDeleteRestaurant = async () => {
+    if (!restaurantToDelete) return
+
+    setIsDeleting(true)
+    try {
+      const response = await fetch(`/api/admin/restaurants/${restaurantToDelete.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (response.ok) {
+        toast.success(`Restaurant "${restaurantToDelete.name}" wurde vollständig gelöscht`)
+        setDeleteDialogOpen(false)
+        setRestaurantToDelete(null)
+        router.refresh()
+      } else {
+        const error = await response.json()
+        throw new Error(error.error || 'Fehler beim Löschen')
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Fehler beim Löschen des Restaurants')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -411,11 +440,24 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem 
-                          className="text-red-500 hover:text-red-400 hover:bg-gray-700"
+                          className="text-orange-500 hover:text-orange-400 hover:bg-gray-700"
                           onClick={() => handleStatusChange(restaurant.id, 'CANCELLED')}
                         >
+                          <Ban className="w-4 h-4 mr-2" />
+                          Deaktivieren
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuSeparator className="bg-gray-700" />
+                        
+                        <DropdownMenuItem 
+                          className="text-red-600 hover:text-red-500 hover:bg-red-950/50 font-semibold"
+                          onClick={() => {
+                            setRestaurantToDelete(restaurant)
+                            setDeleteDialogOpen(true)
+                          }}
+                        >
                           <XCircle className="w-4 h-4 mr-2" />
-                          Löschen
+                          Komplett löschen
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -615,6 +657,71 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
               className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
             >
               Schließen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lösch-Bestätigungs-Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-red-500">
+              ⚠️ Restaurant komplett löschen
+            </DialogTitle>
+            <DialogDescription className="text-gray-300 mt-2">
+              Sie sind dabei, das Restaurant <strong className="text-white">{restaurantToDelete?.name}</strong> vollständig zu löschen.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="bg-red-950/30 border border-red-900 rounded-lg p-4 my-4">
+            <p className="text-red-400 font-semibold mb-2">Diese Aktion löscht unwiderruflich:</p>
+            <ul className="text-red-300 text-sm space-y-1 list-disc list-inside">
+              <li>Das Restaurant und alle Einstellungen</li>
+              <li>Alle Menü-Items und Kategorien</li>
+              <li>Alle Tische und QR-Codes</li>
+              <li>Alle Bestellungen und Bestellhistorie</li>
+              <li>Den Besitzer-Account (wenn keine anderen Restaurants)</li>
+            </ul>
+          </div>
+          
+          <div className="bg-gray-700 rounded-lg p-3">
+            <p className="text-sm text-gray-300">
+              <strong>Besitzer:</strong> {restaurantToDelete?.owner.name || 'N/A'}<br />
+              <strong>E-Mail:</strong> {restaurantToDelete?.owner.email}<br />
+              <strong>Status:</strong> {restaurantToDelete?.status}<br />
+              <strong>Erstellt:</strong> {restaurantToDelete && new Date(restaurantToDelete.createdAt).toLocaleDateString('de-DE')}
+            </p>
+          </div>
+          
+          <DialogFooter className="mt-6">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteDialogOpen(false)
+                setRestaurantToDelete(null)
+              }}
+              disabled={isDeleting}
+              className="bg-gray-700 text-white border-gray-600 hover:bg-gray-600"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={handleDeleteRestaurant}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isDeleting ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Lösche...
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Endgültig löschen
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
