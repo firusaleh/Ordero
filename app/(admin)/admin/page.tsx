@@ -90,7 +90,13 @@ async function getDashboardStats() {
     .slice(0, 5)
 
   // Letzte Aktivitäten
-  const recentActivities = []
+  const recentActivities: Array<{
+    id: string
+    type: string
+    message: string
+    time: Date
+    details?: string
+  }> = []
   
   // Neue Restaurants
   recentRestaurants.forEach(r => {
