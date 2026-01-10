@@ -83,13 +83,10 @@ export const authConfig: NextAuthConfig = {
       }
       return session
     },
-    async redirect({ url, baseUrl, token }) {
-      // Nach Login: Redirect basierend auf Rolle
+    async redirect({ url, baseUrl }) {
+      // Nach Login: Standard-Redirect zum Dashboard
+      // Die rollenbasierte Weiterleitung wird in der Middleware behandelt
       if (url === baseUrl || url === `${baseUrl}/`) {
-        // Prüfe Benutzerrolle für korrekten Redirect
-        if (token?.role === "SUPER_ADMIN") {
-          return `${baseUrl}/admin`
-        }
         return `${baseUrl}/dashboard`
       }
       
