@@ -4,6 +4,9 @@ import sgMail from '@sendgrid/mail'
 const apiKey = process.env.SENDGRID_API_KEY
 if (apiKey) {
   sgMail.setApiKey(apiKey)
+  console.log('SendGrid initialized with API key')
+} else {
+  console.warn('⚠️ SendGrid API key not found - emails will not be sent!')
 }
 
 // E-Mail Konfiguration
@@ -49,6 +52,7 @@ async function sendEmail({
     }
 
     const response = await sgMail.send(msg)
+    console.log('✅ Email sent successfully to:', to, 'Subject:', subject)
     
     return { 
       success: true, 
