@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { sendWelcomeEmail } from '@/lib/email'
+import { sendWelcomeEmail } from '@/lib/email-sendgrid'
 
 const createRestaurantSchema = z.object({
   name: z.string().min(2, 'Name muss mindestens 2 Zeichen lang sein'),
