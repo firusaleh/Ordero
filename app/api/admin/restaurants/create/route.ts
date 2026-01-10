@@ -18,7 +18,10 @@ export async function POST(request: NextRequest) {
     // Überprüfe Admin-Berechtigung
     const session = await auth()
     
+    console.log('Create restaurant - Session:', session?.user?.email, session?.user?.role)
+    
     if (!session || (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN')) {
+      console.log('Authorization failed - role:', session?.user?.role)
       return NextResponse.json(
         { error: 'Nicht autorisiert' },
         { status: 403 }
@@ -26,6 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log('Create restaurant - Request body:', body)
     
     // Validiere Input
     const validatedData = createRestaurantSchema.parse(body)
@@ -36,6 +40,7 @@ export async function POST(request: NextRequest) {
     })
     
     if (existingUser) {
+      console.log('User already exists with email:', validatedData.ownerEmail)
       return NextResponse.json(
         { error: 'Diese E-Mail-Adresse ist bereits registriert' },
         { status: 400 }
