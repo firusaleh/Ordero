@@ -29,18 +29,27 @@ export async function PATCH(
       )
     }
     
-    const { type, data } = body
+    // Unterstütze beide Formate:
+    // 1. { type: "...", data: {...} }  - Strukturiertes Format
+    // 2. { name: "...", ... }          - Direktes Format
+    let type = body.type
+    let data = body.data || body
     
-    // Prüfe ob data existiert
-    if (!data) {
-      console.error('No data provided in request body')
-      return NextResponse.json(
-        { error: 'Keine Daten zum Aktualisieren angegeben' },
-        { status: 400 }
-      )
+    // Wenn body ein type Feld hat, aber kein data Feld, dann ist es vermutlich ein Fehler
+    if (body.type && !body.data) {
+      console.log('Type provided but no data field, treating entire body as data')
+      type = 'all'
+      data = body
     }
     
-    console.log('Update request - restaurantId:', resolvedParams.restaurantId, 'type:', type, 'data:', data)
+    // Wenn weder type noch data existieren, behandle alles als direkte Daten
+    if (!type && !body.data) {
+      console.log('No type or data field, treating entire body as data for "all" update')
+      type = 'all'
+      data = body
+    }
+    
+    console.log('Update request - restaurantId:', resolvedParams.restaurantId, 'type:', type, 'data keys:', Object.keys(data))
     
     // Prüfe ob Restaurant existiert
     const existingRestaurant = await prisma.restaurant.findUnique({
