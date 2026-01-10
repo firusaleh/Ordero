@@ -10,7 +10,7 @@ export async function PATCH(
     // Überprüfe Admin-Berechtigung
     const session = await auth()
     
-    if (!session || session.user.role !== 'SUPER_ADMIN') {
+    if (!session || (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
         { error: 'Nicht autorisiert' },
         { status: 403 }
@@ -18,7 +18,10 @@ export async function PATCH(
     }
 
     const resolvedParams = await params
-    const { type, data } = await request.json()
+    const body = await request.json()
+    const { type, data } = body
+    
+    console.log('Update request - type:', type, 'data:', data)
     
     if (type === 'basic') {
       // Update Restaurant Grunddaten
@@ -70,8 +73,74 @@ export async function PATCH(
       })
     }
     
+    // Wenn kein Type angegeben, versuche alle Felder zu updaten
+    if (!type || type === 'all') {
+      // Update sowohl Restaurant als auch Settings
+      const [restaurant, settings] = await prisma.$transaction([
+        prisma.restaurant.update({
+          where: { id: resolvedParams.restaurantId },
+          data: {
+            name: data.name,
+            description: data.description,
+            cuisine: data.cuisine,
+            street: data.street,
+            city: data.city,
+            postalCode: data.postalCode,
+            phone: data.phone,
+            email: data.email,
+            website: data.website,
+            // Füge weitere Felder hinzu falls vorhanden
+            ...(data.logo && { logo: data.logo }),
+            ...(data.banner && { banner: data.banner }),
+            ...(data.primaryColor && { primaryColor: data.primaryColor })
+          }
+        }),
+        prisma.restaurantSettings.upsert({
+          where: { restaurantId: resolvedParams.restaurantId },
+          create: {
+            restaurantId: resolvedParams.restaurantId,
+            orderingEnabled: data.orderingEnabled ?? true,
+            requireTableNumber: data.requireTableNumber ?? true,
+            allowTakeaway: data.allowTakeaway ?? false,
+            allowDelivery: data.allowDelivery ?? false,
+            autoAcceptOrders: data.autoAcceptOrders ?? false,
+            acceptCash: data.acceptCash ?? true,
+            acceptCard: data.acceptCard ?? false,
+            acceptPaypal: data.acceptPaypal ?? false,
+            acceptStripe: data.acceptStripe ?? false,
+            taxRate: data.taxRate ?? 19,
+            includeTax: data.includeTax ?? true,
+            emailNotifications: true,
+            soundNotifications: true,
+            currency: 'EUR',
+            language: 'de',
+            timezone: 'Europe/Berlin'
+          },
+          update: {
+            orderingEnabled: data.orderingEnabled,
+            requireTableNumber: data.requireTableNumber,
+            allowTakeaway: data.allowTakeaway,
+            allowDelivery: data.allowDelivery,
+            autoAcceptOrders: data.autoAcceptOrders,
+            acceptCash: data.acceptCash,
+            acceptCard: data.acceptCard,
+            acceptPaypal: data.acceptPaypal,
+            acceptStripe: data.acceptStripe,
+            taxRate: data.taxRate,
+            includeTax: data.includeTax
+          }
+        })
+      ])
+      
+      return NextResponse.json({
+        success: true,
+        message: 'Restaurant erfolgreich aktualisiert',
+        data: { restaurant, settings }
+      })
+    }
+    
     return NextResponse.json(
-      { error: 'Ungültiger Update-Typ' },
+      { error: `Ungültiger Update-Typ: ${type}. Erlaubt sind: 'basic', 'settings' oder 'all'` },
       { status: 400 }
     )
     
