@@ -56,17 +56,27 @@ async function sendEmail({
 export async function sendWelcomeEmail({
   email,
   name,
-  restaurantName
+  restaurantName,
+  password,
+  loginUrl
 }: {
   email: string
   name: string
   restaurantName: string
+  password?: string
+  loginUrl?: string
 }) {
   return await sendEmail({
     to: email,
     subject: `Willkommen bei Oriido, ${restaurantName}!`,
-    react: WelcomeEmail({ name, restaurantName }),
-    text: `Willkommen bei Oriido! Ihr Restaurant ${restaurantName} ist jetzt bereit. Besuchen Sie ${process.env.NEXT_PUBLIC_APP_URL}/dashboard um loszulegen.`
+    react: WelcomeEmail({ 
+      name, 
+      restaurantName,
+      email: password ? email : undefined,
+      password,
+      loginUrl 
+    }),
+    text: `Willkommen bei Oriido! Ihr Restaurant ${restaurantName} ist jetzt bereit. ${password ? `Ihre Login-Daten: E-Mail: ${email}, Passwort: ${password}` : ''} Besuchen Sie ${loginUrl || process.env.NEXT_PUBLIC_APP_URL}/dashboard um loszulegen.`
   })
 }
 

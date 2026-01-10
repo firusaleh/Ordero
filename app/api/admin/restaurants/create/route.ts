@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { sendWelcomeEmail } from '@/lib/email'
 
 const createRestaurantSchema = z.object({
   name: z.string().min(2, 'Name muss mindestens 2 Zeichen lang sein'),
@@ -66,6 +67,9 @@ export async function POST(request: NextRequest) {
       slug = `${baseSlug}-${counter}`
       counter++
     }
+    
+    // Generiere ein temporäres Passwort für den Besitzer
+    const tempPassword = validatedData.ownerPassword
     
     // Erstelle User und Restaurant in einer Transaktion
     const result = await prisma.$transaction(async (tx) => {
@@ -137,6 +141,21 @@ export async function POST(request: NextRequest) {
       
       return { user, restaurant }
     })
+    
+    // Sende Willkommens-E-Mail an den Restaurant-Besitzer
+    try {
+      await sendWelcomeEmail({
+        email: validatedData.ownerEmail,
+        name: validatedData.ownerName,
+        restaurantName: validatedData.name,
+        password: tempPassword,
+        loginUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login`
+      })
+      console.log('Welcome email sent to:', validatedData.ownerEmail)
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError)
+      // Fahre fort, auch wenn E-Mail fehlschlägt
+    }
     
     return NextResponse.json({
       success: true,

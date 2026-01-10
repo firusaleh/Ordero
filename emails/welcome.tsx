@@ -16,10 +16,20 @@ import * as React from 'react'
 interface WelcomeEmailProps {
   name: string
   restaurantName: string
+  email?: string
+  password?: string
+  loginUrl?: string
 }
 
-export const WelcomeEmail = ({ name, restaurantName }: WelcomeEmailProps) => {
+export const WelcomeEmail = ({ 
+  name, 
+  restaurantName,
+  email,
+  password,
+  loginUrl
+}: WelcomeEmailProps) => {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://oriido.de'
+  const finalLoginUrl = loginUrl || `${appUrl}/login`
   
   return (
     <Html>
@@ -40,6 +50,19 @@ export const WelcomeEmail = ({ name, restaurantName }: WelcomeEmailProps) => {
             und bereit für digitale Bestellungen.
           </Text>
 
+          {email && password && (
+            <Section style={credentialsBox}>
+              <Text style={credentialsTitle}>🔐 Ihre Zugangsdaten:</Text>
+              <Text style={credentialsText}>
+                <strong>E-Mail:</strong> {email}<br />
+                <strong>Passwort:</strong> {password}
+              </Text>
+              <Text style={warningText}>
+                ⚠️ Bitte ändern Sie Ihr Passwort nach der ersten Anmeldung!
+              </Text>
+            </Section>
+          )}
+
           <Section style={boxSection}>
             <Text style={boxTitle}>🚀 Nächste Schritte:</Text>
             <Text style={boxText}>
@@ -51,8 +74,8 @@ export const WelcomeEmail = ({ name, restaurantName }: WelcomeEmailProps) => {
           </Section>
 
           <Section style={buttonSection}>
-            <Button style={button} href={`${appUrl}/dashboard`}>
-              Zum Dashboard →
+            <Button style={button} href={finalLoginUrl}>
+              Jetzt anmelden →
             </Button>
           </Section>
 
@@ -163,6 +186,35 @@ const footer = {
   fontSize: '12px',
   lineHeight: '16px',
   marginTop: '32px',
+}
+
+const credentialsBox = {
+  backgroundColor: '#fff3cd',
+  borderRadius: '8px',
+  padding: '20px',
+  margin: '24px 0',
+  border: '1px solid #ffc107',
+}
+
+const credentialsTitle = {
+  fontSize: '16px',
+  fontWeight: 'bold',
+  color: '#856404',
+  marginBottom: '12px',
+}
+
+const credentialsText = {
+  fontSize: '14px',
+  lineHeight: '22px',
+  color: '#856404',
+  fontFamily: 'monospace',
+}
+
+const warningText = {
+  fontSize: '13px',
+  color: '#dc3545',
+  marginTop: '12px',
+  fontWeight: 'bold',
 }
 
 export default WelcomeEmail
