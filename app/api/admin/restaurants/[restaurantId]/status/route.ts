@@ -10,7 +10,7 @@ export async function PATCH(
     // Überprüfe Admin-Berechtigung
     const session = await auth()
     
-    if (!session || session.user.role !== 'SUPER_ADMIN') {
+    if (!session || (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN')) {
       return NextResponse.json(
         { error: 'Nicht autorisiert' },
         { status: 403 }
