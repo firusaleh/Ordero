@@ -19,7 +19,26 @@ export async function PATCH(
 
     const resolvedParams = await params
     const body = await request.json()
+    console.log('Update request body:', JSON.stringify(body))
+    
+    // Validiere Request Body
+    if (!body) {
+      return NextResponse.json(
+        { error: 'Keine Daten zum Aktualisieren erhalten' },
+        { status: 400 }
+      )
+    }
+    
     const { type, data } = body
+    
+    // Prüfe ob data existiert
+    if (!data) {
+      console.error('No data provided in request body')
+      return NextResponse.json(
+        { error: 'Keine Daten zum Aktualisieren angegeben' },
+        { status: 400 }
+      )
+    }
     
     console.log('Update request - restaurantId:', resolvedParams.restaurantId, 'type:', type, 'data:', data)
     
@@ -90,18 +109,18 @@ export async function PATCH(
     if (!type || type === 'all') {
       // Bereite Update-Daten vor (nur nicht-null Werte)
       const restaurantUpdateData: any = {}
-      if (data.name !== undefined) restaurantUpdateData.name = data.name
-      if (data.description !== undefined) restaurantUpdateData.description = data.description
-      if (data.cuisine !== undefined) restaurantUpdateData.cuisine = data.cuisine
-      if (data.street !== undefined) restaurantUpdateData.street = data.street
-      if (data.city !== undefined) restaurantUpdateData.city = data.city
-      if (data.postalCode !== undefined) restaurantUpdateData.postalCode = data.postalCode
-      if (data.phone !== undefined) restaurantUpdateData.phone = data.phone
-      if (data.email !== undefined) restaurantUpdateData.email = data.email
-      if (data.website !== undefined) restaurantUpdateData.website = data.website
-      if (data.logo !== undefined) restaurantUpdateData.logo = data.logo
-      if (data.banner !== undefined) restaurantUpdateData.banner = data.banner
-      if (data.primaryColor !== undefined) restaurantUpdateData.primaryColor = data.primaryColor
+      if (data?.name !== undefined) restaurantUpdateData.name = data.name
+      if (data?.description !== undefined) restaurantUpdateData.description = data.description
+      if (data?.cuisine !== undefined) restaurantUpdateData.cuisine = data.cuisine
+      if (data?.street !== undefined) restaurantUpdateData.street = data.street
+      if (data?.city !== undefined) restaurantUpdateData.city = data.city
+      if (data?.postalCode !== undefined) restaurantUpdateData.postalCode = data.postalCode
+      if (data?.phone !== undefined) restaurantUpdateData.phone = data.phone
+      if (data?.email !== undefined) restaurantUpdateData.email = data.email
+      if (data?.website !== undefined) restaurantUpdateData.website = data.website
+      if (data?.logo !== undefined) restaurantUpdateData.logo = data.logo
+      if (data?.banner !== undefined) restaurantUpdateData.banner = data.banner
+      if (data?.primaryColor !== undefined) restaurantUpdateData.primaryColor = data.primaryColor
       
       console.log('Restaurant update data:', restaurantUpdateData)
       
@@ -133,17 +152,17 @@ export async function PATCH(
             timezone: 'Europe/Berlin'
           },
           update: {
-            orderingEnabled: data.orderingEnabled,
-            requireTableNumber: data.requireTableNumber,
-            allowTakeaway: data.allowTakeaway,
-            allowDelivery: data.allowDelivery,
-            autoAcceptOrders: data.autoAcceptOrders,
-            acceptCash: data.acceptCash,
-            acceptCard: data.acceptCard,
-            acceptPaypal: data.acceptPaypal,
-            acceptStripe: data.acceptStripe,
-            taxRate: data.taxRate,
-            includeTax: data.includeTax
+            orderingEnabled: data?.orderingEnabled,
+            requireTableNumber: data?.requireTableNumber,
+            allowTakeaway: data?.allowTakeaway,
+            allowDelivery: data?.allowDelivery,
+            autoAcceptOrders: data?.autoAcceptOrders,
+            acceptCash: data?.acceptCash,
+            acceptCard: data?.acceptCard,
+            acceptPaypal: data?.acceptPaypal,
+            acceptStripe: data?.acceptStripe,
+            taxRate: data?.taxRate,
+            includeTax: data?.includeTax
           }
         })
       ])
