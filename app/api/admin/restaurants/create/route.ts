@@ -149,16 +149,21 @@ export async function POST(request: NextRequest) {
     
     // Sende Willkommens-E-Mail an den Restaurant-Besitzer
     try {
-      await sendWelcomeEmail({
+      const emailResult = await sendWelcomeEmail({
         email: validatedData.ownerEmail,
         name: validatedData.ownerName,
         restaurantName: validatedData.name,
         password: tempPassword,
         loginUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login`
       })
-      console.log('Welcome email sent to:', validatedData.ownerEmail)
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError)
+      
+      if (emailResult.success) {
+        console.log('✅ Welcome email sent successfully to:', validatedData.ownerEmail)
+      } else {
+        console.error('❌ Email failed:', emailResult.error, emailResult.details)
+      }
+    } catch (emailError: any) {
+      console.error('❌ Failed to send welcome email:', emailError.message, emailError)
       // Fahre fort, auch wenn E-Mail fehlschlägt
     }
     

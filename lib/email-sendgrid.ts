@@ -10,9 +10,11 @@ if (apiKey) {
 }
 
 // E-Mail Konfiguration
-const FROM_EMAIL = process.env.EMAIL_FROM || 'info@oriido.com'
+const FROM_EMAIL = process.env.EMAIL_FROM || 'noreply@oriido.de'
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'Oriido'
 const REPLY_TO = process.env.EMAIL_REPLY_TO || 'support@oriido.com'
+
+console.log('Email config - FROM:', FROM_EMAIL, 'NAME:', FROM_NAME, 'REPLY-TO:', REPLY_TO)
 
 // Helper-Funktion für E-Mail-Versand mit SendGrid
 async function sendEmail({
