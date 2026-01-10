@@ -171,10 +171,10 @@ export async function POST(request: NextRequest) {
     console.error('Create restaurant error:', error)
     
     if (error instanceof z.ZodError) {
-      const firstError = error.errors[0]
-      const message = firstError ? `${firstError.path}: ${firstError.message}` : 'Ungültige Eingabedaten'
+      const firstError = error.issues[0]
+      const message = firstError ? `${firstError.path.join('.')}: ${firstError.message}` : 'Ungültige Eingabedaten'
       return NextResponse.json(
-        { error: message, details: error.errors },
+        { error: message, details: error.issues },
         { status: 400 }
       )
     }
