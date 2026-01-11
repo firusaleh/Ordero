@@ -5,12 +5,15 @@ import Stripe from 'stripe';
 
 // Prüfe ob Stripe konfiguriert ist
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const isValidKey = stripeSecretKey && 
+  stripeSecretKey !== 'sk_test_...' && 
+  stripeSecretKey.startsWith('sk_');
 
-if (!stripeSecretKey) {
-  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert');
+if (!isValidKey) {
+  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert oder ungültig. Aktueller Wert:', stripeSecretKey ? 'sk_test_... (Platzhalter)' : 'nicht gesetzt');
 }
 
-const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
+const stripe = isValidKey ? new Stripe(stripeSecretKey!, {
   apiVersion: '2024-11-20.acacia' as any,
 }) : null;
 

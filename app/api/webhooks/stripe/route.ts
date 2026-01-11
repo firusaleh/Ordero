@@ -4,9 +4,19 @@ import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
 import { webhookRateLimiter, checkRateLimit } from '@/lib/rate-limit'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Prüfe ob Stripe konfiguriert ist
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+const isValidKey = stripeSecretKey && 
+  stripeSecretKey !== 'sk_test_...' && 
+  stripeSecretKey.startsWith('sk_')
+
+if (!isValidKey) {
+  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert oder ungültig')
+}
+
+const stripe = isValidKey ? new Stripe(stripeSecretKey!, {
   apiVersion: '2024-11-20.acacia' as any
-})
+}) : null as any
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
