@@ -26,7 +26,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ data: restaurant.settings })
+    return NextResponse.json({ 
+      restaurant: {
+        id: restaurant.id,
+        name: restaurant.name,
+        slug: restaurant.slug
+      },
+      settings: restaurant.settings 
+    })
   } catch (error) {
     console.error('Error fetching settings:', error)
     return NextResponse.json(
