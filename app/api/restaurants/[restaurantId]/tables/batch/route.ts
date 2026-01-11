@@ -75,10 +75,10 @@ export async function POST(
     // Hole die höchste existierende Tischnummer
     const lastTable = await prisma.table.findFirst({
       where: { restaurantId },
-      orderBy: { tableNumber: 'desc' }
+      orderBy: { number: 'desc' }
     })
 
-    const startNumber = (lastTable?.tableNumber || 0) + 1
+    const startNumber = (lastTable?.number || 0) + 1
 
     // Erstelle Tische
     const tables = []
@@ -104,10 +104,10 @@ export async function POST(
       const table = await prisma.table.create({
         data: {
           restaurantId,
-          tableNumber,
-          displayName,
+          number: tableNumber,
+          name: displayName,
           qrCode: qrCodeDataUrl,
-          capacity: 4, // Standard-Kapazität
+          seats: 4, // Standard-Kapazität
           isActive: true
         }
       })
