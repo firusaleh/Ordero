@@ -178,6 +178,7 @@ model RestaurantSettings {
   acceptCard         Boolean @default(false)
   acceptPaypal       Boolean @default(false)
   acceptStripe       Boolean @default(false)
+  acceptPaytabs      Boolean @default(false)
   
   // Steuern
   taxRate            Float   @default(19)
