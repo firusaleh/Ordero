@@ -20,8 +20,18 @@ export default function PaymentsSettingsPage() {
   const [restaurantName, setRestaurantName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   
-  // Check if user is Super Admin (NOT restaurant owner)
-  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+  // Check if user is Super Admin or Admin (NOT restaurant owner)
+  // Default to false to ensure restaurants don't see admin features
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN';
+  
+  // Debug logging
+  useEffect(() => {
+    if (session?.user) {
+      console.log('Current user role:', session.user.role);
+      console.log('Is Super Admin?', isSuperAdmin);
+      console.log('Full session:', session);
+    }
+  }, [session, isSuperAdmin]);
 
   useEffect(() => {
     fetchRestaurantId();
@@ -60,7 +70,8 @@ export default function PaymentsSettingsPage() {
     }
   };
 
-  if (loading) {
+  // Wait for both session and restaurant data to load
+  if (loading || !session) {
     return (
       <div className="p-6 flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
