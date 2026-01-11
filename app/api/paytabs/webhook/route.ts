@@ -56,16 +56,17 @@ export async function POST(req: NextRequest) {
           paymentStatus: 'PAID',
           paidAt: new Date(),
           status: order.status === 'PENDING' ? 'CONFIRMED' : order.status,
-          paymentDetails: JSON.stringify({
-            tranRef: tran_ref,
-            paymentInfo: payment_info,
-            responseMessage: response_message,
-            acquirerMessage: acquirer_message
-          })
+          paymentMethod: 'PAYTABS',
+          paymentIntentId: tran_ref // Speichere PayTabs Transaction Reference
         }
       })
 
-      console.log('PayTabs Payment erfolgreich:', order.id)
+      console.log('PayTabs Payment erfolgreich:', order.id, {
+        tranRef: tran_ref,
+        paymentInfo: payment_info,
+        responseMessage: response_message,
+        acquirerMessage: acquirer_message
+      })
 
       // TODO: Sende Bestätigungs-Email
       // TODO: Benachrichtige Restaurant
@@ -76,16 +77,15 @@ export async function POST(req: NextRequest) {
         where: { id: order.id },
         data: {
           paymentStatus: 'FAILED',
-          paymentDetails: JSON.stringify({
-            tranRef: tran_ref,
-            responseCode: response_code,
-            responseMessage: response_message,
-            acquirerMessage: acquirer_message
-          })
+          paymentIntentId: tran_ref
         }
       })
 
-      console.log('PayTabs Payment abgelehnt:', order.id, response_message)
+      console.log('PayTabs Payment abgelehnt:', order.id, {
+        responseCode: response_code,
+        responseMessage: response_message,
+        acquirerMessage: acquirer_message
+      })
 
     } else if (response_status === 'V') {
       // Zahlung wurde storniert
@@ -95,14 +95,14 @@ export async function POST(req: NextRequest) {
           paymentStatus: 'REFUNDED',
           status: 'CANCELLED',
           cancelledAt: new Date(),
-          paymentDetails: JSON.stringify({
-            tranRef: tran_ref,
-            responseMessage: response_message
-          })
+          paymentIntentId: tran_ref
         }
       })
 
-      console.log('PayTabs Payment storniert:', order.id)
+      console.log('PayTabs Payment storniert:', order.id, {
+        tranRef: tran_ref,
+        responseMessage: response_message
+      })
     }
 
     // PayTabs erwartet eine bestimmte Antwort
