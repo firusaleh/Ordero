@@ -101,6 +101,14 @@ export async function POST(req: NextRequest) {
 // Webhook zum Verarbeiten erfolgreicher Zahlungen
 export async function PUT(req: NextRequest) {
   try {
+    // Prüfe ob Stripe konfiguriert ist
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.' },
+        { status: 503 }
+      );
+    }
+    
     const body = await req.json();
     const { paymentIntentId } = body;
 
