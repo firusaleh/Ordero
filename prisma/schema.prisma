@@ -32,6 +32,10 @@ model User {
   staffAt          RestaurantStaff[]
   
   // Timestamps
+  // Passwort-Zurücksetzen
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   

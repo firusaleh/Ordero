@@ -19,6 +19,9 @@ export default function PaymentsSettingsPage() {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [restaurantName, setRestaurantName] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  
+  // Check if user is Super Admin (NOT restaurant owner)
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
 
   useEffect(() => {
     fetchRestaurantId();
@@ -93,45 +96,75 @@ export default function PaymentsSettingsPage() {
       </div>
 
       <div>
-        <h1 className="text-2xl font-bold">Zahlungseinstellungen</h1>
-        <p className="text-gray-600">Verwalten Sie Ihre Zahlungsmethoden und Payment-Integrationen</p>
+        <h1 className="text-2xl font-bold">
+          {isSuperAdmin ? 'Zahlungseinstellungen' : 'Auszahlungseinstellungen'}
+        </h1>
+        <p className="text-gray-600">
+          {isSuperAdmin 
+            ? 'Verwalten Sie Ihre Zahlungsmethoden und Payment-Integrationen'
+            : 'Verwalten Sie Ihre Bankdaten für automatische Auszahlungen'}
+        </p>
       </div>
 
-      <Tabs defaultValue="stripe" className="space-y-6">
-        <TabsList className="grid grid-cols-3 w-full max-w-[600px]">
-          <TabsTrigger value="stripe" className="flex items-center gap-2">
-            <CreditCard className="h-4 w-4" />
-            Stripe (Europa)
-          </TabsTrigger>
-          <TabsTrigger value="paytabs" className="flex items-center gap-2">
-            <Globe className="h-4 w-4" />
-            PayTabs (Naher Osten)
-          </TabsTrigger>
-          <TabsTrigger value="vendor" className="flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            Auszahlungen
-          </TabsTrigger>
-        </TabsList>
+      {isSuperAdmin ? (
+        // Super Admin sieht alle Tabs
+        <Tabs defaultValue="stripe" className="space-y-6">
+          <TabsList className="grid grid-cols-3 w-full max-w-[600px]">
+            <TabsTrigger value="stripe" className="flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              Stripe (Europa)
+            </TabsTrigger>
+            <TabsTrigger value="paytabs" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              PayTabs (Naher Osten)
+            </TabsTrigger>
+            <TabsTrigger value="vendor" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Auszahlungen
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="stripe" className="space-y-6">
-          <StripeConnectSettings restaurantId={restaurantId} />
-        </TabsContent>
+          <TabsContent value="stripe" className="space-y-6">
+            <StripeConnectSettings restaurantId={restaurantId} />
+          </TabsContent>
 
-        <TabsContent value="paytabs" className="space-y-6">
-          <PayTabsSettings restaurantId={restaurantId} />
-        </TabsContent>
+          <TabsContent value="paytabs" className="space-y-6">
+            <PayTabsSettings restaurantId={restaurantId} />
+          </TabsContent>
 
-        <TabsContent value="vendor" className="space-y-6">
+          <TabsContent value="vendor" className="space-y-6">
+            <PayTabsVendorSettings 
+              restaurantId={restaurantId} 
+              restaurantName={restaurantName}
+            />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        // Restaurant-Besitzer sieht nur Auszahlungseinstellungen
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5" />
+                Auszahlungseinstellungen
+              </CardTitle>
+              <CardDescription>
+                Verwalten Sie Ihre Bankdaten für automatische Auszahlungen
+              </CardDescription>
+            </CardHeader>
+          </Card>
+          
           <PayTabsVendorSettings 
             restaurantId={restaurantId} 
             restaurantName={restaurantName}
           />
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Weitere Zahlungsmethoden</CardTitle>
+      {isSuperAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Weitere Zahlungsmethoden</CardTitle>
           <CardDescription>
             Standard-Zahlungsoptionen für Ihre Kunden
           </CardDescription>
@@ -174,6 +207,7 @@ export default function PaymentsSettingsPage() {
           </div>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
