@@ -66,7 +66,7 @@ export async function GET(
       orderBy: { number: 'asc' }
     })
 
-    return NextResponse.json(tables)
+    return NextResponse.json({ success: true, data: tables })
 
   } catch (error: any) {
     console.error('Get tables error:', error)
@@ -176,7 +176,7 @@ export async function POST(
       }
     })
 
-    return NextResponse.json(table)
+    return NextResponse.json({ success: true, data: table })
 
   } catch (error: any) {
     console.error('Create table error:', error)
@@ -259,7 +259,7 @@ export async function PUT(
       }
     })
 
-    return NextResponse.json(table)
+    return NextResponse.json({ success: true, data: table })
 
   } catch (error: any) {
     console.error('Update table error:', error)

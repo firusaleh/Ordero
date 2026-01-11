@@ -19,15 +19,38 @@ export async function POST(
 
     const { restaurantId } = await context.params
     const body = await request.json()
-    const { count, prefix } = body
-
-    console.log('Creating batch tables:', { restaurantId, count, prefix, body })
-
-    // Validierung
-    if (!count || count < 1 || count > 100) {
-      console.log('Invalid count:', count)
+    
+    // Unterstütze beide Formate: { count, prefix } oder { tables: [...] }
+    let tablesToCreate = []
+    
+    if (body.tables && Array.isArray(body.tables)) {
+      // Frontend sendet { tables: [...] }
+      tablesToCreate = body.tables
+      console.log('Creating batch tables from array:', { restaurantId, count: tablesToCreate.length })
+    } else if (body.count) {
+      // Alternative: { count, prefix }
+      const { count, prefix } = body
+      console.log('Creating batch tables from count:', { restaurantId, count, prefix })
+      
+      if (!count || count < 1 || count > 100) {
+        return NextResponse.json(
+          { error: 'Anzahl muss zwischen 1 und 100 liegen' },
+          { status: 400 }
+        )
+      }
+      
+      // Generiere Tische basierend auf count
+      for (let i = 0; i < count; i++) {
+        tablesToCreate.push({
+          number: i + 1,
+          name: prefix ? `${prefix}${i + 1}` : `Tisch ${i + 1}`,
+          seats: 4,
+          isActive: true
+        })
+      }
+    } else {
       return NextResponse.json(
-        { error: 'Anzahl muss zwischen 1 und 100 liegen', details: { count, receivedBody: body } },
+        { error: 'Ungültiges Format. Erwartet { tables: [...] } oder { count, prefix }' },
         { status: 400 }
       )
     }
@@ -73,24 +96,26 @@ export async function POST(
       }
     }
 
-    // Hole die höchste existierende Tischnummer
-    const lastTable = await prisma.table.findFirst({
-      where: { restaurantId },
-      orderBy: { number: 'desc' }
-    })
-
-    const startNumber = (lastTable?.number || 0) + 1
-
     // Erstelle Tische
-    const tables = []
+    const createdTables = []
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'
 
-    for (let i = 0; i < count; i++) {
-      const tableNumber = startNumber + i
-      const displayName = prefix ? `${prefix}${tableNumber}` : `Tisch ${tableNumber}`
+    for (const tableData of tablesToCreate) {
+      // Prüfe ob Tischnummer bereits existiert
+      const existingTable = await prisma.table.findFirst({
+        where: {
+          restaurantId,
+          number: tableData.number
+        }
+      })
+      
+      if (existingTable) {
+        console.log(`Table number ${tableData.number} already exists, skipping`)
+        continue
+      }
       
       // Generiere QR Code URL
-      const qrUrl = `${baseUrl}/r/${restaurant.slug}?table=${tableNumber}`
+      const qrUrl = `${baseUrl}/r/${restaurant.slug}?table=${tableData.number}`
       
       // Generiere QR Code als Data URL
       const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {
@@ -105,21 +130,22 @@ export async function POST(
       const table = await prisma.table.create({
         data: {
           restaurantId,
-          number: tableNumber,
-          name: displayName,
+          number: tableData.number,
+          name: tableData.name || `Tisch ${tableData.number}`,
           qrCode: qrCodeDataUrl,
-          seats: 4, // Standard-Kapazität
-          isActive: true
+          seats: tableData.seats || 4,
+          area: tableData.area,
+          isActive: tableData.isActive !== false // Standard true
         }
       })
 
-      tables.push(table)
+      createdTables.push(table)
     }
 
     return NextResponse.json({
       success: true,
-      message: `${count} Tische erfolgreich erstellt`,
-      tables
+      message: `${createdTables.length} Tische erfolgreich erstellt`,
+      data: createdTables
     })
 
   } catch (error: any) {
