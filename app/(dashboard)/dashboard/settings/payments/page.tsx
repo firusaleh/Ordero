@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StripeConnectSettings } from '@/components/dashboard/stripe-connect-settings';
+import { PayTabsSettings } from '@/components/dashboard/paytabs-settings';
+import { PayTabsVendorSettings } from '@/components/dashboard/paytabs-vendor-settings';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, CreditCard, Globe, Building2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +17,7 @@ export default function PaymentsSettingsPage() {
   const router = useRouter();
   const { data: session } = useSession();
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
+  const [restaurantName, setRestaurantName] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +46,7 @@ export default function PaymentsSettingsPage() {
         const data = await response.json();
         if (data.restaurant?.id) {
           setRestaurantId(data.restaurant.id);
+          setRestaurantName(data.restaurant.name || '');
         }
       }
     } catch (error) {
@@ -89,16 +94,46 @@ export default function PaymentsSettingsPage() {
 
       <div>
         <h1 className="text-2xl font-bold">Zahlungseinstellungen</h1>
-        <p className="text-gray-600">Verwalten Sie Ihre Zahlungsmethoden und Stripe-Integration</p>
+        <p className="text-gray-600">Verwalten Sie Ihre Zahlungsmethoden und Payment-Integrationen</p>
       </div>
 
-      <StripeConnectSettings restaurantId={restaurantId} />
+      <Tabs defaultValue="stripe" className="space-y-6">
+        <TabsList className="grid grid-cols-3 w-full max-w-[600px]">
+          <TabsTrigger value="stripe" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            Stripe (Europa)
+          </TabsTrigger>
+          <TabsTrigger value="paytabs" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            PayTabs (Naher Osten)
+          </TabsTrigger>
+          <TabsTrigger value="vendor" className="flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            Auszahlungen
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="stripe" className="space-y-6">
+          <StripeConnectSettings restaurantId={restaurantId} />
+        </TabsContent>
+
+        <TabsContent value="paytabs" className="space-y-6">
+          <PayTabsSettings restaurantId={restaurantId} />
+        </TabsContent>
+
+        <TabsContent value="vendor" className="space-y-6">
+          <PayTabsVendorSettings 
+            restaurantId={restaurantId} 
+            restaurantName={restaurantName}
+          />
+        </TabsContent>
+      </Tabs>
 
       <Card>
         <CardHeader>
-          <CardTitle>Andere Zahlungsmethoden</CardTitle>
+          <CardTitle>Weitere Zahlungsmethoden</CardTitle>
           <CardDescription>
-            Aktivieren Sie weitere Zahlungsoptionen für Ihre Kunden
+            Standard-Zahlungsoptionen für Ihre Kunden
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
