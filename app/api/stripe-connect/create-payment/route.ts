@@ -2,15 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Prüfe ob Stripe konfiguriert ist
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert');
+}
+
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2025-12-15.clover',
-});
+}) : null;
 
 // Plattformgebühr in Prozent
 const PLATFORM_FEE_PERCENTAGE = 2.5; // 2.5% Plattformgebühr
 
 export async function POST(req: NextRequest) {
   try {
+    // Prüfe ob Stripe konfiguriert ist
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.' },
+        { status: 503 }
+      );
+    }
     const body = await req.json();
     const { orderId, restaurantId, amount, currency = 'eur' } = body;
 

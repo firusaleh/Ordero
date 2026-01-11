@@ -3,12 +3,27 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Prüfe ob Stripe konfiguriert ist
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert');
+}
+
+const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2025-12-15.clover',
-});
+}) : null;
 
 export async function POST(req: NextRequest) {
   try {
+    // Prüfe ob Stripe konfiguriert ist
+    if (!stripe) {
+      console.error('Stripe ist nicht konfiguriert. Bitte STRIPE_SECRET_KEY in Vercel setzen.');
+      return NextResponse.json(
+        { error: 'Stripe ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.' },
+        { status: 503 }
+      );
+    }
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
@@ -81,10 +96,29 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ url: accountLink.url });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Stripe Connect Onboarding Error:', error);
+    
+    // Bessere Fehlerbehandlung
+    if (error?.type === 'StripeAuthenticationError') {
+      return NextResponse.json(
+        { error: 'Stripe API-Schlüssel ungültig. Bitte Administrator kontaktieren.' },
+        { status: 503 }
+      );
+    }
+    
+    if (error?.statusCode === 401) {
+      return NextResponse.json(
+        { error: 'Stripe Authentifizierung fehlgeschlagen. API-Keys überprüfen.' },
+        { status: 503 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: 'Fehler beim Erstellen des Onboarding-Links' },
+      { 
+        error: 'Fehler beim Erstellen des Onboarding-Links',
+        details: error?.message || 'Unbekannter Fehler'
+      },
       { status: 500 }
     );
   }
@@ -92,6 +126,14 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    // Prüfe ob Stripe konfiguriert ist
+    if (!stripe) {
+      console.error('Stripe ist nicht konfiguriert. Bitte STRIPE_SECRET_KEY in Vercel setzen.');
+      return NextResponse.json(
+        { error: 'Stripe ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.' },
+        { status: 503 }
+      );
+    }
     const session = await auth();
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 });
