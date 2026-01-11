@@ -8,7 +8,7 @@ const isValidKey = stripeSecretKey &&
 
 export const stripe = isValidKey 
   ? new Stripe(stripeSecretKey!, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2024-11-20.acacia' as any,
       typescript: true,
     })
   : null as any
