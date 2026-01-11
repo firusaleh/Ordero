@@ -4,8 +4,6 @@ import sharp from 'sharp'
 
 export async function POST(req: NextRequest) {
   try {
-    // Auf Vercel müssen wir Base64 oder externe Services nutzen
-    // da das Dateisystem read-only ist
     const session = await auth()
     
     if (!session?.user) {
@@ -28,10 +26,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validiere Dateigröße (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validiere Dateigröße (max 2MB für Base64)
+    if (file.size > 2 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'Datei zu groß. Maximal 5MB erlaubt' },
+        { error: 'Datei zu groß. Maximal 2MB erlaubt' },
         { status: 400 }
       )
     }
@@ -39,13 +37,13 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Optimiere Bild für Base64 (max 800px Breite)
+    // Optimiere Bild (max 800px Breite)
     const optimizedBuffer = await sharp(buffer)
       .resize(800, null, {
         withoutEnlargement: true,
         fit: 'inside'
       })
-      .jpeg({ quality: 75 })
+      .jpeg({ quality: 80 })
       .toBuffer()
 
     // Erstelle Thumbnail (200x200)
@@ -58,18 +56,19 @@ export async function POST(req: NextRequest) {
       .toBuffer()
 
     // Konvertiere zu Base64 Data URLs
-    const imageUrl = `data:image/jpeg;base64,${optimizedBuffer.toString('base64')}`
-    const thumbnailUrl = `data:image/jpeg;base64,${thumbnailBuffer.toString('base64')}`
+    const imageBase64 = `data:image/jpeg;base64,${optimizedBuffer.toString('base64')}`
+    const thumbnailBase64 = `data:image/jpeg;base64,${thumbnailBuffer.toString('base64')}`
 
+    // Diese Base64-Strings können direkt in der Datenbank gespeichert werden
     return NextResponse.json({
       success: true,
-      imageUrl,
-      thumbnailUrl
+      imageUrl: imageBase64,
+      thumbnailUrl: thumbnailBase64
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Upload error:', error)
     return NextResponse.json(
-      { error: 'Fehler beim Hochladen der Datei' },
+      { error: error.message || 'Fehler beim Hochladen der Datei' },
       { status: 500 }
     )
   }
