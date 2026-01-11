@@ -83,6 +83,12 @@ export interface PayTabsPaymentRequest {
   }
   callback?: string
   return?: string
+  // Split Payment für Marketplace
+  split?: {
+    vendor_id: string // Restaurant's PayTabs Vendor ID
+    vendor_amount: number // Betrag für Restaurant
+    platform_amount?: number // Betrag für Plattform
+  }
 }
 
 // Erstelle Payment Page
