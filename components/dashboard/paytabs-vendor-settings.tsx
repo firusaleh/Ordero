@@ -84,7 +84,7 @@ export function PayTabsVendorSettings({
       if (response.ok) {
         const data = await response.json()
         setVendorData({ ...vendorData, vendorId: data.vendorId, status: 'active' })
-        toast.success('PayTabs Vendor-Konto erstellt!')
+        toast.success('Bankdaten erfolgreich gespeichert!')
       } else {
         throw new Error('Fehler beim Erstellen')
       }
@@ -147,53 +147,58 @@ export function PayTabsVendorSettings({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>PayTabs Direktauszahlung einrichten</CardTitle>
+          <CardTitle>Bankdaten für Auszahlungen</CardTitle>
           <CardDescription>
-            Erhalten Sie Zahlungen direkt auf Ihr Bankkonto
+            Geben Sie Ihre Bankdaten ein, um Zahlungen aus allen Zahlungsmethoden (Stripe, PayTabs, etc.) zu erhalten
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Mit einem PayTabs Vendor-Konto erhalten Sie Zahlungen direkt auf Ihr Bankkonto.
+              Sobald Sie Ihre Bankdaten hinterlegt haben, erhalten Sie automatische Auszahlungen von allen Zahlungsmethoden.
               Die Auszahlung erfolgt automatisch nach Ihrem gewählten Zeitplan.
             </AlertDescription>
           </Alert>
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="bank">Bank auswählen</Label>
-              <select
-                id="bank"
-                className="w-full px-3 py-2 border rounded-md"
+              <Label htmlFor="bankName">Bank Name</Label>
+              <Input
+                id="bankName"
+                placeholder="z.B. Deutsche Bank, Arab Bank, etc."
                 value={vendorData.bankDetails.bankName}
-                onChange={(e) => {
-                  const bank = JORDAN_BANKS.find(b => b.name === e.target.value)
-                  setVendorData({
-                    ...vendorData,
-                    bankDetails: {
-                      ...vendorData.bankDetails,
-                      bankName: e.target.value,
-                      swiftCode: bank?.swiftCode || ''
-                    }
-                  })
-                }}
-              >
-                <option value="">Bank wählen...</option>
-                {JORDAN_BANKS.map(bank => (
-                  <option key={bank.code} value={bank.name}>
-                    {bank.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(e) => setVendorData({
+                  ...vendorData,
+                  bankDetails: {
+                    ...vendorData.bankDetails,
+                    bankName: e.target.value
+                  }
+                })}
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="swiftCode">SWIFT/BIC Code</Label>
+              <Input
+                id="swiftCode"
+                placeholder="z.B. DEUTDEFF oder ARABJOAX"
+                value={vendorData.bankDetails.swiftCode}
+                onChange={(e) => setVendorData({
+                  ...vendorData,
+                  bankDetails: {
+                    ...vendorData.bankDetails,
+                    swiftCode: e.target.value
+                  }
+                })}
+              />
             </div>
 
             <div>
               <Label htmlFor="iban">IBAN</Label>
               <Input
                 id="iban"
-                placeholder="JO94 CBJO 0010 0000 0000 0131 0003 02"
+                placeholder="z.B. DE89 3704 0044 0532 0130 00 oder JO94 CBJO 0010 0000 0000 0131 0003 02"
                 value={vendorData.bankDetails.iban}
                 onChange={(e) => setVendorData({
                   ...vendorData,
@@ -245,7 +250,7 @@ export function PayTabsVendorSettings({
               className="w-full"
             >
               <Building2 className="h-4 w-4 mr-2" />
-              Vendor-Konto erstellen
+              Bankdaten speichern
             </Button>
           </div>
         </CardContent>
