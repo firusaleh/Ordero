@@ -27,7 +27,6 @@ export async function POST(req: NextRequest) {
       where: { id: orderId },
       include: {
         restaurant: true,
-        customer: true,
         items: {
           include: {
             menuItem: true
@@ -58,11 +57,11 @@ export async function POST(req: NextRequest) {
     // Erstelle PayTabs Payment Page
     const paymentResult = await createPaymentPage({
       orderId: order.id,
-      amount: order.totalAmount,
+      amount: order.total,
       description: `Bestellung bei ${order.restaurant.name}`,
-      customerName: order.customerName || order.customer?.name || 'Gast',
-      customerEmail: order.customerEmail || order.customer?.email || 'guest@oriido.com',
-      customerPhone: order.customerPhone || order.customer?.phone || '+962000000000',
+      customerName: order.guestName || 'Gast',
+      customerEmail: order.guestEmail || 'guest@oriido.com',
+      customerPhone: order.guestPhone || '+962000000000',
       returnUrl: `${process.env.NEXT_PUBLIC_APP_URL}/orders/${orderId}/success`,
       callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/paytabs/webhook`
     })
