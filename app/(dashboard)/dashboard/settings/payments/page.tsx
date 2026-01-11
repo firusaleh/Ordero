@@ -8,7 +8,7 @@ import { PayTabsSettings } from '@/components/dashboard/paytabs-settings';
 import { PayTabsVendorSettings } from '@/components/dashboard/paytabs-vendor-settings';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, CreditCard, Globe, Building2 } from 'lucide-react';
+import { ArrowLeft, CreditCard, Globe, Building2, DollarSign } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -151,7 +151,7 @@ export default function PaymentsSettingsPage() {
           </TabsContent>
         </Tabs>
       ) : (
-        // Restaurant-Besitzer sieht nur Auszahlungseinstellungen
+        // Restaurant-Besitzer sieht NUR Auszahlungseinstellungen (Bankdaten)
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -160,7 +160,8 @@ export default function PaymentsSettingsPage() {
                 Auszahlungseinstellungen
               </CardTitle>
               <CardDescription>
-                Verwalten Sie Ihre Bankdaten für automatische Auszahlungen
+                Geben Sie Ihre Bankdaten ein, um automatische Auszahlungen zu erhalten.
+                Zahlungen Ihrer Kunden werden automatisch abzüglich einer kleinen Servicegebühr auf Ihr Konto überwiesen.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -169,6 +170,50 @@ export default function PaymentsSettingsPage() {
             restaurantId={restaurantId} 
             restaurantName={restaurantName}
           />
+          
+          {/* Info-Box über das Zahlungssystem */}
+          <Card>
+            <CardHeader>
+              <CardTitle>So funktionieren Zahlungen bei Oriido</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-green-100 p-2 mt-1">
+                  <CreditCard className="h-4 w-4 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium">Automatische Zahlungsabwicklung</p>
+                  <p className="text-sm text-muted-foreground">
+                    Ihre Kunden zahlen direkt über unsere Plattform - Sie müssen sich um nichts kümmern.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-blue-100 p-2 mt-1">
+                  <DollarSign className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium">97.5% Auszahlung</p>
+                  <p className="text-sm text-muted-foreground">
+                    Sie erhalten 97.5% jeder Zahlung. Nur 2.5% Servicegebühr - deutlich günstiger als die Konkurrenz!
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-purple-100 p-2 mt-1">
+                  <Building2 className="h-4 w-4 text-purple-600" />
+                </div>
+                <div>
+                  <p className="font-medium">Direkt auf Ihr Konto</p>
+                  <p className="text-sm text-muted-foreground">
+                    Auszahlungen erfolgen automatisch nach Ihrem gewählten Plan (täglich, wöchentlich oder monatlich).
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
 
