@@ -19,7 +19,7 @@ const REPLY_TO = process.env.EMAIL_REPLY_TO || 'support@oriido.com'
 console.log('Email config - FROM:', FROM_EMAIL, 'NAME:', FROM_NAME, 'REPLY-TO:', REPLY_TO)
 
 // Helper-Funktion für E-Mail-Versand mit SendGrid
-async function sendEmail({
+export async function sendEmail({
   to,
   subject,
   html,
