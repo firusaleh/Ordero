@@ -64,7 +64,7 @@ export async function POST(
         }
       })
 
-      if (!staffMember || !staffMember.canManageTables) {
+      if (!staffMember) {
         return NextResponse.json(
           { error: 'Keine Berechtigung für dieses Restaurant' },
           { status: 403 }
