@@ -21,12 +21,13 @@ export async function POST(
     const body = await request.json()
     const { count, prefix } = body
 
-    console.log('Creating batch tables:', { restaurantId, count, prefix })
+    console.log('Creating batch tables:', { restaurantId, count, prefix, body })
 
     // Validierung
     if (!count || count < 1 || count > 100) {
+      console.log('Invalid count:', count)
       return NextResponse.json(
-        { error: 'Anzahl muss zwischen 1 und 100 liegen' },
+        { error: 'Anzahl muss zwischen 1 und 100 liegen', details: { count, receivedBody: body } },
         { status: 400 }
       )
     }
