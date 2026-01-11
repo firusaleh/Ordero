@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StripeConnectSettings } from '@/components/dashboard/stripe-connect-settings';
+import { StripeBankSettings } from '@/components/dashboard/stripe-bank-settings';
 import { PayTabsSettings } from '@/components/dashboard/paytabs-settings';
 import { PayTabsVendorSettings } from '@/components/dashboard/paytabs-vendor-settings';
 import { Button } from '@/components/ui/button';
@@ -151,7 +152,7 @@ export default function PaymentsSettingsPage() {
           </TabsContent>
         </Tabs>
       ) : (
-        // Restaurant-Besitzer sieht NUR Auszahlungseinstellungen (Bankdaten)
+        // Restaurant-Besitzer sieht Auszahlungseinstellungen für beide Systeme
         <div className="space-y-6">
           <Card>
             <CardHeader>
@@ -160,12 +161,19 @@ export default function PaymentsSettingsPage() {
                 Auszahlungseinstellungen
               </CardTitle>
               <CardDescription>
-                Geben Sie Ihre Bankdaten ein, um automatische Auszahlungen zu erhalten.
-                Zahlungen Ihrer Kunden werden automatisch abzüglich einer kleinen Servicegebühr auf Ihr Konto überwiesen.
+                Hinterlegen Sie Ihre Bankdaten für automatische Auszahlungen.
+                Je nach Region Ihrer Kunden werden Zahlungen über verschiedene Anbieter abgewickelt.
               </CardDescription>
             </CardHeader>
           </Card>
           
+          {/* Stripe Bankdaten für Europa */}
+          <StripeBankSettings 
+            restaurantId={restaurantId} 
+            restaurantName={restaurantName}
+          />
+          
+          {/* PayTabs Bankdaten für Naher Osten */}
           <PayTabsVendorSettings 
             restaurantId={restaurantId} 
             restaurantName={restaurantName}

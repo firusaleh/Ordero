@@ -147,17 +147,20 @@ export function PayTabsVendorSettings({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Bankdaten für Auszahlungen</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-green-600" />
+            PayTabs Auszahlungen (Naher Osten)
+          </CardTitle>
           <CardDescription>
-            Geben Sie Ihre Bankdaten ein, um Zahlungen aus allen Zahlungsmethoden (Stripe, PayTabs, etc.) zu erhalten
+            Bankdaten für automatische Auszahlungen von PayTabs-Zahlungen (Kreditkarte, lokale Zahlungsmethoden)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Sobald Sie Ihre Bankdaten hinterlegt haben, erhalten Sie automatische Auszahlungen von allen Zahlungsmethoden.
-              Die Auszahlung erfolgt automatisch nach Ihrem gewählten Zeitplan.
+              Bitte hinterlegen Sie Ihre Bankdaten für automatische PayTabs-Auszahlungen.
+              Diese werden für Zahlungen aus dem Nahen Osten (Jordanien, Saudi-Arabien, VAE) verwendet.
             </AlertDescription>
           </Alert>
 
@@ -252,6 +255,17 @@ export function PayTabsVendorSettings({
               <Building2 className="h-4 w-4 mr-2" />
               Bankdaten speichern
             </Button>
+          </div>
+          
+          {/* Info Box */}
+          <div className="mt-6 p-4 bg-green-50 rounded-lg">
+            <h4 className="font-medium text-green-900 mb-2">PayTabs Auszahlungsplan:</h4>
+            <ul className="text-sm text-green-800 space-y-1">
+              <li>• Tägliche/Wöchentliche Auszahlungen</li>
+              <li>• Bearbeitungszeit: 1-2 Werktage</li>
+              <li>• Unterstützte Währungen: JOD, SAR, AED</li>
+              <li>• Gebühr: 2.5% Plattformgebühr</li>
+            </ul>
           </div>
         </CardContent>
       </Card>
