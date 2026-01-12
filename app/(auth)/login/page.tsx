@@ -3,7 +3,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { signIn } from 'next-auth/react'
+import { handleLogin } from '@/app/actions/login'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -40,22 +40,22 @@ function LoginForm() {
     setIsLoading(true)
     
     try {
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false,
-      })
+      const result = await handleLogin(data.email, data.password)
 
       if (result?.error) {
-        toast.error('Ungültige Anmeldedaten')
+        toast.error(result.error)
+        setIsLoading(false)
       } else {
         toast.success('Erfolgreich angemeldet!')
-        router.push(callbackUrl)
+        // Server Action handles redirect, just refresh
         router.refresh()
+        // Fallback redirect after a short delay
+        setTimeout(() => {
+          router.push(callbackUrl)
+        }, 100)
       }
     } catch (error) {
       toast.error('Ein Fehler ist aufgetreten')
-    } finally {
       setIsLoading(false)
     }
   }
