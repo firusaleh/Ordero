@@ -24,6 +24,7 @@ import {
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import { toast } from 'sonner'
 import SplitBill from './split-bill'
+import PayTabsCheckout from './paytabs-checkout'
 
 // Initialisiere Stripe
 const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY 
@@ -304,6 +305,9 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'paytabs'>('stripe')
+  const [fallbackMessage, setFallbackMessage] = useState<string | null>(null)
+  const [shouldUsePayTabs, setShouldUsePayTabs] = useState(false)
 
   if (!stripePromise) {
     return (
@@ -321,18 +325,15 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        // Immer Stripe für Guest Checkout verwenden, unabhängig vom Restaurant-Standort
         const response = await fetch('/api/payment/create-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderId: props.orderId,
             amount: props.amount,
-            currency: 'EUR', // Immer EUR für Stripe
+            currency: props.currency,
             restaurantId: props.restaurantId,
             tip: props.tip,
-            country: 'DE', // Immer DE für Stripe
-            forceProvider: 'stripe', // Force Stripe provider
             metadata: {
               source: 'guest-checkout',
               timestamp: new Date().toISOString()
@@ -341,9 +342,24 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
         })
 
         const result = await response.json()
+        console.log('Payment intent result:', result)
         
         if (result.success && result.clientSecret) {
           setClientSecret(result.clientSecret)
+          if (result.provider) {
+            const provider = result.provider.toLowerCase()
+            setPaymentProvider(provider as 'stripe' | 'paytabs')
+            
+            // Check if we should use PayTabs (only if it's actually PayTabs, not a fallback)
+            if (provider === 'paytabs' && !result.fallbackMessage) {
+              setShouldUsePayTabs(true)
+            }
+          }
+          if (result.fallbackMessage) {
+            setFallbackMessage(result.fallbackMessage)
+            // Show toast notification about fallback
+            toast.info(result.fallbackMessage)
+          }
         } else {
           throw new Error(result.error || 'Payment intent could not be created')
         }
@@ -357,6 +373,11 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
 
     createPaymentIntent()
   }, [props.orderId, props.amount, props.currency, props.restaurantId, props.tip])
+
+  // If PayTabs should be used, render PayTabs component
+  if (shouldUsePayTabs) {
+    return <PayTabsCheckout {...props} />
+  }
 
   if (isLoading) {
     return (

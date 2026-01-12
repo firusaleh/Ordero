@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PaymentFactory } from '@/lib/payment/factory'
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,41 +40,82 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Lade das Restaurant um Land und Währung zu erhalten
+    let restaurant = null
+    let country = 'DE'
+    let currency = 'EUR'
+    
+    if (body.restaurantId) {
+      restaurant = await prisma.restaurant.findUnique({
+        where: { id: body.restaurantId },
+        include: { settings: true }
+      })
+      
+      if (restaurant) {
+        country = restaurant.country || 'DE'
+        currency = restaurant.settings?.currency || 'EUR'
+        console.log('Restaurant found:', {
+          name: restaurant.name,
+          country,
+          currency
+        })
+      }
+    }
+
     const data = {
       orderId: body.orderId,
       amount: body.amount,
-      currency: body.currency || 'EUR',
+      currency: body.currency || currency,
       restaurantId: body.restaurantId,
       tip: body.tip || 0,
       customerId: body.customerId,
-      country: body.country || 'DE',
+      country: body.country || country,
       metadata: body.metadata || {}
     }
 
-    // Hole den passenden Payment Provider
+    // Hole den passenden Payment Provider basierend auf Restaurant-Standort
     console.log('Getting payment provider for:', { 
       country: data.country, 
-      currency: data.currency,
-      forceProvider: body.forceProvider 
+      currency: data.currency
     })
     
     let paymentProvider
+    let fallbackMessage = null
+    
     try {
-      // If forceProvider is specified and it's stripe, always use stripe regardless of country
-      if (body.forceProvider === 'stripe') {
-        paymentProvider = await PaymentFactory.getProvider(
-          'DE', // Force DE for Stripe
-          'EUR', // Force EUR for Stripe  
-          'stripe'
-        )
-      } else {
+      // Wähle Provider basierend auf Land
+      const isMiddleEast = ['JO', 'SA', 'AE', 'KW', 'BH', 'QA', 'OM', 'EG'].includes(data.country)
+      const preferredProvider = isMiddleEast ? 'paytabs' : 'stripe'
+      
+      console.log('Preferred provider for country', data.country, ':', preferredProvider)
+      
+      // Try to get preferred provider first
+      try {
         paymentProvider = await PaymentFactory.getProvider(
           data.country, 
           data.currency, 
-          'stripe' // Bevorzuge Stripe
+          preferredProvider
         )
+      } catch (error) {
+        console.warn(`Preferred provider ${preferredProvider} not available, trying fallback`)
+        
+        // If PayTabs fails for Middle East, try Stripe as fallback
+        if (isMiddleEast && preferredProvider === 'paytabs') {
+          fallbackMessage = 'PayTabs ist noch nicht konfiguriert. Verwende Stripe als Alternative.'
+          paymentProvider = await PaymentFactory.getProvider(
+            data.country, 
+            data.currency, 
+            'stripe'
+          )
+        } else {
+          throw error
+        }
       }
+      
       console.log('Payment provider obtained:', paymentProvider?.name || 'none')
+      if (fallbackMessage) {
+        console.log('Fallback message:', fallbackMessage)
+      }
     } catch (error) {
       console.error('Payment provider not available:', error)
       return NextResponse.json(
@@ -128,7 +170,8 @@ export async function POST(request: NextRequest) {
       paymentIntentId: result.paymentIntentId,
       clientSecret: result.clientSecret,
       provider: paymentProvider.name,
-      supportedPaymentMethods: paymentProvider.getSupportedPaymentMethods(data.country)
+      supportedPaymentMethods: paymentProvider.getSupportedPaymentMethods(data.country),
+      fallbackMessage: fallbackMessage || undefined
     })
 
   } catch (error) {
@@ -151,33 +194,47 @@ export async function GET(request: NextRequest) {
     const country = searchParams.get('country') || 'DE'
     const currency = searchParams.get('currency') || 'EUR'
 
-    const availableProviders = PaymentFactory.getAvailableProviders(country, currency)
+    // Build response object
+    const response: any = {
+      country,
+      currency,
+      stripeConfigured: !!process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY !== 'sk_test_...',
+      paytabsConfigured: !!process.env.PAYTABS_SERVER_KEY && process.env.PAYTABS_SERVER_KEY !== 'SHJN6LRNBB-JGGLGDNLZT-BWTLZ69DRN',
+      availableProviders: [],
+      activeProvider: null,
+      providerError: null,
+      isProduction: process.env.NODE_ENV === 'production'
+    }
+
+    // Try to get available providers
+    try {
+      response.availableProviders = PaymentFactory.getAvailableProviders(country, currency)
+    } catch (error) {
+      console.error('Error getting available providers:', error)
+    }
     
-    let activeProvider = null
+    // Try to get active provider
     try {
       const provider = await PaymentFactory.getProvider(country, currency)
-      activeProvider = {
+      response.activeProvider = {
         name: provider.name,
         supportedMethods: provider.getSupportedPaymentMethods(country)
       }
     } catch (error) {
       // Provider nicht verfügbar
+      response.providerError = error instanceof Error ? error.message : 'Provider not available'
+      console.log('Provider error for', country, currency, ':', response.providerError)
     }
 
-    return NextResponse.json({
-      country,
-      currency,
-      availableProviders,
-      activeProvider,
-      isProduction: process.env.NODE_ENV === 'production'
-    })
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error('Get payment info error:', error)
     
     return NextResponse.json(
       {
-        error: 'Fehler beim Abrufen der Zahlungsinformationen'
+        error: 'Fehler beim Abrufen der Zahlungsinformationen',
+        details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
     )

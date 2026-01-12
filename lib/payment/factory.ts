@@ -141,11 +141,18 @@ export class PaymentFactory {
         }
 
       case 'paytabs':
-        if (!process.env.PAYTABS_SERVER_KEY) return null
+        // Check if PayTabs is properly configured with real credentials
+        if (!process.env.PAYTABS_SERVER_KEY || 
+            process.env.PAYTABS_SERVER_KEY === 'SHJN6LRNBB-JGGLGDNLZT-BWTLZ69DRN' ||
+            !process.env.PAYTABS_PROFILE_ID ||
+            process.env.PAYTABS_PROFILE_ID === '123456') {
+          console.warn('PayTabs is not properly configured. Please add real PayTabs credentials to .env.local')
+          return null
+        }
         
         return {
           provider: 'paytabs',
-          publicKey: process.env.PAYTABS_PROFILE_ID || '',
+          publicKey: process.env.PAYTABS_PROFILE_ID,
           secretKey: process.env.PAYTABS_SERVER_KEY,
           currency,
           country,
