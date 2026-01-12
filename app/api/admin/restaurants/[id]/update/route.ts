@@ -143,6 +143,7 @@ export async function PATCH(
           where: { id: resolvedParams.id },
           create: {
             id: resolvedParams.id,
+            restaurantId: resolvedParams.id,
             orderingEnabled: data.orderingEnabled ?? true,
             requireTableNumber: data.requireTableNumber ?? true,
             allowTakeaway: data.allowTakeaway ?? false,
