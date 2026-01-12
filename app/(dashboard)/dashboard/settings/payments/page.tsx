@@ -34,7 +34,13 @@ export default function PaymentsSettingsPage() {
   }, [session, isSuperAdmin]);
 
   useEffect(() => {
-    fetchRestaurantId();
+    // Try to get restaurant ID from session first (for admins)
+    if (session?.user?.restaurantId) {
+      setRestaurantId(session.user.restaurantId);
+      setLoading(false);
+    } else {
+      fetchRestaurantId();
+    }
   }, [session]);
 
   useEffect(() => {
@@ -55,16 +61,34 @@ export default function PaymentsSettingsPage() {
     try {
       setLoading(true);
       const response = await fetch('/api/dashboard/settings');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.restaurant?.id) {
-          setRestaurantId(data.restaurant.id);
-          setRestaurantName(data.restaurant.name || '');
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('API Error:', response.status, errorData);
+        
+        if (response.status === 401) {
+          toast.error('Nicht authentifiziert. Bitte melden Sie sich erneut an.');
+          router.push('/login');
+          return;
+        } else if (response.status === 404) {
+          toast.error('Kein Restaurant gefunden. Bitte erstellen Sie zuerst ein Restaurant.');
+        } else {
+          toast.error(`Fehler beim Laden: ${errorData.error || 'Unbekannter Fehler'}`);
         }
+        return;
+      }
+      
+      const data = await response.json();
+      if (data.restaurant?.id) {
+        setRestaurantId(data.restaurant.id);
+        setRestaurantName(data.restaurant.name || '');
+      } else {
+        console.warn('No restaurant ID in response:', data);
+        toast.error('Restaurant-Daten unvollständig');
       }
     } catch (error) {
       console.error('Error fetching restaurant:', error);
-      toast.error('Fehler beim Laden der Restaurant-Daten');
+      toast.error('Netzwerkfehler beim Laden der Restaurant-Daten');
     } finally {
       setLoading(false);
     }
