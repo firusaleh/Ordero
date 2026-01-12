@@ -321,16 +321,18 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
+        // Immer Stripe für Guest Checkout verwenden, unabhängig vom Restaurant-Standort
         const response = await fetch('/api/payment/create-intent', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderId: props.orderId,
             amount: props.amount,
-            currency: props.currency,
+            currency: 'EUR', // Immer EUR für Stripe
             restaurantId: props.restaurantId,
             tip: props.tip,
-            country: 'DE',
+            country: 'DE', // Immer DE für Stripe
+            forceProvider: 'stripe', // Force Stripe provider
             metadata: {
               source: 'guest-checkout',
               timestamp: new Date().toISOString()

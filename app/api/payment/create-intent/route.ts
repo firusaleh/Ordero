@@ -3,6 +3,8 @@ import { PaymentFactory } from '@/lib/payment/factory'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('Create payment intent - Request received')
+    
     // Check if Stripe is configured
     if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY === 'sk_test_...') {
       console.error('Stripe Secret Key is not configured')
@@ -14,11 +16,20 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       )
     }
+    
+    console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY)
 
     const body = await request.json()
+    console.log('Request body:', body)
     
     // Validate required fields
     if (!body.orderId || !body.amount || !body.currency || !body.restaurantId) {
+      console.error('Missing required fields:', {
+        orderId: !!body.orderId,
+        amount: !!body.amount,
+        currency: !!body.currency,
+        restaurantId: !!body.restaurantId
+      })
       return NextResponse.json(
         {
           success: false,
@@ -40,19 +51,46 @@ export async function POST(request: NextRequest) {
     }
 
     // Hole den passenden Payment Provider
+    console.log('Getting payment provider for:', { 
+      country: data.country, 
+      currency: data.currency,
+      forceProvider: body.forceProvider 
+    })
+    
     let paymentProvider
     try {
-      paymentProvider = await PaymentFactory.getProvider(
-        data.country, 
-        data.currency, 
-        'stripe' // Bevorzuge Stripe
-      )
+      // If forceProvider is specified and it's stripe, always use stripe regardless of country
+      if (body.forceProvider === 'stripe') {
+        paymentProvider = await PaymentFactory.getProvider(
+          'DE', // Force DE for Stripe
+          'EUR', // Force EUR for Stripe  
+          'stripe'
+        )
+      } else {
+        paymentProvider = await PaymentFactory.getProvider(
+          data.country, 
+          data.currency, 
+          'stripe' // Bevorzuge Stripe
+        )
+      }
+      console.log('Payment provider obtained:', paymentProvider?.name || 'none')
     } catch (error) {
       console.error('Payment provider not available:', error)
       return NextResponse.json(
         {
           success: false,
           error: 'Kein Zahlungsanbieter verfügbar für diese Region'
+        },
+        { status: 503 }
+      )
+    }
+    
+    if (!paymentProvider) {
+      console.error('No payment provider returned')
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Zahlungsanbieter konnte nicht initialisiert werden'
         },
         { status: 503 }
       )
