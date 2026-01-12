@@ -14,7 +14,8 @@ import {
   Globe,
   Shield,
   Database,
-  CreditCard
+  CreditCard,
+  MapPin
 } from 'lucide-react'
 
 
@@ -29,6 +30,14 @@ export default function SettingsPage() {
       href: '/dashboard/settings/general',
       icon: Settings,
       color: 'bg-blue-500'
+    },
+    {
+      title: 'Standort & Region',
+      description: 'Land und Adresse festlegen (bestimmt Zahlungsanbieter)',
+      href: '/dashboard/settings/location',
+      icon: MapPin,
+      color: 'bg-red-500',
+      badge: 'WICHTIG'
     },
     {
       title: t('settings.features.title'),
