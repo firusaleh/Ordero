@@ -166,36 +166,68 @@ export function PayTabsVendorSettings({
 
           <div className="space-y-4">
             <div>
-              <Label htmlFor="bankName">Bank Name</Label>
-              <Input
-                id="bankName"
-                placeholder="z.B. Deutsche Bank, Arab Bank, etc."
+              <Label htmlFor="bank">Bank auswählen</Label>
+              <select
+                id="bank"
+                className="w-full px-3 py-2 border rounded-md"
                 value={vendorData.bankDetails.bankName}
-                onChange={(e) => setVendorData({
-                  ...vendorData,
-                  bankDetails: {
-                    ...vendorData.bankDetails,
-                    bankName: e.target.value
-                  }
-                })}
-              />
+                onChange={(e) => {
+                  const bank = JORDAN_BANKS.find(b => b.name === e.target.value)
+                  setVendorData({
+                    ...vendorData,
+                    bankDetails: {
+                      ...vendorData.bankDetails,
+                      bankName: e.target.value,
+                      swiftCode: bank?.swiftCode || ''
+                    }
+                  })
+                }}
+              >
+                <option value="">Bank wählen...</option>
+                {JORDAN_BANKS.map(bank => (
+                  <option key={bank.code} value={bank.name}>
+                    {bank.name}
+                  </option>
+                ))}
+                <option value="other">Andere Bank...</option>
+              </select>
             </div>
             
-            <div>
-              <Label htmlFor="swiftCode">SWIFT/BIC Code</Label>
-              <Input
-                id="swiftCode"
-                placeholder="z.B. DEUTDEFF oder ARABJOAX"
-                value={vendorData.bankDetails.swiftCode}
-                onChange={(e) => setVendorData({
-                  ...vendorData,
-                  bankDetails: {
-                    ...vendorData.bankDetails,
-                    swiftCode: e.target.value
-                  }
-                })}
-              />
-            </div>
+            {/* Zeige manuelle Eingabe nur wenn "Andere Bank" gewählt wurde */}
+            {vendorData.bankDetails.bankName === 'other' && (
+              <>
+                <div>
+                  <Label htmlFor="customBankName">Bank Name</Label>
+                  <Input
+                    id="customBankName"
+                    placeholder="Name Ihrer Bank"
+                    onChange={(e) => setVendorData({
+                      ...vendorData,
+                      bankDetails: {
+                        ...vendorData.bankDetails,
+                        bankName: e.target.value
+                      }
+                    })}
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="swiftCode">SWIFT/BIC Code</Label>
+                  <Input
+                    id="swiftCode"
+                    placeholder="z.B. ARABJOAX"
+                    value={vendorData.bankDetails.swiftCode}
+                    onChange={(e) => setVendorData({
+                      ...vendorData,
+                      bankDetails: {
+                        ...vendorData.bankDetails,
+                        swiftCode: e.target.value
+                      }
+                    })}
+                  />
+                </div>
+              </>
+            )}
 
             <div>
               <Label htmlFor="iban">IBAN</Label>

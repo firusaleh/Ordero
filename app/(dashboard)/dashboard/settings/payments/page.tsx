@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StripeConnectSettings } from '@/components/dashboard/stripe-connect-settings';
-import { StripeBankSettings } from '@/components/dashboard/stripe-bank-settings';
 import { PayTabsSettings } from '@/components/dashboard/paytabs-settings';
 import { PayTabsVendorSettings } from '@/components/dashboard/paytabs-vendor-settings';
 import { Button } from '@/components/ui/button';
@@ -167,10 +166,9 @@ export default function PaymentsSettingsPage() {
             </CardHeader>
           </Card>
           
-          {/* Stripe Bankdaten für Europa */}
-          <StripeBankSettings 
-            restaurantId={restaurantId} 
-            restaurantName={restaurantName}
+          {/* Stripe Connect für Europa */}
+          <StripeConnectSettings 
+            restaurantId={restaurantId}
           />
           
           {/* PayTabs Bankdaten für Naher Osten */}
