@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers - Oriido | Join Our Team</title>
+    <meta name="description" content="Join the Oriido team and help us transform the restaurant industry. View open positions and apply today.">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Ambient Background -->
+    <div class="ambient-bg"></div>
+    <div class="grid-overlay"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" onclick="closeMobileMenu()">×</button>
+        <a href="index.html#features" onclick="closeMobileMenu()">Features</a>
+        <a href="index.html#how-it-works" onclick="closeMobileMenu()">How It Works</a>
+        <a href="index.html#faq" onclick="closeMobileMenu()">FAQ</a>
+        <a href="https://www.oriido.com/login">Login</a>
+        <a href="https://www.oriido.com/register" class="btn-primary">Get Started Free</a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="oriido-logo.png" alt="Oriido">
+            </a>
+            <div class="nav-links">
+                <a href="index.html#features">Features</a>
+                <a href="index.html#how-it-works">How It Works</a>
+                <a href="index.html#faq">FAQ</a>
+                <a href="https://www.oriido.com/login" class="nav-login">Login</a>
+                <a href="https://www.oriido.com/register" class="nav-cta">Get Started Free</a>
+            </div>
+            <button class="mobile-menu-btn" onclick="openMobileMenu()">☰</button>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <h1>Join <span>Oriido</span></h1>
+        <p>Help us build the future of restaurant technology. We're looking for passionate people who want to make a difference.</p>
+    </header>
+
+    <!-- Why Join Section -->
+    <section class="content-section">
+        <div class="content-container" style="max-width: 1000px;">
+            <h2 style="text-align: center;">Why Work With Us?</h2>
+            
+            <div class="cards-grid">
+                <div class="card">
+                    <h3>🚀 High Impact</h3>
+                    <p>Your work directly affects thousands of restaurants and millions of diners. See the impact of what you build every day.</p>
+                </div>
+                <div class="card">
+                    <h3>🌍 Remote-First</h3>
+                    <p>Work from anywhere. We believe great talent isn't limited by geography.</p>
+                </div>
+                <div class="card">
+                    <h3>📈 Growth</h3>
+                    <p>Join a fast-growing startup where you can shape the product and the company culture.</p>
+                </div>
+                <div class="card">
+                    <h3>💡 Innovation</h3>
+                    <p>We encourage experimentation and new ideas. If you have a better way to do something, we want to hear it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Open Positions -->
+    <section class="content-section" style="background: linear-gradient(180deg, transparent 0%, rgba(255, 107, 53, 0.03) 50%, transparent 100%);">
+        <div class="content-container" style="max-width: 900px;">
+            <h2 style="text-align: center; margin-bottom: 48px;">Open Positions</h2>
+            
+            <div class="job-listing">
+                <div class="job-info">
+                    <h3>Full Stack Developer</h3>
+                    <div class="job-details">
+                        <span>📍 Remote</span>
+                        <span>⏰ Full-time</span>
+                        <span>💼 Engineering</span>
+                    </div>
+                </div>
+                <a href="mailto:careers@oriido.com?subject=Application: Full Stack Developer" class="btn-apply">Apply Now</a>
+            </div>
+            
+            <div class="job-listing">
+                <div class="job-info">
+                    <h3>Sales Representative (Germany)</h3>
+                    <div class="job-details">
+                        <span>📍 Germany</span>
+                        <span>⏰ Full-time</span>
+                        <span>💼 Sales</span>
+                    </div>
+                </div>
+                <a href="mailto:careers@oriido.com?subject=Application: Sales Representative" class="btn-apply">Apply Now</a>
+            </div>
+            
+            <div class="job-listing">
+                <div class="job-info">
+                    <h3>Customer Success Manager</h3>
+                    <div class="job-details">
+                        <span>📍 Remote</span>
+                        <span>⏰ Full-time</span>
+                        <span>💼 Customer Success</span>
+                    </div>
+                </div>
+                <a href="mailto:careers@oriido.com?subject=Application: Customer Success Manager" class="btn-apply">Apply Now</a>
+            </div>
+            
+            <div class="job-listing">
+                <div class="job-info">
+                    <h3>UI/UX Designer</h3>
+                    <div class="job-details">
+                        <span>📍 Remote</span>
+                        <span>⏰ Full-time</span>
+                        <span>💼 Design</span>
+                    </div>
+                </div>
+                <a href="mailto:careers@oriido.com?subject=Application: UI/UX Designer" class="btn-apply">Apply Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- No Fit Section -->
+    <section class="content-section" style="text-align: center; padding: 100px 40px;">
+        <h2 style="font-size: 28px; margin-bottom: 16px;">Don't See the Right Role?</h2>
+        <p style="color: var(--gray-300); margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto;">We're always looking for talented people. Send us your resume and tell us how you can contribute to Oriido.</p>
+        <a href="mailto:careers@oriido.com" class="btn-secondary">Send Open Application</a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <img src="oriido-logo.png" alt="Oriido">
+                    </a>
+                    <p>The modern QR ordering system for restaurants. More revenue, less waiting, happier guests.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="index.html#features">Features</a>
+                    <a href="index.html#how-it-works">How It Works</a>
+                    <a href="index.html#faq">FAQ</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="about.html">About Us</a>
+                    <a href="blog.html">Blog</a>
+                    <a href="careers.html">Careers</a>
+                    <a href="index.html#contact">Contact</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="privacy.html">Privacy Policy</a>
+                    <a href="imprint.html">Imprint</a>
+                    <a href="terms.html">Terms of Service</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2025 Oriido. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation scroll effect
+        const nav = document.getElementById('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu
+        function openMobileMenu() {
+            document.getElementById('mobileMenu').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobileMenu').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    </script>
+</body>
+</html>

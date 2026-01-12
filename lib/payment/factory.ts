@@ -1,7 +1,7 @@
 import { PaymentProvider, PaymentConfig, PROVIDER_COUNTRIES, PROVIDER_CURRENCIES } from './types'
 import { StripeProvider } from './providers/stripe'
+import { PayTabsProvider } from './providers/paytabs'
 // import { PayPalProvider } from './providers/paypal' // Für später
-// import { PayTabsProvider } from './providers/paytabs' // Für später
 
 export class PaymentFactory {
   private static providers: Map<string, PaymentProvider> = new Map()
@@ -36,8 +36,8 @@ export class PaymentFactory {
     // PayTabs for Middle East
     if (PROVIDER_COUNTRIES.paytabs.includes(country) && 
         PROVIDER_CURRENCIES.paytabs.includes(currency)) {
-      // const paytabs = await this.initializeProvider('paytabs', country, currency)
-      // if (paytabs) return paytabs
+      const paytabs = await this.initializeProvider('paytabs', country, currency)
+      if (paytabs) return paytabs
     }
 
     // Razorpay for India
@@ -80,6 +80,14 @@ export class PaymentFactory {
           const config = await this.getProviderConfig('stripe', country, currency)
           if (config) {
             provider = new StripeProvider(config)
+            this.providers.set(cacheKey, provider)
+          }
+          break
+
+        case 'paytabs':
+          const paytabsConfig = await this.getProviderConfig('paytabs', country, currency)
+          if (paytabsConfig) {
+            provider = new PayTabsProvider(paytabsConfig)
             this.providers.set(cacheKey, provider)
           }
           break
@@ -129,6 +137,23 @@ export class PaymentFactory {
             googlePay: true,
             saveCards: true,
             subscriptions: true
+          }
+        }
+
+      case 'paytabs':
+        if (!process.env.PAYTABS_SERVER_KEY) return null
+        
+        return {
+          provider: 'paytabs',
+          publicKey: process.env.PAYTABS_PROFILE_ID || '',
+          secretKey: process.env.PAYTABS_SERVER_KEY,
+          currency,
+          country,
+          features: {
+            applePay: true,
+            googlePay: false,
+            saveCards: false,
+            subscriptions: false
           }
         }
 
