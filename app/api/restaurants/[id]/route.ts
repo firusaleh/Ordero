@@ -4,9 +4,11 @@ import { auth } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const session = await auth()
     if (!session) {
       return NextResponse.json(
@@ -17,7 +19,7 @@ export async function GET(
 
     const restaurant = await prisma.restaurant.findUnique({
       where: { 
-        id: params.id 
+        id 
       },
       include: {
         owner: true,
@@ -47,7 +49,7 @@ export async function GET(
       // Check if user has access to this restaurant
       const hasAccess = await prisma.restaurant.findFirst({
         where: {
-          id: params.id,
+          id,
           OR: [
             { ownerId: session.user.id },
             { staff: { some: { id: session.user.id } } }
@@ -75,9 +77,11 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const session = await auth()
     if (!session) {
       return NextResponse.json(
@@ -90,7 +94,7 @@ export async function PATCH(
 
     // Check if restaurant exists
     const restaurant = await prisma.restaurant.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!restaurant) {
@@ -104,7 +108,7 @@ export async function PATCH(
     if (session.user.role === 'RESTAURANT_OWNER' || session.user.role === 'RESTAURANT_STAFF') {
       const hasAccess = await prisma.restaurant.findFirst({
         where: {
-          id: params.id,
+          id,
           OR: [
             { ownerId: session.user.id },
             { staff: { some: { id: session.user.id } } }
@@ -122,7 +126,7 @@ export async function PATCH(
 
     // Update restaurant
     const updatedRestaurant = await prisma.restaurant.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name: body.name,
         slug: body.slug,
@@ -144,7 +148,7 @@ export async function PATCH(
     // Update settings if provided
     if (body.settings) {
       await prisma.restaurantSettings.update({
-        where: { restaurantId: params.id },
+        where: { restaurantId: id },
         data: body.settings
       })
     }
@@ -164,9 +168,11 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+    
     const session = await auth()
     
     // Only SUPER_ADMIN can delete restaurants
@@ -179,7 +185,7 @@ export async function DELETE(
 
     // Check if restaurant exists
     const restaurant = await prisma.restaurant.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         owner: true
       }
@@ -194,7 +200,7 @@ export async function DELETE(
 
     // Delete restaurant (will cascade delete related data)
     await prisma.restaurant.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     // If owner has no other restaurants, optionally delete the owner account
