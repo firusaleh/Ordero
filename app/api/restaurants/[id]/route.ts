@@ -28,7 +28,7 @@ export async function GET(
           where: { isActive: true },
           orderBy: { sortOrder: 'asc' },
           include: {
-            items: {
+            menuItems: {
               where: { isAvailable: true },
               orderBy: { sortOrder: 'asc' }
             }
