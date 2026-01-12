@@ -8,6 +8,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   Table,
   TableBody,
   TableCell,
@@ -86,7 +93,8 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
     ownerName: '',
     ownerEmail: '',
     ownerPassword: '',
-    phone: ''
+    phone: '',
+    country: 'DE'
   })
   const [isCreating, setIsCreating] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -153,7 +161,8 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
           ownerName: '',
           ownerEmail: '',
           ownerPassword: '',
-          phone: ''
+          phone: '',
+          country: 'DE'
         })
         router.refresh()
       } else {
@@ -329,6 +338,7 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
               <TableRow className="border-gray-700 hover:bg-gray-700/50">
                 <TableHead className="text-gray-300">Restaurant</TableHead>
                 <TableHead className="text-gray-300">Besitzer</TableHead>
+                <TableHead className="text-gray-300">Land</TableHead>
                 <TableHead className="text-gray-300">Plan</TableHead>
                 <TableHead className="text-gray-300">Status</TableHead>
                 <TableHead className="text-gray-300">Monatsumsatz</TableHead>
@@ -349,6 +359,19 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
                     <div>
                       <p className="text-gray-300">{restaurant.owner.name || 'Nicht angegeben'}</p>
                       <p className="text-xs text-gray-500">{restaurant.owner.email}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">
+                        {{
+                          'DE': '🇩🇪', 'AT': '🇦🇹', 'CH': '🇨🇭', 'FR': '🇫🇷',
+                          'IT': '🇮🇹', 'ES': '🇪🇸', 'NL': '🇳🇱', 'BE': '🇧🇪',
+                          'GB': '🇬🇧', 'JO': '🇯🇴', 'SA': '🇸🇦', 'AE': '🇦🇪',
+                          'KW': '🇰🇼', 'BH': '🇧🇭', 'QA': '🇶🇦', 'OM': '🇴🇲', 'EG': '🇪🇬'
+                        }[restaurant.country] || '🌍'}
+                      </span>
+                      <span className="text-sm text-gray-400">{restaurant.country || 'DE'}</span>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -538,6 +561,37 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
                   placeholder="+49 89 123456"
                   className="bg-gray-700 border-gray-600 text-white"
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="country">Land</Label>
+                <Select 
+                  value={newRestaurant.country}
+                  onValueChange={(value) => setNewRestaurant({ ...newRestaurant, country: value })}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Land auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DE">🇩🇪 Deutschland (Stripe)</SelectItem>
+                    <SelectItem value="AT">🇦🇹 Österreich (Stripe)</SelectItem>
+                    <SelectItem value="CH">🇨🇭 Schweiz (Stripe)</SelectItem>
+                    <SelectItem value="FR">🇫🇷 Frankreich (Stripe)</SelectItem>
+                    <SelectItem value="IT">🇮🇹 Italien (Stripe)</SelectItem>
+                    <SelectItem value="ES">🇪🇸 Spanien (Stripe)</SelectItem>
+                    <SelectItem value="NL">🇳🇱 Niederlande (Stripe)</SelectItem>
+                    <SelectItem value="BE">🇧🇪 Belgien (Stripe)</SelectItem>
+                    <SelectItem value="GB">🇬🇧 Vereinigtes Königreich (Stripe)</SelectItem>
+                    <SelectItem value="JO">🇯🇴 Jordanien (PayTabs)</SelectItem>
+                    <SelectItem value="SA">🇸🇦 Saudi-Arabien (PayTabs)</SelectItem>
+                    <SelectItem value="AE">🇦🇪 VAE (PayTabs)</SelectItem>
+                    <SelectItem value="KW">🇰🇼 Kuwait (PayTabs)</SelectItem>
+                    <SelectItem value="BH">🇧🇭 Bahrain (PayTabs)</SelectItem>
+                    <SelectItem value="QA">🇶🇦 Katar (PayTabs)</SelectItem>
+                    <SelectItem value="OM">🇴🇲 Oman (PayTabs)</SelectItem>
+                    <SelectItem value="EG">🇪🇬 Ägypten (PayTabs)</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

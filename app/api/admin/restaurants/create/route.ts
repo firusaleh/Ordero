@@ -10,7 +10,8 @@ const createRestaurantSchema = z.object({
   ownerName: z.string().min(2, 'Besitzername muss mindestens 2 Zeichen lang sein'),
   ownerEmail: z.string().email('Ungültige E-Mail-Adresse'),
   ownerPassword: z.string().min(8, 'Passwort muss mindestens 8 Zeichen lang sein'),
-  phone: z.string().optional()
+  phone: z.string().optional(),
+  country: z.string().default('DE')
 })
 
 export async function POST(request: NextRequest) {
@@ -100,9 +101,28 @@ export async function POST(request: NextRequest) {
           trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 Tage Trial
           email: validatedData.ownerEmail,
           phone: validatedData.phone,
+          country: validatedData.country,
         }
       })
       
+      // Bestimme Währung und Zeitzone basierend auf Land
+      const currencyByCountry: { [key: string]: string } = {
+        'JO': 'JOD', 'SA': 'SAR', 'AE': 'AED', 'KW': 'KWD',
+        'BH': 'BHD', 'QA': 'QAR', 'OM': 'OMR', 'EG': 'EGP',
+        'GB': 'GBP', 'CH': 'CHF'
+      }
+      const currency = currencyByCountry[validatedData.country] || 'EUR'
+      
+      const timezoneByCountry: { [key: string]: string } = {
+        'JO': 'Asia/Amman', 'SA': 'Asia/Riyadh', 'AE': 'Asia/Dubai',
+        'KW': 'Asia/Kuwait', 'BH': 'Asia/Bahrain', 'QA': 'Asia/Qatar',
+        'OM': 'Asia/Muscat', 'EG': 'Africa/Cairo', 'GB': 'Europe/London',
+        'CH': 'Europe/Zurich', 'AT': 'Europe/Vienna', 'FR': 'Europe/Paris',
+        'IT': 'Europe/Rome', 'ES': 'Europe/Madrid', 'NL': 'Europe/Amsterdam',
+        'BE': 'Europe/Brussels'
+      }
+      const timezone = timezoneByCountry[validatedData.country] || 'Europe/Berlin'
+
       // Erstelle Restaurant-Einstellungen mit Standardwerten
       await tx.restaurantSettings.create({
         data: {
@@ -118,9 +138,9 @@ export async function POST(request: NextRequest) {
           acceptCard: false,
           taxRate: 19,
           includeTax: true,
-          currency: 'EUR',
+          currency,
           language: 'de',
-          timezone: 'Europe/Berlin'
+          timezone
         }
       })
 
