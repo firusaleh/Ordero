@@ -81,8 +81,23 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
   const saveLocationData = async () => {
     try {
       setLoading(true)
+      setSaved(false)
       
       const countryInfo = COUNTRY_PAYMENT_INFO[locationData.country as keyof typeof COUNTRY_PAYMENT_INFO]
+      
+      if (!countryInfo) {
+        toast.error('Ungültiges Land ausgewählt')
+        return
+      }
+      
+      console.log('Saving location data:', {
+        restaurantId,
+        country: locationData.country,
+        city: locationData.city,
+        street: locationData.street,
+        postalCode: locationData.postalCode,
+        currency: countryInfo.currency
+      })
       
       // Update Restaurant mit allen Daten inkl. Settings
       const response = await fetch(`/api/restaurants/${restaurantId}`, {
@@ -90,29 +105,34 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           country: locationData.country,
-          city: locationData.city,
-          street: locationData.street,
-          postalCode: locationData.postalCode,
+          city: locationData.city || null,
+          street: locationData.street || null,
+          postalCode: locationData.postalCode || null,
           settings: {
             currency: countryInfo.currency
           }
         })
       })
 
+      const responseData = await response.json()
+      console.log('Save response:', responseData)
+
       if (!response.ok) {
-        const error = await response.text()
-        console.error('Save error:', error)
-        throw new Error('Fehler beim Speichern')
+        console.error('Save error:', responseData)
+        throw new Error(responseData.error || 'Fehler beim Speichern')
       }
 
       setSaved(true)
-      toast.success('Standort-Einstellungen gespeichert!')
+      toast.success('Standort-Einstellungen erfolgreich gespeichert!')
       
       // Reload data to confirm save
-      await fetchLocationData()
-    } catch (error) {
+      setTimeout(() => {
+        fetchLocationData()
+      }, 500)
+      
+    } catch (error: any) {
       console.error('Error saving location data:', error)
-      toast.error('Fehler beim Speichern der Einstellungen')
+      toast.error(error.message || 'Fehler beim Speichern der Einstellungen')
     } finally {
       setLoading(false)
     }
