@@ -224,7 +224,9 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="city">Stadt</Label>
+              <Label htmlFor="city">
+                Stadt {selectedCountry?.provider !== 'PayTabs' && <span className="text-red-500">*</span>}
+              </Label>
               <Input
                 id="city"
                 value={locationData.city}
@@ -233,11 +235,14 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
                   setSaved(false)
                 }}
                 placeholder="z.B. Berlin, Amman"
+                required={selectedCountry?.provider !== 'PayTabs'}
               />
             </div>
             
             <div>
-              <Label htmlFor="postalCode">Postleitzahl</Label>
+              <Label htmlFor="postalCode">
+                Postleitzahl {selectedCountry?.provider === 'PayTabs' && <span className="text-gray-400 text-xs">(optional)</span>}
+              </Label>
               <Input
                 id="postalCode"
                 value={locationData.postalCode}
@@ -245,13 +250,15 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
                   setLocationData({ ...locationData, postalCode: e.target.value })
                   setSaved(false)
                 }}
-                placeholder="z.B. 10115"
+                placeholder={selectedCountry?.provider === 'PayTabs' ? "Optional" : "z.B. 10115"}
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="street">Straße</Label>
+            <Label htmlFor="street">
+              Straße {selectedCountry?.provider === 'PayTabs' && <span className="text-gray-400 text-xs">(optional)</span>}
+            </Label>
             <Input
               id="street"
               value={locationData.street}
@@ -259,7 +266,7 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
                 setLocationData({ ...locationData, street: e.target.value })
                 setSaved(false)
               }}
-              placeholder="Straße und Hausnummer"
+              placeholder={selectedCountry?.provider === 'PayTabs' ? "Optional für Länder im Nahen Osten" : "Straße und Hausnummer"}
             />
           </div>
 
