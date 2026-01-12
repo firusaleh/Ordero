@@ -364,12 +364,15 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <span className="text-lg">
-                        {{
-                          'DE': '🇩🇪', 'AT': '🇦🇹', 'CH': '🇨🇭', 'FR': '🇫🇷',
-                          'IT': '🇮🇹', 'ES': '🇪🇸', 'NL': '🇳🇱', 'BE': '🇧🇪',
-                          'GB': '🇬🇧', 'JO': '🇯🇴', 'SA': '🇸🇦', 'AE': '🇦🇪',
-                          'KW': '🇰🇼', 'BH': '🇧🇭', 'QA': '🇶🇦', 'OM': '🇴🇲', 'EG': '🇪🇬'
-                        }[restaurant.country] || '🌍'}
+                        {(() => {
+                          const flags: { [key: string]: string } = {
+                            'DE': '🇩🇪', 'AT': '🇦🇹', 'CH': '🇨🇭', 'FR': '🇫🇷',
+                            'IT': '🇮🇹', 'ES': '🇪🇸', 'NL': '🇳🇱', 'BE': '🇧🇪',
+                            'GB': '🇬🇧', 'JO': '🇯🇴', 'SA': '🇸🇦', 'AE': '🇦🇪',
+                            'KW': '🇰🇼', 'BH': '🇧🇭', 'QA': '🇶🇦', 'OM': '🇴🇲', 'EG': '🇪🇬'
+                          }
+                          return flags[restaurant.country || 'DE'] || '🌍'
+                        })()}
                       </span>
                       <span className="text-sm text-gray-400">{restaurant.country || 'DE'}</span>
                     </div>
