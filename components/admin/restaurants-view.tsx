@@ -66,6 +66,7 @@ interface Restaurant {
   slug: string
   email?: string | null
   phone?: string | null
+  country?: string | null
   status: string
   plan: string
   createdAt: Date
