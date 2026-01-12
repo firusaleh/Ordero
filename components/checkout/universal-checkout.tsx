@@ -152,6 +152,7 @@ export function UniversalCheckout({
           amount={amount}
           currency={currency}
           restaurantName={restaurantName}
+          clientSecret={clientSecret}
           onSuccess={onSuccess}
           onError={onError}
         />
@@ -179,12 +180,14 @@ function StripeCheckoutForm({
   amount,
   currency,
   restaurantName,
+  clientSecret,
   onSuccess,
   onError
 }: {
   amount: number
   currency: string
   restaurantName: string
+  clientSecret: string
   onSuccess: () => void
   onError: (error: string) => void
 }) {
@@ -200,11 +203,16 @@ function StripeCheckoutForm({
     setProcessing(true)
 
     try {
+      const cardElement = elements.getElement(CardElement)
+      if (!cardElement) {
+        throw new Error('Card element not found')
+      }
+
       const result = await stripe.confirmCardPayment(
-        elements.getElement(CardElement)!.clientSecret!,
+        clientSecret,
         {
           payment_method: {
-            card: elements.getElement(CardElement)!
+            card: cardElement
           }
         }
       )
