@@ -84,7 +84,7 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
       
       const countryInfo = COUNTRY_PAYMENT_INFO[locationData.country as keyof typeof COUNTRY_PAYMENT_INFO]
       
-      // Update Restaurant
+      // Update Restaurant mit allen Daten inkl. Settings
       const response = await fetch(`/api/restaurants/${restaurantId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -92,23 +92,24 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
           country: locationData.country,
           city: locationData.city,
           street: locationData.street,
-          postalCode: locationData.postalCode
+          postalCode: locationData.postalCode,
+          settings: {
+            currency: countryInfo.currency
+          }
         })
       })
 
-      if (!response.ok) throw new Error('Fehler beim Speichern')
-
-      // Update Settings mit Währung
-      await fetch(`/api/restaurants/${restaurantId}/settings`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          currency: countryInfo.currency
-        })
-      })
+      if (!response.ok) {
+        const error = await response.text()
+        console.error('Save error:', error)
+        throw new Error('Fehler beim Speichern')
+      }
 
       setSaved(true)
       toast.success('Standort-Einstellungen gespeichert!')
+      
+      // Reload data to confirm save
+      await fetchLocationData()
     } catch (error) {
       console.error('Error saving location data:', error)
       toast.error('Fehler beim Speichern der Einstellungen')

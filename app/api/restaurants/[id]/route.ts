@@ -128,22 +128,25 @@ export async function PATCH(
       }
     }
 
-    // Update restaurant
+    // Update restaurant - nur die übergebenen Felder updaten
+    const updateData: any = {}
+    
+    // Nur Felder hinzufügen, die tatsächlich gesendet wurden
+    if (body.name !== undefined) updateData.name = body.name
+    if (body.slug !== undefined) updateData.slug = body.slug
+    if (body.email !== undefined) updateData.email = body.email
+    if (body.phone !== undefined) updateData.phone = body.phone
+    if (body.street !== undefined) updateData.street = body.street
+    if (body.city !== undefined) updateData.city = body.city
+    if (body.postalCode !== undefined) updateData.postalCode = body.postalCode
+    if (body.country !== undefined) updateData.country = body.country
+    if (body.description !== undefined) updateData.description = body.description
+    if (body.logo !== undefined) updateData.logo = body.logo
+    if (body.banner !== undefined) updateData.banner = body.banner
+    
     const updatedRestaurant = await prisma.restaurant.update({
       where: { id },
-      data: {
-        name: body.name,
-        slug: body.slug,
-        email: body.email,
-        phone: body.phone,
-        address: body.address,
-        city: body.city,
-        zipCode: body.zipCode,
-        country: body.country,
-        description: body.description,
-        ...(body.logo && { logo: body.logo }),
-        ...(body.banner && { banner: body.banner })
-      },
+      data: updateData,
       include: {
         settings: true
       }
