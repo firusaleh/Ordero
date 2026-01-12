@@ -67,8 +67,12 @@ interface Restaurant {
   city?: string | null
   postalCode?: string | null
   phone?: string | null
+  country?: string | null
   categories: Category[]
-  settings: any
+  settings: {
+    currency?: string
+    [key: string]: any
+  }
 }
 
 interface CartItem {
@@ -119,6 +123,19 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
   const [showStripeCheckout, setShowStripeCheckout] = useState(false)
   const [currentPaymentMethod, setCurrentPaymentMethod] = useState<string>('CASH')
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
+
+  // Währungshelfer basierend auf Restaurant-Einstellungen
+  const currency = restaurant.settings?.currency || 'EUR'
+  const currencySymbol = currency === 'JOD' ? 'JD' : 
+                        currency === 'USD' ? '$' : 
+                        currency === 'AED' ? 'AED' : 
+                        currency === 'SAR' ? 'SAR' :
+                        currency === 'KWD' ? 'KWD' :
+                        currency === 'BHD' ? 'BHD' :
+                        currency === 'QAR' ? 'QAR' :
+                        currency === 'OMR' ? 'OMR' :
+                        currency === 'EGP' ? 'EGP' : '€'
+  const formatPrice = (price: number) => `$€${price.toFixed(2)}`
 
   // Lade Warenkorb aus localStorage
   useEffect(() => {
@@ -373,7 +390,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
               <ShoppingCart className="h-5 w-5" />
               {cart.length > 0 && (
                 <>
-                  <span className="ml-2 hidden sm:inline">€{getCartTotal().toFixed(2)}</span>
+                  <span className="ml-2 hidden sm:inline">{formatPrice(getCartTotal())}</span>
                   <Badge 
                     className="absolute -top-2 -right-2 h-6 w-6 p-0 flex items-center justify-center animate-pulse"
                     variant="destructive"
@@ -476,7 +493,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                         />
                         <div className="absolute top-2 right-2 flex flex-col gap-2">
                           <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 font-bold shadow-md">
-                            €{item.price.toFixed(2)}
+                            {formatPrice(item.price)}
                           </Badge>
                           {item.variants && item.variants.length > 0 && (
                             <Badge className="bg-blue-500/90 text-white backdrop-blur-sm shadow-md">
@@ -493,13 +510,13 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                           <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
                           {item.variants && item.variants.length > 0 && (
                             <p className="text-xs text-gray-500 mt-1">
-                              ab €{Math.min(...item.variants.map(v => v.price)).toFixed(2)}
+                              ab {formatPrice(Math.min(...item.variants.map(v => v.price)))}
                             </p>
                           )}
                         </div>
                         {!item.image && (
                           <Badge className="font-bold text-lg" style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}>
-                            €{item.price.toFixed(2)}
+                            {formatPrice(item.price)}
                           </Badge>
                         )}
                       </div>
@@ -575,8 +592,8 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                           <p className="text-sm text-gray-500 italic">"{item.notes}"</p>
                         )}
                         <p className="text-sm text-gray-600 mt-1">
-                          €{((item.variant?.price || item.menuItem.price) + 
-                            item.extras.reduce((sum, e) => sum + e.price, 0)).toFixed(2)} pro Stück
+                          {formatPrice((item.variant?.price || item.menuItem.price) + 
+                            item.extras.reduce((sum, e) => sum + e.price, 0))} pro Stück
                         </p>
                       </div>
                       <Button
@@ -610,7 +627,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                         </Button>
                       </div>
                       <span className="font-bold">
-                        €{getItemPrice(item).toFixed(2)}
+                        {formatPrice(getItemPrice(item))}
                       </span>
                     </div>
                   </div>
@@ -626,7 +643,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold">{t('common.total')}</span>
                     <span className="text-xl font-bold">
-                      €{getCartTotal().toFixed(2)}
+                      {formatPrice(getCartTotal())}
                     </span>
                   </div>
                 </div>
@@ -687,7 +704,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                             className="flex-1 cursor-pointer flex justify-between"
                           >
                             <span>{variant.name}</span>
-                            <span className="font-medium">€{variant.price.toFixed(2)}</span>
+                            <span className="font-medium">{formatPrice(variant.price)}</span>
                           </Label>
                         </div>
                       ))}
@@ -712,7 +729,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                             className="flex-1 cursor-pointer flex justify-between"
                           >
                             <span>{extra.name}</span>
-                            <span className="font-medium">+€{extra.price.toFixed(2)}</span>
+                            <span className="font-medium">+{formatPrice(extra.price)}</span>
                           </Label>
                         </div>
                       ))}
@@ -823,10 +840,13 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
             const { subtotal, tax } = calculateTax()
             const baseAmount = subtotal + tax
             
+            // Verwende die Währung aus den Restaurant-Einstellungen oder fallback auf EUR
+            const currency = restaurant.settings?.currency || 'EUR'
+            
             return (
               <StripeCheckout
                 amount={baseAmount}
-                currency="EUR"
+                currency={currency}
                 orderId={`temp-${Date.now()}`} // Wird durch echte Order ID ersetzt
                 restaurantId={restaurant.id}
                 tip={currentTipAmount}
