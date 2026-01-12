@@ -34,13 +34,8 @@ export default function PaymentsSettingsPage() {
   }, [session, isSuperAdmin]);
 
   useEffect(() => {
-    // Try to get restaurant ID from session first (for admins)
-    if (session?.user?.restaurantId) {
-      setRestaurantId(session.user.restaurantId);
-      setLoading(false);
-    } else {
-      fetchRestaurantId();
-    }
+    // Always fetch restaurant ID from API
+    fetchRestaurantId();
   }, [session]);
 
   useEffect(() => {
