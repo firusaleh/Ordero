@@ -44,24 +44,26 @@ export async function GET(
       )
     }
 
-    // Check authorization
-    if (session.user.role === 'RESTAURANT_OWNER' || session.user.role === 'RESTAURANT_STAFF') {
-      // Check if user has access to this restaurant
-      const hasAccess = await prisma.restaurant.findFirst({
-        where: {
-          id,
-          OR: [
-            { ownerId: session.user.id },
-            { staff: { some: { id: session.user.id } } }
-          ]
-        }
-      })
+    // Check authorization - Skip check for admins
+    if (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
+      if (session.user.role === 'RESTAURANT_OWNER' || session.user.role === 'RESTAURANT_STAFF') {
+        // Check if user has access to this restaurant
+        const hasAccess = await prisma.restaurant.findFirst({
+          where: {
+            id,
+            OR: [
+              { ownerId: session.user.id },
+              { staff: { some: { id: session.user.id } } }
+            ]
+          }
+        })
 
-      if (!hasAccess && session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
-        return NextResponse.json(
-          { error: 'Keine Berechtigung für dieses Restaurant' },
-          { status: 403 }
-        )
+        if (!hasAccess) {
+          return NextResponse.json(
+            { error: 'Keine Berechtigung für dieses Restaurant' },
+            { status: 403 }
+          )
+        }
       }
     }
 
@@ -104,23 +106,25 @@ export async function PATCH(
       )
     }
 
-    // Check authorization
-    if (session.user.role === 'RESTAURANT_OWNER' || session.user.role === 'RESTAURANT_STAFF') {
-      const hasAccess = await prisma.restaurant.findFirst({
-        where: {
-          id,
-          OR: [
-            { ownerId: session.user.id },
-            { staff: { some: { id: session.user.id } } }
-          ]
-        }
-      })
+    // Check authorization - Skip check for admins
+    if (session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
+      if (session.user.role === 'RESTAURANT_OWNER' || session.user.role === 'RESTAURANT_STAFF') {
+        const hasAccess = await prisma.restaurant.findFirst({
+          where: {
+            id,
+            OR: [
+              { ownerId: session.user.id },
+              { staff: { some: { id: session.user.id } } }
+            ]
+          }
+        })
 
-      if (!hasAccess && session.user.role !== 'SUPER_ADMIN' && session.user.role !== 'ADMIN') {
-        return NextResponse.json(
-          { error: 'Keine Berechtigung für dieses Restaurant' },
-          { status: 403 }
-        )
+        if (!hasAccess) {
+          return NextResponse.json(
+            { error: 'Keine Berechtigung für dieses Restaurant' },
+            { status: 403 }
+          )
+        }
       }
     }
 
