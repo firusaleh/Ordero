@@ -12,7 +12,7 @@ import {
   LogOut,
   Shield
 } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 const navigation = [
   { name: 'Übersicht', href: '/admin', icon: Home },
@@ -24,6 +24,22 @@ const navigation = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+      })
+      
+      if (response.ok) {
+        router.push('/login')
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
 
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
@@ -75,7 +91,7 @@ export default function AdminSidebar() {
                 Zum Dashboard
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={handleLogout}
                 className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-300 hover:bg-gray-800 hover:text-red-500 w-full transition-colors"
               >
                 <LogOut className="h-5 w-5 shrink-0 text-gray-500 group-hover:text-red-500 transition-colors" />

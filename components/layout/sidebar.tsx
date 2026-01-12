@@ -1,7 +1,7 @@
 "use client"
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   Home,
@@ -15,12 +15,27 @@ import {
   LogOut,
   Rocket
 } from 'lucide-react'
-import { signOut } from 'next-auth/react'
 import { useLanguage } from '@/contexts/language-context'
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { t } = useLanguage()
+  
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST',
+      })
+      
+      if (response.ok) {
+        router.push('/login')
+        router.refresh()
+      }
+    } catch (error) {
+      console.error('Logout error:', error)
+    }
+  }
 
   const navigation = [
     { name: t('nav.dashboard'), href: '/dashboard', icon: Home },
@@ -74,7 +89,7 @@ export default function Sidebar() {
             </li>
             <li className="mt-auto">
               <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={handleLogout}
                 className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-50 hover:text-red-600 w-full transition-colors"
               >
                 <LogOut className="h-5 w-5 shrink-0 text-gray-400 group-hover:text-red-600 transition-colors" />
