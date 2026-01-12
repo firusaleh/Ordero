@@ -86,7 +86,7 @@ model Restaurant {
   street      String?
   city        String?
   postalCode  String?
-  country     String   @default("DE")
+  country     String   @default("DE") // DE, JO, SA, AE, etc.
   
   // Kontakt
   phone       String?

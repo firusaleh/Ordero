@@ -2,14 +2,56 @@ import { NextRequest, NextResponse } from 'next/server'
 import { PaymentFactory } from '@/lib/payment/factory'
 import { prisma } from '@/lib/prisma'
 
+// Helper: Standard-Währung für ein Land
+function getCurrencyForCountry(country: string): string {
+  const currencyMap: Record<string, string> = {
+    // Europa
+    'DE': 'EUR',
+    'FR': 'EUR',
+    'IT': 'EUR',
+    'ES': 'EUR',
+    'NL': 'EUR',
+    'BE': 'EUR',
+    'AT': 'EUR',
+    'PT': 'EUR',
+    'IE': 'EUR',
+    'FI': 'EUR',
+    'GR': 'EUR',
+    'LU': 'EUR',
+    
+    // Naher Osten
+    'JO': 'JOD',
+    'SA': 'SAR',
+    'AE': 'AED',
+    'KW': 'KWD',
+    'BH': 'BHD',
+    'QA': 'QAR',
+    'OM': 'OMR',
+    'EG': 'EGP',
+    'LB': 'LBP',
+    'MA': 'MAD',
+    
+    // Andere
+    'GB': 'GBP',
+    'CH': 'CHF',
+    'US': 'USD',
+    'CA': 'CAD',
+    'AU': 'AUD',
+    'JP': 'JPY',
+    'IN': 'INR',
+    'CN': 'CNY',
+    'TR': 'TRY'
+  }
+  
+  return currencyMap[country] || 'EUR'
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { 
       orderId, 
       amount, 
-      currency, 
-      country,
       tip,
       customerEmail,
       customerName,
@@ -18,17 +60,21 @@ export async function POST(req: NextRequest) {
     } = body
 
     // Validierung
-    if (!orderId || !amount || !currency || !country) {
+    if (!orderId || !amount) {
       return NextResponse.json(
         { error: 'Fehlende erforderliche Felder' },
         { status: 400 }
       )
     }
 
-    // Hole Bestelldetails
+    // Hole Bestelldetails mit Restaurant
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      include: { restaurant: true }
+      include: { 
+        restaurant: {
+          include: { settings: true }
+        }
+      }
     })
 
     if (!order) {
@@ -38,7 +84,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Automatisch den besten Payment Provider auswählen
+    // Nutze Restaurant-Land und Währung
+    const country = order.restaurant.country || 'DE'
+    const currency = order.restaurant.settings?.currency || getCurrencyForCountry(country)
+    
+    console.log(`Restaurant ${order.restaurant.name} - Country: ${country}, Currency: ${currency}`)
+
+    // Automatisch den besten Payment Provider auswählen basierend auf Restaurant-Land
     const provider = await PaymentFactory.getProvider(
       country,
       currency,
