@@ -114,6 +114,7 @@ export async function POST(
       },
       create: {
         id: resolvedParams.id,
+        restaurantId: resolvedParams.id,
         acceptCash,
         acceptCard,
         acceptPaypal,

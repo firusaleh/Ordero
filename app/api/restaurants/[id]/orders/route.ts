@@ -86,7 +86,6 @@ export async function GET(
     // Formatiere Daten für Frontend
     const formattedOrders = orders.map(order => ({
       id: order.id,
-      id: order.id,
       orderNumber: order.orderNumber,
       tableNumber: order.tableNumber,
       customerName: order.guestName,

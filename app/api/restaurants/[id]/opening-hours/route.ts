@@ -95,6 +95,7 @@ export async function POST(
       },
       create: {
         id: resolvedParams.id,
+        restaurantId: resolvedParams.id,
         openingHours: hours
       }
     })

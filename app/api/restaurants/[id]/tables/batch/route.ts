@@ -79,12 +79,10 @@ export async function POST(
     
     if (!isOwner && !isAdmin) {
       // Prüfe ob User Staff-Mitglied ist
-      const staffMember = await prisma.restaurantStaff.findUnique({
+      const staffMember = await prisma.restaurantStaff.findFirst({
         where: {
-          id_userId: {
-            id: id,
-            userId: session.user.id
-          }
+          restaurantId: id,
+          userId: session.user.id
         }
       })
 
@@ -129,7 +127,8 @@ export async function POST(
 
       const table = await prisma.table.create({
         data: {
-          id,
+          id: tableData.id,
+          restaurantId: id,
           number: tableData.number,
           name: tableData.name || `Tisch ${tableData.number}`,
           qrCode: qrCodeDataUrl,
@@ -221,7 +220,7 @@ export async function DELETE(
     const result = await prisma.table.deleteMany({
       where: {
         id: { in: tableIds },
-        id // Sicherstellen dass nur Tische dieses Restaurants gelöscht werden
+        restaurantId: id // Sicherstellen dass nur Tische dieses Restaurants gelöscht werden
       }
     })
 

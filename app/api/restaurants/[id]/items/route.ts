@@ -33,7 +33,8 @@ export async function POST(
     // Erstelle neuen Menü-Artikel
     const menuItem = await prisma.menuItem.create({
       data: {
-        id,
+        id: data.id,
+        restaurantId: id,
         categoryId: data.categoryId,
         name: data.name,
         description: data.description || null,

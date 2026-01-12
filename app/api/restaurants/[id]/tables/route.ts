@@ -43,12 +43,10 @@ export async function GET(
     
     if (!isOwner && !isAdmin) {
       // Prüfe ob User Staff-Mitglied ist
-      const staffMember = await prisma.restaurantStaff.findUnique({
+      const staffMember = await prisma.restaurantStaff.findFirst({
         where: {
-          id_userId: {
-            id: id,
-            userId: session.user.id
-          }
+          restaurantId: id,
+          userId: session.user.id
         }
       })
 
@@ -122,12 +120,10 @@ export async function POST(
     
     if (!isOwner && !isAdmin) {
       // Prüfe ob User Staff-Mitglied ist
-      const staffMember = await prisma.restaurantStaff.findUnique({
+      const staffMember = await prisma.restaurantStaff.findFirst({
         where: {
-          id_userId: {
-            id: id,
-            userId: session.user.id
-          }
+          restaurantId: id,
+          userId: session.user.id
         }
       })
 
@@ -166,7 +162,7 @@ export async function POST(
     // Erstelle Tisch
     const table = await prisma.table.create({
       data: {
-        id,
+        restaurantId: id,
         number: tableNumber,
         name: name || `Tisch ${tableNumber}`,
         seats: seats || 4,
@@ -306,7 +302,7 @@ export async function DELETE(
 
     // Prüfe Berechtigung
     const restaurant = await prisma.restaurant.findUnique({
-      where: { id: restaurantId },
+      where: { id: id },
       select: { ownerId: true }
     })
 
