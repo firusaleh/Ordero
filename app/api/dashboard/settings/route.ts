@@ -10,17 +10,35 @@ export async function GET(request: Request) {
   }
 
   try {
-    const restaurant = await prisma.restaurant.findFirst({
+    // Zuerst prüfen ob der User ein Restaurant besitzt
+    let restaurant = await prisma.restaurant.findFirst({
       where: {
-        OR: [
-          { ownerId: session.user.id },
-          { staff: { some: { userId: session.user.id } } }
-        ]
+        ownerId: session.user.id
       },
       include: {
         settings: true
       }
     })
+
+    // Falls nicht Owner, prüfe ob Staff
+    if (!restaurant) {
+      const staffRelation = await prisma.restaurantStaff.findFirst({
+        where: {
+          userId: session.user.id
+        },
+        include: {
+          restaurant: {
+            include: {
+              settings: true
+            }
+          }
+        }
+      })
+
+      if (staffRelation) {
+        restaurant = staffRelation.restaurant
+      }
+    }
 
     if (!restaurant) {
       return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 })
