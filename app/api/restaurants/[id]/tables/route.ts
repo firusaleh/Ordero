@@ -213,11 +213,11 @@ export async function PUT(
       )
     }
 
-    const { id } = await context.params
+    const { id: restaurantId } = await context.params
     const body = await request.json()
-    const { id, number, name, seats, area, isActive } = body
+    const { id: tableId, number, name, seats, area, isActive } = body
 
-    if (!id) {
+    if (!tableId) {
       return NextResponse.json(
         { error: 'Tisch ID erforderlich' },
         { status: 400 }
@@ -226,7 +226,7 @@ export async function PUT(
 
     // Prüfe Berechtigung
     const restaurant = await prisma.restaurant.findUnique({
-      where: { id: id },
+      where: { id: restaurantId },
       select: { ownerId: true }
     })
 
@@ -249,7 +249,7 @@ export async function PUT(
 
     // Update Tisch
     const table = await prisma.table.update({
-      where: { id },
+      where: { id: tableId },
       data: {
         number,
         name,
@@ -306,7 +306,7 @@ export async function DELETE(
 
     // Prüfe Berechtigung
     const restaurant = await prisma.restaurant.findUnique({
-      where: { id: id },
+      where: { id: restaurantId },
       select: { ownerId: true }
     })
 
