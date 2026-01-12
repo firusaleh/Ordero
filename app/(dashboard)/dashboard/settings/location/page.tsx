@@ -1,56 +1,52 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { redirect } from 'next/navigation'
+import { RestaurantLocationSettings } from '@/components/dashboard/restaurant-location-settings'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
-import { RestaurantLocationSettings } from '@/components/dashboard/restaurant-location-settings'
-import { toast } from 'sonner'
+import Link from 'next/link'
 
-export default function LocationSettingsPage() {
-  const router = useRouter()
-  const [restaurantId, setRestaurantId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+export default async function LocationSettingsPage() {
+  const session = await auth()
+  
+  if (!session) {
+    redirect('/login')
+  }
 
-  useEffect(() => {
-    fetchRestaurantId()
-  }, [])
+  // Restaurant für den aktuellen User finden
+  let restaurant = await prisma.restaurant.findFirst({
+    where: {
+      ownerId: session.user.id
+    }
+  })
 
-  const fetchRestaurantId = async () => {
-    try {
-      const response = await fetch('/api/dashboard/settings')
-      if (response.ok) {
-        const data = await response.json()
-        if (data.restaurant?.id) {
-          setRestaurantId(data.restaurant.id)
-        } else {
-          toast.error('Kein Restaurant gefunden')
-        }
+  // Falls nicht Owner, prüfe ob Staff
+  if (!restaurant) {
+    const staffRelation = await prisma.restaurantStaff.findFirst({
+      where: {
+        userId: session.user.id
+      },
+      include: {
+        restaurant: true
       }
-    } catch (error) {
-      console.error('Error fetching restaurant:', error)
-      toast.error('Fehler beim Laden der Daten')
-    } finally {
-      setLoading(false)
+    })
+
+    if (staffRelation) {
+      restaurant = staffRelation.restaurant
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!restaurantId) {
+  if (!restaurant) {
     return (
       <div className="p-6">
         <div className="text-center py-12">
           <p className="text-gray-500">Kein Restaurant gefunden</p>
+          <Link href="/dashboard/settings" className="mt-4 inline-block">
+            <Button variant="outline">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Zurück zu Einstellungen
+            </Button>
+          </Link>
         </div>
       </div>
     )
@@ -59,14 +55,12 @@ export default function LocationSettingsPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push('/dashboard/settings')}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Zurück zu Einstellungen
-        </Button>
+        <Link href="/dashboard/settings">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Zurück zu Einstellungen
+          </Button>
+        </Link>
       </div>
 
       <div>
@@ -77,7 +71,7 @@ export default function LocationSettingsPage() {
         </p>
       </div>
 
-      <RestaurantLocationSettings restaurantId={restaurantId} />
+      <RestaurantLocationSettings restaurantId={restaurant.id} />
     </div>
   )
 }
