@@ -1,15 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    // Find demo restaurant
-    const restaurant = await prisma.restaurant.findUnique({
-      where: { slug: 'demo-restaurant' },
-      include: {
-        settings: true
-      }
-    })
+    const session = await auth()
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 })
+    }
+    
+    // Get restaurant ID from query params or find user's restaurant
+    const searchParams = request.nextUrl.searchParams
+    const restaurantId = searchParams.get('id')
+    const slug = searchParams.get('slug')
+    
+    let restaurant
+    
+    if (restaurantId) {
+      restaurant = await prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+        include: { settings: true }
+      })
+    } else if (slug) {
+      restaurant = await prisma.restaurant.findUnique({
+        where: { slug: slug },
+        include: { settings: true }
+      })
+    } else {
+      // Find user's restaurant
+      restaurant = await prisma.restaurant.findFirst({
+        where: { ownerId: session.user.id },
+        include: { settings: true }
+      })
+    }
     
     if (!restaurant) {
       return NextResponse.json({ error: 'Restaurant nicht gefunden' }, { status: 404 })
