@@ -86,6 +86,11 @@ export async function PATCH(
 
     const { id } = await params
     const body = await request.json()
+    
+    console.log('PATCH Restaurant request:', {
+      id,
+      body: JSON.stringify(body, null, 2)
+    })
 
     // Prüfe ob Restaurant existiert
     const restaurant = await prisma.restaurant.findUnique({
@@ -138,14 +143,31 @@ export async function PATCH(
     
     // Update Settings wenn vorhanden
     if (body.settings) {
-      await prisma.restaurantSettings.upsert({
-        where: { restaurantId: id },
-        create: {
-          restaurantId: id,
-          ...body.settings
-        },
-        update: body.settings
+      console.log('Updating settings for restaurant:', id, body.settings)
+      
+      // Erst prüfen, ob Settings existieren
+      const existingSettings = await prisma.restaurantSettings.findUnique({
+        where: { restaurantId: id }
       })
+      
+      let updatedSettings
+      if (existingSettings) {
+        // Update existing settings
+        updatedSettings = await prisma.restaurantSettings.update({
+          where: { restaurantId: id },
+          data: body.settings
+        })
+      } else {
+        // Create new settings
+        updatedSettings = await prisma.restaurantSettings.create({
+          data: {
+            restaurantId: id,
+            ...body.settings
+          }
+        })
+      }
+      
+      console.log('Settings after update:', updatedSettings)
     }
     
     // Lade Restaurant mit aktualisierten Settings neu
