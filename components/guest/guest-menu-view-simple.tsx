@@ -520,6 +520,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                         </div>
                       </div>
                     )}
+                    </div>
                     
                     <CardContent className="p-3 sm:p-4">
                       <div className="flex justify-between items-start mb-2">
