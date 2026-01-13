@@ -63,7 +63,12 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
     try {
       const response = await fetch(`/api/restaurants/${restaurantId}`)
       if (response.ok) {
-        const data = await response.json()
+        const responseData = await response.json()
+        console.log('Fetched restaurant data:', responseData)
+        
+        // Die Daten können direkt oder in data verschachtelt sein
+        const data = responseData.data || responseData
+        
         setLocationData({
           country: data.country || 'DE',
           city: data.city || '',
@@ -90,28 +95,35 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
         return
       }
       
+      console.log('CountryInfo for', locationData.country, ':', countryInfo)
       console.log('Saving location data:', {
         restaurantId,
         country: locationData.country,
         city: locationData.city,
         street: locationData.street,
         postalCode: locationData.postalCode,
-        currency: countryInfo.currency
+        currency: countryInfo.currency,
+        provider: countryInfo.provider
       })
+      
+      const requestBody = {
+        country: locationData.country,
+        city: locationData.city || null,
+        street: locationData.street || null,
+        postalCode: locationData.postalCode || null,
+        settings: {
+          currency: countryInfo.currency,
+          paymentRegion: countryInfo.provider === 'PayTabs' ? 'MIDDLE_EAST' : 'EUROPE'
+        }
+      }
+      
+      console.log('Sending request body:', JSON.stringify(requestBody, null, 2))
       
       // Update Restaurant mit allen Daten inkl. Settings
       const response = await fetch(`/api/restaurants/${restaurantId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          country: locationData.country,
-          city: locationData.city || null,
-          street: locationData.street || null,
-          postalCode: locationData.postalCode || null,
-          settings: {
-            currency: countryInfo.currency
-          }
-        })
+        body: JSON.stringify(requestBody)
       })
 
       const responseData = await response.json()
