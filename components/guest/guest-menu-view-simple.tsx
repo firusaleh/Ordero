@@ -124,6 +124,16 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
   const [currentPaymentMethod, setCurrentPaymentMethod] = useState<string>('CASH')
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
 
+  // Debug logging
+  useEffect(() => {
+    console.log('Restaurant Data:', {
+      name: restaurant.name,
+      country: restaurant.country,
+      city: restaurant.city,
+      settings: restaurant.settings
+    })
+  }, [restaurant])
+  
   // Währungshelfer basierend auf Restaurant-Einstellungen
   const currency = restaurant.settings?.currency || 'EUR'
   const currencySymbol = currency === 'JOD' ? 'JD' : 
