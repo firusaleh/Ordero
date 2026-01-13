@@ -24,22 +24,19 @@ export async function GET(request: NextRequest) {
           }
         ]
       },
-      include: {
-        settings: {
-          select: {
-            currency: true,
-            timezone: true
-          }
-        }
-      },
       select: {
         id: true,
         name: true,
         slug: true,
         country: true,
         city: true,
-        settings: true,
-        ownerId: true
+        ownerId: true,
+        settings: {
+          select: {
+            currency: true,
+            timezone: true
+          }
+        }
       }
     })
     
