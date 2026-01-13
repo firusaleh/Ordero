@@ -519,6 +519,10 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                           )}
                         </div>
                       </div>
+                    ) : (
+                      <div className="h-36 sm:h-44 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                        <span className="text-5xl opacity-30">🍽️</span>
+                      </div>
                     )}
                     </div>
                     
