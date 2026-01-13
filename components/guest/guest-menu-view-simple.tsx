@@ -487,22 +487,29 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                 </div>
               )}
               
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 menu-grid-mobile">
                 {category.menuItems.map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
-                    {item.image && (
-                      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200">
+                  <Card key={item.id} className="overflow-hidden menu-item-card cursor-pointer">
+                    <div onClick={() => {
+                      setSelectedItem(item)
+                      setSelectedVariant(item.variants[0] || null)
+                      setSelectedExtras([])
+                      setItemNotes('')
+                      setItemQuantity(1)
+                    }}>
+                    {item.image ? (
+                      <div className="relative h-36 sm:h-44 bg-gradient-to-br from-gray-100 to-gray-200">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                           loading="lazy"
                           onError={(e) => {
                             e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIwMCIgeT0iMTUwIiBzdHlsZT0iZmlsbDojYWFhO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjI1cHg7Zm9udC1mYW1pbHk6QXJpYWwsSGVsdmV0aWNhLHNhbnMtc2VyaWY7ZG9taW5hbnQtYmFzZWxpbmU6Y2VudHJhbCI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'
                           }}
                         />
-                        <div className="absolute top-2 right-2 flex flex-col gap-2">
-                          <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 font-bold shadow-md">
+                        <div className="absolute top-2 right-2 flex flex-col gap-1">
+                          <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 font-bold shadow-lg px-2 py-1">
                             {formatPrice(item.price)}
                           </Badge>
                           {item.variants && item.variants.length > 0 && (
@@ -514,7 +521,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                       </div>
                     )}
                     
-                    <CardContent className="p-4">
+                    <CardContent className="p-3 sm:p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1">
                           <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
