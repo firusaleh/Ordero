@@ -13,13 +13,19 @@ interface CheckoutWithTipProps {
   tax: number
   onConfirm: (tipPercent: number, tipAmount: number, paymentMethod: string) => void
   isProcessing: boolean
+  currency?: string
+  currencySymbol?: string
+  paymentProvider?: string
 }
 
 export default function CheckoutWithTip({ 
   subtotal, 
   tax, 
   onConfirm, 
-  isProcessing 
+  isProcessing,
+  currency = 'EUR',
+  currencySymbol = '€',
+  paymentProvider = 'Stripe'
 }: CheckoutWithTipProps) {
   const { t } = useGuestLanguage()
   const [tipPercent, setTipPercent] = useState<number>(10)
@@ -92,7 +98,7 @@ export default function CheckoutWithTip({
                 <span className="text-sm font-medium">{option.label}</span>
                 {option.value > 0 && (
                   <span className="text-xs text-gray-600">
-                    €{(baseAmount * (option.value / 100)).toFixed(2)}
+                    {currencySymbol}{(baseAmount * (option.value / 100)).toFixed(2)}
                   </span>
                 )}
               </Button>
@@ -110,7 +116,7 @@ export default function CheckoutWithTip({
             </Button>
             {tipPercent === -1 && (
               <div className="flex items-center gap-1">
-                <span>€</span>
+                <span>{currencySymbol}</span>
                 <input
                   type="number"
                   value={customTip}
@@ -167,11 +173,11 @@ export default function CheckoutWithTip({
         <CardContent className="space-y-2">
           <div className="flex justify-between text-sm">
             <span>{t('common.subtotal') || 'Zwischensumme'}</span>
-            <span>€{subtotal.toFixed(2)}</span>
+            <span>{currencySymbol}{subtotal.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span>{t('checkout.taxes') || 'MwSt (19%)'}</span>
-            <span>€{tax.toFixed(2)}</span>
+            <span>{currencySymbol}{tax.toFixed(2)}</span>
           </div>
           {tipAmount > 0 && (
             <div className="flex justify-between text-sm font-medium text-green-600">
@@ -180,12 +186,12 @@ export default function CheckoutWithTip({
                 {t('checkout.tip') || 'Trinkgeld'}
                 {tipPercent > 0 && ` (${tipPercent}%)`}
               </span>
-              <span>€{tipAmount.toFixed(2)}</span>
+              <span>{currencySymbol}{tipAmount.toFixed(2)}</span>
             </div>
           )}
           <div className="border-t pt-2 flex justify-between font-bold text-lg">
             <span>{t('common.total') || 'Gesamt'}</span>
-            <span>€{total.toFixed(2)}</span>
+            <span>{currencySymbol}{total.toFixed(2)}</span>
           </div>
         </CardContent>
       </Card>
@@ -207,12 +213,12 @@ export default function CheckoutWithTip({
             {paymentMethod === 'CARD' ? (
               <>
                 <CreditCard className="h-5 w-5" />
-                {t('checkout.payNow') || 'Jetzt bezahlen'} (€{total.toFixed(2)})
+                {t('checkout.payNow') || 'Jetzt bezahlen'} ({currencySymbol}{total.toFixed(2)})
               </>
             ) : (
               <>
                 <Banknote className="h-5 w-5" />
-                {t('checkout.placeOrder') || 'Bestellung aufgeben'} (€{total.toFixed(2)})
+                {t('checkout.placeOrder') || 'Bestellung aufgeben'} ({currencySymbol}{total.toFixed(2)})
               </>
             )}
           </span>
@@ -222,7 +228,7 @@ export default function CheckoutWithTip({
       {/* Info Text */}
       <p className="text-xs text-center text-gray-600">
         {paymentMethod === 'CARD' 
-          ? t('checkout.securePayment') || 'Sichere Zahlung über Stripe'
+          ? t('checkout.securePayment') || `Sichere Zahlung über ${paymentProvider}`
           : t('checkout.payAtRestaurant') || 'Bezahlung erfolgt im Restaurant'
         }
       </p>

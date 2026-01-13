@@ -135,7 +135,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                         currency === 'QAR' ? 'QAR' :
                         currency === 'OMR' ? 'OMR' :
                         currency === 'EGP' ? 'EGP' : '€'
-  const formatPrice = (price: number) => `$€${price.toFixed(2)}`
+  const formatPrice = (price: number) => `${currencySymbol}${price.toFixed(2)}`
 
   // Lade Warenkorb aus localStorage
   useEffect(() => {
@@ -811,12 +811,18 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
           
           {cart.length > 0 && (() => {
             const { subtotal, tax } = calculateTax()
+            const isMiddleEast = ['JO', 'SA', 'AE', 'KW', 'BH', 'QA', 'OM', 'EG'].includes(restaurant.country || '')
+            const paymentProvider = isMiddleEast ? 'PayTabs' : 'Stripe'
+            
             return (
               <CheckoutWithTip
                 subtotal={subtotal}
                 tax={tax}
                 onConfirm={handleOrder}
                 isProcessing={isOrdering}
+                currency={currency}
+                currencySymbol={currencySymbol}
+                paymentProvider={paymentProvider}
               />
             )
           })()}
