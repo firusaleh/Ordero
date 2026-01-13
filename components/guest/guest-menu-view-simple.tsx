@@ -377,39 +377,38 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      {/* Header */}
-      <div className="bg-white shadow-lg sticky top-0 z-40 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile Optimized Header */}
+      <div className="bg-white shadow-md sticky top-0 z-50 border-b">
+        <div className="px-3 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">{restaurant.name}</h1>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-2xl">{cuisineEmojis[restaurant.cuisine || 'other']}</span>
-                <span className="text-sm text-gray-600">{t('guest.tableNumber')} {tableNumber}</span>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold text-gray-900 truncate">{restaurant.name}</h1>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  {cuisineEmojis[restaurant.cuisine || 'other']} Tisch {tableNumber}
+                </Badge>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <LanguageSelector />
-            <Button
-              onClick={() => setIsCartOpen(true)}
-              className="relative shadow-md hover:shadow-lg transition-shadow"
-              size="lg"
-              style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              {cart.length > 0 && (
-                <>
-                  <span className="ml-2 hidden sm:inline">{formatPrice(getCartTotal())}</span>
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-6 w-6 p-0 flex items-center justify-center animate-pulse"
-                    variant="destructive"
-                  >
-                    {getCartItemCount()}
-                  </Badge>
-                </>
-              )}
-            </Button>
+              <Button
+                onClick={() => setIsCartOpen(true)}
+                className="relative bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transition-all active:scale-95"
+                size="sm"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {cart.length > 0 && (
+                  <>
+                    <span className="ml-1 font-semibold text-xs hidden xs:inline">{formatPrice(getCartTotal())}</span>
+                    <Badge 
+                      className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-red-500 text-white text-[10px]"
+                    >
+                      {getCartItemCount()}
+                    </Badge>
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>
@@ -440,10 +439,10 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
         </div>
       )}
 
-      {/* Categories */}
-      <div className="bg-white/95 backdrop-blur-sm border-b sticky top-[73px] sm:top-[81px] z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex gap-2 py-3 overflow-x-auto scrollbar-hide">
+      {/* Mobile Categories */}
+      <div className="bg-white border-b sticky top-[48px] z-40">
+        <div className="px-2">
+          <div className="flex gap-1 py-2 overflow-x-auto scrollbar-hide">
             {restaurant.categories.map((category) => {
               const isSelected = selectedCategory === category.id
               return (
@@ -475,8 +474,8 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
         </div>
       </div>
 
-      {/* Menu Items */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      {/* Mobile Optimized Menu Grid */}
+      <div className="px-3 py-3">
         {restaurant.categories
           .filter(cat => cat.id === selectedCategory)
           .map((category) => (
@@ -526,10 +525,10 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                     )}
                     </div>
                     
-                    <CardContent className="p-3 sm:p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-lg text-gray-900">{item.name}</h3>
+                    <CardContent className="p-3">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 pr-2">
+                          <h3 className="font-semibold text-base text-gray-900 line-clamp-2">{item.name}</h3>
                           {item.variants && item.variants.length > 0 && (
                             <p className="text-xs text-gray-500 mt-1">
                               ab {formatPrice(Math.min(...item.variants.map(v => v.price)))}
