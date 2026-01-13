@@ -135,10 +135,30 @@ export async function PATCH(
         settings: true
       }
     })
+    
+    // Update Settings wenn vorhanden
+    if (body.settings) {
+      await prisma.restaurantSettings.upsert({
+        where: { restaurantId: id },
+        create: {
+          restaurantId: id,
+          ...body.settings
+        },
+        update: body.settings
+      })
+    }
+    
+    // Lade Restaurant mit aktualisierten Settings neu
+    const finalRestaurant = await prisma.restaurant.findUnique({
+      where: { id },
+      include: {
+        settings: true
+      }
+    })
 
     return NextResponse.json({
       success: true,
-      data: updatedRestaurant
+      data: finalRestaurant
     })
 
   } catch (error) {
