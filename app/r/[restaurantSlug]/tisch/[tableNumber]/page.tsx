@@ -31,6 +31,22 @@ async function getRestaurantMenu(slug: string, tableNumber: string) {
   if (!restaurant) {
     return null
   }
+  
+  // Stelle sicher, dass Settings geladen sind
+  if (!restaurant.settings) {
+    const settings = await prisma.restaurantSettings.findUnique({
+      where: { restaurantId: restaurant.id }
+    })
+    restaurant.settings = settings
+  }
+  
+  // Debug logging für Restaurant-Daten
+  console.log('Restaurant loaded for guest page:', {
+    name: restaurant.name,
+    country: restaurant.country,
+    settings: restaurant.settings,
+    slug: restaurant.slug
+  })
 
   // Prüfe ob Tisch existiert
   const table = await prisma.table.findFirst({
