@@ -110,11 +110,8 @@ export function RestaurantLocationSettings({ restaurantId }: RestaurantLocationS
         country: locationData.country,
         city: locationData.city || null,
         street: locationData.street || null,
-        postalCode: locationData.postalCode || null,
-        settings: {
-          currency: countryInfo.currency,
-          paymentRegion: countryInfo.provider === 'PayTabs' ? 'MIDDLE_EAST' : 'EUROPE'
-        }
+        postalCode: locationData.postalCode || null
+        // Settings werden jetzt automatisch vom API basierend auf dem Land gesetzt
       }
       
       console.log('Sending request body:', JSON.stringify(requestBody, null, 2))

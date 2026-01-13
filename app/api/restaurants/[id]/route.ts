@@ -141,33 +141,46 @@ export async function PATCH(
       }
     })
     
-    // Update Settings wenn vorhanden
-    if (body.settings) {
-      console.log('Updating settings for restaurant:', id, body.settings)
-      
-      // Erst prüfen, ob Settings existieren
-      const existingSettings = await prisma.restaurantSettings.findUnique({
-        where: { restaurantId: id }
-      })
-      
-      let updatedSettings
-      if (existingSettings) {
-        // Update existing settings
-        updatedSettings = await prisma.restaurantSettings.update({
-          where: { restaurantId: id },
-          data: body.settings
-        })
-      } else {
-        // Create new settings
-        updatedSettings = await prisma.restaurantSettings.create({
-          data: {
-            restaurantId: id,
-            ...body.settings
-          }
-        })
+    // Update Settings wenn vorhanden ODER wenn Land geändert wird
+    let currencyToSet = body.settings?.currency
+    
+    // Automatisch Währung basierend auf Land setzen
+    if (body.country && !currencyToSet) {
+      const currencyMap: { [key: string]: string } = {
+        'JO': 'JOD', 'SA': 'SAR', 'AE': 'AED', 'KW': 'KWD',
+        'BH': 'BHD', 'QA': 'QAR', 'OM': 'OMR', 'EG': 'EGP',
+        'LB': 'LBP', 'DE': 'EUR', 'FR': 'EUR', 'IT': 'EUR',
+        'ES': 'EUR', 'NL': 'EUR', 'BE': 'EUR', 'AT': 'EUR',
+        'GB': 'GBP', 'US': 'USD', 'CH': 'CHF', 'IN': 'INR'
+      }
+      currencyToSet = currencyMap[body.country] || 'EUR'
+    }
+    
+    if (body.settings || currencyToSet) {
+      const settingsData = {
+        ...body.settings,
+        ...(currencyToSet && { currency: currencyToSet })
       }
       
-      console.log('Settings after update:', updatedSettings)
+      console.log('Updating settings for restaurant:', id, settingsData)
+      
+      try {
+        // Versuche erst zu updaten
+        const updatedSettings = await prisma.restaurantSettings.update({
+          where: { restaurantId: id },
+          data: settingsData
+        })
+        console.log('Settings updated:', updatedSettings)
+      } catch (e) {
+        // Falls nicht existiert, erstelle neue Settings
+        const newSettings = await prisma.restaurantSettings.create({
+          data: {
+            restaurantId: id,
+            ...settingsData
+          }
+        })
+        console.log('Settings created:', newSettings)
+      }
     }
     
     // Lade Restaurant mit aktualisierten Settings neu
