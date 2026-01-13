@@ -228,8 +228,8 @@ export default function CheckoutWithTip({
       {/* Info Text */}
       <p className="text-xs text-center text-gray-600">
         {paymentMethod === 'CARD' 
-          ? t('checkout.securePayment') || `Sichere Zahlung über ${paymentProvider}`
-          : t('checkout.payAtRestaurant') || 'Bezahlung erfolgt im Restaurant'
+          ? `Sichere Zahlung über ${paymentProvider}`
+          : 'Bezahlung erfolgt im Restaurant'
         }
       </p>
     </div>
