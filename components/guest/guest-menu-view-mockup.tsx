@@ -112,6 +112,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
   const [selectedTipOption, setSelectedTipOption] = useState<string>('10')
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
+  const [customTipAmount, setCustomTipAmount] = useState<string>('')
+  const [showCustomTip, setShowCustomTip] = useState<boolean>(false)
 
   // Currency helpers
   const currency = restaurant.settings?.currency || 'EUR'
@@ -680,21 +682,23 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
             
             {/* Tip Options */}
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Trinkgeld hinzufügen?</p>
-              <div className="grid grid-cols-5 gap-2">
+              <p className="text-sm font-semibold text-gray-700 mb-3">Möchten Sie Trinkgeld geben? 💖</p>
+              <div className="grid grid-cols-3 gap-2 mb-2">
                 {/* No Tip */}
                 <button
                   onClick={() => {
                     setSelectedTipOption('0')
                     setCurrentTipAmount(0)
+                    setShowCustomTip(false)
                   }}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
                     selectedTipOption === '0' 
                       ? 'bg-[#FF6B35] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  Kein
+                  <span className="text-xl">😐</span>
+                  <span className="text-xs font-medium">Kein Trinkgeld</span>
                 </button>
                 
                 {/* 5% */}
@@ -702,14 +706,17 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   onClick={() => {
                     setSelectedTipOption('5')
                     setCurrentTipAmount(getCartTotal() * 0.05)
+                    setShowCustomTip(false)
                   }}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
                     selectedTipOption === '5' 
                       ? 'bg-[#FF6B35] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  5%
+                  <span className="text-xl">🙂</span>
+                  <span className="text-xs font-medium">5%</span>
+                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.05).toFixed(2)}</span>
                 </button>
                 
                 {/* 10% */}
@@ -717,14 +724,17 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   onClick={() => {
                     setSelectedTipOption('10')
                     setCurrentTipAmount(getCartTotal() * 0.10)
+                    setShowCustomTip(false)
                   }}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
                     selectedTipOption === '10' 
                       ? 'bg-[#FF6B35] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  10%
+                  <span className="text-xl">😊</span>
+                  <span className="text-xs font-medium">10%</span>
+                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.10).toFixed(2)}</span>
                 </button>
                 
                 {/* 15% */}
@@ -732,14 +742,35 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   onClick={() => {
                     setSelectedTipOption('15')
                     setCurrentTipAmount(getCartTotal() * 0.15)
+                    setShowCustomTip(false)
                   }}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
                     selectedTipOption === '15' 
                       ? 'bg-[#FF6B35] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
-                  15%
+                  <span className="text-xl">😃</span>
+                  <span className="text-xs font-medium">15%</span>
+                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.15).toFixed(2)}</span>
+                </button>
+                
+                {/* 20% */}
+                <button
+                  onClick={() => {
+                    setSelectedTipOption('20')
+                    setCurrentTipAmount(getCartTotal() * 0.20)
+                    setShowCustomTip(false)
+                  }}
+                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                    selectedTipOption === '20' 
+                      ? 'bg-[#FF6B35] text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="text-xl">😍</span>
+                  <span className="text-xs font-medium">20%</span>
+                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.20).toFixed(2)}</span>
                 </button>
                 
                 {/* Round Up */}
@@ -747,30 +778,71 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   onClick={() => {
                     setSelectedTipOption('round')
                     const total = getCartTotal()
-                    const nextFive = Math.ceil(total / 5) * 5 // Round to next 5
-                    const nextTen = Math.ceil(total / 10) * 10 // Round to next 10
-                    // Choose the smaller round up amount
+                    const nextFive = Math.ceil(total / 5) * 5
+                    const nextTen = Math.ceil(total / 10) * 10
                     const roundedUp = (nextFive - total) < (nextTen - total) && (nextFive - total) > 0.5 ? nextFive : nextTen
                     setCurrentTipAmount(roundedUp - total)
+                    setShowCustomTip(false)
                   }}
-                  className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
                     selectedTipOption === 'round' 
                       ? 'bg-[#FF6B35] text-white' 
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
-                  title={`Auf ${currencySymbol}${
-                    (() => {
+                >
+                  <span className="text-xl">💝</span>
+                  <span className="text-xs font-medium">Aufrunden</span>
+                  <span className="text-xs opacity-75">
+                    {(() => {
                       const total = getCartTotal()
                       const nextFive = Math.ceil(total / 5) * 5
                       const nextTen = Math.ceil(total / 10) * 10
                       const roundedUp = (nextFive - total) < (nextTen - total) && (nextFive - total) > 0.5 ? nextFive : nextTen
-                      return roundedUp.toFixed(2)
-                    })()
-                  } aufrunden`}
-                >
-                  Aufrunden
+                      return `+${currencySymbol}${(roundedUp - total).toFixed(2)}`
+                    })()}
+                  </span>
                 </button>
               </div>
+              
+              {/* Custom Amount Button */}
+              <button
+                onClick={() => {
+                  setShowCustomTip(!showCustomTip)
+                  setSelectedTipOption('custom')
+                  if (!showCustomTip) {
+                    setCustomTipAmount('')
+                    setCurrentTipAmount(0)
+                  }
+                }}
+                className={`w-full py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+                  selectedTipOption === 'custom' 
+                    ? 'bg-[#FF6B35] text-white' 
+                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                💰 Eigener Betrag
+              </button>
+              
+              {/* Custom Amount Input */}
+              {showCustomTip && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-gray-600">{currencySymbol}</span>
+                  <input
+                    type="number"
+                    value={customTipAmount}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      setCustomTipAmount(value)
+                      const amount = parseFloat(value) || 0
+                      setCurrentTipAmount(amount)
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.50"
+                  />
+                </div>
+              )}
               
               {/* Tip Amount Display */}
               {currentTipAmount > 0 && (
