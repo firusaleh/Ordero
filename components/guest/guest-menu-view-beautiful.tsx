@@ -255,29 +255,29 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
   const isPopular = (item: MenuItem) => Math.random() > 0.7
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
       {/* Beautiful Header */}
-      <div className="bg-white/80 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-100 shadow-lg">
-        <div className="px-4 py-3">
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 sticky top-0 z-50 shadow-2xl">
+        <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  {restaurant.name}
-                </h1>
-                <Badge className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white border-0">
-                  <Star className="h-3 w-3 mr-1" />
-                  4.8
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline" className="text-xs">
-                  <ChefHat className="h-3 w-3 mr-1" />
-                  {restaurant.cuisine || 'International'}
-                </Badge>
-                <Badge variant="outline" className="text-xs">
-                  📍 Tisch {tableNumber}
-                </Badge>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white/20 backdrop-blur-lg rounded-full animate-pulse">
+                  <ChefHat className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white drop-shadow-lg">
+                    {restaurant.name}
+                  </h1>
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`h-4 w-4 ${i < 4 ? 'text-yellow-300 fill-yellow-300' : 'text-white/50'}`} />
+                      ))}
+                    </div>
+                    <span className="text-white/90 text-sm">4.8 (127 Bewertungen)</span>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -287,8 +287,8 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
               <Button
                 id="cart-button"
                 onClick={() => setIsCartOpen(true)}
-                className="relative bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-                size="default"
+                className="relative bg-white/20 backdrop-blur-lg hover:bg-white/30 text-white border-2 border-white/30 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                size="lg"
               >
                 <ShoppingCart className="h-5 w-5" />
                 {cart.length > 0 && (
@@ -306,9 +306,9 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
       </div>
 
       {/* Beautiful Categories */}
-      <div className="bg-white/60 backdrop-blur-sm sticky top-[72px] z-40 border-b border-gray-100">
-        <div className="px-3 py-3">
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+      <div className="bg-white sticky top-[88px] z-40 shadow-md">
+        <div className="px-3 py-4">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide">
             {restaurant.categories.map((category) => {
               const isSelected = selectedCategory === category.id
               return (
@@ -316,22 +316,19 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
                   className={`
-                    px-4 py-2 rounded-2xl font-medium whitespace-nowrap transition-all duration-300
+                    px-5 py-3 rounded-full font-semibold whitespace-nowrap transition-all duration-500 transform
                     ${isSelected 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105' 
-                      : 'bg-white hover:bg-gray-50 text-gray-700 shadow-md hover:shadow-lg'
+                      ? 'bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 text-white shadow-2xl scale-110 rotate-1' 
+                      : 'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 shadow-lg hover:shadow-xl hover:scale-105'
                     }
                   `}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">{category.icon || '🍽️'}</span>
+                    <span className="text-2xl">{category.icon || '🍽️'}</span>
                     <span>{category.name}</span>
-                    <Badge 
-                      variant={isSelected ? "secondary" : "outline"} 
-                      className={`ml-1 ${isSelected ? 'bg-white/20 text-white' : ''}`}
-                    >
-                      {category.menuItems.length}
-                    </Badge>
+                    {isSelected && (
+                      <Sparkles className="h-4 w-4 animate-pulse" />
+                    )}
                   </div>
                 </button>
               )
@@ -340,13 +337,34 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
         </div>
       </div>
 
+      {/* Info Banner */}
+      <div className="mx-4 mt-6 mb-4">
+        <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500 p-1 rounded-2xl shadow-xl">
+          <div className="bg-white rounded-2xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full">
+                <MapPin className="h-6 w-6 text-orange-600" />
+              </div>
+              <div>
+                <p className="font-bold text-gray-800">Tisch {tableNumber}</p>
+                <p className="text-sm text-gray-600">{restaurant.cuisine || 'International'} • Schnelle Lieferung</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-green-500" />
+              <span className="text-sm font-semibold text-gray-700">15-25 Min</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Beautiful Menu Grid */}
-      <div className="px-4 py-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="px-4 py-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentCategory?.menuItems.map((item) => (
             <Card 
               key={item.id}
-              className="group overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer bg-white/90 backdrop-blur-sm"
+              className="group overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:rotate-1 cursor-pointer bg-white border-2 border-transparent hover:border-pink-300"
               onClick={() => {
                 setSelectedItem(item)
                 setSelectedVariant(item.variants[0] || null)
@@ -356,7 +374,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
               }}
             >
               {/* Image or Placeholder */}
-              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-purple-100 to-pink-100">
+              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-orange-100 via-pink-100 to-purple-100">
                 {item.image ? (
                   <img
                     src={item.image}
@@ -364,18 +382,19 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-6xl opacity-50">🍴</span>
+                  <div className="w-full h-full flex items-center justify-center relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-orange-200/50 via-transparent to-purple-200/50"></div>
+                    <span className="text-7xl transform group-hover:scale-125 transition-transform duration-500">🍴</span>
                   </div>
                 )}
                 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex flex-col gap-2">
                   {isPopular(item) && (
-                    <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg">
-                      <Flame className="h-3 w-3 mr-1" />
-                      Beliebt
-                    </Badge>
+                    <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full shadow-lg animate-pulse flex items-center gap-1">
+                      <Flame className="h-4 w-4 animate-bounce" />
+                      <span className="font-bold text-sm">BELIEBT</span>
+                    </div>
                   )}
                   {item.tags.includes('vegan') && (
                     <Badge className="bg-green-500 text-white shadow-lg">
@@ -392,16 +411,20 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
 
                 {/* Price Badge */}
                 <div className="absolute bottom-3 right-3">
-                  <div className="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg">
-                    <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      {formatPrice(item.price)}
-                    </span>
+                  <div className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 p-0.5 rounded-xl shadow-2xl transform rotate-3 group-hover:rotate-0 transition-transform">
+                    <div className="bg-white rounded-xl px-4 py-2">
+                      <span className="text-2xl font-black bg-gradient-to-r from-orange-500 via-pink-600 to-purple-700 bg-clip-text text-transparent">
+                        {formatPrice(item.price)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <CardContent className="p-4">
-                <h3 className="font-bold text-lg mb-2 text-gray-800">{item.name}</h3>
+                <h3 className="font-bold text-lg mb-2 text-gray-800 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300">
+                  {item.name}
+                </h3>
                 
                 {item.description && (
                   <p className="text-sm text-gray-600 mb-3 line-clamp-2">
@@ -427,7 +450,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                   
                   <Button 
                     size="sm"
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                    className="bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 hover:from-orange-500 hover:via-pink-600 hover:to-purple-700 text-white shadow-lg transform transition-all hover:scale-110"
                     onClick={(e) => {
                       e.stopPropagation()
                       if (item.variants.length === 0 && item.extras.length === 0) {
@@ -438,7 +461,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                       }
                     }}
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-5 w-5 animate-pulse" />
                   </Button>
                 </div>
               </CardContent>
@@ -582,7 +605,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                       size="icon"
                       onClick={() => setItemQuantity(itemQuantity + 1)}
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-5 w-5 animate-pulse" />
                     </Button>
                   </div>
                 </div>
@@ -636,9 +659,10 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
 
       {/* Beautiful Cart Sheet */}
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
-        <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-gradient-to-b from-white to-gray-50">
-          <SheetHeader>
-            <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-gradient-to-b from-orange-50 via-pink-50 to-purple-50">
+          <SheetHeader className="pb-4 border-b border-gray-200">
+            <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-600 to-purple-700 bg-clip-text text-transparent flex items-center gap-2">
+              <ShoppingCart className="h-6 w-6 text-pink-500" />
               Ihr Warenkorb
             </SheetTitle>
           </SheetHeader>
@@ -646,14 +670,23 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
           <div className="flex-1 overflow-y-auto py-4">
             {cart.length === 0 ? (
               <div className="text-center py-12">
-                <div className="text-6xl mb-4">🛒</div>
-                <p className="text-gray-500 text-lg">Ihr Warenkorb ist noch leer</p>
-                <p className="text-gray-400 text-sm mt-2">Fügen Sie leckere Gerichte hinzu!</p>
+                <div className="text-7xl mb-4 animate-bounce">🛒</div>
+                <p className="text-gray-600 text-xl font-semibold">Noch keine Auswahl</p>
+                <p className="text-gray-500 text-sm mt-2">Entdecken Sie unsere köstlichen Gerichte!</p>
+                <div className="mt-6 flex justify-center">
+                  <div className="flex gap-2">
+                    {['🍕', '🍔', '🌮', '🍣', '🥗'].map((emoji, i) => (
+                      <span key={i} className="text-3xl animate-pulse" style={{animationDelay: `${i * 0.1}s`}}>
+                        {emoji}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
                 {cart.map((item) => (
-                  <Card key={item.id} className="p-4 bg-white shadow-lg">
+                  <Card key={item.id} className="p-4 bg-white shadow-xl border-l-4 border-gradient-to-b from-orange-400 via-pink-500 to-purple-600 hover:shadow-2xl transition-shadow">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h4 className="font-semibold text-lg">{item.menuItem.name}</h4>
@@ -699,7 +732,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
-                      <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      <span className="font-bold text-lg bg-gradient-to-r from-orange-500 via-pink-600 to-purple-700 bg-clip-text text-transparent">
                         {formatPrice(getItemPrice(item) * item.quantity)}
                       </span>
                     </div>
@@ -714,7 +747,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
               <div className="w-full space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Gesamt</span>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-600 to-purple-700 bg-clip-text text-transparent animate-pulse">
                     {formatPrice(getCartTotal())}
                   </span>
                 </div>
@@ -723,7 +756,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                     setIsCartOpen(false)
                     setShowCheckout(true)
                   }}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-6"
+                  className="w-full bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600 hover:from-orange-500 hover:via-pink-600 hover:to-purple-700 text-white py-6 shadow-2xl transform hover:scale-105 transition-all"
                   size="lg"
                 >
                   <span className="flex items-center gap-2 text-lg font-semibold">
