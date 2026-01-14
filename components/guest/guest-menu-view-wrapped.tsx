@@ -1,7 +1,7 @@
 'use client'
 
 import { GuestLanguageProvider } from '@/contexts/guest-language-context'
-import GuestMenuViewElegant from './guest-menu-view-elegant'
+import GuestMenuViewMockup from './guest-menu-view-mockup'
 
 interface GuestMenuViewWrappedProps {
   restaurant: any
@@ -12,7 +12,7 @@ interface GuestMenuViewWrappedProps {
 export default function GuestMenuViewWrapped(props: GuestMenuViewWrappedProps) {
   return (
     <GuestLanguageProvider>
-      <GuestMenuViewElegant {...props} />
+      <GuestMenuViewMockup {...props} />
     </GuestLanguageProvider>
   )
 }
