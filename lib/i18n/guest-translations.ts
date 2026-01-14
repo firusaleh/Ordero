@@ -1,5 +1,63 @@
 export const guestTranslations = {
   de: {
+    // Header
+    header: {
+      table: 'Tisch',
+      international: 'International'
+    },
+    
+    // Cart
+    cart: {
+      title: 'Ihre Bestellung',
+      yourOrder: 'Ihre Bestellung',
+      empty: 'Ihr Warenkorb ist leer',
+      emptyMessage: 'Fügen Sie Artikel aus der Speisekarte hinzu',
+      items: 'Artikel',
+      each: 'pro Stück',
+      remove: 'Entfernen',
+      subtotal: 'Zwischensumme',
+      serviceFee: 'Servicegebühr',
+      total: 'Gesamt',
+      checkout: 'Zur Kasse'
+    },
+    
+    // Menu
+    menu: {
+      popular: 'Beliebt',
+      chooseSize: 'Größe wählen',
+      addExtras: 'Extras hinzufügen',
+      specialRequests: 'Spezielle Wünsche',
+      specialRequestsPlaceholder: 'z.B. ohne Zwiebeln, extra scharf...',
+      quantity: 'Menge',
+      addToCart: 'In den Warenkorb'
+    },
+    
+    // Payment
+    payment: {
+      subtotal: 'Zwischensumme',
+      tip: 'Trinkgeld',
+      tipQuestion: 'Möchten Sie Trinkgeld geben? 💖',
+      noTip: 'Kein Trinkgeld',
+      roundUp: 'Aufrunden',
+      customAmount: '💰 Eigener Betrag',
+      total: 'Gesamt',
+      selectPaymentMethod: 'Zahlungsmethode wählen',
+      applePay: 'Apple Pay',
+      googlePay: 'Google Pay',
+      creditCard: 'Kredit-/Debitkarte',
+      cash: 'Bargeld',
+      payNow: 'Jetzt bezahlen',
+      placeOrder: 'Bestellung aufgeben'
+    },
+    
+    // Toast messages
+    toast: {
+      addedToCart: 'wurde zum Warenkorb hinzugefügt',
+      orderSuccess: 'Bestellung erfolgreich aufgegeben!',
+      paymentSuccess: 'Zahlung erfolgreich!',
+      error: 'Ein Fehler ist aufgetreten'
+    },
+    
     common: {
       addToCart: 'In den Warenkorb',
       cart: 'Warenkorb',
@@ -174,6 +232,64 @@ export const guestTranslations = {
     }
   },
   en: {
+    // Header
+    header: {
+      table: 'Table',
+      international: 'International'
+    },
+    
+    // Cart
+    cart: {
+      title: 'Your Order',
+      yourOrder: 'Your Order',
+      empty: 'Your cart is empty',
+      emptyMessage: 'Add items from the menu',
+      items: 'items',
+      each: 'each',
+      remove: 'Remove',
+      subtotal: 'Subtotal',
+      serviceFee: 'Service Fee',
+      total: 'Total',
+      checkout: 'Checkout'
+    },
+    
+    // Menu
+    menu: {
+      popular: 'Popular',
+      chooseSize: 'Choose Size',
+      addExtras: 'Add Extras',
+      specialRequests: 'Special Requests',
+      specialRequestsPlaceholder: 'e.g., no onions, extra spicy...',
+      quantity: 'Quantity',
+      addToCart: 'Add to Cart'
+    },
+    
+    // Payment
+    payment: {
+      subtotal: 'Subtotal',
+      tip: 'Tip',
+      tipQuestion: 'Would you like to leave a tip? 💖',
+      noTip: 'No tip',
+      roundUp: 'Round up',
+      customAmount: '💰 Custom amount',
+      total: 'Total',
+      selectPaymentMethod: 'Select Payment Method',
+      applePay: 'Apple Pay',
+      googlePay: 'Google Pay',
+      creditCard: 'Credit/Debit Card',
+      cash: 'Cash',
+      payNow: 'Pay Now',
+      placeOrder: 'Place Order'
+    },
+    
+    // Toast messages
+    toast: {
+      addedToCart: 'added to cart',
+      orderSuccess: 'Order placed successfully!',
+      paymentSuccess: 'Payment successful!',
+      error: 'An error occurred'
+    },
+    
     common: {
       addToCart: 'Add to Cart',
       cart: 'Cart',
@@ -348,6 +464,64 @@ export const guestTranslations = {
     }
   },
   ar: {
+    // Header
+    header: {
+      table: 'طاولة',
+      international: 'عالمي'
+    },
+    
+    // Cart
+    cart: {
+      title: 'طلبك',
+      yourOrder: 'طلبك',
+      empty: 'سلة التسوق فارغة',
+      emptyMessage: 'أضف أصناف من القائمة',
+      items: 'عناصر',
+      each: 'للقطعة',
+      remove: 'إزالة',
+      subtotal: 'المجموع الفرعي',
+      serviceFee: 'رسوم الخدمة',
+      total: 'المجموع',
+      checkout: 'الدفع'
+    },
+    
+    // Menu
+    menu: {
+      popular: 'شائع',
+      chooseSize: 'اختر الحجم',
+      addExtras: 'أضف إضافات',
+      specialRequests: 'طلبات خاصة',
+      specialRequestsPlaceholder: 'مثال: بدون بصل، حار إضافي...',
+      quantity: 'الكمية',
+      addToCart: 'أضف إلى السلة'
+    },
+    
+    // Payment
+    payment: {
+      subtotal: 'المجموع الفرعي',
+      tip: 'البقشيش',
+      tipQuestion: 'هل تود ترك بقشيش؟ 💖',
+      noTip: 'بدون بقشيش',
+      roundUp: 'التقريب للأعلى',
+      customAmount: '💰 مبلغ مخصص',
+      total: 'المجموع',
+      selectPaymentMethod: 'اختر طريقة الدفع',
+      applePay: 'Apple Pay',
+      googlePay: 'Google Pay',
+      creditCard: 'بطاقة الائتمان/الخصم',
+      cash: 'نقد',
+      payNow: 'ادفع الآن',
+      placeOrder: 'تأكيد الطلب'
+    },
+    
+    // Toast messages
+    toast: {
+      addedToCart: 'تم الإضافة إلى السلة',
+      orderSuccess: 'تم تأكيد الطلب بنجاح!',
+      paymentSuccess: 'تم الدفع بنجاح!',
+      error: 'حدث خطأ'
+    },
+    
     common: {
       addToCart: 'أضف إلى السلة',
       cart: 'السلة',

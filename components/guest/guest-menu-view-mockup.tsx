@@ -26,6 +26,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
+import LanguageSwitcher from './language-switcher'
 
 // Types
 interface MenuItemVariant {
@@ -159,7 +160,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
     
     setCart([...cart, cartItem])
     
-    toast.success(`${item.name} added to cart`, {
+    toast.success(`${item.name} ${t('toast.addedToCart')}`, {
       duration: 2000,
       position: 'bottom-center',
       style: {
@@ -219,7 +220,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
       if (response.ok) {
         setCart([])
         setShowCheckout(false)
-        toast.success('Order placed successfully!', {
+        toast.success(t('toast.orderSuccess'), {
           duration: 4000,
           style: {
             background: '#FF6B35',
@@ -231,7 +232,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         throw new Error('Order failed')
       }
     } catch (error) {
-      toast.error('Error placing order. Please try again.')
+      toast.error(t('toast.error'))
     } finally {
       setIsOrdering(false)
     }
@@ -298,10 +299,11 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
             </div>
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-600">
-            <span>{restaurant.cuisine || 'International'} {restaurant.cuisine ? getFoodEmoji(restaurant.cuisine) : '🍽️'}</span>
+            <span>{restaurant.cuisine || t('header.international')} {restaurant.cuisine ? getFoodEmoji(restaurant.cuisine) : '🍽️'}</span>
             <Badge className="bg-[#FF6B35] text-white border-0 px-3 py-1 rounded-full text-xs font-semibold">
-              Table {tableNumber}
+              {t('header.table')} {tableNumber}
             </Badge>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
@@ -370,7 +372,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                       {item.name}
                       {isPopular(item) && (
                         <Badge className="ml-2 bg-orange-100 text-orange-700 text-xs px-2 py-0">
-                          Popular
+                          {t('menu.popular')}
                         </Badge>
                       )}
                     </h3>
@@ -437,7 +439,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 {selectedItem.variants.length > 0 && (
                   <div>
                     <Label className="text-sm font-semibold text-gray-700 mb-3 block">
-                      Choose Size
+                      {t('menu.chooseSize')}
                     </Label>
                     <RadioGroup
                       value={selectedVariant?.id}
@@ -472,7 +474,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 {selectedItem.extras.length > 0 && (
                   <div>
                     <Label className="text-sm font-semibold text-gray-700 mb-3 block">
-                      Add Extras
+                      {t('menu.addExtras')}
                     </Label>
                     <div className="space-y-2">
                       {selectedItem.extras.map((extra) => (
@@ -508,10 +510,10 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 {/* Special Requests */}
                 <div>
                   <Label className="text-sm font-semibold text-gray-700 mb-3 block">
-                    Special Requests
+                    {t('menu.specialRequests')}
                   </Label>
                   <Textarea
-                    placeholder="e.g., no onions, extra spicy..."
+                    placeholder={t('menu.specialRequestsPlaceholder')}
                     value={itemNotes}
                     onChange={(e) => setItemNotes(e.target.value)}
                     className="w-full rounded-xl border-gray-200 focus:border-[#FF6B35] focus:ring-[#FF6B35]"
@@ -521,7 +523,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
 
                 {/* Quantity */}
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold text-gray-700">Quantity</Label>
+                  <Label className="text-sm font-semibold text-gray-700">{t('menu.quantity')}</Label>
                   <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
@@ -558,7 +560,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   }}
                   className="w-full bg-[#FF6B35] hover:bg-[#ff5420] text-white rounded-xl py-6 text-base font-semibold"
                 >
-                  Add to Cart • {formatPrice(
+                  {t('menu.addToCart')} • {formatPrice(
                     ((selectedVariant?.price || selectedItem.price) + 
                     selectedExtras.reduce((sum, e) => sum + e.price, 0)) * itemQuantity
                   )}
@@ -575,9 +577,9 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           {/* Cart Header */}
           <div className="bg-white border-b border-gray-200 px-5 py-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Your Order</h2>
+              <h2 className="text-xl font-bold text-gray-900">{t('cart.yourOrder')}</h2>
               <Badge className="bg-[#FF6B35] text-white px-3 py-1 rounded-full">
-                {getCartItemCount()} items
+                {getCartItemCount()} {t('cart.items')}
               </Badge>
             </div>
           </div>
@@ -589,8 +591,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                   <ShoppingCart className="h-10 w-10 text-gray-300" />
                 </div>
-                <p className="text-gray-600 text-lg font-medium">Your cart is empty</p>
-                <p className="text-gray-400 text-sm mt-1">Add items from the menu</p>
+                <p className="text-gray-600 text-lg font-medium">{t('cart.empty')}</p>
+                <p className="text-gray-400 text-sm mt-1">{t('cart.emptyMessage')}</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -605,7 +607,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 text-sm">{item.menuItem.name}</h4>
                       <p className="text-xs text-gray-500">
-                        {formatPrice(getItemPrice(item))} each
+                        {formatPrice(getItemPrice(item))} {t('cart.each')}
                         {item.variant && ` • ${item.variant.name}`}
                       </p>
                       {item.extras.length > 0 && (
@@ -626,7 +628,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                         onClick={() => removeFromCart(item.id)}
                         className="text-xs text-gray-400 hover:text-red-500 p-0 h-auto"
                       >
-                        Remove
+                        {t('cart.remove')}
                       </Button>
                     </div>
                   </div>
@@ -640,15 +642,15 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
               {/* Summary */}
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Subtotal</span>
+                  <span>{t('cart.subtotal')}</span>
                   <span>{formatPrice(getCartTotal())}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>Service Fee</span>
+                  <span>{t('cart.serviceFee')}</span>
                   <span>{formatPrice(0)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t">
-                  <span>Total</span>
+                  <span>{t('cart.total')}</span>
                   <span>{formatPrice(getCartTotal())}</span>
                 </div>
               </div>
@@ -661,7 +663,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 }}
                 className="w-full bg-gradient-to-r from-[#FF6B35] to-[#E85A24] hover:from-[#E85A24] hover:to-[#FF6B35] text-white rounded-2xl py-4 text-base font-semibold flex items-center justify-center gap-2"
               >
-                Checkout
+                {t('cart.checkout')}
                 <span>→</span>
               </Button>
             </div>
@@ -674,7 +676,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
           {/* Payment Header */}
           <div className="bg-white px-6 py-6 text-center border-b">
-            <p className="text-gray-600 text-sm font-medium mb-2">Zwischensumme</p>
+            <p className="text-gray-600 text-sm font-medium mb-2">{t('payment.subtotal')}</p>
             <div className="text-4xl font-bold mb-4">
               <span className="text-[#FF6B35]">{currencySymbol}</span>
               <span className="text-gray-900">{getCartTotal().toFixed(2)}</span>
@@ -682,7 +684,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
             
             {/* Tip Options */}
             <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-700 mb-3">Möchten Sie Trinkgeld geben? 💖</p>
+              <p className="text-sm font-semibold text-gray-700 mb-3">{t('payment.tipQuestion')}</p>
               <div className="grid grid-cols-3 gap-2 mb-2">
                 {/* No Tip */}
                 <button
@@ -698,7 +700,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   }`}
                 >
                   <span className="text-xl">😐</span>
-                  <span className="text-xs font-medium">Kein Trinkgeld</span>
+                  <span className="text-xs font-medium">{t('payment.noTip')}</span>
                 </button>
                 
                 {/* 5% */}
@@ -791,7 +793,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   }`}
                 >
                   <span className="text-xl">💝</span>
-                  <span className="text-xs font-medium">Aufrunden</span>
+                  <span className="text-xs font-medium">{t('payment.roundUp')}</span>
                   <span className="text-xs opacity-75">
                     {(() => {
                       const total = getCartTotal()
@@ -820,7 +822,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                     : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                💰 Eigener Betrag
+                {t('payment.customAmount')}
               </button>
               
               {/* Custom Amount Input */}
@@ -848,13 +850,13 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
               {currentTipAmount > 0 && (
                 <div className="mt-3 p-3 bg-orange-50 rounded-xl">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Trinkgeld</span>
+                    <span className="text-sm text-gray-600">{t('payment.tip')}</span>
                     <span className="font-semibold text-[#FF6B35]">
                       +{currencySymbol}{currentTipAmount.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mt-2 pt-2 border-t border-orange-100">
-                    <span className="text-sm font-semibold text-gray-700">Gesamt</span>
+                    <span className="text-sm font-semibold text-gray-700">{t('payment.total')}</span>
                     <span className="text-lg font-bold text-gray-900">
                       {currencySymbol}{(getCartTotal() + currentTipAmount).toFixed(2)}
                     </span>
@@ -867,7 +869,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           {/* Payment Methods */}
           <div className="bg-[#f8f8f8] px-5 py-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              Select Payment Method
+              {t('payment.selectPaymentMethod')}
             </p>
             
             <div className="space-y-3">
@@ -881,7 +883,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 <div className="w-12 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xs">
                   Pay
                 </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">Apple Pay</span>
+                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.applePay')}</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   selectedPaymentMethod === 'APPLE_PAY' ? 'bg-[#FF6B35]' : 'bg-gray-200'
                 }`}>
@@ -899,7 +901,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 <div className="w-12 h-8 bg-white border rounded-lg flex items-center justify-center font-bold text-xs">
                   G Pay
                 </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">Google Pay</span>
+                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.googlePay')}</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   selectedPaymentMethod === 'GOOGLE_PAY' ? 'bg-[#FF6B35]' : 'bg-gray-200'
                 }`}>
@@ -917,7 +919,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 <div className="w-12 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center text-white">
                   💳
                 </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">Kredit-/Debitkarte</span>
+                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.creditCard')}</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   selectedPaymentMethod === 'CARD' ? 'bg-[#FF6B35]' : 'bg-gray-200'
                 }`}>
@@ -935,7 +937,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 <div className="w-12 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white">
                   💵
                 </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">Bargeld</span>
+                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.cash')}</span>
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                   selectedPaymentMethod === 'CASH' ? 'bg-[#FF6B35]' : 'bg-gray-200'
                 }`}>
@@ -952,7 +954,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
               }}
               className="w-full bg-gradient-to-r from-[#FF6B35] to-[#E85A24] hover:from-[#E85A24] hover:to-[#FF6B35] text-white rounded-2xl py-5 text-lg font-bold mt-6 shadow-lg flex items-center justify-center gap-2"
             >
-              {selectedPaymentMethod === 'CASH' ? 'Bestellung aufgeben' : 'Jetzt bezahlen'}
+              {selectedPaymentMethod === 'CASH' ? t('payment.placeOrder') : t('payment.payNow')}
               • {currencySymbol}{(getCartTotal() + currentTipAmount).toFixed(2)}
               <span>→</span>
             </Button>
@@ -973,7 +975,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
               onSuccess={(paymentIntentId) => {
                 setCart([])
                 setShowStripeCheckout(false)
-                toast.success('Payment successful!', {
+                toast.success(t('toast.paymentSuccess'), {
                   style: {
                     background: '#FF6B35',
                     color: 'white',
