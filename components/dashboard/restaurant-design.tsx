@@ -40,9 +40,9 @@ const FONT_FAMILIES = [
 ]
 
 const COLOR_PRESETS = [
+  { primary: '#FF6B35', secondary: '#E85A24', name: 'Orange (Standard)' },
   { primary: '#3B82F6', secondary: '#1E40AF', name: 'Blau' },
   { primary: '#10B981', secondary: '#047857', name: 'Grün' },
-  { primary: '#F59E0B', secondary: '#D97706', name: 'Orange' },
   { primary: '#EF4444', secondary: '#B91C1C', name: 'Rot' },
   { primary: '#8B5CF6', secondary: '#6D28D9', name: 'Violett' },
   { primary: '#6B7280', secondary: '#374151', name: 'Grau' }
@@ -52,8 +52,8 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
   const [design, setDesign] = useState({
     logo: initialData?.logo || '',
     banner: initialData?.coverImage || '', // Changed to banner to match API
-    primaryColor: initialData?.primaryColor || '#3B82F6',
-    secondaryColor: initialData?.secondaryColor || '#1E40AF',
+    primaryColor: initialData?.primaryColor || '#FF6B35',
+    secondaryColor: initialData?.secondaryColor || '#E85A24',
     fontFamily: initialData?.fontFamily || 'inter',
     customCss: initialData?.customCss || ''
   })
