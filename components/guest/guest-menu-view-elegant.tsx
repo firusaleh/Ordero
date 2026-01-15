@@ -31,6 +31,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import { toast } from 'sonner'
+import OrderSuccessDialog from './order-success-dialog'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSelector from './language-selector'
 
@@ -117,6 +118,8 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
   const [showCheckout, setShowCheckout] = useState(false)
   const [showStripeCheckout, setShowStripeCheckout] = useState(false)
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [orderNumber, setOrderNumber] = useState('')
 
   // Currency helpers
   const currency = restaurant.settings?.currency || 'EUR'
@@ -222,15 +225,11 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
       })
       
       if (response.ok) {
+        const data = await response.json()
+        setOrderNumber(data.data?.orderNumber || '#0000')
         setCart([])
         setShowCheckout(false)
-        toast.success(
-          <div>
-            <p className="font-semibold">Bestellung aufgegeben!</p>
-            <p className="text-sm">Sie wird in Kürze zubereitet</p>
-          </div>,
-          { duration: 4000 }
-        )
+        setShowSuccessDialog(true)
       } else {
         throw new Error('Bestellung fehlgeschlagen')
       }
@@ -734,6 +733,15 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Order Success Dialog */}
+      <OrderSuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        orderNumber={orderNumber}
+        estimatedTime="15-20 Minuten"
+        primaryColor="#10B981"
+      />
     </div>
   )
 }

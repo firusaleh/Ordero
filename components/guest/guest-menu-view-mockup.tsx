@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import OrderSuccessDialog from './order-success-dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -117,6 +118,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
   const [customTipAmount, setCustomTipAmount] = useState<string>('')
   const [showCustomTip, setShowCustomTip] = useState<boolean>(false)
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false)
+  const [orderNumber, setOrderNumber] = useState('')
   
   // Use restaurant's primary color or fallback to orange
   const primaryColor = restaurant.primaryColor || '#FF6B35'
@@ -225,16 +228,11 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
       })
       
       if (response.ok) {
+        const data = await response.json()
+        setOrderNumber(data.data?.orderNumber || '#0000')
         setCart([])
         setShowCheckout(false)
-        toast.success(t('toast.orderSuccess'), {
-          duration: 4000,
-          style: {
-            background: primaryColor,
-            color: 'white',
-            border: 'none'
-          }
-        })
+        setShowSuccessDialog(true)
       } else {
         throw new Error('Order failed')
       }
@@ -1023,6 +1021,15 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Order Success Dialog */}
+      <OrderSuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        orderNumber={orderNumber}
+        estimatedTime="15-20 Minuten"
+        primaryColor={primaryColor}
+      />
     </div>
   )
 }
