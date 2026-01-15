@@ -51,7 +51,7 @@ const COLOR_PRESETS = [
 export default function RestaurantDesign({ restaurantId, initialData }: RestaurantDesignProps) {
   const [design, setDesign] = useState({
     logo: initialData?.logo || '',
-    coverImage: initialData?.coverImage || '',
+    banner: initialData?.coverImage || '', // Changed to banner to match API
     primaryColor: initialData?.primaryColor || '#3B82F6',
     secondaryColor: initialData?.secondaryColor || '#1E40AF',
     fontFamily: initialData?.fontFamily || 'inter',
@@ -80,7 +80,7 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
         setDesign(prev => ({ ...prev, logo: url }))
         setLogoPreview(url)
       } else {
-        setDesign(prev => ({ ...prev, coverImage: url }))
+        setDesign(prev => ({ ...prev, banner: url }))
         setCoverPreview(url)
       }
 

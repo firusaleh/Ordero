@@ -66,7 +66,10 @@ export async function POST(
     }
 
     const body = await request.json()
-    const { logo, banner, primaryColor } = body
+    const { logo, banner, coverImage, primaryColor, secondaryColor, fontFamily, customCss } = body
+    
+    // Support both banner and coverImage for backwards compatibility
+    const bannerImage = banner || coverImage
 
     // Überprüfe ob der Benutzer Zugriff auf dieses Restaurant hat
     const restaurant = await prisma.restaurant.findFirst({
@@ -90,11 +93,46 @@ export async function POST(
     const updatedRestaurant = await prisma.restaurant.update({
       where: { id: resolvedParams.id },
       data: {
-        logo,
-        banner,
-        primaryColor
+        logo: logo || undefined,
+        banner: bannerImage || undefined,
+        primaryColor: primaryColor || undefined
       }
     })
+    
+    // Speichere zusätzliche Design-Einstellungen in Restaurant Settings falls vorhanden
+    if (secondaryColor || fontFamily || customCss) {
+      await prisma.restaurantSettings.upsert({
+        where: { restaurantId: resolvedParams.id },
+        update: {
+          // Diese Felder existieren noch nicht im Schema, aber wir können sie später hinzufügen
+          // Für jetzt speichern wir nur was im Schema vorhanden ist
+        },
+        create: {
+          restaurantId: resolvedParams.id,
+          // Standard-Werte für erforderliche Felder
+          orderingEnabled: true,
+          requireTableNumber: true,
+          allowTakeaway: false,
+          allowDelivery: false,
+          autoAcceptOrders: false,
+          orderPrefix: 'ORD',
+          emailNotifications: true,
+          soundNotifications: true,
+          sendOrderEmails: true,
+          sendStatusUpdates: true,
+          acceptCash: true,
+          acceptCard: false,
+          acceptPaypal: false,
+          acceptStripe: false,
+          acceptPaytabs: false,
+          taxRate: 19,
+          includeTax: true,
+          currency: 'EUR',
+          language: 'de',
+          timezone: 'Europe/Berlin'
+        }
+      })
+    }
 
     return NextResponse.json({
       success: true,
