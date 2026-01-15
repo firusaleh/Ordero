@@ -111,19 +111,20 @@ export async function POST(
     const tip = tipAmount || 0
     const total = subtotal + (includeTax ? 0 : tax) + tip
 
-    // Generiere Bestellnummer
-    const today = new Date()
-    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '')
+    // Generiere Bestellnummer als String
     const count = await prisma.order.count({
       where: {
-        restaurantId: restaurant.id,
-        createdAt: {
-          gte: new Date(today.setHours(0, 0, 0, 0)),
-          lt: new Date(today.setHours(23, 59, 59, 999))
-        }
+        restaurantId: restaurant.id
       }
     })
-    const orderNumber = parseInt(`${dateStr}${(count + 1).toString().padStart(4, '0')}`)
+    
+    // Hole Restaurant-Settings für Bestellnummer-Prefix
+    const settings = await prisma.restaurantSettings.findUnique({
+      where: { restaurantId: restaurant.id }
+    })
+    
+    const orderPrefix = settings?.orderPrefix || 'ORD'
+    const orderNumber = `${orderPrefix}-${String(count + 1).padStart(5, '0')}`
 
     // Erstelle Bestellung
     const order = await prisma.order.create({
