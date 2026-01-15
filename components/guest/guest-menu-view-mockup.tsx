@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import CheckoutWithTip from './checkout-with-tip'
 import StripeCheckout from './stripe-checkout-new'
 import { Label } from '@/components/ui/label'
@@ -453,9 +453,9 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 <DialogTitle className="text-xl font-bold text-gray-900">
                   {selectedItem.name}
                 </DialogTitle>
-                {selectedItem.description && (
-                  <p className="text-gray-600 mt-2">{selectedItem.description}</p>
-                )}
+                <DialogDescription className="text-gray-600 mt-2">
+                  {selectedItem.description || 'Wählen Sie Ihre Optionen'}
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 mt-4">
@@ -700,6 +700,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
       {/* Checkout Dialog - Payment Methods */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
+          <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode und Trinkgeld</DialogDescription>
           {/* Payment Header */}
           <div className="bg-white px-6 py-6 text-center border-b">
             <p className="text-gray-600 text-sm font-medium mb-2">{t('payment.subtotal')}</p>
@@ -992,6 +994,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
       {showStripeCheckout && (
         <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
           <DialogContent className="max-w-md rounded-3xl">
+            <DialogTitle className="sr-only">Stripe Zahlung</DialogTitle>
+            <DialogDescription className="sr-only">Sichere Zahlung mit Stripe</DialogDescription>
             <StripeCheckout
               restaurantId={restaurant.id}
               orderId={`order-${Date.now()}`}
