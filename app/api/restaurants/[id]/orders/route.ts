@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { sendOrderEmails } from "@/lib/email-service"
+import { sendOrderToPOS } from "@/lib/pos-integrations"
 
 export async function GET(
   req: NextRequest,
@@ -204,6 +205,29 @@ export async function POST(
       } catch (emailError) {
         console.error("Failed to send email notifications:", emailError)
         // Fahre trotzdem fort, E-Mail-Fehler sollten die Bestellung nicht blockieren
+      }
+    }
+    
+    // Sende Bestellung an POS-System wenn konfiguriert
+    if (restaurant.settings?.posSyncEnabled) {
+      try {
+        const posSent = await sendOrderToPOS(order, restaurant.settings)
+        if (posSent) {
+          console.log(`Order ${order.orderNumber} sent to POS system ${restaurant.settings.posSystem}`)
+          // Optional: Update order with POS sync status
+          await prisma.order.update({
+            where: { id: order.id },
+            data: { 
+              metadata: {
+                posSyncedAt: new Date().toISOString(),
+                posSystem: restaurant.settings.posSystem
+              }
+            }
+          })
+        }
+      } catch (posError) {
+        console.error("Failed to send order to POS:", posError)
+        // Fahre trotzdem fort, POS-Fehler sollten die Bestellung nicht blockieren
       }
     }
     
