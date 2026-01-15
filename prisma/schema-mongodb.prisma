@@ -301,7 +301,7 @@ model Order {
   restaurantId String   @db.ObjectId
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   
-  orderNumber  Int      @unique
+  orderNumber  String   @unique
   
   // Optional: Tisch-Zuordnung
   tableId      String?  @db.ObjectId
