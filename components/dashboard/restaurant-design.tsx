@@ -94,9 +94,9 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validiere Dateigröße (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Datei ist zu groß (max. 5MB)')
+    // Validiere Dateigröße (max 2MB für Base64)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Datei ist zu groß (max. 2MB)')
       return
     }
 

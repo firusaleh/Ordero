@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
 
 export async function POST(
   request: NextRequest,
@@ -48,10 +46,10 @@ export async function POST(
       )
     }
 
-    // Validiere Dateigröße (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validiere Dateigröße (max 2MB für Base64)
+    if (file.size > 2 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'Datei ist zu groß (max. 5MB)' },
+        { error: 'Datei ist zu groß (max. 2MB)' },
         { status: 400 }
       )
     }
@@ -64,34 +62,18 @@ export async function POST(
       )
     }
 
+    // Konvertiere zu Base64
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+    const base64 = `data:${file.type};base64,${buffer.toString('base64')}`
 
-    // Erstelle einen eindeutigen Dateinamen
-    const timestamp = Date.now()
-    const extension = file.name.split('.').pop()
-    const filename = `${resolvedParams.id}-${type}-${timestamp}.${extension}`
+    // Speichere als Base64 URL direkt in der Datenbank
+    // Dies funktioniert für kleine Logos und ist auf Vercel kompatibel
     
-    // Speicherpfad (in public/uploads/restaurants/)
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'restaurants')
-    const filepath = join(uploadDir, filename)
-    
-    // Stelle sicher, dass das Verzeichnis existiert
-    const fs = require('fs')
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true })
-    }
-    
-    // Speichere die Datei
-    await writeFile(filepath, buffer)
-    
-    // URL für die Datei
-    const url = `/uploads/restaurants/${filename}`
-
     return NextResponse.json({
       success: true,
-      url,
-      filename
+      url: base64,
+      message: 'Bild erfolgreich hochgeladen'
     })
     
   } catch (error) {
