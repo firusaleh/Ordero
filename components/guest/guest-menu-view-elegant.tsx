@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import OrderSuccessDialog from './order-success-dialog'
+import OrderHistorySheet from './order-history-sheet'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSelector from './language-selector'
 
@@ -226,7 +227,23 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
       
       if (response.ok) {
         const data = await response.json()
-        setOrderNumber(data.data?.orderNumber || '#0000')
+        const orderId = data.data?.id
+        const orderNum = data.data?.orderNumber || '#0000'
+        
+        // Save order ID to localStorage for history
+        const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
+        const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+        if (!storedOrderIds.includes(orderId)) {
+          storedOrderIds.push(orderId)
+          localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
+        }
+        
+        // Dispatch event for order history component
+        window.dispatchEvent(new CustomEvent('orderCreated', { 
+          detail: { orderNumber: orderNum, orderId }
+        }))
+        
+        setOrderNumber(orderNum)
         setCart([])
         setShowCheckout(false)
         setShowSuccessDialog(true)
@@ -740,6 +757,14 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         onClose={() => setShowSuccessDialog(false)}
         orderNumber={orderNumber}
         estimatedTime="15-20 Minuten"
+        primaryColor="#10B981"
+      />
+
+      {/* Order History Sheet */}
+      <OrderHistorySheet
+        restaurantSlug={restaurant.slug}
+        tableNumber={tableNumber}
+        currency={currency}
         primaryColor="#10B981"
       />
     </div>
