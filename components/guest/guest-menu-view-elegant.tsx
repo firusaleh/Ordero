@@ -215,7 +215,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         tipPercent
       }
       
-      const response = await fetch(`/api/restaurants/${restaurant.id}/orders`, {
+      const response = await fetch(`/api/public/${restaurant.slug}/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)

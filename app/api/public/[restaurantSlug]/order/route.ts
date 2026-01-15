@@ -22,12 +22,11 @@ export async function POST(
     }
     
     const body = await request.json()
-    const { restaurantId, tableId, tableNumber, type, items, tipPercent, tipAmount, paymentMethod } = body
+    const { tableId, tableNumber, type, items, tipPercent, tipAmount, paymentMethod } = body
 
-    // Validiere Restaurant
+    // Validiere Restaurant über Slug
     const restaurant = await prisma.restaurant.findUnique({
       where: { 
-        id: restaurantId,
         slug: restaurantSlug,
         status: 'ACTIVE'
       },
