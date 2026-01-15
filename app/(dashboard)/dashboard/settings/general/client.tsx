@@ -377,7 +377,7 @@ export default function GeneralSettingsClient({ restaurant: initialRestaurant, s
             initialData={{
               logo: initialRestaurant.logo || '',
               coverImage: initialRestaurant.coverImage || '',
-              primaryColor: initialRestaurant.primaryColor || '#3B82F6',
+              primaryColor: initialRestaurant.primaryColor || '#FF6B35',
               secondaryColor: '#1E40AF',
               fontFamily: 'inter',
               customCss: ''

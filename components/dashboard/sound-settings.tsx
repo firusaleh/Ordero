@@ -8,7 +8,11 @@ import { Button } from '@/components/ui/button'
 import { Volume2, VolumeX, Bell, BellOff, TestTube } from 'lucide-react'
 import { useNotificationSound } from '@/lib/hooks/use-notification-sound'
 
-export function SoundSettings() {
+interface SoundSettingsProps {
+  restaurantId?: string
+}
+
+export function SoundSettings({ restaurantId }: SoundSettingsProps) {
   const { isEnabled, volume, toggleSound, setVolume, testSound } = useNotificationSound()
 
   return (

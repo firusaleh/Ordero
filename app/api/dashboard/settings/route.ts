@@ -70,10 +70,22 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json()
+    const { type, id, ...data } = body
 
+    // Find restaurant - either as owner or as admin/manager staff
     const restaurant = await prisma.restaurant.findFirst({
       where: {
-        ownerId: session.user.id // Nur Owner kann Einstellungen ändern
+        OR: [
+          { ownerId: session.user.id },
+          { 
+            staff: { 
+              some: { 
+                userId: session.user.id,
+                role: { in: ['ADMIN', 'MANAGER'] }
+              } 
+            } 
+          }
+        ]
       },
       include: {
         settings: true
@@ -84,25 +96,44 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    let settings
-
-    if (restaurant.settings) {
-      // Update existierende Einstellungen
-      settings = await prisma.restaurantSettings.update({
-        where: { id: restaurant.settings.id },
-        data: body
-      })
-    } else {
-      // Erstelle neue Einstellungen
-      settings = await prisma.restaurantSettings.create({
+    // Handle different update types
+    if (type === 'restaurant') {
+      // Update restaurant basic info
+      const updatedRestaurant = await prisma.restaurant.update({
+        where: { id: restaurant.id },
         data: {
-          restaurantId: restaurant.id,
-          ...body
+          name: data.name,
+          description: data.description,
+          cuisine: data.cuisine,
+          street: data.street,
+          city: data.city,
+          postalCode: data.postalCode,
+          phone: data.phone,
+          email: data.email,
+          website: data.website
         }
       })
+      return NextResponse.json({ data: updatedRestaurant })
+    } else if (type === 'settings') {
+      // Update restaurant settings
+      let settings
+      if (restaurant.settings) {
+        settings = await prisma.restaurantSettings.update({
+          where: { id: restaurant.settings.id },
+          data
+        })
+      } else {
+        settings = await prisma.restaurantSettings.create({
+          data: {
+            restaurantId: restaurant.id,
+            ...data
+          }
+        })
+      }
+      return NextResponse.json({ data: settings })
+    } else {
+      return NextResponse.json({ error: 'Invalid update type' }, { status: 400 })
     }
-
-    return NextResponse.json({ data: settings })
   } catch (error) {
     console.error('Error updating settings:', error)
     return NextResponse.json(
