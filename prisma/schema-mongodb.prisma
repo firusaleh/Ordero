@@ -171,6 +171,8 @@ model RestaurantSettings {
   currency          String  @default("EUR")
   language          String  @default("de")
   timezone          String  @default("Europe/Berlin")
+  dateFormat        String  @default("DD.MM.YYYY")
+  timeFormat        String  @default("24h")
   
   // POS Integration
   posSystem         String?  // ready2order, orderbird, gastrofix
