@@ -72,6 +72,8 @@ interface Restaurant {
   postalCode?: string | null
   phone?: string | null
   country?: string | null
+  logo?: string | null
+  banner?: string | null
   categories: Category[]
   settings: {
     currency?: string
@@ -115,6 +117,11 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
   const [customTipAmount, setCustomTipAmount] = useState<string>('')
   const [showCustomTip, setShowCustomTip] = useState<boolean>(false)
+  
+  // Use restaurant's primary color or fallback to orange
+  const primaryColor = restaurant.primaryColor || '#FF6B35'
+  const primaryColorHover = restaurant.primaryColor ? 
+    restaurant.primaryColor + 'dd' : '#ff5420'
 
   // Currency helpers
   const currency = restaurant.settings?.currency || 'EUR'
@@ -164,7 +171,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
       duration: 2000,
       position: 'bottom-center',
       style: {
-        background: '#FF6B35',
+        background: primaryColor,
         color: 'white',
         border: 'none'
       }
@@ -223,7 +230,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         toast.success(t('toast.orderSuccess'), {
           duration: 4000,
           style: {
-            background: '#FF6B35',
+            background: primaryColor,
             color: 'white',
             border: 'none'
           }
@@ -281,11 +288,24 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
       <div className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="px-5 py-4">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-xl font-bold text-gray-900">{restaurant.name}</h1>
+            <div className="flex items-center gap-3">
+              {restaurant.logo && (
+                <img 
+                  src={restaurant.logo} 
+                  alt={restaurant.name}
+                  className="h-10 w-10 object-contain"
+                />
+              )}
+              <h1 className="text-xl font-bold text-gray-900">{restaurant.name}</h1>
+            </div>
             <div className="relative">
               <Button
                 onClick={() => setIsCartOpen(true)}
-                className="bg-[#FF6B35] hover:bg-[#ff5420] text-white rounded-full px-4 py-2 h-auto"
+                style={{ 
+                  backgroundColor: primaryColor,
+                  color: 'white'
+                }}
+                className="text-white rounded-full px-4 py-2 h-auto hover:opacity-90 transition-opacity"
                 size="sm"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
@@ -300,7 +320,9 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           </div>
           <div className="flex items-center gap-3 text-sm text-gray-600">
             <span>{restaurant.cuisine || t('header.international')} {restaurant.cuisine ? getFoodEmoji(restaurant.cuisine) : '🍽️'}</span>
-            <Badge className="bg-[#FF6B35] text-white border-0 px-3 py-1 rounded-full text-xs font-semibold">
+            <Badge 
+              style={{ backgroundColor: primaryColor }}
+              className="text-white border-0 px-3 py-1 rounded-full text-xs font-semibold">
               {t('header.table')} {tableNumber}
             </Badge>
             <LanguageSwitcher />
@@ -320,10 +342,11 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 className={`
                   px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
                   ${isSelected 
-                    ? 'bg-[#FF6B35] text-white' 
+                    ? 'text-white' 
                     : 'bg-white text-gray-600 border border-gray-200'
                   }
                 `}
+                style={isSelected ? { backgroundColor: primaryColor } : {}}
               >
                 {category.name}
               </button>
@@ -383,11 +406,12 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                     </p>
                   )}
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-bold text-[#FF6B35]">
+                    <span className="text-lg font-bold" style={{ color: primaryColor }}>
                       {formatPrice(item.price)}
                     </span>
                     <Button
-                      className="bg-[#FF6B35] hover:bg-[#ff5420] text-white rounded-xl h-8 w-8 p-0"
+                      className="text-white rounded-xl h-8 w-8 p-0 hover:opacity-90 transition-opacity"
+                      style={{ backgroundColor: primaryColor }}
                       onClick={(e) => {
                         e.stopPropagation()
                         if (item.variants.length === 0 && item.extras.length === 0) {
@@ -578,7 +602,9 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           <div className="bg-white border-b border-gray-200 px-5 py-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-gray-900">{t('cart.yourOrder')}</h2>
-              <Badge className="bg-[#FF6B35] text-white px-3 py-1 rounded-full">
+              <Badge 
+                style={{ backgroundColor: primaryColor }}
+                className="text-white px-3 py-1 rounded-full">
                 {getCartItemCount()} {t('cart.items')}
               </Badge>
             </div>
@@ -977,7 +1003,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 setShowStripeCheckout(false)
                 toast.success(t('toast.paymentSuccess'), {
                   style: {
-                    background: '#FF6B35',
+                    background: primaryColor,
                     color: 'white',
                     border: 'none'
                   }
