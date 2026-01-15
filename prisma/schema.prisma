@@ -199,6 +199,8 @@ model RestaurantSettings {
   posSystem         String?  // ready2order, orderbird, gastrofix
   posApiKey         String?
   posRestaurantId   String?
+  posSyncEnabled    Boolean @default(false)
+  posLastSync       DateTime?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
