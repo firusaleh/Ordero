@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -24,7 +25,6 @@ import {
   ChevronLeft,
   Check
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSwitcher from './language-switcher'
 
