@@ -161,7 +161,7 @@ export async function POST(
         status: restaurant.settings?.autoAcceptOrders ? "CONFIRMED" : "PENDING",
         paymentMethod: body.paymentMethod || "CASH",
         paymentStatus: body.paymentMethod === "CASH" ? "PENDING" : "PROCESSING",
-        orderType: body.orderType || "DINE_IN",
+        type: body.orderType || "DINE_IN",
         tableNumber: body.tableNumber,
         guestName: body.customerName || "Gast",
         guestEmail: body.customerEmail,
@@ -214,16 +214,7 @@ export async function POST(
         const posSent = await sendOrderToPOS(order, restaurant.settings)
         if (posSent) {
           console.log(`Order ${order.orderNumber} sent to POS system ${restaurant.settings.posSystem}`)
-          // Optional: Update order with POS sync status
-          await prisma.order.update({
-            where: { id: order.id },
-            data: { 
-              metadata: {
-                posSyncedAt: new Date().toISOString(),
-                posSystem: restaurant.settings.posSystem
-              }
-            }
-          })
+          // POS sync successful - metadata update removed as field doesn't exist
         }
       } catch (posError) {
         console.error("Failed to send order to POS:", posError)
