@@ -68,27 +68,34 @@ export async function PATCH(
       }
     })
     
-    // Sende Pusher Event
-    await pusherServer.trigger(
-      getRestaurantChannel(order.restaurantId),
-      "ORDER_UPDATED",
-      {
-        orderId: updatedOrder.id,
-        status: updatedOrder.status,
-        updatedBy: session.user.name || session.user.email
-      }
-    )
-    
-    // Sende auch an Table Channel für Gäste
-    if (order.tableNumber) {
-      await pusherServer.trigger(
-        `private-table-${order.restaurantId}-${order.tableNumber}`,
-        "ORDER_UPDATED",
-        {
-          orderId: updatedOrder.id,
-          status: updatedOrder.status
+    // Sende Pusher Event (optional - falls konfiguriert)
+    try {
+      if (process.env.PUSHER_APP_ID && process.env.PUSHER_APP_ID !== "local") {
+        await pusherServer.trigger(
+          getRestaurantChannel(order.restaurantId),
+          "ORDER_UPDATED",
+          {
+            orderId: updatedOrder.id,
+            status: updatedOrder.status,
+            updatedBy: session.user.name || session.user.email
+          }
+        )
+        
+        // Sende auch an Table Channel für Gäste
+        if (order.tableNumber) {
+          await pusherServer.trigger(
+            `private-table-${order.restaurantId}-${order.tableNumber}`,
+            "ORDER_UPDATED",
+            {
+              orderId: updatedOrder.id,
+              status: updatedOrder.status
+            }
+          )
         }
-      )
+      }
+    } catch (pusherError) {
+      console.error('Pusher notification failed:', pusherError)
+      // Pusher-Fehler sollten das Update nicht verhindern
     }
     
     // Sende E-Mail-Benachrichtigung bei wichtigen Status-Änderungen
@@ -103,7 +110,7 @@ export async function PATCH(
         
         const restaurantOwner = restaurant?.owner
         
-        if (restaurantOwner?.email) {
+        if (restaurantOwner?.email && restaurant) {
           const statusTextMap: Record<string, string> = {
             CONFIRMED: "bestätigt",
             PREPARING: "wird zubereitet",
@@ -114,8 +121,8 @@ export async function PATCH(
           
           await sendOrderStatusUpdate({
             email: restaurantOwner.email,
-            orderNumber: order.orderNumber.toString(),
-            restaurantName: order.restaurant.name,
+            orderNumber: order.orderNumber,
+            restaurantName: restaurant.name,
             status,
             estimatedTime: statusTextMap[status] || status.toLowerCase()
           })
