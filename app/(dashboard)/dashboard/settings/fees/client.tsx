@@ -41,6 +41,7 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          type: 'settings',
           serviceFeeEnabled,
           serviceFeeType,
           serviceFeePercent,

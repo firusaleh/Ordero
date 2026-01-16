@@ -114,8 +114,8 @@ export async function PUT(request: Request) {
         }
       })
       return NextResponse.json({ data: updatedRestaurant })
-    } else if (type === 'settings') {
-      // Update restaurant settings
+    } else if (type === 'settings' || !type) {
+      // Update restaurant settings (default to settings if no type specified)
       let settings
       if (restaurant.settings) {
         settings = await prisma.restaurantSettings.update({
