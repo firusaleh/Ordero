@@ -8,9 +8,22 @@ export default authEdge((req) => {
   const isAdmin = auth?.user?.role === "SUPER_ADMIN" || auth?.user?.role === "ADMIN"
   
   // Öffentliche Routen
-  const publicRoutes = ["/", "/login", "/register", "/r"]
+  const publicRoutes = [
+    "/", 
+    "/login", 
+    "/register", 
+    "/forgot-password",
+    "/reset-password",
+    "/demo",
+    "/test-login",
+    "/payment/paytabs-return",
+    "/terms",
+    "/privacy"
+  ]
   const isPublicRoute = publicRoutes.some(route => 
-    nextUrl.pathname === route || nextUrl.pathname.startsWith("/r/")
+    nextUrl.pathname === route || 
+    nextUrl.pathname.startsWith("/r/") ||
+    nextUrl.pathname.startsWith("/api/public/")
   )
   
   // Admin-Routen

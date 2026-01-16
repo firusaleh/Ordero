@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import Link from 'next/link'
 
 export default function MarketingLayout({
   children,
@@ -10,7 +11,9 @@ export default function MarketingLayout({
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
-            <img src="/oriido-logo.png" alt="Oriido" className="h-12 w-auto" />
+            <Link href="/">
+              <img src="/oriido-logo.png" alt="Oriido" className="h-12 w-auto cursor-pointer" />
+            </Link>
           </div>
           <nav className="hidden md:flex space-x-6">
             <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
@@ -18,12 +21,12 @@ export default function MarketingLayout({
             <a href="#contact" className="text-gray-600 hover:text-gray-900">Kontakt</a>
           </nav>
           <div className="flex space-x-4">
-            <a href="/login" className="px-4 py-2 text-gray-600 hover:text-gray-900">
+            <Link href="/login" className="px-4 py-2 text-gray-600 hover:text-gray-900">
               Anmelden
-            </a>
-            <a href="/register" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            </Link>
+            <Link href="/register" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
               Kostenlos starten
-            </a>
+            </Link>
           </div>
         </div>
       </header>
@@ -58,9 +61,9 @@ export default function MarketingLayout({
             <div>
               <h3 className="font-semibold mb-4">Rechtliches</h3>
               <ul className="space-y-2 text-sm text-gray-600">
-                <li><a href="#" className="hover:text-gray-900">Impressum</a></li>
-                <li><a href="#" className="hover:text-gray-900">Datenschutz</a></li>
-                <li><a href="#" className="hover:text-gray-900">AGB</a></li>
+                <li><Link href="/imprint" className="hover:text-gray-900">Impressum</Link></li>
+                <li><Link href="/privacy" className="hover:text-gray-900">Datenschutz</Link></li>
+                <li><Link href="/terms" className="hover:text-gray-900">AGB</Link></li>
               </ul>
             </div>
           </div>
