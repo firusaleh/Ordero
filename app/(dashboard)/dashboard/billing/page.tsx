@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
-import { SUBSCRIPTION_FEATURES } from '@/lib/stripe'
 import { 
   CreditCard, 
   Download, 
@@ -21,8 +20,18 @@ import {
   Loader2,
   Crown,
   Rocket,
-  Sparkles
+  Sparkles,
+  Globe,
+  Receipt,
+  Building2
 } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function BillingPage() {
   const router = useRouter()
@@ -31,6 +40,8 @@ export default function BillingPage() {
   const [loading, setLoading] = useState(false)
   const [currentPlan, setCurrentPlan] = useState('FREE')
   const [portalLoading, setPortalLoading] = useState(false)
+  const [selectedCountry, setSelectedCountry] = useState<'DE' | 'JO'>('DE')
+  const [selectedPlanType, setSelectedPlanType] = useState<'pay-per-order' | 'monthly'>('pay-per-order')
 
   useEffect(() => {
     // Check for success/cancel params from Stripe
@@ -57,24 +68,14 @@ export default function BillingPage() {
     }
   }, [searchParams, toast, router])
 
-  const handleUpgrade = async (plan: 'STANDARD' | 'PREMIUM') => {
+  const handleUpgrade = async (planId: string) => {
     setLoading(true)
     try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan })
+      // Hier würde die tatsächliche Implementierung der Zahlungsabwicklung stattfinden
+      toast({
+        title: 'Kontaktieren Sie uns',
+        description: 'Bitte kontaktieren Sie unser Sales-Team für die Aktivierung dieses Plans.',
       })
-
-      if (!response.ok) {
-        throw new Error('Fehler beim Erstellen der Checkout-Session')
-      }
-
-      const { url } = await response.json()
-      
-      if (url) {
-        window.location.href = url
-      }
     } catch (error) {
       toast({
         title: 'Fehler',
@@ -114,42 +115,80 @@ export default function BillingPage() {
     }
   }
 
-  const plans = [
-    {
-      id: 'FREE',
-      name: SUBSCRIPTION_FEATURES.FREE.name,
-      price: SUBSCRIPTION_FEATURES.FREE.price,
-      icon: Sparkles,
-      features: SUBSCRIPTION_FEATURES.FREE.features,
-      buttonText: 'Aktueller Plan',
-      disabled: true
+  // Jordanien Plan
+  const jordanPlan = {
+    id: 'JO_PAY_PER_ORDER',
+    name: 'Pay-per-Order',
+    price: '0,10',
+    currency: 'JD',
+    unit: 'pro Bestellung',
+    icon: Receipt,
+    features: [
+      'Keine monatliche Grundgebühr',
+      'Nur 0,10 JD pro erfolgter Bestellung',
+      'Unbegrenzte Menü-Artikel',
+      'Unbegrenzte Tische',
+      'Vollständiger Funktionsumfang',
+      'E-Mail & WhatsApp Support',
+      'Monatliche Abrechnung'
+    ],
+    buttonText: 'Plan auswählen',
+    onClick: () => handleUpgrade('JO_PAY_PER_ORDER')
+  }
+
+  // Deutschland Pläne
+  const germanyPlans = {
+    payPerOrder: {
+      id: 'DE_PAY_PER_ORDER',
+      name: 'Pay-per-Order',
+      price: '0,35',
+      currency: '€',
+      unit: 'pro Bestellung',
+      setupFee: '250',
+      icon: Receipt,
+      features: [
+        'Keine monatliche Grundgebühr',
+        'Nur 0,35 € pro erfolgter Bestellung',
+        'Einmalige Setup-Gebühr: 250 €',
+        'Unbegrenzte Menü-Artikel',
+        'Unbegrenzte Tische',
+        'Vollständiger Funktionsumfang',
+        'Priority E-Mail Support',
+        'Monatliche Abrechnung nach Nutzung'
+      ],
+      buttonText: 'Pay-per-Order wählen',
+      onClick: () => handleUpgrade('DE_PAY_PER_ORDER')
     },
-    {
-      id: 'STANDARD',
-      name: SUBSCRIPTION_FEATURES.STANDARD.name,
-      price: SUBSCRIPTION_FEATURES.STANDARD.price,
-      icon: Rocket,
+    monthly: {
+      id: 'DE_MONTHLY',
+      name: 'Monatlich / Jährlich',
+      monthlyPrice: '279',
+      yearlyPrice: '2.150',
+      currency: '€',
+      setupFee: '250',
+      icon: Calendar,
       popular: true,
-      features: SUBSCRIPTION_FEATURES.STANDARD.features,
-      buttonText: 'Upgrade auf Standard',
-      onClick: () => handleUpgrade('STANDARD')
-    },
-    {
-      id: 'PREMIUM',
-      name: SUBSCRIPTION_FEATURES.PREMIUM.name,
-      price: SUBSCRIPTION_FEATURES.PREMIUM.price,
-      icon: Crown,
-      features: SUBSCRIPTION_FEATURES.PREMIUM.features,
-      buttonText: 'Upgrade auf Premium',
-      onClick: () => handleUpgrade('PREMIUM')
+      features: [
+        'Unbegrenzte Bestellungen',
+        'Monatlich: 279 € / Monat',
+        'Jährlich: 2.150 € / Jahr (spare 1.198 €)',
+        'Einmalige Setup-Gebühr: 250 €',
+        'Unbegrenzte Menü-Artikel',
+        'Unbegrenzte Tische',
+        'Priority Support mit SLA',
+        'Dedizierter Account Manager',
+        'Kostenlose Updates & neue Features'
+      ],
+      buttonText: 'Flatrate wählen',
+      onClick: () => handleUpgrade('DE_MONTHLY')
     }
-  ]
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Abrechnung & Pläne</h1>
-        <p className="text-gray-600">Verwalten Sie Ihr Abonnement und Zahlungen</p>
+        <p className="text-gray-600">Wählen Sie den passenden Plan für Ihr Restaurant</p>
       </div>
 
       <Tabs defaultValue="subscription" className="space-y-6">
@@ -159,135 +198,220 @@ export default function BillingPage() {
         </TabsList>
 
         <TabsContent value="subscription" className="space-y-6">
-          {/* Current Plan Card */}
+          {/* Country Selection */}
           <Card>
             <CardHeader>
-              <CardTitle>Aktueller Plan</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="w-5 h-5" />
+                Land auswählen
+              </CardTitle>
               <CardDescription>
-                Ihr aktuelles Abonnement und verfügbare Upgrades
+                Wählen Sie Ihr Land für die verfügbaren Zahlungspläne
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
-                <div>
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    <Sparkles className="w-5 h-5" />
-                    {SUBSCRIPTION_FEATURES[currentPlan as keyof typeof SUBSCRIPTION_FEATURES].name} Plan
-                  </h3>
-                  <p className="text-gray-600">
-                    {currentPlan === 'FREE' 
-                      ? 'Kostenlos - 50 Bestellungen/Monat'
-                      : `${SUBSCRIPTION_FEATURES[currentPlan as keyof typeof SUBSCRIPTION_FEATURES].price} € / Monat`
-                    }
-                  </p>
-                </div>
-                <Badge className="bg-green-500">Aktiv</Badge>
-              </div>
+              <Select value={selectedCountry} onValueChange={(value) => setSelectedCountry(value as 'DE' | 'JO')}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Land auswählen" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="DE">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🇩🇪</span>
+                      Deutschland
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="JO">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🇯🇴</span>
+                      Jordanien
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </CardContent>
           </Card>
 
-          {/* Available Plans */}
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Verfügbare Pläne</h2>
-            <div className="grid md:grid-cols-3 gap-4">
-              {plans.map((plan) => {
-                const Icon = plan.icon
-                return (
-                  <Card 
-                    key={plan.id} 
-                    className={`relative ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
-                  >
-                    {plan.popular && (
-                      <Badge className="absolute -top-3 right-4 bg-blue-500">
-                        Beliebt
-                      </Badge>
-                    )}
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Icon className="w-5 h-5" />
-                          {plan.name}
-                        </CardTitle>
-                      </div>
-                      <div className="flex items-baseline mt-2">
-                        <span className="text-3xl font-bold">{plan.price}</span>
-                        <span className="text-gray-500 ml-1">
-                          {plan.price > 0 ? '€/Monat' : ''}
-                        </span>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      {plan.features.map((feature) => (
-                        <div key={feature} className="flex items-start gap-2">
-                          <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                          <span className="text-sm">{feature}</span>
-                        </div>
-                      ))}
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        className="w-full" 
-                        variant={currentPlan === plan.id ? 'secondary' : 'default'}
-                        disabled={plan.disabled || loading}
-                        onClick={plan.onClick}
-                      >
-                        {loading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          plan.buttonText
-                        )}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Usage Stats */}
-          {currentPlan === 'FREE' && (
+          {/* Current Plan Card */}
+          {currentPlan !== 'FREE' && (
             <Card>
               <CardHeader>
-                <CardTitle>Nutzung diesen Monat</CardTitle>
+                <CardTitle>Aktueller Plan</CardTitle>
                 <CardDescription>
-                  Ihr aktuelles Kontingent im Free Plan
+                  Ihr aktuelles Abonnement
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Bestellungen</span>
-                      <span>23 / 50</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '46%' }}></div>
-                    </div>
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      {currentPlan} Plan
+                    </h3>
                   </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Menü-Artikel</span>
-                      <span>15 / 20</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '75%' }}></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Tische</span>
-                      <span>4 / 5</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '80%' }}></div>
-                    </div>
-                  </div>
+                  <Badge className="bg-green-500">Aktiv</Badge>
                 </div>
-                <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                  <p className="text-sm text-yellow-800">
-                    <AlertCircle className="inline w-4 h-4 mr-1" />
-                    Sie erreichen bald Ihre Limits. Upgraden Sie für unbegrenzte Nutzung!
-                  </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Available Plans based on Country */}
+          <div>
+            <h2 className="text-xl font-semibold mb-4">
+              Verfügbare Pläne für {selectedCountry === 'DE' ? 'Deutschland' : 'Jordanien'}
+            </h2>
+            
+            {selectedCountry === 'JO' ? (
+              // Jordanien Plan
+              <Card className="max-w-2xl mx-auto">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <Receipt className="w-5 h-5" />
+                      {jordanPlan.name}
+                    </CardTitle>
+                  </div>
+                  <div className="flex items-baseline mt-2">
+                    <span className="text-3xl font-bold">{jordanPlan.price}</span>
+                    <span className="text-gray-500 ml-1">{jordanPlan.currency}</span>
+                    <span className="text-gray-500 ml-2">/ {jordanPlan.unit}</span>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {jordanPlan.features.map((feature) => (
+                    <div key={feature} className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </div>
+                  ))}
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full" 
+                    disabled={loading}
+                    onClick={jordanPlan.onClick}
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      jordanPlan.buttonText
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ) : (
+              // Deutschland Pläne
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Pay-per-Order Plan */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Receipt className="w-5 h-5" />
+                      {germanyPlans.payPerOrder.name}
+                    </CardTitle>
+                    <div className="space-y-2 mt-2">
+                      <div className="flex items-baseline">
+                        <span className="text-3xl font-bold">{germanyPlans.payPerOrder.price}</span>
+                        <span className="text-gray-500 ml-1">{germanyPlans.payPerOrder.currency}</span>
+                        <span className="text-gray-500 ml-2">/ {germanyPlans.payPerOrder.unit}</span>
+                      </div>
+                      <Badge variant="secondary" className="inline-flex">
+                        + {germanyPlans.payPerOrder.setupFee} € Setup-Gebühr
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {germanyPlans.payPerOrder.features.map((feature) => (
+                      <div key={feature} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      variant="outline"
+                      disabled={loading}
+                      onClick={germanyPlans.payPerOrder.onClick}
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        germanyPlans.payPerOrder.buttonText
+                      )}
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                {/* Monthly/Yearly Plan */}
+                <Card className="relative ring-2 ring-blue-500 shadow-lg">
+                  <Badge className="absolute -top-3 right-4 bg-blue-500">
+                    Beliebt
+                  </Badge>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      {germanyPlans.monthly.name}
+                    </CardTitle>
+                    <div className="space-y-2 mt-2">
+                      <div>
+                        <div className="flex items-baseline">
+                          <span className="text-2xl font-bold">{germanyPlans.monthly.monthlyPrice}</span>
+                          <span className="text-gray-500 ml-1">{germanyPlans.monthly.currency} / Monat</span>
+                        </div>
+                        <div className="flex items-baseline text-sm text-gray-600">
+                          oder <span className="font-semibold mx-1">{germanyPlans.monthly.yearlyPrice} €</span> / Jahr
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="inline-flex">
+                        + {germanyPlans.monthly.setupFee} € Setup-Gebühr
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {germanyPlans.monthly.features.map((feature) => (
+                      <div key={feature} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      disabled={loading}
+                      onClick={germanyPlans.monthly.onClick}
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        germanyPlans.monthly.buttonText
+                      )}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            )}
+          </div>
+
+          {/* Pricing Comparison Note */}
+          {selectedCountry === 'DE' && (
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-blue-900 mb-1">
+                      Welcher Plan passt zu Ihnen?
+                    </p>
+                    <p className="text-sm text-blue-800">
+                      <strong>Pay-per-Order:</strong> Ideal für neue Restaurants oder bei saisonalen Schwankungen. Sie zahlen nur für tatsächliche Bestellungen.
+                    </p>
+                    <p className="text-sm text-blue-800 mt-2">
+                      <strong>Flatrate:</strong> Perfekt für etablierte Restaurants mit regelmäßigem Bestellvolumen. Ab ~800 Bestellungen/Monat günstiger als Pay-per-Order.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -307,7 +431,7 @@ export default function BillingPage() {
                 <>
                   <p className="text-sm text-gray-600">
                     Verwalten Sie Ihr Abonnement, laden Sie Rechnungen herunter und aktualisieren Sie 
-                    Ihre Zahlungsmethode über das Stripe-Kundenportal.
+                    Ihre Zahlungsmethode über das Kundenportal.
                   </p>
                   <Button 
                     className="w-full"
@@ -332,10 +456,10 @@ export default function BillingPage() {
                   <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                   <h3 className="font-semibold mb-2">Keine aktive Zahlungsmethode</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Upgraden Sie auf einen kostenpflichtigen Plan, um Zahlungen zu verwalten.
+                    Wählen Sie einen Plan aus, um mit der Einrichtung zu beginnen.
                   </p>
-                  <Button onClick={() => handleUpgrade('STANDARD')}>
-                    Jetzt upgraden
+                  <Button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    Plan auswählen
                   </Button>
                 </div>
               )}
