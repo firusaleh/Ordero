@@ -63,6 +63,14 @@ export default function SettingsPage() {
       badge: 'NEU'
     },
     {
+      title: 'Individuelle Gebühren',
+      description: 'Eigene Gebühren erstellen und verwalten',
+      href: '/dashboard/settings/custom-fees',
+      icon: CreditCard,
+      color: 'bg-orange-500',
+      badge: 'NEU'
+    },
+    {
       title: t('settings.pos.title'),
       description: t('settings.pos.description'),
       href: '/dashboard/settings/pos',

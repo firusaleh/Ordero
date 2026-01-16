@@ -188,11 +188,14 @@ model RestaurantSettings {
   taxRate            Float   @default(19)
   includeTax         Boolean @default(true)
   
-  // Service Fee
+  // Service Fee (Legacy - wird durch customFees ersetzt)
   serviceFeeEnabled  Boolean @default(false)
   serviceFeePercent  Float   @default(0)
   serviceFeeAmount   Float   @default(0)
   serviceFeeType     String  @default("PERCENT") // PERCENT or FIXED
+  
+  // Custom Fees
+  customFees         CustomFee[]
   
   // Sprache & Währung
   currency          String  @default("EUR")
@@ -472,6 +475,29 @@ type InvoiceItem {
   price     Float
   total     Float
   tax       Float
+}
+
+model CustomFee {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  settingsId    String   @db.ObjectId
+  settings      RestaurantSettings @relation(fields: [settingsId], references: [id], onDelete: Cascade)
+  
+  name          String   // z.B. "Service-Gebühr", "Bearbeitungsgebühr", "Liefergebühr"
+  description   String?  // Optionale Beschreibung
+  type          String   @default("PERCENT") // PERCENT or FIXED
+  value         Float    // Prozentsatz oder fester Betrag
+  enabled       Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  
+  // Bedingungen
+  minOrderAmount Float?  // Mindestbestellwert für diese Gebühr
+  maxOrderAmount Float?  // Maximalbestellwert für diese Gebühr
+  applyToDelivery Boolean @default(true)
+  applyToDineIn   Boolean @default(true)
+  applyToTakeaway Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Payment {
