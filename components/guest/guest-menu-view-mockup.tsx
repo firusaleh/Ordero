@@ -127,6 +127,15 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const primaryColorHover = restaurant.primaryColor ? 
     restaurant.primaryColor + 'dd' : '#ff5420'
 
+  // Calculate service fee
+  const calculateServiceFee = (subtotal: number) => {
+    if (!restaurant.settings?.serviceFeeEnabled) return 0
+    if (restaurant.settings.serviceFeeType === 'PERCENT') {
+      return subtotal * (restaurant.settings.serviceFeePercent / 100)
+    }
+    return restaurant.settings.serviceFeeAmount || 0
+  }
+
   // Currency helpers
   const currency = restaurant.settings?.currency || 'EUR'
   const currencySymbol = currency === 'JOD' ? 'JD' : 
@@ -686,13 +695,19 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                   <span>{t('cart.subtotal')}</span>
                   <span>{formatPrice(getCartTotal())}</span>
                 </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{t('cart.serviceFee')}</span>
-                  <span>{formatPrice(0)}</span>
-                </div>
+                {restaurant.settings?.serviceFeeEnabled && (
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>
+                      {t('cart.serviceFee')}
+                      {restaurant.settings.serviceFeeType === 'PERCENT' && 
+                        ` (${restaurant.settings.serviceFeePercent}%)`}
+                    </span>
+                    <span>{formatPrice(calculateServiceFee(getCartTotal()))}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t">
                   <span>{t('cart.total')}</span>
-                  <span>{formatPrice(getCartTotal())}</span>
+                  <span>{formatPrice(getCartTotal() + calculateServiceFee(getCartTotal()))}</span>
                 </div>
               </div>
               
@@ -718,11 +733,27 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
           <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode und Trinkgeld</DialogDescription>
           {/* Payment Header */}
-          <div className="bg-white px-6 py-6 text-center border-b">
-            <p className="text-gray-600 text-sm font-medium mb-2">{t('payment.subtotal')}</p>
-            <div className="text-4xl font-bold mb-4">
-              <span className="text-[#FF6B35]">{currencySymbol}</span>
-              <span className="text-gray-900">{getCartTotal().toFixed(2)}</span>
+          <div className="bg-white px-6 py-6 border-b">
+            {/* Price Breakdown */}
+            <div className="space-y-2 mb-4 p-4 bg-gray-50 rounded-xl">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Zwischensumme</span>
+                <span className="text-gray-900">{formatPrice(getCartTotal())}</span>
+              </div>
+              {restaurant.settings?.serviceFeeEnabled && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-600">
+                    Service-Gebühr
+                    {restaurant.settings.serviceFeeType === 'PERCENT' && 
+                      ` (${restaurant.settings.serviceFeePercent}%)`}
+                  </span>
+                  <span className="text-gray-900">{formatPrice(calculateServiceFee(getCartTotal()))}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center font-semibold pt-2 border-t">
+                <span>Gesamt (vor Trinkgeld)</span>
+                <span className="text-xl text-[#FF6B35]">{formatPrice(getCartTotal() + calculateServiceFee(getCartTotal()))}</span>
+              </div>
             </div>
             
             {/* Tip Options */}
@@ -998,7 +1029,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
               className="w-full bg-gradient-to-r from-[#FF6B35] to-[#E85A24] hover:from-[#E85A24] hover:to-[#FF6B35] text-white rounded-2xl py-5 text-lg font-bold mt-6 shadow-lg flex items-center justify-center gap-2"
             >
               {selectedPaymentMethod === 'CASH' ? t('payment.placeOrder') : t('payment.payNow')}
-              • {currencySymbol}{(getCartTotal() + currentTipAmount).toFixed(2)}
+              • {currencySymbol}{(getCartTotal() + calculateServiceFee(getCartTotal()) + currentTipAmount).toFixed(2)}
               <span>→</span>
             </Button>
           </div>

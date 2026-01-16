@@ -167,6 +167,12 @@ model RestaurantSettings {
   taxRate            Float   @default(19)
   includeTax         Boolean @default(true)
   
+  // Service Fee
+  serviceFeeEnabled  Boolean @default(false)
+  serviceFeePercent  Float   @default(0)
+  serviceFeeAmount   Float   @default(0)
+  serviceFeeType     String  @default("PERCENT") // PERCENT or FIXED
+  
   // Sprache & Währung
   currency          String  @default("EUR")
   language          String  @default("de")
@@ -315,6 +321,7 @@ model Order {
   // Preise
   subtotal     Float
   tax          Float
+  serviceFee   Float    @default(0)
   total        Float
   
   // Gast-Info (optional)

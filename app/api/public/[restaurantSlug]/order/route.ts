@@ -93,6 +93,16 @@ export async function POST(
       })
     }
 
+    // Berechne Service Fee
+    let serviceFee = 0
+    if (restaurant.settings?.serviceFeeEnabled) {
+      if (restaurant.settings.serviceFeeType === 'PERCENT') {
+        serviceFee = subtotal * (restaurant.settings.serviceFeePercent / 100)
+      } else {
+        serviceFee = restaurant.settings.serviceFeeAmount || 0
+      }
+    }
+    
     // Berechne Steuer
     const taxRate = restaurant.settings?.taxRate || 19
     const includeTax = restaurant.settings?.includeTax ?? true
@@ -106,9 +116,9 @@ export async function POST(
       tax = subtotal * (taxRate / 100)
     }
 
-    // Füge Trinkgeld hinzu
+    // Füge Trinkgeld und Service Fee hinzu
     const tip = tipAmount || 0
-    const total = subtotal + (includeTax ? 0 : tax) + tip
+    const total = subtotal + (includeTax ? 0 : tax) + serviceFee + tip
 
     // Generiere Bestellnummer als String
     const count = await prisma.order.count({
@@ -136,6 +146,7 @@ export async function POST(
         status: 'PENDING',
         subtotal,
         tax,
+        serviceFee,
         total,
         tip,
         tipPercent: tipPercent || null,

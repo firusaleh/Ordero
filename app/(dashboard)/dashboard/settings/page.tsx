@@ -55,6 +55,14 @@ export default function SettingsPage() {
       badge: 'NEU'
     },
     {
+      title: 'Gebühren & Steuern',
+      description: 'Service-Gebühren und Steuereinstellungen',
+      href: '/dashboard/settings/fees',
+      icon: CreditCard,
+      color: 'bg-amber-500',
+      badge: 'NEU'
+    },
+    {
       title: t('settings.pos.title'),
       description: t('settings.pos.description'),
       href: '/dashboard/settings/pos',
