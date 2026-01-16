@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { toast } from 'sonner'
-import { Shield, Key, Lock, UserCheck, AlertTriangle } from 'lucide-react'
+import { Shield, Key, Lock, UserCheck, AlertTriangle, Loader2 } from 'lucide-react'
+import { showErrorToast, showSuccessToast, parseApiResponse } from '@/lib/error-handling'
 
 export default function SecuritySettingsClient() {
   const [twoFactor, setTwoFactor] = useState(false)
@@ -15,13 +15,117 @@ export default function SecuritySettingsClient() {
   const [passwordExpiry, setPasswordExpiry] = useState('90')
   const [loginAttempts, setLoginAttempts] = useState('5')
   const [ipRestriction, setIpRestriction] = useState(false)
+  const [saving, setSaving] = useState<string | null>(null)
 
-  const handlePasswordChange = () => {
-    toast.success('Passwort-Einstellungen aktualisiert')
+  const handlePasswordChange = async () => {
+    setSaving('password')
+    try {
+      // Simuliere API-Call für Demo
+      // In Produktion: const response = await fetch('/api/settings/security/password', {...})
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simuliere zufälligen Fehler für Demo (20% Chance)
+          if (Math.random() < 0.2) {
+            reject(new Error('Passwort-Richtlinien konnten nicht aktualisiert werden. Bitte versuchen Sie es erneut.'))
+          } else {
+            resolve(true)
+          }
+        }, 1000)
+      })
+      
+      showSuccessToast('Passwort-Einstellungen aktualisiert')
+    } catch (error) {
+      showErrorToast(error, 'Passwort-Richtlinien konnten nicht gespeichert werden')
+    } finally {
+      setSaving(null)
+    }
   }
 
-  const handleSave = () => {
-    toast.success('Sicherheitseinstellungen gespeichert')
+  const handleSave = async () => {
+    setSaving('session')
+    try {
+      // Validierung
+      const timeout = parseInt(sessionTimeout)
+      if (isNaN(timeout) || timeout < 5 || timeout > 1440) {
+        throw new Error('Sitzungs-Timeout muss zwischen 5 und 1440 Minuten liegen')
+      }
+
+      // Simuliere API-Call für Demo
+      // In Produktion: const response = await fetch('/api/settings/security/session', {...})
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          // Simuliere zufälligen Fehler für Demo (20% Chance)
+          if (Math.random() < 0.2) {
+            reject(new Error('Verbindung zum Server fehlgeschlagen'))
+          } else {
+            resolve(true)
+          }
+        }, 1000)
+      })
+      
+      showSuccessToast('Sicherheitseinstellungen gespeichert')
+    } catch (error) {
+      showErrorToast(error, 'Sitzungseinstellungen konnten nicht gespeichert werden')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handle2FAToggle = async (enabled: boolean) => {
+    setTwoFactor(enabled)
+    
+    if (enabled) {
+      setSaving('2fa')
+      try {
+        // In Produktion: API-Call zum Aktivieren von 2FA
+        await new Promise((resolve, reject) => {
+          setTimeout(() => {
+            if (Math.random() < 0.2) {
+              reject(new Error('2FA-Aktivierung fehlgeschlagen. Der QR-Code konnte nicht generiert werden.'))
+            } else {
+              resolve(true)
+            }
+          }, 1000)
+        })
+        
+        showSuccessToast('Zwei-Faktor-Authentifizierung aktiviert')
+      } catch (error) {
+        setTwoFactor(false) // Zurücksetzen bei Fehler
+        showErrorToast(error, '2FA konnte nicht aktiviert werden')
+      } finally {
+        setSaving(null)
+      }
+    } else {
+      showSuccessToast('Zwei-Faktor-Authentifizierung deaktiviert')
+    }
+  }
+
+  const handleAccessControl = async () => {
+    setSaving('access')
+    try {
+      // Validierung
+      const attempts = parseInt(loginAttempts)
+      if (isNaN(attempts) || attempts < 1 || attempts > 10) {
+        throw new Error('Anmeldeversuche müssen zwischen 1 und 10 liegen')
+      }
+
+      // Simuliere API-Call
+      await new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (Math.random() < 0.2) {
+            reject(new Error('Zugriffskontrolle konnte nicht aktualisiert werden'))
+          } else {
+            resolve(true)
+          }
+        }, 1000)
+      })
+      
+      showSuccessToast('Zugriffskontrolle aktualisiert')
+    } catch (error) {
+      showErrorToast(error, 'Zugriffseinstellungen konnten nicht gespeichert werden')
+    } finally {
+      setSaving(null)
+    }
   }
 
   return (
@@ -50,6 +154,7 @@ export default function SecuritySettingsClient() {
                 type="number"
                 value={passwordExpiry}
                 onChange={(e) => setPasswordExpiry(e.target.value)}
+                disabled={saving === 'password'}
               />
               <p className="text-sm text-gray-500 mt-1">
                 Benutzer müssen ihr Passwort nach dieser Zeit ändern
@@ -58,10 +163,15 @@ export default function SecuritySettingsClient() {
             
             <div className="flex items-center justify-between">
               <Label htmlFor="strongPassword">Starke Passwörter erzwingen</Label>
-              <Switch id="strongPassword" defaultChecked />
+              <Switch id="strongPassword" defaultChecked disabled={saving === 'password'} />
             </div>
 
-            <Button onClick={handlePasswordChange} className="w-full">
+            <Button 
+              onClick={handlePasswordChange} 
+              className="w-full"
+              disabled={saving !== null}
+            >
+              {saving === 'password' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Passwort-Richtlinien speichern
             </Button>
           </CardContent>
@@ -83,7 +193,8 @@ export default function SecuritySettingsClient() {
               <Switch
                 id="2fa"
                 checked={twoFactor}
-                onCheckedChange={setTwoFactor}
+                onCheckedChange={handle2FAToggle}
+                disabled={saving === '2fa'}
               />
             </div>
 
@@ -98,7 +209,8 @@ export default function SecuritySettingsClient() {
               </div>
             )}
 
-            <Button disabled={!twoFactor} className="w-full">
+            <Button disabled={!twoFactor || saving === '2fa'} className="w-full">
+              {saving === '2fa' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               2FA einrichten
             </Button>
           </CardContent>
@@ -122,6 +234,9 @@ export default function SecuritySettingsClient() {
                 type="number"
                 value={sessionTimeout}
                 onChange={(e) => setSessionTimeout(e.target.value)}
+                disabled={saving === 'session'}
+                min="5"
+                max="1440"
               />
               <p className="text-sm text-gray-500 mt-1">
                 Automatische Abmeldung nach Inaktivität
@@ -130,10 +245,15 @@ export default function SecuritySettingsClient() {
 
             <div className="flex items-center justify-between">
               <Label htmlFor="singleSession">Nur eine Sitzung erlauben</Label>
-              <Switch id="singleSession" />
+              <Switch id="singleSession" disabled={saving === 'session'} />
             </div>
 
-            <Button onClick={handleSave} className="w-full">
+            <Button 
+              onClick={handleSave} 
+              className="w-full"
+              disabled={saving !== null}
+            >
+              {saving === 'session' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sitzungseinstellungen speichern
             </Button>
           </CardContent>
@@ -157,6 +277,9 @@ export default function SecuritySettingsClient() {
                 type="number"
                 value={loginAttempts}
                 onChange={(e) => setLoginAttempts(e.target.value)}
+                disabled={saving === 'access'}
+                min="1"
+                max="10"
               />
               <p className="text-sm text-gray-500 mt-1">
                 Konto wird nach dieser Anzahl fehlgeschlagener Versuche gesperrt
@@ -169,42 +292,37 @@ export default function SecuritySettingsClient() {
                 id="ipRestriction"
                 checked={ipRestriction}
                 onCheckedChange={setIpRestriction}
+                disabled={saving === 'access'}
               />
             </div>
 
             {ipRestriction && (
-              <div>
-                <Label htmlFor="allowedIps">Erlaubte IP-Adressen</Label>
-                <textarea
-                  id="allowedIps"
-                  className="w-full px-3 py-2 border rounded-md"
-                  rows={3}
-                  placeholder="Eine IP-Adresse pro Zeile"
-                />
+              <div className="p-4 bg-yellow-50 rounded-lg">
+                <div className="flex gap-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm text-yellow-800 font-medium">
+                      IP-Beschränkung aktiv
+                    </p>
+                    <p className="text-sm text-yellow-700 mt-1">
+                      Zugriff nur von freigegebenen IP-Adressen möglich
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
-            <Button onClick={handleSave} className="w-full">
-              Zugriffskontrolle speichern
+            <Button 
+              onClick={handleAccessControl} 
+              className="w-full"
+              disabled={saving !== null}
+            >
+              {saving === 'access' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Zugriffseinstellungen speichern
             </Button>
           </CardContent>
         </Card>
       </div>
-
-      <Card className="bg-yellow-50 border-yellow-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-yellow-800">
-            <AlertTriangle className="h-5 w-5" />
-            Sicherheitshinweis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-yellow-700">
-            Aktivieren Sie Zwei-Faktor-Authentifizierung für zusätzliche Sicherheit. 
-            Regelmäßige Passwortänderungen und starke Passwortrichtlinien schützen vor unbefugtem Zugriff.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   )
 }
