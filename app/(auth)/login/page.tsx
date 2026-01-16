@@ -13,13 +13,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-
-const loginSchema = z.object({
-  email: z.string().email('Bitte geben Sie eine gültige E-Mail-Adresse ein'),
-  password: z.string().min(1, 'Passwort ist erforderlich'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+import LanguageSelector from '@/components/language-selector'
+import { translations, type Language } from '@/lib/translations'
 
 function LoginForm() {
   const router = useRouter()
@@ -27,6 +22,16 @@ function LoginForm() {
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard'
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [language, setLanguage] = useState<Language>('de')
+  
+  const t = translations[language].login
+
+  const loginSchema = z.object({
+    email: z.string().email(t.errors.invalidCredentials),
+    password: z.string().min(1, t.errors.invalidCredentials),
+  })
+
+  type LoginFormData = z.infer<typeof loginSchema>
 
   const {
     register,
@@ -43,10 +48,10 @@ function LoginForm() {
       const result = await handleLogin(data.email, data.password)
 
       if (result?.error) {
-        toast.error(result.error)
+        toast.error(t.errors.invalidCredentials)
         setIsLoading(false)
       } else {
-        toast.success('Erfolgreich angemeldet!')
+        toast.success('✓')
         // Server Action handles redirect, just refresh
         router.refresh()
         // Fallback redirect after a short delay
@@ -55,46 +60,55 @@ function LoginForm() {
         }, 100)
       }
     } catch (error) {
-      toast.error('Ein Fehler ist aufgetreten')
+      toast.error(t.errors.genericError)
       setIsLoading(false)
     }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector 
+          currentLang={language}
+          onLanguageChange={(lang) => setLanguage(lang)}
+        />
+      </div>
+      
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Willkommen zurück
+            {t.title}
           </CardTitle>
           <CardDescription className="text-center">
-            Melden Sie sich bei Ihrem Konto an
+            {t.subtitle}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-Mail</Label>
+              <Label htmlFor="email">{t.email}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder={t.emailPlaceholder}
                 disabled={isLoading}
                 {...register('email')}
+                dir="ltr"
               />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Passwort</Label>
+              <Label htmlFor="password">{t.password}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  placeholder={t.passwordPlaceholder}
                   disabled={isLoading}
                   {...register('password')}
+                  dir="ltr"
                 />
                 <button
                   type="button"
@@ -118,7 +132,7 @@ function LoginForm() {
                 href="/forgot-password" 
                 className="text-sm text-blue-600 hover:underline"
               >
-                Passwort vergessen?
+                {t.forgotPassword}
               </Link>
             </div>
           </CardContent>
@@ -129,15 +143,15 @@ function LoginForm() {
               disabled={isLoading}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Anmelden
+              {isLoading ? t.loggingIn : t.loginButton}
             </Button>
             <div className="text-sm text-center text-gray-600">
-              Noch kein Konto?{' '}
+              {t.noAccount}{' '}
               <Link 
                 href="/register" 
                 className="text-blue-600 hover:underline font-medium"
               >
-                Jetzt registrieren
+                {t.registerNow}
               </Link>
             </div>
           </CardFooter>

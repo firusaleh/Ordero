@@ -9,6 +9,8 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   restaurantName: z.string().min(2),
+  phone: z.string().optional(),
+  country: z.string().default('DE'),
 })
 
 export async function POST(request: NextRequest) {
@@ -82,6 +84,7 @@ export async function POST(request: NextRequest) {
           email: validatedData.email,
           password: hashedPassword,
           name: validatedData.name,
+          phone: validatedData.phone,
           role: 'RESTAURANT_OWNER',
         }
       })
@@ -100,6 +103,8 @@ export async function POST(request: NextRequest) {
           plan: 'TRIAL',
           trialEndsAt,
           email: validatedData.email,
+          phone: validatedData.phone,
+          country: validatedData.country || 'DE',
         }
       })
       
