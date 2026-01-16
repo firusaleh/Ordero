@@ -123,8 +123,15 @@ model Restaurant {
   stripePriceId         String?
   stripeCurrentPeriodEnd DateTime?
   subscriptionStatus     String?   @default("FREE") // FREE, ACTIVE, CANCELLED, PAST_DUE
-  subscriptionPlan       String?   @default("FREE") // FREE, STANDARD, PREMIUM
+  subscriptionPlan       String?   @default("FREE") // FREE, STANDARD, PREMIUM, JO_PAY_PER_ORDER, DE_PAY_PER_ORDER, DE_MONTHLY, DE_YEARLY
   subscriptionCurrentPeriodEnd DateTime?
+  
+  // Pay-per-Order Billing
+  billingEnabled          Boolean @default(false)
+  payPerOrderEnabled      Boolean @default(false)
+  payPerOrderRate         Float?  // Rate pro Bestellung (0.10 für JO, 0.35 für DE)
+  monthlyOrderCount       Int @default(0) // Zähler für Bestellungen im aktuellen Monat
+  lastBillingDate         DateTime? // Letztes Abrechnungsdatum
   
   // Stripe Connect (für Zahlungsabwicklung)
   stripeAccountId        String?   // Connected Stripe Account ID

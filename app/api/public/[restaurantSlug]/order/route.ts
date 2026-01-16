@@ -165,6 +165,28 @@ export async function POST(
       }
     })
 
+    // Automatische Abrechnung für Jordanien Pay-per-Order
+    if (restaurant.country === 'JO' && restaurant.payPerOrderEnabled && restaurant.payPerOrderRate) {
+      try {
+        // Erhöhe den monatlichen Bestellzähler
+        await prisma.restaurant.update({
+          where: { id: restaurant.id },
+          data: {
+            monthlyOrderCount: {
+              increment: 1
+            }
+          }
+        })
+        
+        // TODO: Hier könnte später die tatsächliche Abrechnung implementiert werden
+        // z.B. über einen Payment Provider oder eine Billing-Tabelle
+        console.log(`[BILLING] Bestellung ${orderNumber} für Restaurant ${restaurant.name} (JO) - Gebühr: ${restaurant.payPerOrderRate} JD`)
+      } catch (billingError) {
+        // Billing-Fehler sollten die Bestellung nicht verhindern
+        console.error('Fehler bei der automatischen Abrechnung:', billingError)
+      }
+    }
+
     // E-Mail-Benachrichtigungen senden
     try {
       // Benachrichtigung an Restaurant

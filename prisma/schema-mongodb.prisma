@@ -108,11 +108,18 @@ model Restaurant {
   orders      Order[]
   settings    RestaurantSettings?
   
-  // Stripe
+  // Stripe & Billing
   stripeCustomerId       String?
   stripeSubscriptionId   String?
   stripePriceId         String?
   stripeCurrentPeriodEnd DateTime?
+  subscriptionStatus     String? @default("FREE")
+  subscriptionPlan       String? @default("FREE") // FREE, JO_PAY_PER_ORDER, DE_PAY_PER_ORDER, DE_MONTHLY, DE_YEARLY
+  billingEnabled         Boolean @default(false)
+  payPerOrderEnabled     Boolean @default(false)
+  payPerOrderRate        Float? // 0.10 für JO, 0.35 für DE
+  monthlyOrderCount      Int @default(0)
+  lastBillingDate        DateTime?
   
   // Timestamps
   createdAt DateTime @default(now())
