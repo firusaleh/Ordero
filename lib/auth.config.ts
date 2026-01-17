@@ -84,22 +84,31 @@ export const authConfig: NextAuthConfig = {
       return session
     },
     async redirect({ url, baseUrl }) {
-      // Nach Login: Standard-Redirect zum Dashboard
-      // Die rollenbasierte Weiterleitung wird in der Middleware behandelt
-      if (url === baseUrl || url === `${baseUrl}/`) {
-        return `${baseUrl}/dashboard`
-      }
-      
-      // Erlaubte Redirects
+      // Relative URLs - prefix with baseUrl
       if (url.startsWith("/")) {
         return `${baseUrl}${url}`
       }
       
+      // Already absolute URL with correct base
       if (url.startsWith(baseUrl)) {
         return url
       }
       
-      return baseUrl
+      // Default - return the requested URL if it's safe
+      try {
+        const requestedUrl = new URL(url)
+        const baseUrlObj = new URL(baseUrl)
+        
+        // Only allow redirects to the same host
+        if (requestedUrl.host === baseUrlObj.host) {
+          return url
+        }
+      } catch {
+        // Invalid URL - ignore
+      }
+      
+      // Fallback to current page (no redirect)
+      return url
     }
   },
 }

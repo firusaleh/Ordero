@@ -78,11 +78,20 @@ export default authEdge((req) => {
     return NextResponse.redirect(new URL("/dashboard", nextUrl))
   }
   
+  // Für alle anderen Routen: einfach durchlassen
   return NextResponse.next()
 })
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.svg$|.*\\.webp$).*)",
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public assets (images, etc.)
+     * - oriido-website (HTML files)
+     */
+    "/((?!_next/static|_next/image|favicon.ico|oriido-website|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.svg$|.*\\.webp$|.*\\.html$|.*\\.css$|.*\\.js$).*)",
   ],
 }
