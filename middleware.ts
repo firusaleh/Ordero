@@ -18,7 +18,11 @@ export default authEdge((req) => {
     "/test-login",
     "/payment/paytabs-return",
     "/terms",
-    "/privacy"
+    "/privacy",
+    "/imprint",
+    "/about",
+    "/blog",
+    "/careers"
   ]
   const isPublicRoute = publicRoutes.some(route => 
     nextUrl.pathname === route || 
@@ -40,6 +44,11 @@ export default authEdge((req) => {
   
   // API-Routen immer durchlassen
   if (isApiRoute) {
+    return NextResponse.next()
+  }
+  
+  // Öffentliche Routen immer durchlassen
+  if (isPublicRoute) {
     return NextResponse.next()
   }
   
