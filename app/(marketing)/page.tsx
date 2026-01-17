@@ -87,9 +87,9 @@ export default function HomePage() {
       {/* Mobile Menu */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'active' : ''}`}>
         <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)}>×</button>
-        <Link href="#features" onClick={() => setMobileMenuOpen(false)}>Features</Link>
-        <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>So funktioniert's</Link>
-        <Link href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</Link>
+        <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
+        <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>So funktioniert's</a>
+        <a href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</a>
         <Link href="/login">Login</Link>
         <Link href="/register" className="btn-primary">Kostenlos starten</Link>
       </div>
@@ -101,9 +101,9 @@ export default function HomePage() {
             <Image src="/oriido-logo.png" alt="Oriido" width={120} height={40} />
           </Link>
           <div className="nav-links">
-            <Link href="#features">Features</Link>
-            <Link href="#how-it-works">So funktioniert's</Link>
-            <Link href="#faq">FAQ</Link>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">So funktioniert's</a>
+            <a href="#faq">FAQ</a>
             <Link href="/login" className="nav-login">Login</Link>
             <Link href="/register" className="nav-cta">Kostenlos starten</Link>
           </div>
@@ -128,9 +128,9 @@ export default function HomePage() {
               <Link href="/register" className="btn-primary">
                 Kostenlos starten →
               </Link>
-              <Link href="#contact" className="btn-secondary">
+              <a href="#contact" className="btn-secondary">
                 Mehr erfahren
-              </Link>
+              </a>
             </div>
             <div className="hero-stats">
               <div className="hero-stat">
@@ -581,9 +581,9 @@ export default function HomePage() {
             <Link href="/register" className="btn-primary">
               Kostenlos starten →
             </Link>
-            <Link href="#contact" className="btn-secondary">
+            <a href="#contact" className="btn-secondary">
               Demo anfordern
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -600,17 +600,17 @@ export default function HomePage() {
             </div>
             <div className="footer-col">
               <h4>Produkt</h4>
-              <Link href="#features">Features</Link>
-              <Link href="#how-it-works">So funktioniert's</Link>
-              <Link href="#faq">FAQ</Link>
-              <Link href="#contact">Kontakt</Link>
+              <a href="#features">Features</a>
+              <a href="#how-it-works">So funktioniert's</a>
+              <a href="#faq">FAQ</a>
+              <a href="#contact">Kontakt</a>
             </div>
             <div className="footer-col">
               <h4>Unternehmen</h4>
               <Link href="/about">Über uns</Link>
               <Link href="/blog">Blog</Link>
               <Link href="/careers">Karriere</Link>
-              <Link href="#contact">Kontakt</Link>
+              <a href="#contact">Kontakt</a>
             </div>
             <div className="footer-col">
               <h4>Rechtliches</h4>
