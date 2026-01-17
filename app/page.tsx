@@ -1,5 +1,17 @@
-import MarketingPage from './(marketing)/page'
+'use client'
 
 export default function HomePage() {
-  return <MarketingPage />
+  return (
+    <iframe 
+      src="/oriido-website/index.html" 
+      style={{ 
+        width: '100vw', 
+        height: '100vh', 
+        border: 'none', 
+        position: 'fixed', 
+        top: 0, 
+        left: 0 
+      }}
+    />
+  )
 }
