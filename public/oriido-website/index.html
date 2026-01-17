@@ -1906,6 +1906,24 @@
     </style>
 </head>
 <body>
+    <script>
+        // Handle navigation from iframe to parent window
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for all links that should navigate the parent
+            const navLinks = document.querySelectorAll('a[href^="/"]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    // Check if we're in an iframe
+                    if (window.parent !== window) {
+                        e.preventDefault();
+                        // Navigate the parent window
+                        window.parent.location.href = href;
+                    }
+                });
+            });
+        });
+    </script>
     <!-- Ambient Background -->
     <div class="ambient-bg"></div>
     <div class="grid-overlay"></div>
@@ -1919,8 +1937,8 @@
         <a href="#features" onclick="closeMobileMenu()">Features</a>
         <a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a>
         <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
-        <a href="https://www.oriido.com/login">Login</a>
-        <a href="https://www.oriido.com/register" class="btn-primary">Get Started Free</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-primary">Get Started Free</a>
     </div>
 
     <!-- Navigation -->
@@ -1933,8 +1951,8 @@
                 <a href="#features">Features</a>
                 <a href="#how-it-works">How It Works</a>
                 <a href="#faq">FAQ</a>
-                <a href="https://www.oriido.com/login" class="nav-login">Login</a>
-                <a href="https://www.oriido.com/register" class="nav-cta">Get Started Free</a>
+                <a href="/login" class="nav-login">Login</a>
+                <a href="/register" class="nav-cta">Get Started Free</a>
             </div>
             <button class="mobile-menu-btn" onclick="openMobileMenu()">☰</button>
         </div>
@@ -1954,7 +1972,7 @@
                     No app, no download – just scan and order.
                 </p>
                 <div class="hero-buttons">
-                    <a href="https://www.oriido.com/register" class="btn-primary">
+                    <a href="/register" class="btn-primary">
                         Get Started Free →
                     </a>
                     <a href="#contact" class="btn-secondary">
