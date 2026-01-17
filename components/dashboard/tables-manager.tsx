@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -75,6 +75,39 @@ export default function TablesManager({ restaurant, initialTables }: TablesManag
   })
 
   const [qrPreview, setQrPreview] = useState<{ [key: string]: string }>({})
+
+  // Generate QR codes for existing tables on mount
+  useEffect(() => {
+    const generateExistingQRCodes = async () => {
+      const previews: { [key: string]: string } = {}
+      
+      for (const table of tables) {
+        if (table.qrCodeUrl || table.number) {
+          const url = table.qrCodeUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${table.number}`
+          try {
+            const qrDataUrl = await QRCode.toDataURL(url, {
+              width: 300,
+              margin: 2,
+              color: {
+                dark: '#000000',
+                light: '#ffffff',
+              },
+              errorCorrectionLevel: 'H',
+            })
+            previews[table.id] = qrDataUrl
+          } catch (error) {
+            console.error(`Error generating QR code for table ${table.number}:`, error)
+          }
+        }
+      }
+      
+      setQrPreview(previews)
+    }
+    
+    if (tables.length > 0) {
+      generateExistingQRCodes()
+    }
+  }, [tables, restaurant.slug])
 
   const handleSaveTable = async () => {
     try {
@@ -196,7 +229,7 @@ export default function TablesManager({ restaurant, initialTables }: TablesManag
 
   const generateQRCode = async (tableNumber: number) => {
     try {
-      const url = `${process.env.NEXT_PUBLIC_APP_URL || 'https://ordero.de'}/r/${restaurant.slug}/tisch/${tableNumber}`
+      const url = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${tableNumber}`
       const qrDataUrl = await QRCode.toDataURL(url, {
         width: 300,
         margin: 2,
@@ -315,7 +348,7 @@ export default function TablesManager({ restaurant, initialTables }: TablesManag
   }
 
   const getTableUrl = (tableNumber: number) => {
-    return `${process.env.NEXT_PUBLIC_APP_URL || 'https://ordero.de'}/r/${restaurant.slug}/tisch/${tableNumber}`
+    return `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${tableNumber}`
   }
 
   return (

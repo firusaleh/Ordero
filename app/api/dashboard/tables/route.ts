@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         })
         
         if (!existingTable) {
-          const qrCode = `${process.env.NEXT_PUBLIC_APP_URL}/r/${restaurant.slug}/tisch/${i}`
+          const qrCode = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${i}`
           
           tables.push({
             restaurantId: restaurant.id,
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const qrCode = `${process.env.NEXT_PUBLIC_APP_URL}/r/${restaurant.slug}/tisch/${number}`
+    const qrCode = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${number}`
 
     const table = await prisma.table.create({
       data: {
