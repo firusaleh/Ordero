@@ -73,7 +73,24 @@ export default function LocalizationSettingsClient({
 
       if (!response.ok) throw new Error('Fehler beim Speichern')
 
+      // Speichere die Sprache in localStorage und lade die Seite neu
+      localStorage.setItem('language', settings.language)
+      
+      // Setze RTL für Arabisch
+      if (settings.language === 'ar') {
+        document.documentElement.dir = 'rtl'
+        document.documentElement.lang = 'ar'
+      } else {
+        document.documentElement.dir = 'ltr'
+        document.documentElement.lang = settings.language
+      }
+
       toast.success('Sprach- und Regionseinstellungen gespeichert')
+      
+      // Lade die Seite neu, um die neue Sprache anzuwenden
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
     } catch (error) {
       toast.error('Einstellungen konnten nicht gespeichert werden')
     } finally {
