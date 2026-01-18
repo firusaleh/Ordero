@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { authRateLimiter, checkRateLimit, getIpAddress } from '@/lib/rate-limit'
+import { sendWelcomeEmail } from '@/lib/email-sendgrid'
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -117,6 +118,26 @@ export async function POST(request: NextRequest) {
       
       return { user, restaurant }
     })
+    
+    // Sende Willkommens-E-Mail
+    try {
+      const emailResult = await sendWelcomeEmail({
+        email: validatedData.email,
+        name: validatedData.name,
+        restaurantName: validatedData.restaurantName,
+        password: validatedData.password, // Originales Passwort vor dem Hashen
+        loginUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login`
+      })
+      
+      if (emailResult.success) {
+        console.log('✅ Welcome email sent successfully to:', validatedData.email)
+      } else {
+        console.error('❌ Email failed:', emailResult.error, emailResult.details)
+      }
+    } catch (emailError: any) {
+      console.error('❌ Failed to send welcome email:', emailError.message)
+      // Fahre fort, auch wenn E-Mail fehlschlägt - Registrierung war erfolgreich
+    }
     
     return NextResponse.json({
       success: true,
