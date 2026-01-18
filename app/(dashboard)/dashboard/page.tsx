@@ -99,7 +99,7 @@ export default async function DashboardPage() {
       setupComplete={setupComplete}
       setupProgress={setupProgress}
       trialDaysLeft={trialDaysLeft}
-      userName={session.user.name}
+      userName={session.user.name || null}
       userEmail={session.user.email}
     />
   )
