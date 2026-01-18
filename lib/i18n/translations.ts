@@ -9,7 +9,8 @@ export const translations = {
       statistics: 'الإحصائيات',
       staff: 'الموظفون',
       billing: 'الفوترة',
-      settings: 'الإعدادات'
+      settings: 'الإعدادات',
+      setup: 'الإعداد'
     },
     // Dashboard
     dashboard: {
@@ -99,7 +100,8 @@ export const translations = {
       statistics: 'Statistiken',
       staff: 'Mitarbeiter',
       billing: 'Abrechnung',
-      settings: 'Einstellungen'
+      settings: 'Einstellungen',
+      setup: 'Einrichtung'
     },
     // Dashboard
     dashboard: {
@@ -189,7 +191,8 @@ export const translations = {
       statistics: 'Statistics',
       staff: 'Staff',
       billing: 'Billing',
-      settings: 'Settings'
+      settings: 'Settings',
+      setup: 'Setup'
     },
     // Dashboard
     dashboard: {

@@ -20,7 +20,7 @@ export default async function DashboardLayout({
     <LanguageProvider>
       <div className="min-h-screen bg-gray-50">
         <Sidebar />
-        <div className="lg:pl-64">
+        <div className="lg:pl-64 rtl:lg:pl-0 rtl:lg:pr-64">
           <DashboardHeader />
           <main className="py-8 px-4 sm:px-6 lg:px-8">
             {children}
