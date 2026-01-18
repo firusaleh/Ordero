@@ -670,7 +670,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
             </div>
             <div className="p-3 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">
-                {t('tables.tablesWillBeCreated', { count: parseInt(batchForm.endNumber) - parseInt(batchForm.startNumber) + 1 })}
+                {parseInt(batchForm.endNumber) - parseInt(batchForm.startNumber) + 1} {t('tables.tablesWillBeCreated')}
               </p>
               <p className="text-sm font-medium">
                 {batchForm.prefix}{batchForm.startNumber} {t('tables.toNumber').toLowerCase()} {batchForm.prefix}{batchForm.endNumber}
