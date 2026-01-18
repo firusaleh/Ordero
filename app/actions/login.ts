@@ -23,8 +23,6 @@ export async function handleLogin(email: string, password: string) {
           return { error: 'Ungültige E-Mail-Adresse oder Passwort' }
         case 'AccessDenied':
           return { error: 'Zugriff verweigert' }
-        case 'Configuration':
-          return { error: 'Konfigurationsfehler' }
         default:
           return { error: 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.' }
       }
