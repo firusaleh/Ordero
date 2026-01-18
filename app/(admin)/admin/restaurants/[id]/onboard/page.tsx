@@ -6,7 +6,7 @@ import RestaurantOnboarding from '@/components/admin/restaurant-onboarding'
 
 interface PageProps {
   params: Promise<{
-    restaurantId: string
+    id: string
   }>
 }
 
@@ -42,7 +42,7 @@ export default async function RestaurantOnboardingPage({ params }: PageProps) {
 
   // In Next.js 15+ params is a Promise
   const resolvedParams = await params
-  const restaurant = await getRestaurant(resolvedParams.restaurantId)
+  const restaurant = await getRestaurant(resolvedParams.id)
 
   if (!restaurant) {
     notFound()

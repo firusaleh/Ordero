@@ -63,12 +63,18 @@ function LoginForm() {
           }
         })
         setIsLoading(false)
-      } else {
-        // Login war erfolgreich - Server macht den Redirect
+      } else if (result?.success) {
+        // Login war erfolgreich - Client macht den Redirect
         toast.success('Anmeldung erfolgreich!', {
-          duration: 2000,
+          duration: 1000,
           position: 'top-center'
         })
+        
+        // Redirect zum Dashboard oder callbackUrl
+        setTimeout(() => {
+          router.push(callbackUrl)
+          router.refresh()
+        }, 500)
       }
     } catch (error) {
       console.error('Login error:', error)

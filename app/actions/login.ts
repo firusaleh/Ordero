@@ -2,18 +2,19 @@
 
 import { signIn } from "@/lib/auth"
 import { AuthError } from "next-auth"
-import { redirect } from 'next/navigation'
 
 export async function handleLogin(email: string, password: string) {
   try {
-    await signIn('credentials', {
+    const result = await signIn('credentials', {
       email,
       password,
       redirect: false // Wichtig: Kein automatischer Redirect
     })
     
-    // Erfolgreicher Login - manueller Redirect
-    redirect('/dashboard')
+    console.log('Login result:', result)
+    
+    // Erfolgreicher Login
+    return { success: true }
   } catch (error) {
     console.error('Login error:', error)
     
