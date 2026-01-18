@@ -155,6 +155,53 @@ export const translations = {
         cancelled: 'ملغى'
       }
     },
+    // Orders
+    orders: {
+      title: 'الطلبات',
+      subtitle: 'عرض مباشر لجميع الطلبات الواردة',
+      liveOrders: 'الطلبات المباشرة',
+      realtime: 'عرض فوري لجميع الطلبات الواردة',
+      offline: 'غير متصل',
+      noRealtime: 'التحديثات الفورية غير متاحة - قم بتحديث الصفحة يدوياً',
+      newOrder: 'طلب جديد',
+      newOrderDesc: 'طلب جديد من الطاولة {{table}}',
+      soundEnabled: 'الصوت مفعل',
+      soundDisabled: 'الصوت معطل',
+      filter: {
+        all: 'الكل',
+        pending: 'معلّق',
+        confirmed: 'مؤكد',
+        preparing: 'قيد التحضير',
+        ready: 'جاهز',
+        delivered: 'تم التوصيل',
+        cancelled: 'ملغى'
+      },
+      status: {
+        pending: 'معلّق',
+        confirmed: 'مؤكد',
+        preparing: 'قيد التحضير',
+        ready: 'جاهز',
+        delivered: 'تم التوصيل',
+        cancelled: 'ملغى'
+      },
+      actions: {
+        confirm: 'تأكيد',
+        startPreparing: 'بدء التحضير',
+        markReady: 'جاهز',
+        markDelivered: 'تم التوصيل',
+        cancel: 'إلغاء',
+        cancelConfirm: 'هل تريد حقاً إلغاء الطلب؟',
+        cancelledByStaff: 'ألغي بواسطة الموظف'
+      },
+      table: 'الطاولة',
+      takeaway: 'للاصطحاب',
+      orderNumber: 'رقم الطلب',
+      total: 'المجموع',
+      items: 'العناصر',
+      time: 'الوقت',
+      noOrders: 'لا توجد طلبات',
+      noOrdersDesc: 'لا توجد طلبات بعد. سيتم عرض الطلبات الجديدة هنا تلقائياً.'
+    },
     // Settings
     settings: {
       title: 'الإعدادات',
@@ -378,6 +425,53 @@ export const translations = {
         cancelled: 'Storniert'
       }
     },
+    // Orders
+    orders: {
+      title: 'Bestellungen',
+      subtitle: 'Live-Übersicht aller eingehenden Bestellungen',
+      liveOrders: 'Live Bestellungen',
+      realtime: 'Echtzeit-Übersicht aller eingehenden Bestellungen',
+      offline: 'Offline',
+      noRealtime: 'Echtzeit-Updates nicht verfügbar - Seite manuell aktualisieren',
+      newOrder: 'Neue Bestellung',
+      newOrderDesc: 'Neue Bestellung von Tisch {{table}}',
+      soundEnabled: 'Ton aktiviert',
+      soundDisabled: 'Ton deaktiviert',
+      filter: {
+        all: 'Alle',
+        pending: 'Ausstehend',
+        confirmed: 'Bestätigt',
+        preparing: 'In Zubereitung',
+        ready: 'Fertig',
+        delivered: 'Geliefert',
+        cancelled: 'Storniert'
+      },
+      status: {
+        pending: 'Ausstehend',
+        confirmed: 'Bestätigt',
+        preparing: 'In Zubereitung',
+        ready: 'Fertig',
+        delivered: 'Geliefert',
+        cancelled: 'Storniert'
+      },
+      actions: {
+        confirm: 'Bestätigen',
+        startPreparing: 'Zubereitung starten',
+        markReady: 'Fertig',
+        markDelivered: 'Ausgeliefert',
+        cancel: 'Stornieren',
+        cancelConfirm: 'Bestellung wirklich stornieren?',
+        cancelledByStaff: 'Vom Personal storniert'
+      },
+      table: 'Tisch',
+      takeaway: 'Zum Mitnehmen',
+      orderNumber: 'Bestellnummer',
+      total: 'Gesamt',
+      items: 'Artikel',
+      time: 'Zeit',
+      noOrders: 'Keine Bestellungen',
+      noOrdersDesc: 'Noch keine Bestellungen. Neue Bestellungen werden hier automatisch angezeigt.'
+    },
     // Settings
     settings: {
       title: 'Einstellungen',
@@ -600,6 +694,53 @@ export const translations = {
         completed: 'Completed',
         cancelled: 'Cancelled'
       }
+    },
+    // Orders
+    orders: {
+      title: 'Orders',
+      subtitle: 'Live overview of all incoming orders',
+      liveOrders: 'Live Orders',
+      realtime: 'Real-time overview of all incoming orders',
+      offline: 'Offline',
+      noRealtime: 'Real-time updates unavailable - refresh page manually',
+      newOrder: 'New Order',
+      newOrderDesc: 'New order from table {{table}}',
+      soundEnabled: 'Sound enabled',
+      soundDisabled: 'Sound disabled',
+      filter: {
+        all: 'All',
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        preparing: 'Preparing',
+        ready: 'Ready',
+        delivered: 'Delivered',
+        cancelled: 'Cancelled'
+      },
+      status: {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        preparing: 'Preparing',
+        ready: 'Ready',
+        delivered: 'Delivered',
+        cancelled: 'Cancelled'
+      },
+      actions: {
+        confirm: 'Confirm',
+        startPreparing: 'Start Preparing',
+        markReady: 'Ready',
+        markDelivered: 'Delivered',
+        cancel: 'Cancel',
+        cancelConfirm: 'Really cancel order?',
+        cancelledByStaff: 'Cancelled by staff'
+      },
+      table: 'Table',
+      takeaway: 'Takeaway',
+      orderNumber: 'Order Number',
+      total: 'Total',
+      items: 'Items',
+      time: 'Time',
+      noOrders: 'No Orders',
+      noOrdersDesc: 'No orders yet. New orders will appear here automatically.'
     },
     // Settings
     settings: {

@@ -8,22 +8,33 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Bell, Clock, CheckCircle, XCircle, Truck, ChefHat, Volume2, VolumeX } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
-import { de } from "date-fns/locale"
+import { de, ar, enUS } from "date-fns/locale"
 import { useNotificationSound } from "@/lib/hooks/use-notification-sound"
 import { useToast } from "@/hooks/use-toast"
 import { usePusher } from "@/components/providers/pusher-provider"
 import { LiveOrdersFallback } from "./live-orders-fallback"
+import { useLanguage } from "@/contexts/language-context"
 
 interface LiveOrdersProps {
   restaurantId: string
 }
 
 export function LiveOrders({ restaurantId }: LiveOrdersProps) {
+  const { t, language } = useLanguage()
   const [filter, setFilter] = useState<string>("ALL")
   const [previousOrderCount, setPreviousOrderCount] = useState(0)
   const { playSound, isEnabled: soundEnabled, toggleSound } = useNotificationSound()
   const { toast } = useToast()
   const { pusher } = usePusher()
+  
+  // Select date-fns locale based on language
+  const getLocale = () => {
+    switch(language) {
+      case 'ar': return ar
+      case 'de': return de
+      default: return enUS
+    }
+  }
   
   const { orders, isListening, updateOrderStatus, cancelOrder } = useRealtimeOrders({
     restaurantId,
@@ -49,8 +60,8 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
       const newOrders = orders.slice(0, orders.length - previousOrderCount)
       newOrders.forEach(order => {
         toast({
-          title: "🔔 Neue Bestellung",
-          description: `Neue Bestellung von Tisch ${order.tableNumber}`,
+          title: `🔔 ${t('orders.newOrder')}`,
+          description: t('orders.newOrderDesc').replace('{{table}}', order.tableNumber || t('orders.takeaway')),
           duration: 5000,
         })
       })
@@ -66,12 +77,12 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
   // Status-Badge-Komponente
   const StatusBadge = ({ status }: { status: string }) => {
     const config = {
-      PENDING: { label: "Ausstehend", variant: "secondary" as const, icon: Clock },
-      CONFIRMED: { label: "Bestätigt", variant: "default" as const, icon: CheckCircle },
-      PREPARING: { label: "In Zubereitung", variant: "default" as const, icon: ChefHat },
-      READY: { label: "Fertig", variant: "default" as const, icon: Bell },
-      DELIVERED: { label: "Geliefert", variant: "outline" as const, icon: Truck },
-      CANCELLED: { label: "Storniert", variant: "destructive" as const, icon: XCircle }
+      PENDING: { label: t('orders.status.pending'), variant: "secondary" as const, icon: Clock },
+      CONFIRMED: { label: t('orders.status.confirmed'), variant: "default" as const, icon: CheckCircle },
+      PREPARING: { label: t('orders.status.preparing'), variant: "default" as const, icon: ChefHat },
+      READY: { label: t('orders.status.ready'), variant: "default" as const, icon: Bell },
+      DELIVERED: { label: t('orders.status.delivered'), variant: "outline" as const, icon: Truck },
+      CANCELLED: { label: t('orders.status.cancelled'), variant: "destructive" as const, icon: XCircle }
     }[status] || { label: status, variant: "secondary" as const, icon: Clock }
     
     const Icon = config.icon
@@ -104,22 +115,22 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
             size="sm"
             onClick={() => updateOrderStatus(order.id, nextStatus)}
           >
-            {nextStatus === "CONFIRMED" && "Bestätigen"}
-            {nextStatus === "PREPARING" && "Zubereitung starten"}
-            {nextStatus === "READY" && "Fertig"}
-            {nextStatus === "DELIVERED" && "Ausgeliefert"}
+            {nextStatus === "CONFIRMED" && t('orders.actions.confirm')}
+            {nextStatus === "PREPARING" && t('orders.actions.startPreparing')}
+            {nextStatus === "READY" && t('orders.actions.markReady')}
+            {nextStatus === "DELIVERED" && t('orders.actions.markDelivered')}
           </Button>
         )}
         <Button
           size="sm"
           variant="destructive"
           onClick={() => {
-            if (confirm("Bestellung wirklich stornieren?")) {
-              cancelOrder(order.id, "Vom Personal storniert")
+            if (confirm(t('orders.actions.cancelConfirm'))) {
+              cancelOrder(order.id, t('orders.actions.cancelledByStaff'))
             }
           }}
         >
-          Stornieren
+          {t('orders.actions.cancel')}
         </Button>
       </div>
     )
@@ -130,8 +141,8 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              Live Bestellungen
+            <CardTitle className="flex items-center gap-2 rtl:gap-x-reverse">
+              {t('orders.liveOrders')}
               {isListening ? (
                 <span className="flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
@@ -139,14 +150,14 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                 </span>
               ) : (
                 <Badge variant="secondary" className="text-xs">
-                  Offline
+                  {t('orders.offline')}
                 </Badge>
               )}
             </CardTitle>
             <CardDescription>
               {isListening 
-                ? "Echtzeit-Übersicht aller eingehenden Bestellungen"
-                : "Echtzeit-Updates nicht verfügbar - Seite manuell aktualisieren"}
+                ? t('orders.realtime')
+                : t('orders.noRealtime')}
             </CardDescription>
           </div>
           <div className="flex items-center gap-2">
@@ -154,7 +165,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
               size="sm"
               variant="ghost"
               onClick={toggleSound}
-              title={soundEnabled ? "Sound deaktivieren" : "Sound aktivieren"}
+              title={soundEnabled ? t('orders.soundDisabled') : t('orders.soundEnabled')}
             >
               {soundEnabled ? (
                 <Volume2 className="h-4 w-4" />
@@ -163,7 +174,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
               )}
             </Button>
             <Badge variant="outline" className="text-lg px-3 py-1">
-              {filteredOrders.length} Bestellungen
+              {filteredOrders.length} {t('orders.title')}
             </Badge>
           </div>
         </div>
@@ -176,35 +187,35 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
             variant={filter === "ALL" ? "default" : "outline"}
             onClick={() => setFilter("ALL")}
           >
-            Alle
+            {t('orders.filter.all')}
           </Button>
           <Button
             size="sm"
             variant={filter === "PENDING" ? "default" : "outline"}
             onClick={() => setFilter("PENDING")}
           >
-            Ausstehend
+            {t('orders.filter.pending')}
           </Button>
           <Button
             size="sm"
             variant={filter === "CONFIRMED" ? "default" : "outline"}
             onClick={() => setFilter("CONFIRMED")}
           >
-            Bestätigt
+            {t('orders.filter.confirmed')}
           </Button>
           <Button
             size="sm"
             variant={filter === "PREPARING" ? "default" : "outline"}
             onClick={() => setFilter("PREPARING")}
           >
-            In Zubereitung
+            {t('orders.filter.preparing')}
           </Button>
           <Button
             size="sm"
             variant={filter === "READY" ? "default" : "outline"}
             onClick={() => setFilter("READY")}
           >
-            Fertig
+            {t('orders.filter.ready')}
           </Button>
         </div>
 
@@ -214,17 +225,17 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
             {filteredOrders.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
                 {filter === "ALL" 
-                  ? "Noch keine Bestellungen heute" 
-                  : `Keine ${filter.toLowerCase()} Bestellungen`}
+                  ? t('orders.noOrders') 
+                  : t('orders.noOrders')}
               </div>
             ) : (
               filteredOrders.map((order) => (
                 <Card key={order.id} className="p-4">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 rtl:gap-x-reverse">
                         <span className="font-semibold">
-                          Tisch {order.tableNumber}
+                          {order.tableNumber ? `${t('orders.table')} ${order.tableNumber}` : t('orders.takeaway')}
                         </span>
                         <StatusBadge status={order.status} />
                       </div>
@@ -236,7 +247,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                       <p className="text-xs text-gray-500">
                         {formatDistanceToNow(new Date(order.createdAt), {
                           addSuffix: true,
-                          locale: de
+                          locale: getLocale()
                         })}
                       </p>
                     </div>
