@@ -23,6 +23,7 @@ function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [language, setLanguage] = useState<Language>('de')
+  const [loginError, setLoginError] = useState<string | null>(null)
   
   const t = translations[language].login
 
@@ -43,33 +44,43 @@ function LoginForm() {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
+    setLoginError(null) // Reset error before new attempt
     
     try {
       const result = await handleLogin(data.email, data.password)
 
       if (result?.error) {
-        // Zeige die spezifische Fehlermeldung vom Server
+        // Zeige Fehlermeldung direkt im UI
+        setLoginError(result.error)
+        // Auch als Toast für zusätzliche Sichtbarkeit
         toast.error(result.error, {
           duration: 5000,
+          position: 'top-center',
           style: {
-            background: '#ef4444',
-            color: '#fff',
+            background: '#dc2626',
+            color: '#ffffff',
+            border: '1px solid #b91c1c',
           }
         })
         setIsLoading(false)
       } else {
         // Login war erfolgreich - Server macht den Redirect
         toast.success('Anmeldung erfolgreich!', {
-          duration: 2000
+          duration: 2000,
+          position: 'top-center'
         })
       }
     } catch (error) {
       console.error('Login error:', error)
-      toast.error('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.', {
+      const errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
+      setLoginError(errorMessage)
+      toast.error(errorMessage, {
         duration: 5000,
+        position: 'top-center',
         style: {
-          background: '#ef4444',
-          color: '#fff',
+          background: '#dc2626',
+          color: '#ffffff',
+          border: '1px solid #b91c1c',
         }
       })
       setIsLoading(false)
@@ -96,6 +107,15 @@ function LoginForm() {
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
+            {/* Fehleranzeige direkt im Formular */}
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-start space-x-2">
+                <svg className="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-medium">{loginError}</span>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">{t.email}</Label>
               <Input
