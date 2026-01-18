@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import TablesManager from '@/components/dashboard/tables-manager'
+import TablesManagerTranslated from '@/components/dashboard/tables-manager-translated'
 
 async function getTablesData(userId: string) {
   const restaurant = await prisma.restaurant.findFirst({
@@ -42,7 +42,7 @@ export default async function TablesPage() {
     redirect('/onboarding')
   }
 
-  return <TablesManager 
+  return <TablesManagerTranslated 
     restaurant={data.restaurant}
     initialTables={data.tables}
   />

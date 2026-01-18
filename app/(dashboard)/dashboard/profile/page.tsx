@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import ProfileView from '@/components/dashboard/profile-view'
+import ProfileViewTranslated from '@/components/dashboard/profile-view-translated'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -9,5 +9,5 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  return <ProfileView user={session.user} />
+  return <ProfileViewTranslated user={session.user} />
 }

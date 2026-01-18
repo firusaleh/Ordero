@@ -1,7 +1,7 @@
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import MenuManager from '@/components/dashboard/menu-manager'
+import MenuWrapper from '@/components/dashboard/menu-wrapper'
 
 async function getMenuData(userId: string) {
   const restaurant = await prisma.restaurant.findFirst({
@@ -49,7 +49,7 @@ export default async function MenuPage() {
     redirect('/onboarding')
   }
 
-  return <MenuManager 
+  return <MenuWrapper 
     restaurantId={data.restaurant.id} 
     initialCategories={data.categories}
   />
