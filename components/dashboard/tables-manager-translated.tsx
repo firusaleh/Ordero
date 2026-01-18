@@ -182,7 +182,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
 
       const result = await response.json()
       setTables([...tables, ...result.data])
-      toast.success(t('tables.tablesCreated', { count: tablesToCreate.length }))
+      toast.success(`${tablesToCreate.length} ${t('tables.tablesCreated')}`)
       setShowBatchDialog(false)
       resetBatchForm()
     } catch (error) {
