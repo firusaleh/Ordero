@@ -12,16 +12,148 @@ export const translations = {
       settings: 'الإعدادات',
       setup: 'الإعداد'
     },
+    // Setup Page
+    setup: {
+      title: 'إعداد المطعم',
+      subtitle: 'أكمل هذه الخطوات لتفعيل مطعمك بالكامل',
+      goLive: 'انطلق الآن!',
+      completeSetup: 'أكمل الإعداد',
+      required: 'مطلوب',
+      optional: 'اختياري',
+      edit: 'تعديل',
+      setup: 'إعداد',
+      manage: 'إدارة',
+      create: 'إنشاء',
+      configure: 'تكوين',
+      customize: 'تخصيص',
+      progress: {
+        title: 'التقدم الإجمالي',
+        description: '{{completed}} من {{total}} خطوات مطلوبة مكتملة',
+        ready: 'جاهز',
+        inProgress: 'قيد التنفيذ'
+      },
+      congratulations: 'تهانينا! مطعمك جاهز لاستقبال الطلبات.',
+      basic: {
+        title: 'المعلومات الأساسية',
+        basicInfo: {
+          title: 'البيانات الأساسية',
+          description: 'اسم المطعم والوصف وبيانات الاتصال'
+        },
+        address: {
+          title: 'العنوان',
+          description: 'العنوان الكامل للعملاء'
+        },
+        contact: {
+          title: 'الاتصال',
+          description: 'الهاتف والبريد الإلكتروني والموقع الإلكتروني'
+        }
+      },
+      menu: {
+        title: 'قائمة الطعام',
+        categories: {
+          title: 'الفئات',
+          description: 'إنشاء فئات قائمة الطعام'
+        },
+        items: {
+          title: 'الأطباق والمشروبات',
+          description: 'إضافة 5 عناصر على الأقل'
+        }
+      },
+      operation: {
+        title: 'التشغيل',
+        tables: {
+          title: 'الطاولات ورموز QR',
+          description: 'إعداد الطاولات وإنشاء رموز QR'
+        },
+        hours: {
+          title: 'ساعات العمل',
+          description: 'تحديد أوقات العمل'
+        },
+        payment: {
+          title: 'طرق الدفع',
+          description: 'تكوين خيارات الدفع المقبولة'
+        }
+      },
+      advanced: {
+        title: 'الإعدادات المتقدمة',
+        design: {
+          title: 'التصميم والمظهر',
+          description: 'الشعار والألوان والصور'
+        },
+        staff: {
+          title: 'الموظفون',
+          description: 'إضافة أعضاء الفريق'
+        },
+        notifications: {
+          title: 'الإشعارات',
+          description: 'البريد الإلكتروني والإشعارات الصوتية'
+        }
+      },
+      stats: {
+        categoriesCreated: 'فئات تم إنشاؤها',
+        itemsCreated: 'عناصر تم إنشاؤها',
+        tablesCreated: 'طاولات تم إنشاؤها'
+      },
+      tips: {
+        title: 'نصائح للبداية',
+        tip1: 'ابدأ بالبيانات الأساسية واعمل بالترتيب',
+        tip2: 'ارفع صورًا عالية الجودة لأطباقك - هذا يزيد الطلبات',
+        tip3: 'اختبر عملية الطلب عبر رمز QR بنفسك قبل البدء',
+        tip4: 'درّب فريقك على استخدام النظام'
+      },
+      errors: {
+        incompleteSteps: 'يرجى إكمال جميع الخطوات المطلوبة',
+        activationFailed: 'خطأ في التفعيل'
+      },
+      success: {
+        goLive: 'المطعم الآن مباشر! 🎉'
+      }
+    },
     // Dashboard
     dashboard: {
       title: 'لوحة التحكم',
       welcome: 'مرحباً بعودتك',
-      todayOrders: 'طلبات اليوم',
-      revenue: 'الإيرادات',
-      activeOrders: 'الطلبات النشطة',
-      newOrders: 'طلبات جديدة',
-      preparingOrders: 'قيد التحضير',
-      readyOrders: 'جاهز'
+      setupIncomplete: 'إعداد المطعم غير مكتمل',
+      completed: 'مكتمل',
+      setupDescription: 'أكمل الإعداد حتى يتمكن العملاء من الطلب منك.',
+      missingBasicInfo: 'البيانات الأساسية والوصف مفقودة',
+      missingAddress: 'العنوان غير مكتمل',
+      missingCategories: 'لم يتم إنشاء فئات قائمة الطعام',
+      missingMenuItems: 'أقل من 5 عناصر في قائمة الطعام',
+      missingTables: 'لم يتم إنشاء طاولات/رموز QR',
+      missingPaymentMethods: 'لم يتم تكوين طرق الدفع',
+      continueSetup: 'متابعة الإعداد',
+      trialVersion: 'النسخة التجريبية',
+      daysRemaining: 'أيام متبقية',
+      trialDescription: 'تنتهي النسخة التجريبية في {{days}} يوم. قم بالترقية الآن للاستمرار في استخدام جميع الميزات.',
+      upgradeNow: 'قم بالترقية الآن',
+      todayRevenue: 'إيرادات اليوم',
+      fromYesterday: 'من الأمس',
+      ordersToday: 'طلبات اليوم',
+      pending: 'معلّق',
+      averageOrderValue: 'متوسط قيمة الطلب',
+      today: 'اليوم',
+      activeTables: 'الطاولات النشطة',
+      qrCodesGenerated: 'رموز QR تم إنشاؤها',
+      manage: 'إدارة',
+      items: 'عناصر',
+      qrCodes: 'رموز QR',
+      tables: 'طاولات',
+      view: 'عرض',
+      recentOrders: 'الطلبات الأخيرة',
+      viewAll: 'عرض الكل',
+      order: 'الطلب',
+      table: 'الطاولة',
+      takeaway: 'للاصطحاب',
+      noOrdersToday: 'لا توجد طلبات اليوم بعد',
+      orderStatus: {
+        pending: 'معلّق',
+        confirmed: 'مؤكد',
+        preparing: 'قيد التحضير',
+        ready: 'جاهز',
+        completed: 'مكتمل',
+        cancelled: 'ملغى'
+      }
     },
     // Settings
     settings: {
@@ -103,16 +235,148 @@ export const translations = {
       settings: 'Einstellungen',
       setup: 'Einrichtung'
     },
+    // Setup Page
+    setup: {
+      title: 'Restaurant einrichten',
+      subtitle: 'Vervollständigen Sie die Einrichtung, um online zu gehen',
+      goLive: 'Jetzt Live gehen!',
+      completeSetup: 'Einrichtung abschließen',
+      required: 'Erforderlich',
+      optional: 'Optional',
+      edit: 'Bearbeiten',
+      setup: 'Einrichten',
+      manage: 'Verwalten',
+      create: 'Anlegen',
+      configure: 'Konfigurieren',
+      customize: 'Anpassen',
+      progress: {
+        title: 'Gesamt-Fortschritt',
+        description: '{{completed}} von {{total}} erforderlichen Schritten abgeschlossen',
+        ready: 'Bereit',
+        inProgress: 'In Bearbeitung'
+      },
+      congratulations: 'Glückwunsch! Ihr Restaurant ist bereit für Bestellungen.',
+      basic: {
+        title: 'Basis-Informationen',
+        basicInfo: {
+          title: 'Grunddaten',
+          description: 'Restaurant-Name, Beschreibung und Kontaktdaten'
+        },
+        address: {
+          title: 'Adresse',
+          description: 'Vollständige Adresse für Kunden'
+        },
+        contact: {
+          title: 'Kontakt',
+          description: 'Telefon, E-Mail und Website'
+        }
+      },
+      menu: {
+        title: 'Speisekarte',
+        categories: {
+          title: 'Kategorien',
+          description: 'Speisekarten-Kategorien anlegen'
+        },
+        items: {
+          title: 'Speisen & Getränke',
+          description: 'Mindestens 5 Artikel anlegen'
+        }
+      },
+      operation: {
+        title: 'Betrieb',
+        tables: {
+          title: 'Tische & QR-Codes',
+          description: 'Tische anlegen und QR-Codes generieren'
+        },
+        hours: {
+          title: 'Öffnungszeiten',
+          description: 'Geschäftszeiten festlegen'
+        },
+        payment: {
+          title: 'Zahlungsmethoden',
+          description: 'Akzeptierte Zahlungsarten konfigurieren'
+        }
+      },
+      advanced: {
+        title: 'Erweiterte Einstellungen',
+        design: {
+          title: 'Design & Aussehen',
+          description: 'Logo, Farben und Bilder'
+        },
+        staff: {
+          title: 'Mitarbeiter',
+          description: 'Team-Mitglieder hinzufügen'
+        },
+        notifications: {
+          title: 'Benachrichtigungen',
+          description: 'E-Mail und Sound-Benachrichtigungen'
+        }
+      },
+      stats: {
+        categoriesCreated: 'Kategorien angelegt',
+        itemsCreated: 'Artikel angelegt',
+        tablesCreated: 'Tische angelegt'
+      },
+      tips: {
+        title: 'Tipps für den Start',
+        tip1: 'Beginnen Sie mit den Grunddaten und arbeiten Sie sich nach unten vor',
+        tip2: 'Laden Sie hochwertige Bilder Ihrer Speisen hoch - das erhöht die Bestellungen',
+        tip3: 'Testen Sie den QR-Code Bestellvorgang selbst, bevor Sie live gehen',
+        tip4: 'Schulen Sie Ihr Personal im Umgang mit dem System'
+      },
+      errors: {
+        incompleteSteps: 'Bitte schließen Sie alle erforderlichen Schritte ab',
+        activationFailed: 'Fehler beim Aktivieren'
+      },
+      success: {
+        goLive: 'Restaurant ist jetzt live! 🎉'
+      }
+    },
     // Dashboard
     dashboard: {
       title: 'Dashboard',
       welcome: 'Willkommen zurück',
-      todayOrders: 'Heutige Bestellungen',
-      revenue: 'Umsatz',
-      activeOrders: 'Aktive Bestellungen',
-      newOrders: 'Neue Bestellungen',
-      preparingOrders: 'In Zubereitung',
-      readyOrders: 'Fertig'
+      setupIncomplete: 'Restaurant-Einrichtung unvollständig',
+      completed: 'abgeschlossen',
+      setupDescription: 'Vervollständigen Sie die Einrichtung, damit Kunden bei Ihnen bestellen können.',
+      missingBasicInfo: 'Grunddaten und Beschreibung fehlen',
+      missingAddress: 'Adresse unvollständig',
+      missingCategories: 'Keine Speisekarten-Kategorien angelegt',
+      missingMenuItems: 'Weniger als 5 Artikel in der Speisekarte',
+      missingTables: 'Keine Tische/QR-Codes angelegt',
+      missingPaymentMethods: 'Zahlungsmethoden nicht konfiguriert',
+      continueSetup: 'Einrichtung fortsetzen',
+      trialVersion: 'Testversion',
+      daysRemaining: 'Tage verbleibend',
+      trialDescription: 'Ihre kostenlose Testversion endet in {{days}} Tagen. Upgraden Sie jetzt, um alle Features weiter zu nutzen.',
+      upgradeNow: 'Jetzt upgraden',
+      todayRevenue: 'Heutiger Umsatz',
+      fromYesterday: 'zum Vortag',
+      ordersToday: 'Bestellungen heute',
+      pending: 'ausstehend',
+      averageOrderValue: 'Durchschn. Bestellwert',
+      today: 'Heute',
+      activeTables: 'Aktive Tische',
+      qrCodesGenerated: 'QR-Codes generiert',
+      manage: 'Verwalten',
+      items: 'Artikel',
+      qrCodes: 'QR-Codes',
+      tables: 'Tische',
+      view: 'Ansehen',
+      recentOrders: 'Letzte Bestellungen',
+      viewAll: 'Alle anzeigen',
+      order: 'Bestellung',
+      table: 'Tisch',
+      takeaway: 'Zum Mitnehmen',
+      noOrdersToday: 'Noch keine Bestellungen heute',
+      orderStatus: {
+        pending: 'Ausstehend',
+        confirmed: 'Bestätigt',
+        preparing: 'In Zubereitung',
+        ready: 'Fertig',
+        completed: 'Abgeschlossen',
+        cancelled: 'Storniert'
+      }
     },
     // Settings
     settings: {
@@ -194,16 +458,148 @@ export const translations = {
       settings: 'Settings',
       setup: 'Setup'
     },
+    // Setup Page
+    setup: {
+      title: 'Setup Restaurant',
+      subtitle: 'Complete setup to go online',
+      goLive: 'Go Live Now!',
+      completeSetup: 'Complete Setup',
+      required: 'Required',
+      optional: 'Optional',
+      edit: 'Edit',
+      setup: 'Setup',
+      manage: 'Manage',
+      create: 'Create',
+      configure: 'Configure',
+      customize: 'Customize',
+      progress: {
+        title: 'Overall Progress',
+        description: '{{completed}} of {{total}} required steps completed',
+        ready: 'Ready',
+        inProgress: 'In Progress'
+      },
+      congratulations: 'Congratulations! Your restaurant is ready for orders.',
+      basic: {
+        title: 'Basic Information',
+        basicInfo: {
+          title: 'Basic Data',
+          description: 'Restaurant name, description and contact details'
+        },
+        address: {
+          title: 'Address',
+          description: 'Complete address for customers'
+        },
+        contact: {
+          title: 'Contact',
+          description: 'Phone, email and website'
+        }
+      },
+      menu: {
+        title: 'Menu',
+        categories: {
+          title: 'Categories',
+          description: 'Create menu categories'
+        },
+        items: {
+          title: 'Food & Drinks',
+          description: 'Add at least 5 items'
+        }
+      },
+      operation: {
+        title: 'Operations',
+        tables: {
+          title: 'Tables & QR Codes',
+          description: 'Setup tables and generate QR codes'
+        },
+        hours: {
+          title: 'Opening Hours',
+          description: 'Set business hours'
+        },
+        payment: {
+          title: 'Payment Methods',
+          description: 'Configure accepted payment types'
+        }
+      },
+      advanced: {
+        title: 'Advanced Settings',
+        design: {
+          title: 'Design & Appearance',
+          description: 'Logo, colors and images'
+        },
+        staff: {
+          title: 'Staff',
+          description: 'Add team members'
+        },
+        notifications: {
+          title: 'Notifications',
+          description: 'Email and sound notifications'
+        }
+      },
+      stats: {
+        categoriesCreated: 'categories created',
+        itemsCreated: 'items created',
+        tablesCreated: 'tables created'
+      },
+      tips: {
+        title: 'Getting Started Tips',
+        tip1: 'Start with basic data and work your way down',
+        tip2: 'Upload high-quality images of your dishes - it increases orders',
+        tip3: 'Test the QR code ordering process yourself before going live',
+        tip4: 'Train your staff on using the system'
+      },
+      errors: {
+        incompleteSteps: 'Please complete all required steps',
+        activationFailed: 'Activation failed'
+      },
+      success: {
+        goLive: 'Restaurant is now live! 🎉'
+      }
+    },
     // Dashboard
     dashboard: {
       title: 'Dashboard',
       welcome: 'Welcome back',
-      todayOrders: "Today's Orders",
-      revenue: 'Revenue',
-      activeOrders: 'Active Orders',
-      newOrders: 'New Orders',
-      preparingOrders: 'Preparing',
-      readyOrders: 'Ready'
+      setupIncomplete: 'Restaurant Setup Incomplete',
+      completed: 'completed',
+      setupDescription: 'Complete setup so customers can order from you.',
+      missingBasicInfo: 'Basic data and description missing',
+      missingAddress: 'Address incomplete',
+      missingCategories: 'No menu categories created',
+      missingMenuItems: 'Less than 5 items in menu',
+      missingTables: 'No tables/QR codes created',
+      missingPaymentMethods: 'Payment methods not configured',
+      continueSetup: 'Continue Setup',
+      trialVersion: 'Trial Version',
+      daysRemaining: 'days remaining',
+      trialDescription: 'Your free trial ends in {{days}} days. Upgrade now to continue using all features.',
+      upgradeNow: 'Upgrade Now',
+      todayRevenue: "Today's Revenue",
+      fromYesterday: 'from yesterday',
+      ordersToday: 'Orders Today',
+      pending: 'pending',
+      averageOrderValue: 'Average Order Value',
+      today: 'Today',
+      activeTables: 'Active Tables',
+      qrCodesGenerated: 'QR codes generated',
+      manage: 'Manage',
+      items: 'items',
+      qrCodes: 'QR Codes',
+      tables: 'tables',
+      view: 'View',
+      recentOrders: 'Recent Orders',
+      viewAll: 'View All',
+      order: 'Order',
+      table: 'Table',
+      takeaway: 'Takeaway',
+      noOrdersToday: 'No orders today yet',
+      orderStatus: {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        preparing: 'Preparing',
+        ready: 'Ready',
+        completed: 'Completed',
+        cancelled: 'Cancelled'
+      }
     },
     // Settings
     settings: {

@@ -31,6 +31,7 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { useLanguage } from '@/contexts/language-context'
 
 interface RestaurantSetupProps {
   restaurant: any
@@ -49,6 +50,7 @@ interface SetupStep {
 
 export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
   const router = useRouter()
+  const { t } = useLanguage()
   const [setupProgress, setSetupProgress] = useState(0)
   
   // Definiere alle Setup-Schritte
@@ -56,8 +58,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     // Basis-Informationen
     {
       id: 'basic-info',
-      title: 'Grunddaten',
-      description: 'Restaurant-Name, Beschreibung und Kontaktdaten',
+      title: t('setup.basic.basicInfo.title'),
+      description: t('setup.basic.basicInfo.description'),
       icon: Store,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.name && restaurant.description && restaurant.phone),
@@ -66,8 +68,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'address',
-      title: 'Adresse',
-      description: 'Vollständige Adresse für Kunden',
+      title: t('setup.basic.address.title'),
+      description: t('setup.basic.address.description'),
       icon: MapPin,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.street && restaurant.city && restaurant.postalCode),
@@ -76,8 +78,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'contact',
-      title: 'Kontakt',
-      description: 'Telefon, E-Mail und Website',
+      title: t('setup.basic.contact.title'),
+      description: t('setup.basic.contact.description'),
       icon: Phone,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.phone && restaurant.email),
@@ -88,8 +90,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     // Speisekarte
     {
       id: 'categories',
-      title: 'Kategorien',
-      description: 'Speisekarten-Kategorien anlegen',
+      title: t('setup.menu.categories.title'),
+      description: t('setup.menu.categories.description'),
       icon: Menu,
       href: '/dashboard/menu',
       completed: restaurant._count.categories > 0,
@@ -98,8 +100,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'menu-items',
-      title: 'Speisen & Getränke',
-      description: 'Mindestens 5 Artikel anlegen',
+      title: t('setup.menu.items.title'),
+      description: t('setup.menu.items.description'),
       icon: ChefHat,
       href: '/dashboard/menu',
       completed: restaurant._count.menuItems >= 5,
@@ -110,8 +112,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     // Betrieb
     {
       id: 'tables',
-      title: 'Tische & QR-Codes',
-      description: 'Tische anlegen und QR-Codes generieren',
+      title: t('setup.operation.tables.title'),
+      description: t('setup.operation.tables.description'),
       icon: QrCode,
       href: '/dashboard/tables',
       completed: restaurant._count.tables > 0,
@@ -120,8 +122,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'opening-hours',
-      title: 'Öffnungszeiten',
-      description: 'Geschäftszeiten festlegen',
+      title: t('setup.operation.hours.title'),
+      description: t('setup.operation.hours.description'),
       icon: Clock,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.settings?.openingHours),
@@ -130,8 +132,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'payment',
-      title: 'Zahlungsmethoden',
-      description: 'Akzeptierte Zahlungsarten konfigurieren',
+      title: t('setup.operation.payment.title'),
+      description: t('setup.operation.payment.description'),
       icon: CreditCard,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.settings?.acceptCash || restaurant.settings?.acceptCard),
@@ -142,8 +144,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     // Erweitert
     {
       id: 'design',
-      title: 'Design & Aussehen',
-      description: 'Logo, Farben und Bilder',
+      title: t('setup.advanced.design.title'),
+      description: t('setup.advanced.design.description'),
       icon: Palette,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.logo || restaurant.primaryColor),
@@ -152,8 +154,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'staff',
-      title: 'Mitarbeiter',
-      description: 'Team-Mitglieder hinzufügen',
+      title: t('setup.advanced.staff.title'),
+      description: t('setup.advanced.staff.description'),
       icon: Users,
       href: '/dashboard/staff',
       completed: false,
@@ -162,8 +164,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
     },
     {
       id: 'notifications',
-      title: 'Benachrichtigungen',
-      description: 'E-Mail und Sound-Benachrichtigungen',
+      title: t('setup.advanced.notifications.title'),
+      description: t('setup.advanced.notifications.description'),
       icon: Bell,
       href: '/dashboard/settings',
       completed: Boolean(restaurant.settings?.emailNotifications),
@@ -196,7 +198,7 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
 
   const handleGoLive = async () => {
     if (setupProgress < 100) {
-      toast.error('Bitte schließen Sie alle erforderlichen Schritte ab')
+      toast.error(t('setup.errors.incompleteSteps'))
       return
     }
 
@@ -206,11 +208,11 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
       })
 
       if (response.ok) {
-        toast.success('Restaurant ist jetzt live! 🎉')
+        toast.success(t('setup.success.goLive'))
         router.push('/dashboard')
       }
     } catch (error) {
-      toast.error('Fehler beim Aktivieren')
+      toast.error(t('setup.errors.activationFailed'))
     }
   }
 
@@ -219,9 +221,9 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold">Restaurant einrichten</h1>
+          <h1 className="text-3xl font-bold">{t('setup.title')}</h1>
           <p className="text-gray-600 mt-2">
-            Vervollständigen Sie die Einrichtung, um online zu gehen
+            {t('setup.subtitle')}
           </p>
         </div>
         
@@ -231,8 +233,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
           onClick={handleGoLive}
           className={setupProgress === 100 ? 'bg-green-600 hover:bg-green-700' : ''}
         >
-          <Rocket className="w-4 h-4 mr-2" />
-          {setupProgress === 100 ? 'Jetzt Live gehen!' : 'Einrichtung abschließen'}
+          <Rocket className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+          {setupProgress === 100 ? t('setup.goLive') : t('setup.completeSetup')}
         </Button>
       </div>
 
@@ -241,15 +243,17 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Gesamt-Fortschritt</CardTitle>
+              <CardTitle>{t('setup.progress.title')}</CardTitle>
               <CardDescription>
-                {setupSteps.filter(s => s.completed && s.required).length} von {setupSteps.filter(s => s.required).length} erforderlichen Schritten abgeschlossen
+                {t('setup.progress.description')
+                  .replace('{{completed}}', setupSteps.filter(s => s.completed && s.required).length.toString())
+                  .replace('{{total}}', setupSteps.filter(s => s.required).length.toString())}
               </CardDescription>
             </div>
-            <div className="text-right">
+            <div className="text-right rtl:text-left">
               <div className="text-3xl font-bold">{setupProgress}%</div>
               <Badge variant={setupProgress === 100 ? 'default' : 'secondary'}>
-                {setupProgress === 100 ? 'Bereit' : 'In Bearbeitung'}
+                {setupProgress === 100 ? t('setup.progress.ready') : t('setup.progress.inProgress')}
               </Badge>
             </div>
           </div>
@@ -259,9 +263,9 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
           
           {setupProgress === 100 && (
             <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
-              <div className="flex items-center gap-2 text-green-700">
+              <div className="flex items-center gap-2 rtl:gap-x-reverse text-green-700">
                 <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Glückwunsch! Ihr Restaurant ist bereit für Bestellungen.</span>
+                <span className="font-semibold">{t('setup.congratulations')}</span>
               </div>
             </div>
           )}
@@ -270,9 +274,9 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
 
       {/* Basis-Informationen */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 rtl:gap-x-reverse mb-4">
           <Store className="w-5 h-5 text-gray-600" />
-          <h2 className="text-xl font-semibold">Basis-Informationen</h2>
+          <h2 className="text-xl font-semibold">{t('setup.basic.title')}</h2>
           <Badge variant="outline">
             {getCategoryProgress('basic').completed}/{getCategoryProgress('basic').total}
           </Badge>
@@ -300,11 +304,11 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                         }`} />
                       </div>
                       <div>
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <CardTitle className="text-base flex items-center gap-2 rtl:gap-x-reverse">
                           {step.title}
                           {step.required && (
                             <Badge variant="outline" className="text-xs">
-                              Erforderlich
+                              {t('setup.required')}
                             </Badge>
                           )}
                         </CardTitle>
@@ -324,8 +328,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                     size="sm"
                     className="w-full"
                   >
-                    {step.completed ? 'Bearbeiten' : 'Einrichten'}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    {step.completed ? t('setup.edit') : t('setup.setup')}
+                    <ArrowRight className="w-4 h-4 ml-2 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
                   </Button>
                 </CardContent>
               </Card>
@@ -336,9 +340,9 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
 
       {/* Speisekarte */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 rtl:gap-x-reverse mb-4">
           <Menu className="w-5 h-5 text-gray-600" />
-          <h2 className="text-xl font-semibold">Speisekarte</h2>
+          <h2 className="text-xl font-semibold">{t('setup.menu.title')}</h2>
           <Badge variant="outline">
             {getCategoryProgress('menu').completed}/{getCategoryProgress('menu').total}
           </Badge>
@@ -366,11 +370,11 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                         }`} />
                       </div>
                       <div>
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <CardTitle className="text-base flex items-center gap-2 rtl:gap-x-reverse">
                           {step.title}
                           {step.required && (
                             <Badge variant="outline" className="text-xs">
-                              Erforderlich
+                              {t('setup.required')}
                             </Badge>
                           )}
                         </CardTitle>
@@ -390,13 +394,13 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                   {step.id === 'categories' && (
                     <div className="mb-3 text-sm">
                       <span className="font-medium">{restaurant._count.categories}</span>
-                      <span className="text-gray-500"> Kategorien angelegt</span>
+                      <span className="text-gray-500"> {t('setup.stats.categoriesCreated')}</span>
                     </div>
                   )}
                   {step.id === 'menu-items' && (
                     <div className="mb-3 text-sm">
                       <span className="font-medium">{restaurant._count.menuItems}</span>
-                      <span className="text-gray-500"> Artikel angelegt</span>
+                      <span className="text-gray-500"> {t('setup.stats.itemsCreated')}</span>
                     </div>
                   )}
                   
@@ -405,8 +409,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                     size="sm"
                     className="w-full"
                   >
-                    {step.completed ? 'Verwalten' : 'Anlegen'}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    {step.completed ? t('setup.manage') : t('setup.create')}
+                    <ArrowRight className="w-4 h-4 ml-2 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
                   </Button>
                 </CardContent>
               </Card>
@@ -417,9 +421,9 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
 
       {/* Betrieb */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 rtl:gap-x-reverse mb-4">
           <Settings className="w-5 h-5 text-gray-600" />
-          <h2 className="text-xl font-semibold">Betrieb</h2>
+          <h2 className="text-xl font-semibold">{t('setup.operation.title')}</h2>
           <Badge variant="outline">
             {getCategoryProgress('operation').completed}/{getCategoryProgress('operation').total}
           </Badge>
@@ -447,11 +451,11 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                         }`} />
                       </div>
                       <div>
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <CardTitle className="text-base flex items-center gap-2 rtl:gap-x-reverse">
                           {step.title}
                           {step.required && (
                             <Badge variant="outline" className="text-xs">
-                              Erforderlich
+                              {t('setup.required')}
                             </Badge>
                           )}
                         </CardTitle>
@@ -471,7 +475,7 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                   {step.id === 'tables' && restaurant._count.tables > 0 && (
                     <div className="mb-3 text-sm">
                       <span className="font-medium">{restaurant._count.tables}</span>
-                      <span className="text-gray-500"> Tische angelegt</span>
+                      <span className="text-gray-500"> {t('setup.stats.tablesCreated')}</span>
                     </div>
                   )}
                   
@@ -480,8 +484,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                     size="sm"
                     className="w-full"
                   >
-                    {step.completed ? 'Bearbeiten' : 'Konfigurieren'}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    {step.completed ? t('setup.edit') : t('setup.configure')}
+                    <ArrowRight className="w-4 h-4 ml-2 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
                   </Button>
                 </CardContent>
               </Card>
@@ -492,10 +496,10 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
 
       {/* Erweiterte Einstellungen */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 rtl:gap-x-reverse mb-4">
           <Shield className="w-5 h-5 text-gray-600" />
-          <h2 className="text-xl font-semibold">Erweiterte Einstellungen</h2>
-          <Badge variant="secondary">Optional</Badge>
+          <h2 className="text-xl font-semibold">{t('setup.advanced.title')}</h2>
+          <Badge variant="secondary">{t('setup.optional')}</Badge>
         </div>
         
         <div className="grid gap-4 md:grid-cols-3">
@@ -539,8 +543,8 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
                     size="sm"
                     className="w-full"
                   >
-                    {step.completed ? 'Anpassen' : 'Einrichten'}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    {step.completed ? t('setup.customize') : t('setup.setup')}
+                    <ArrowRight className="w-4 h-4 ml-2 rtl:ml-0 rtl:mr-2 rtl:rotate-180" />
                   </Button>
                 </CardContent>
               </Card>
@@ -552,23 +556,23 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
       {/* Quick Tips */}
       <Card className="bg-blue-50 border-blue-200">
         <CardHeader>
-          <CardTitle className="text-blue-900 flex items-center gap-2">
+          <CardTitle className="text-blue-900 flex items-center gap-2 rtl:gap-x-reverse">
             <AlertCircle className="w-5 h-5" />
-            Tipps für den Start
+            {t('setup.tips.title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-sm text-blue-800">
-            • Beginnen Sie mit den Grunddaten und arbeiten Sie sich nach unten vor
+            • {t('setup.tips.tip1')}
           </p>
           <p className="text-sm text-blue-800">
-            • Laden Sie hochwertige Bilder Ihrer Speisen hoch - das erhöht die Bestellungen
+            • {t('setup.tips.tip2')}
           </p>
           <p className="text-sm text-blue-800">
-            • Testen Sie den QR-Code Bestellvorgang selbst, bevor Sie live gehen
+            • {t('setup.tips.tip3')}
           </p>
           <p className="text-sm text-blue-800">
-            • Schulen Sie Ihr Personal im Umgang mit dem System
+            • {t('setup.tips.tip4')}
           </p>
         </CardContent>
       </Card>
