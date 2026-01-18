@@ -48,19 +48,30 @@ function LoginForm() {
       const result = await handleLogin(data.email, data.password)
 
       if (result?.error) {
-        toast.error(t.errors.invalidCredentials)
+        // Zeige die spezifische Fehlermeldung vom Server
+        toast.error(result.error, {
+          duration: 5000,
+          style: {
+            background: '#ef4444',
+            color: '#fff',
+          }
+        })
         setIsLoading(false)
       } else {
-        toast.success('✓')
-        // Server Action handles redirect, just refresh
-        router.refresh()
-        // Fallback redirect after a short delay
-        setTimeout(() => {
-          router.push(callbackUrl)
-        }, 100)
+        // Login war erfolgreich - Server macht den Redirect
+        toast.success('Anmeldung erfolgreich!', {
+          duration: 2000
+        })
       }
     } catch (error) {
-      toast.error(t.errors.genericError)
+      console.error('Login error:', error)
+      toast.error('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.', {
+        duration: 5000,
+        style: {
+          background: '#ef4444',
+          color: '#fff',
+        }
+      })
       setIsLoading(false)
     }
   }
