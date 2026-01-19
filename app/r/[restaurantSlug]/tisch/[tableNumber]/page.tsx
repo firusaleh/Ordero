@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import GuestMenuViewWrapped from '@/components/guest/guest-menu-view-wrapped'
+import TableNotFound from '@/components/guest/table-not-found'
+import { GuestLanguageProvider } from '@/contexts/guest-language-context'
 
 async function getRestaurantMenu(slug: string, tableNumber: string) {
   const restaurant = await prisma.restaurant.findUnique({
@@ -80,25 +82,9 @@ export default async function GuestMenuPage({
   // Wenn Tischnummer erforderlich ist und Tisch nicht existiert
   if (restaurant.settings?.requireTableNumber && !table) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">❌</span>
-            </div>
-            <h1 className="text-2xl font-bold mb-2">Tisch nicht gefunden</h1>
-            <p className="text-gray-600 mb-6">
-              Tisch {tableNum} existiert nicht oder ist nicht aktiv.
-            </p>
-            <a 
-              href={`/r/${restaurantSlug}`}
-              className="text-blue-600 hover:underline"
-            >
-              Zurück zur Restaurant-Seite
-            </a>
-          </div>
-        </div>
-      </div>
+      <GuestLanguageProvider>
+        <TableNotFound tableNumber={tableNum} restaurantSlug={restaurantSlug} />
+      </GuestLanguageProvider>
     )
   }
 

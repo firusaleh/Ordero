@@ -569,6 +569,50 @@ export const translations = {
         noCustomFeesDesc: 'قم بإنشاء رسوم مخصصة لطلباتك'
       }
     },
+    // Guest Pages
+    guest: {
+      reservation: {
+        title: 'حجز طاولة',
+        subtitle: 'احجز طاولتك مسبقاً',
+        button: 'حجز طاولة',
+        buttonDesc: 'تأكد من مكانك مسبقاً'
+      },
+      preorder: {
+        title: 'طلب مسبق',
+        subtitle: 'اطلب مسبقاً ووفر الوقت',
+        button: 'طلب مسبق',
+        buttonDesc: 'اطلب مسبقاً ووفر الوقت'
+      },
+      actions: {
+        reserve: 'حجز طاولة',
+        preorder: 'طلب مسبق'
+      },
+      restaurantPage: {
+        restaurantInfo: 'معلومات المطعم',
+        address: 'العنوان',
+        phone: 'الهاتف',
+        website: 'الموقع الإلكتروني',
+        openingHours: 'ساعات العمل',
+        seeDetails: 'انظر التفاصيل أدناه',
+        orderOnline: 'اطلب عبر الإنترنت',
+        scanQR: 'امسح رمز QR على طاولتك أو أدخل رقم الطاولة',
+        scanTableQR: 'امسح رمز QR على طاولتك',
+        or: 'أو',
+        enterTableNumber: 'أدخل رقم طاولتك:',
+        tableNumber: 'رقم الطاولة',
+        continue: 'متابعة',
+        categories: 'الفئات',
+        dishes: 'الأطباق',
+        tables: 'الطاولات',
+        items: 'عنصر',
+        cuisine: 'المطبخ'
+      },
+      tableNotFound: {
+        title: 'الطاولة غير موجودة',
+        description: 'الطاولة {{number}} غير موجودة أو غير نشطة.',
+        backToRestaurant: 'العودة إلى صفحة المطعم'
+      }
+    },
     // Common
     common: {
       save: 'حفظ',
@@ -1418,6 +1462,50 @@ export const translations = {
         noCustomFeesDesc: 'Erstellen Sie benutzerdefinierte Gebühren für Ihre Bestellungen'
       }
     },
+    // Guest Pages
+    guest: {
+      reservation: {
+        title: 'Tisch reservieren',
+        subtitle: 'Sichern Sie sich Ihren Platz im Voraus',
+        button: 'Tisch reservieren',
+        buttonDesc: 'Sichern Sie sich Ihren Platz im Voraus'
+      },
+      preorder: {
+        title: 'Vorbestellen',
+        subtitle: 'Bestellen Sie vor und sparen Sie Zeit',
+        button: 'Vorbestellen',
+        buttonDesc: 'Bestellen Sie vor und sparen Sie Zeit'
+      },
+      actions: {
+        reserve: 'Tisch reservieren',
+        preorder: 'Vorbestellen'
+      },
+      restaurantPage: {
+        restaurantInfo: 'Restaurant-Informationen',
+        address: 'Adresse',
+        phone: 'Telefon',
+        website: 'Website',
+        openingHours: 'Öffnungszeiten',
+        seeDetails: 'Siehe Details unten',
+        orderOnline: 'Online bestellen',
+        scanQR: 'Scannen Sie den QR-Code an Ihrem Tisch oder geben Sie die Tischnummer ein',
+        scanTableQR: 'Scannen Sie den QR-Code an Ihrem Tisch',
+        or: 'oder',
+        enterTableNumber: 'Geben Sie Ihre Tischnummer ein:',
+        tableNumber: 'Tischnummer',
+        continue: 'Weiter',
+        categories: 'Kategorien',
+        dishes: 'Gerichte',
+        tables: 'Tische',
+        items: 'Artikel',
+        cuisine: 'Küche'
+      },
+      tableNotFound: {
+        title: 'Tisch nicht gefunden',
+        description: 'Tisch {{number}} existiert nicht oder ist nicht aktiv.',
+        backToRestaurant: 'Zurück zur Restaurant-Seite'
+      }
+    },
     // Common
     common: {
       save: 'Speichern',
@@ -2265,6 +2353,50 @@ export const translations = {
         editFee: 'Edit Fee',
         noCustomFees: 'No Custom Fees',
         noCustomFeesDesc: 'Create custom fees for your orders'
+      }
+    },
+    // Guest Pages
+    guest: {
+      reservation: {
+        title: 'Reserve Table',
+        subtitle: 'Secure your spot in advance',
+        button: 'Reserve Table',
+        buttonDesc: 'Secure your spot in advance'
+      },
+      preorder: {
+        title: 'Pre-order',
+        subtitle: 'Order ahead and save time',
+        button: 'Pre-order',
+        buttonDesc: 'Order ahead and save time'
+      },
+      actions: {
+        reserve: 'Reserve Table',
+        preorder: 'Pre-order'
+      },
+      restaurantPage: {
+        restaurantInfo: 'Restaurant Information',
+        address: 'Address',
+        phone: 'Phone',
+        website: 'Website',
+        openingHours: 'Opening Hours',
+        seeDetails: 'See details below',
+        orderOnline: 'Order Online',
+        scanQR: 'Scan the QR code at your table or enter the table number',
+        scanTableQR: 'Scan the QR code at your table',
+        or: 'or',
+        enterTableNumber: 'Enter your table number:',
+        tableNumber: 'Table Number',
+        continue: 'Continue',
+        categories: 'Categories',
+        dishes: 'Dishes',
+        tables: 'Tables',
+        items: 'items',
+        cuisine: 'Cuisine'
+      },
+      tableNotFound: {
+        title: 'Table Not Found',
+        description: 'Table {{number}} does not exist or is not active.',
+        backToRestaurant: 'Back to Restaurant Page'
       }
     },
     // Common
