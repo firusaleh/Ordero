@@ -4,6 +4,7 @@ export const translations = {
     nav: {
       dashboard: 'لوحة التحكم',
       orders: 'الطلبات',
+      reservations: 'الحجوزات',
       menu: 'قائمة الطعام',
       tables: 'الطاولات و QR',
       statistics: 'الإحصائيات',
@@ -851,6 +852,7 @@ export const translations = {
     nav: {
       dashboard: 'Übersicht',
       orders: 'Bestellungen',
+      reservations: 'Reservierungen',
       menu: 'Speisekarte',
       tables: 'Tische & QR',
       statistics: 'Statistiken',
@@ -1698,6 +1700,7 @@ export const translations = {
     nav: {
       dashboard: 'Overview',
       orders: 'Orders',
+      reservations: 'Reservations',
       menu: 'Menu',
       tables: 'Tables & QR',
       statistics: 'Statistics',
