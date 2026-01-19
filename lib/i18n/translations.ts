@@ -233,7 +233,8 @@ export const translations = {
       },
       stats: {
         today: "اليوم",
-        upcoming: "القادمة"
+        upcoming: "القادمة",
+        pending: "معلقة"
       },
       actions: {
         confirm: 'تأكيد',
@@ -1081,7 +1082,8 @@ export const translations = {
       },
       stats: {
         today: "Heute",
-        upcoming: "Bevorstehend"
+        upcoming: "Bevorstehend",
+        pending: "Ausstehend"
       },
       actions: {
         confirm: 'Bestätigen',
@@ -1929,7 +1931,8 @@ export const translations = {
       },
       stats: {
         today: "Today",
-        upcoming: "Upcoming"
+        upcoming: "Upcoming",
+        pending: "Pending"
       },
       actions: {
         confirm: 'Confirm',
