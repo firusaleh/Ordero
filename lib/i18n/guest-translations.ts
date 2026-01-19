@@ -163,6 +163,18 @@ export const guestTranslations = {
       online: 'Online',
       waiterCalled: 'Der Kellner wurde benachrichtigt',
       billRequested: 'Die Rechnung wurde angefordert',
+      reservation: {
+        title: 'Tisch reservieren',
+        subtitle: 'Sichern Sie sich Ihren Platz im Voraus',
+        button: 'Tisch reservieren',
+        buttonDesc: 'Sichern Sie sich Ihren Platz im Voraus'
+      },
+      preorder: {
+        title: 'Vorbestellen',
+        subtitle: 'Bestellen Sie vor und sparen Sie Zeit',
+        button: 'Vorbestellen',
+        buttonDesc: 'Bestellen Sie vor und sparen Sie Zeit'
+      },
       actions: {
         reserve: 'Tisch reservieren',
         preorder: 'Vorbestellen'
@@ -419,6 +431,18 @@ export const guestTranslations = {
       online: 'Online',
       waiterCalled: 'The waiter has been notified',
       billRequested: 'The bill has been requested',
+      reservation: {
+        title: 'Reserve Table',
+        subtitle: 'Secure your spot in advance',
+        button: 'Reserve Table',
+        buttonDesc: 'Secure your spot in advance'
+      },
+      preorder: {
+        title: 'Pre-order',
+        subtitle: 'Order ahead and save time',
+        button: 'Pre-order',
+        buttonDesc: 'Order ahead and save time'
+      },
       actions: {
         reserve: 'Reserve Table',
         preorder: 'Pre-order'
@@ -675,6 +699,18 @@ export const guestTranslations = {
       online: 'أونلاين',
       waiterCalled: 'تم إشعار النادل',
       billRequested: 'تم طلب الفاتورة',
+      reservation: {
+        title: 'حجز طاولة',
+        subtitle: 'احجز طاولتك مسبقاً',
+        button: 'حجز طاولة',
+        buttonDesc: 'تأكد من مكانك مسبقاً'
+      },
+      preorder: {
+        title: 'طلب مسبق',
+        subtitle: 'اطلب مسبقاً ووفر الوقت',
+        button: 'طلب مسبق',
+        buttonDesc: 'اطلب مسبقاً ووفر الوقت'
+      },
       actions: {
         reserve: 'حجز طاولة',
         preorder: 'طلب مسبق'
