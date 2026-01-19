@@ -416,23 +416,23 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Prominente Buttons für Reservierung und Vorbestellung */}
       <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
-        <div className="container mx-auto px-4 py-3">
-          <div className="grid grid-cols-2 gap-3">
+        <div className="px-4 py-3">
+          <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
             <a 
               href={`/${restaurant.slug}/reserve`}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-blue-300 hover:border-blue-400 rounded-lg p-4 transition-all shadow-sm hover:shadow-lg"
             >
-              <Calendar className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-medium">Tisch reservieren</span>
+              <Calendar className="h-6 w-6 text-blue-600" />
+              <span className="text-base font-semibold text-blue-900">Tisch reservieren</span>
             </a>
             <a 
               href={`/${restaurant.slug}/preorder`}
-              className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border border-green-200 hover:border-green-300 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
+              className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border-2 border-green-300 hover:border-green-400 rounded-lg p-4 transition-all shadow-sm hover:shadow-lg"
             >
-              <ShoppingBag className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-medium">Vorbestellen</span>
+              <ShoppingBag className="h-6 w-6 text-green-600" />
+              <span className="text-base font-semibold text-green-900">Vorbestellen</span>
             </a>
           </div>
         </div>
