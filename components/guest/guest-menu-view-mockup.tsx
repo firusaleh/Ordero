@@ -25,7 +25,9 @@ import {
   Star,
   Clock,
   ChevronLeft,
-  Check
+  Check,
+  Calendar,
+  ShoppingBag
 } from 'lucide-react'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSwitcher from './language-switcher'
@@ -354,8 +356,30 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         </div>
       </div>
 
+      {/* Quick Actions - Reservierung und Vorbestellung */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
+        <div className="px-5 py-3">
+          <div className="grid grid-cols-2 gap-3">
+            <a 
+              href={`/${restaurant.slug}/reserve`}
+              className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-blue-300 hover:border-blue-400 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
+            >
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-semibold text-blue-900">Tisch reservieren</span>
+            </a>
+            <a 
+              href={`/${restaurant.slug}/preorder`}
+              className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border-2 border-green-300 hover:border-green-400 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
+            >
+              <ShoppingBag className="h-5 w-5 text-green-600" />
+              <span className="text-sm font-semibold text-green-900">Vorbestellen</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Categories */}
-      <div className="bg-white border-b border-gray-100 sticky top-[73px] z-40">
+      <div className="bg-white border-b border-gray-100 sticky top-[140px] z-40">
         <div className="px-5 py-3 flex gap-2 overflow-x-auto scrollbar-hide">
           {restaurant.categories.map((category) => {
             const isSelected = selectedCategory === category.id
