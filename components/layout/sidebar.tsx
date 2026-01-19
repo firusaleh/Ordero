@@ -13,7 +13,8 @@ import {
   Users,
   BarChart,
   LogOut,
-  Rocket
+  Rocket,
+  Calendar
 } from 'lucide-react'
 import { handleSignOut } from '@/app/actions/auth'
 import { useLanguage } from '@/contexts/language-context'
@@ -26,6 +27,7 @@ export default function Sidebar() {
     { name: t('nav.dashboard'), href: '/dashboard', icon: Home },
     { name: t('nav.setup'), href: '/dashboard/setup', icon: Rocket },
     { name: t('nav.orders'), href: '/dashboard/orders', icon: ShoppingCart },
+    { name: t('nav.reservations'), href: '/dashboard/reservations', icon: Calendar },
     { name: t('nav.menu'), href: '/dashboard/menu', icon: MenuSquare },
     { name: t('nav.tables'), href: '/dashboard/tables', icon: QrCode },
     { name: t('nav.statistics'), href: '/dashboard/stats', icon: BarChart },

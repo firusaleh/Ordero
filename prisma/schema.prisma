@@ -116,6 +116,8 @@ model Restaurant {
   settings    RestaurantSettings?
   payments    Payment[]
   invoices    Invoice[]
+  reservations Reservation[]
+  preOrders   PreOrder[]
   
   // Stripe Platform (für Abonnements)
   stripeCustomerId       String?
@@ -284,6 +286,7 @@ model MenuItem {
   
   // Relationen
   orderItems   OrderItem[]
+  preOrderItems PreOrderItem[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -324,6 +327,7 @@ model Table {
   
   // Relationen
   orders       Order[]
+  reservations Reservation[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -424,6 +428,136 @@ model OrderItem {
 }
 
 type OrderItemExtra {
+  name  String
+  price Float
+}
+
+// ============================================
+// RESERVIERUNGEN & VORBESTELLUNGEN
+// ============================================
+
+model Reservation {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId  String   @db.ObjectId
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  tableId       String?  @db.ObjectId
+  table         Table?   @relation(fields: [tableId], references: [id])
+  
+  // Kunde
+  customerName  String
+  customerEmail String
+  customerPhone String
+  numberOfGuests Int
+  
+  // Zeitpunkt
+  reservationDate DateTime
+  reservationTime String   // z.B. "19:00"
+  duration        Int      @default(120) // in Minuten
+  
+  // Status
+  status        String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
+  
+  // Notizen
+  notes         String?
+  specialRequests String?
+  
+  // Vorbestellung (optional)
+  preOrderId    String?  @db.ObjectId
+  preOrder      PreOrder? @relation(fields: [preOrderId], references: [id])
+  
+  // Bestätigung
+  confirmationToken String?
+  confirmedAt   DateTime?
+  cancelledAt   DateTime?
+  cancelReason  String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([restaurantId, reservationDate])
+  @@index([status])
+}
+
+model PreOrder {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId  String   @db.ObjectId
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  // Kunde
+  customerName  String
+  customerEmail String
+  customerPhone String
+  
+  // Pickup/Delivery Zeit
+  pickupTime    DateTime
+  orderType     String   @default("PICKUP") // PICKUP, DINE_IN
+  
+  // Verknüpfung mit Reservierung (optional)
+  reservations  Reservation[]
+  
+  // Status
+  status        String   @default("PENDING") // PENDING, CONFIRMED, PREPARING, READY, COMPLETED, CANCELLED
+  
+  // Bestelldetails
+  items         PreOrderItem[]
+  
+  // Preise
+  subtotal      Float
+  tax           Float
+  serviceFee    Float    @default(0)
+  total         Float
+  
+  // Zahlung
+  paymentStatus String   @default("PENDING") // PENDING, PAID, REFUNDED
+  paymentMethod String?  // CASH, CARD, ONLINE
+  paidAt        DateTime?
+  
+  // Stripe
+  stripePaymentIntentId String?
+  
+  // Notizen
+  notes         String?
+  
+  // Benachrichtigungen
+  notificationSent Boolean @default(false)
+  reminderSent    Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([restaurantId, pickupTime])
+  @@index([status])
+}
+
+model PreOrderItem {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  preOrderId   String   @db.ObjectId
+  preOrder     PreOrder @relation(fields: [preOrderId], references: [id], onDelete: Cascade)
+  
+  menuItemId   String   @db.ObjectId
+  menuItem     MenuItem @relation(fields: [menuItemId], references: [id])
+  
+  name         String   // Snapshot des Namens
+  quantity     Int      @default(1)
+  unitPrice    Float
+  totalPrice   Float
+  
+  // Variante
+  variant      String?
+  variantPrice Float?
+  
+  // Extras
+  extras       PreOrderItemExtra[]
+  
+  // Notizen
+  notes        String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+type PreOrderItemExtra {
   name  String
   price Float
 }

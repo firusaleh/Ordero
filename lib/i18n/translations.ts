@@ -202,6 +202,136 @@ export const translations = {
       noOrders: 'لا توجد طلبات',
       noOrdersDesc: 'لا توجد طلبات بعد. سيتم عرض الطلبات الجديدة هنا تلقائياً.'
     },
+    // Reservations
+    reservations: {
+      title: 'الحجوزات',
+      description: 'إدارة الحجوزات والطلبات المسبقة',
+      tab: 'الحجوزات',
+      today: 'اليوم',
+      tomorrow: 'غداً',
+      search: 'البحث بالاسم أو البريد الإلكتروني أو الهاتف...',
+      filterStatus: 'تصفية حسب الحالة',
+      filterDate: 'تصفية حسب التاريخ',
+      filter: {
+        all: 'الكل',
+        pending: 'معلق',
+        confirmed: 'مؤكد',
+        cancelled: 'ملغى',
+        completed: 'مكتمل',
+        allDates: 'جميع التواريخ',
+        today: 'اليوم',
+        tomorrow: 'غداً',
+        week: 'هذا الأسبوع'
+      },
+      status: {
+        pending: 'معلق',
+        confirmed: 'مؤكد',
+        cancelled: 'ملغى',
+        completed: 'مكتمل',
+        noShow: 'لم يحضر'
+      },
+      stats: {
+        today: "اليوم",
+        upcoming: "القادمة"
+      },
+      actions: {
+        confirm: 'تأكيد',
+        complete: 'إكمال',
+        cancel: 'إلغاء',
+        noShow: 'لم يحضر',
+        cancelConfirm: 'هل تريد فعلاً إلغاء هذا الحجز؟',
+        noShowConfirm: 'تمييز كـ "لم يحضر"؟'
+      },
+      guests: 'الضيوف',
+      table: 'الطاولة',
+      seats: 'المقاعد',
+      specialRequests: 'الطلبات الخاصة',
+      notes: 'الملاحظات',
+      notify: 'إشعار',
+      details: 'التفاصيل',
+      confirmationCode: 'رمز التأكيد',
+      duration: 'المدة',
+      minutes: 'دقائق',
+      tableDetails: 'تفاصيل الطاولة',
+      customerInfo: 'معلومات العميل',
+      name: 'الاسم',
+      email: 'البريد الإلكتروني',
+      phone: 'الهاتف',
+      additionalInfo: 'معلومات إضافية',
+      created: 'تم الإنشاء',
+      updated: 'تم التحديث',
+      noReservations: 'لا توجد حجوزات',
+      noFilterResults: 'لم يتم العثور على حجوزات',
+      sendNotification: 'إرسال إشعار',
+      notificationDesc: 'إرسال رسالة للعميل',
+      statusChanged: 'تم تغيير الحالة'
+    },
+    // Preorders
+    preorders: {
+      tab: 'الطلبات المسبقة',
+      pickup: 'استلام',
+      dineIn: 'تناول في المطعم',
+      items: 'العناصر',
+      moreItems: 'عناصر أخرى',
+      total: 'المجموع',
+      status: {
+        pending: 'معلق',
+        confirmed: 'مؤكد',
+        preparing: 'قيد التحضير',
+        ready: 'جاهز',
+        completed: 'مكتمل',
+        cancelled: 'ملغى'
+      },
+      filter: {
+        preparing: 'قيد التحضير',
+        ready: 'جاهز'
+      },
+      stats: {
+        today: "اليوم"
+      },
+      actions: {
+        confirm: 'تأكيد',
+        startPreparing: 'بدء التحضير',
+        markReady: 'تمييز كجاهز',
+        markCompleted: 'تمييز كمكتمل',
+        cancel: 'إلغاء',
+        cancelConfirm: 'هل تريد فعلاً إلغاء هذا الطلب المسبق؟'
+      },
+      notify: 'إشعار',
+      details: 'التفاصيل',
+      orderNumber: 'رقم الطلب',
+      paymentMethod: 'طريقة الدفع',
+      customerInfo: 'معلومات العميل',
+      name: 'الاسم',
+      email: 'البريد الإلكتروني',
+      phone: 'الهاتف',
+      orderItems: 'عناصر الطلب',
+      subtotal: 'المجموع الفرعي',
+      tax: 'الضريبة',
+      serviceFee: 'رسوم الخدمة',
+      customerNotes: 'ملاحظات العميل',
+      created: 'تم الإنشاء',
+      updated: 'تم التحديث',
+      noPreorders: 'لا توجد طلبات مسبقة',
+      noFilterResults: 'لم يتم العثور على طلبات مسبقة',
+      sendNotification: 'إرسال إشعار',
+      notificationDesc: 'إرسال رسالة للعميل',
+      statusChanged: 'تم تغيير الحالة'
+    },
+    // Notifications
+    notifications: {
+      sent: 'تم الإرسال',
+      customerNotified: 'تم إشعار العميل',
+      quickMessages: 'رسائل سريعة',
+      customMessage: 'رسالة مخصصة',
+      messagePlaceholder: 'أدخل رسالة للعميل...',
+      sending: 'جاري الإرسال...',
+      send: 'إرسال',
+      orderReady: 'طلبك جاهز للاستلام!',
+      orderDelayed: 'طلبك متأخر بحوالي 15 دقيقة.',
+      tableReady: 'طاولتك جاهزة!',
+      thankYou: 'شكراً لزيارتك!'
+    },
     // Menu
     menu: {
       title: 'قائمة الطعام',
@@ -919,6 +1049,136 @@ export const translations = {
       noOrders: 'Keine Bestellungen',
       noOrdersDesc: 'Noch keine Bestellungen. Neue Bestellungen werden hier automatisch angezeigt.'
     },
+    // Reservations
+    reservations: {
+      title: 'Reservierungen',
+      description: 'Verwalten Sie Reservierungen und Vorbestellungen',
+      tab: 'Reservierungen',
+      today: 'Heute',
+      tomorrow: 'Morgen',
+      search: 'Nach Namen, E-Mail oder Telefon suchen...',
+      filterStatus: 'Nach Status filtern',
+      filterDate: 'Nach Datum filtern',
+      filter: {
+        all: 'Alle',
+        pending: 'Ausstehend',
+        confirmed: 'Bestätigt',
+        cancelled: 'Storniert',
+        completed: 'Abgeschlossen',
+        allDates: 'Alle Termine',
+        today: 'Heute',
+        tomorrow: 'Morgen',
+        week: 'Diese Woche'
+      },
+      status: {
+        pending: 'Ausstehend',
+        confirmed: 'Bestätigt',
+        cancelled: 'Storniert',
+        completed: 'Abgeschlossen',
+        noShow: 'Nicht erschienen'
+      },
+      stats: {
+        today: "Heute",
+        upcoming: "Bevorstehend"
+      },
+      actions: {
+        confirm: 'Bestätigen',
+        complete: 'Abschließen',
+        cancel: 'Stornieren',
+        noShow: 'Nicht erschienen',
+        cancelConfirm: 'Diese Reservierung wirklich stornieren?',
+        noShowConfirm: 'Als "Nicht erschienen" markieren?'
+      },
+      guests: 'Gäste',
+      table: 'Tisch',
+      seats: 'Plätze',
+      specialRequests: 'Besondere Wünsche',
+      notes: 'Notizen',
+      notify: 'Benachrichtigen',
+      details: 'Details',
+      confirmationCode: 'Bestätigungscode',
+      duration: 'Dauer',
+      minutes: 'Minuten',
+      tableDetails: 'Tischdetails',
+      customerInfo: 'Kundeninformationen',
+      name: 'Name',
+      email: 'E-Mail',
+      phone: 'Telefon',
+      additionalInfo: 'Zusätzliche Informationen',
+      created: 'Erstellt',
+      updated: 'Aktualisiert',
+      noReservations: 'Keine Reservierungen',
+      noFilterResults: 'Keine Reservierungen gefunden',
+      sendNotification: 'Benachrichtigung senden',
+      notificationDesc: 'Eine Nachricht an den Kunden senden',
+      statusChanged: 'Status geändert'
+    },
+    // Preorders
+    preorders: {
+      tab: 'Vorbestellungen',
+      pickup: 'Abholung',
+      dineIn: 'Im Restaurant',
+      items: 'Artikel',
+      moreItems: 'weitere Artikel',
+      total: 'Gesamt',
+      status: {
+        pending: 'Ausstehend',
+        confirmed: 'Bestätigt',
+        preparing: 'In Zubereitung',
+        ready: 'Bereit',
+        completed: 'Abgeschlossen',
+        cancelled: 'Storniert'
+      },
+      filter: {
+        preparing: 'In Zubereitung',
+        ready: 'Bereit'
+      },
+      stats: {
+        today: "Heute"
+      },
+      actions: {
+        confirm: 'Bestätigen',
+        startPreparing: 'Zubereitung starten',
+        markReady: 'Als bereit markieren',
+        markCompleted: 'Als abgeschlossen markieren',
+        cancel: 'Stornieren',
+        cancelConfirm: 'Diese Vorbestellung wirklich stornieren?'
+      },
+      notify: 'Benachrichtigen',
+      details: 'Details',
+      orderNumber: 'Bestellnummer',
+      paymentMethod: 'Zahlungsmethode',
+      customerInfo: 'Kundeninformationen',
+      name: 'Name',
+      email: 'E-Mail',
+      phone: 'Telefon',
+      orderItems: 'Bestellte Artikel',
+      subtotal: 'Zwischensumme',
+      tax: 'Steuer',
+      serviceFee: 'Servicegebühr',
+      customerNotes: 'Kundennotizen',
+      created: 'Erstellt',
+      updated: 'Aktualisiert',
+      noPreorders: 'Keine Vorbestellungen',
+      noFilterResults: 'Keine Vorbestellungen gefunden',
+      sendNotification: 'Benachrichtigung senden',
+      notificationDesc: 'Eine Nachricht an den Kunden senden',
+      statusChanged: 'Status geändert'
+    },
+    // Notifications
+    notifications: {
+      sent: 'Gesendet',
+      customerNotified: 'Kunde wurde benachrichtigt',
+      quickMessages: 'Schnellnachrichten',
+      customMessage: 'Eigene Nachricht',
+      messagePlaceholder: 'Nachricht an den Kunden eingeben...',
+      sending: 'Wird gesendet...',
+      send: 'Senden',
+      orderReady: 'Ihre Bestellung ist bereit zur Abholung!',
+      orderDelayed: 'Ihre Bestellung verzögert sich um etwa 15 Minuten.',
+      tableReady: 'Ihr Tisch ist bereit!',
+      thankYou: 'Vielen Dank für Ihren Besuch!'
+    },
     // Menu
     menu: {
       title: 'Speisekarte',
@@ -1635,6 +1895,136 @@ export const translations = {
       time: 'Time',
       noOrders: 'No Orders',
       noOrdersDesc: 'No orders yet. New orders will appear here automatically.'
+    },
+    // Reservations
+    reservations: {
+      title: 'Reservations',
+      description: 'Manage reservations and preorders',
+      tab: 'Reservations',
+      today: 'Today',
+      tomorrow: 'Tomorrow',
+      search: 'Search by name, email or phone...',
+      filterStatus: 'Filter by status',
+      filterDate: 'Filter by date',
+      filter: {
+        all: 'All',
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        cancelled: 'Cancelled',
+        completed: 'Completed',
+        allDates: 'All dates',
+        today: 'Today',
+        tomorrow: 'Tomorrow',
+        week: 'This week'
+      },
+      status: {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        cancelled: 'Cancelled',
+        completed: 'Completed',
+        noShow: 'No show'
+      },
+      stats: {
+        today: "Today",
+        upcoming: "Upcoming"
+      },
+      actions: {
+        confirm: 'Confirm',
+        complete: 'Complete',
+        cancel: 'Cancel',
+        noShow: 'No show',
+        cancelConfirm: 'Really cancel this reservation?',
+        noShowConfirm: 'Mark as no show?'
+      },
+      guests: 'Guests',
+      table: 'Table',
+      seats: 'Seats',
+      specialRequests: 'Special requests',
+      notes: 'Notes',
+      notify: 'Notify',
+      details: 'Details',
+      confirmationCode: 'Confirmation code',
+      duration: 'Duration',
+      minutes: 'Minutes',
+      tableDetails: 'Table details',
+      customerInfo: 'Customer information',
+      name: 'Name',
+      email: 'Email',
+      phone: 'Phone',
+      additionalInfo: 'Additional information',
+      created: 'Created',
+      updated: 'Updated',
+      noReservations: 'No reservations',
+      noFilterResults: 'No reservations found',
+      sendNotification: 'Send notification',
+      notificationDesc: 'Send a message to the customer',
+      statusChanged: 'Status changed'
+    },
+    // Preorders
+    preorders: {
+      tab: 'Preorders',
+      pickup: 'Pickup',
+      dineIn: 'Dine in',
+      items: 'Items',
+      moreItems: 'more items',
+      total: 'Total',
+      status: {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        preparing: 'Preparing',
+        ready: 'Ready',
+        completed: 'Completed',
+        cancelled: 'Cancelled'
+      },
+      filter: {
+        preparing: 'Preparing',
+        ready: 'Ready'
+      },
+      stats: {
+        today: "Today"
+      },
+      actions: {
+        confirm: 'Confirm',
+        startPreparing: 'Start preparing',
+        markReady: 'Mark ready',
+        markCompleted: 'Mark completed',
+        cancel: 'Cancel',
+        cancelConfirm: 'Really cancel this preorder?'
+      },
+      notify: 'Notify',
+      details: 'Details',
+      orderNumber: 'Order number',
+      paymentMethod: 'Payment method',
+      customerInfo: 'Customer information',
+      name: 'Name',
+      email: 'Email',
+      phone: 'Phone',
+      orderItems: 'Order items',
+      subtotal: 'Subtotal',
+      tax: 'Tax',
+      serviceFee: 'Service fee',
+      customerNotes: 'Customer notes',
+      created: 'Created',
+      updated: 'Updated',
+      noPreorders: 'No preorders',
+      noFilterResults: 'No preorders found',
+      sendNotification: 'Send notification',
+      notificationDesc: 'Send a message to the customer',
+      statusChanged: 'Status changed'
+    },
+    // Notifications
+    notifications: {
+      sent: 'Sent',
+      customerNotified: 'Customer has been notified',
+      quickMessages: 'Quick messages',
+      customMessage: 'Custom message',
+      messagePlaceholder: 'Enter message to customer...',
+      sending: 'Sending...',
+      send: 'Send',
+      orderReady: 'Your order is ready for pickup!',
+      orderDelayed: 'Your order is delayed by about 15 minutes.',
+      tableReady: 'Your table is ready!',
+      thankYou: 'Thank you for your visit!'
     },
     // Menu
     menu: {
