@@ -761,13 +761,13 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
             {/* Price Breakdown */}
             <div className="space-y-2 mb-4 p-4 bg-gray-50 rounded-xl">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">Zwischensumme</span>
+                <span className="text-gray-600">{t('payment.subtotal')}</span>
                 <span className="text-gray-900">{formatPrice(getCartTotal())}</span>
               </div>
               {restaurant.settings?.serviceFeeEnabled && (
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-600">
-                    Service-Gebühr
+                    {t('payment.serviceFee')}
                     {restaurant.settings.serviceFeeType === 'PERCENT' && 
                       ` (${restaurant.settings.serviceFeePercent}%)`}
                   </span>
@@ -775,7 +775,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 </div>
               )}
               <div className="flex justify-between items-center font-semibold pt-2 border-t">
-                <span>Gesamt (vor Trinkgeld)</span>
+                <span>{t('payment.totalBeforeTip')}</span>
                 <span className="text-xl text-[#FF6B35]">{formatPrice(getCartTotal() + calculateServiceFee(getCartTotal()))}</span>
               </div>
             </div>

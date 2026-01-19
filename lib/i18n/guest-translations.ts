@@ -79,11 +79,14 @@ export const guestTranslations = {
     // Payment
     payment: {
       subtotal: 'Zwischensumme',
+      serviceFee: 'Service-Gebühr',
+      totalBeforeTip: 'Gesamt (vor Trinkgeld)',
       tip: 'Trinkgeld',
       tipQuestion: 'Möchten Sie Trinkgeld geben? 💖',
       noTip: 'Kein Trinkgeld',
       roundUp: 'Aufrunden',
       customAmount: '💰 Eigener Betrag',
+      customTip: 'Eigener Betrag',
       total: 'Gesamt',
       selectPaymentMethod: 'Zahlungsmethode wählen',
       applePay: 'Apple Pay',
@@ -91,7 +94,8 @@ export const guestTranslations = {
       creditCard: 'Kredit-/Debitkarte',
       cash: 'Bargeld',
       payNow: 'Jetzt bezahlen',
-      placeOrder: 'Bestellung aufgeben'
+      placeOrder: 'Bestellung aufgeben',
+      confirmPayment: 'ادفع الآن'
     },
     
     // Toast messages
@@ -311,11 +315,14 @@ export const guestTranslations = {
     // Payment
     payment: {
       subtotal: 'Subtotal',
+      serviceFee: 'Service Fee',
+      totalBeforeTip: 'Total (before tip)',
       tip: 'Tip',
       tipQuestion: 'Would you like to leave a tip? 💖',
       noTip: 'No tip',
       roundUp: 'Round up',
       customAmount: '💰 Custom amount',
+      customTip: 'Custom amount',
       total: 'Total',
       selectPaymentMethod: 'Select Payment Method',
       applePay: 'Apple Pay',
@@ -323,7 +330,8 @@ export const guestTranslations = {
       creditCard: 'Credit/Debit Card',
       cash: 'Cash',
       payNow: 'Pay Now',
-      placeOrder: 'Place Order'
+      placeOrder: 'Place Order',
+      confirmPayment: 'Pay Now'
     },
     
     // Toast messages
@@ -543,11 +551,14 @@ export const guestTranslations = {
     // Payment
     payment: {
       subtotal: 'المجموع الفرعي',
+      serviceFee: 'رسوم الخدمة',
+      totalBeforeTip: 'المجموع (قبل البقشيش)',
       tip: 'البقشيش',
       tipQuestion: 'هل تود ترك بقشيش؟ 💖',
       noTip: 'بدون بقشيش',
       roundUp: 'التقريب للأعلى',
       customAmount: '💰 مبلغ مخصص',
+      customTip: 'مبلغ مخصص',
       total: 'المجموع',
       selectPaymentMethod: 'اختر طريقة الدفع',
       applePay: 'Apple Pay',
@@ -555,7 +566,8 @@ export const guestTranslations = {
       creditCard: 'بطاقة الائتمان/الخصم',
       cash: 'نقد',
       payNow: 'ادفع الآن',
-      placeOrder: 'تأكيد الطلب'
+      placeOrder: 'تأكيد الطلب',
+      confirmPayment: 'ادفع الآن'
     },
     
     // Toast messages
