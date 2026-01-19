@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { MapPin, Phone, Globe, Clock, QrCode, ArrowRight } from 'lucide-react'
+import { MapPin, Phone, Globe, Clock, QrCode, ArrowRight, Calendar, ShoppingBag } from 'lucide-react'
 import Loading from '@/components/ui/loading'
 
 interface Restaurant {
@@ -108,6 +108,43 @@ export default function RestaurantPage({
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
+        {/* Action Buttons */}
+        <div className="grid gap-4 md:grid-cols-2 mb-8">
+          <Link href={`/${restaurantSlug}/reserve`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <Calendar className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold">Tisch reservieren</h3>
+                    <p className="text-sm text-gray-600">Sichern Sie sich Ihren Platz im Voraus</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+          
+          <Link href={`/${restaurantSlug}/preorder`}>
+            <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <ShoppingBag className="h-8 w-8 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold">Vorbestellen</h3>
+                    <p className="text-sm text-gray-600">Bestellen Sie vor und sparen Sie Zeit</p>
+                  </div>
+                  <ArrowRight className="h-5 w-5 text-gray-400" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
         <div className="grid gap-6 md:grid-cols-2">
           {/* Info Card */}
           <Card>

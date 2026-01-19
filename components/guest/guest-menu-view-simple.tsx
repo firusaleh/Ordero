@@ -20,6 +20,8 @@ import {
   Info,
   MapPin,
   Phone,
+  Calendar,
+  ShoppingBag,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { GuestLanguageProvider, useGuestLanguage } from '@/contexts/guest-language-context'
@@ -410,6 +412,28 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                 )}
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="bg-gradient-to-r from-blue-50 to-purple-50 border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="grid grid-cols-2 gap-3">
+            <a 
+              href={`/${restaurant.slug}/reserve`}
+              className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
+            >
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <span className="text-sm font-medium">Tisch reservieren</span>
+            </a>
+            <a 
+              href={`/${restaurant.slug}/preorder`}
+              className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border border-green-200 hover:border-green-300 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
+            >
+              <ShoppingBag className="h-5 w-5 text-green-600" />
+              <span className="text-sm font-medium">Vorbestellen</span>
+            </a>
           </div>
         </div>
       </div>
