@@ -158,7 +158,11 @@ export const guestTranslations = {
       card: 'Karte',
       online: 'Online',
       waiterCalled: 'Der Kellner wurde benachrichtigt',
-      billRequested: 'Die Rechnung wurde angefordert'
+      billRequested: 'Die Rechnung wurde angefordert',
+      actions: {
+        reserve: 'Tisch reservieren',
+        preorder: 'Vorbestellen'
+      }
     },
     item: {
       description: 'Beschreibung',
@@ -386,7 +390,11 @@ export const guestTranslations = {
       card: 'Card',
       online: 'Online',
       waiterCalled: 'The waiter has been notified',
-      billRequested: 'The bill has been requested'
+      billRequested: 'The bill has been requested',
+      actions: {
+        reserve: 'Reserve Table',
+        preorder: 'Pre-order'
+      }
     },
     item: {
       description: 'Description',
@@ -614,7 +622,11 @@ export const guestTranslations = {
       card: 'بطاقة',
       online: 'أونلاين',
       waiterCalled: 'تم إشعار النادل',
-      billRequested: 'تم طلب الفاتورة'
+      billRequested: 'تم طلب الفاتورة',
+      actions: {
+        reserve: 'حجز طاولة',
+        preorder: 'طلب مسبق'
+      }
     },
     item: {
       description: 'الوصف',
