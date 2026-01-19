@@ -166,6 +166,26 @@ export const guestTranslations = {
       actions: {
         reserve: 'Tisch reservieren',
         preorder: 'Vorbestellen'
+      },
+      restaurantPage: {
+        restaurantInfo: 'Restaurant-Informationen',
+        address: 'Adresse',
+        phone: 'Telefon',
+        website: 'Website',
+        openingHours: 'Öffnungszeiten',
+        seeDetails: 'Siehe Details unten',
+        orderOnline: 'Online bestellen',
+        scanQR: 'Scannen Sie den QR-Code an Ihrem Tisch oder geben Sie die Tischnummer ein',
+        scanTableQR: 'Scannen Sie den QR-Code an Ihrem Tisch',
+        or: 'oder',
+        enterTableNumber: 'Geben Sie Ihre Tischnummer ein:',
+        tableNumber: 'Tischnummer',
+        continue: 'Weiter',
+        categories: 'Kategorien',
+        dishes: 'Gerichte',
+        tables: 'Tische',
+        items: 'Artikel',
+        cuisine: 'Küche'
       }
     },
     item: {
@@ -402,6 +422,26 @@ export const guestTranslations = {
       actions: {
         reserve: 'Reserve Table',
         preorder: 'Pre-order'
+      },
+      restaurantPage: {
+        restaurantInfo: 'Restaurant Information',
+        address: 'Address',
+        phone: 'Phone',
+        website: 'Website',
+        openingHours: 'Opening Hours',
+        seeDetails: 'See details below',
+        orderOnline: 'Order Online',
+        scanQR: 'Scan the QR code at your table or enter the table number',
+        scanTableQR: 'Scan the QR code at your table',
+        or: 'or',
+        enterTableNumber: 'Enter your table number:',
+        tableNumber: 'Table Number',
+        continue: 'Continue',
+        categories: 'Categories',
+        dishes: 'Dishes',
+        tables: 'Tables',
+        items: 'items',
+        cuisine: 'Cuisine'
       }
     },
     item: {
@@ -638,6 +678,26 @@ export const guestTranslations = {
       actions: {
         reserve: 'حجز طاولة',
         preorder: 'طلب مسبق'
+      },
+      restaurantPage: {
+        restaurantInfo: 'معلومات المطعم',
+        address: 'العنوان',
+        phone: 'الهاتف',
+        website: 'الموقع الإلكتروني',
+        openingHours: 'ساعات العمل',
+        seeDetails: 'انظر التفاصيل أدناه',
+        orderOnline: 'اطلب عبر الإنترنت',
+        scanQR: 'امسح رمز QR على طاولتك أو أدخل رقم الطاولة',
+        scanTableQR: 'امسح رمز QR على طاولتك',
+        or: 'أو',
+        enterTableNumber: 'أدخل رقم طاولتك:',
+        tableNumber: 'رقم الطاولة',
+        continue: 'متابعة',
+        categories: 'الفئات',
+        dishes: 'الأطباق',
+        tables: 'الطاولات',
+        items: 'عنصر',
+        cuisine: 'المطبخ'
       }
     },
     item: {

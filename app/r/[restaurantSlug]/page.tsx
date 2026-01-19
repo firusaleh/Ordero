@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { MapPin, Phone, Globe, Clock, QrCode, ArrowRight, Calendar, ShoppingBag } from 'lucide-react'
 import Loading from '@/components/ui/loading'
 import { GuestLanguageProvider, useGuestLanguage } from '@/contexts/guest-language-context'
+import LanguageSwitcher from '@/components/guest/language-switcher'
 
 interface Restaurant {
   id: string
@@ -81,9 +82,11 @@ function RestaurantPageContent({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Loading text="Lade Restaurant-Daten..." />
-      </div>
+      <GuestLanguageProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Loading text="Loading..." />
+        </div>
+      </GuestLanguageProvider>
     )
   }
 
@@ -96,15 +99,22 @@ function RestaurantPageContent({
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
-          {restaurant.description && (
-            <p className="text-gray-600">{restaurant.description}</p>
-          )}
-          {restaurant.cuisine && (
-            <p className="text-sm text-gray-500 mt-2">
-              {t('guest.restaurantPage.cuisine')}: {restaurant.cuisine}
-            </p>
-          )}
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
+              {restaurant.description && (
+                <p className="text-gray-600">{restaurant.description}</p>
+              )}
+              {restaurant.cuisine && (
+                <p className="text-sm text-gray-500 mt-2">
+                  {t('guest.restaurantPage.cuisine')}: {restaurant.cuisine}
+                </p>
+              )}
+            </div>
+            <div className="ml-4">
+              <LanguageSwitcher />
+            </div>
+          </div>
         </div>
       </div>
 
