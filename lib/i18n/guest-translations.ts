@@ -209,13 +209,20 @@ export const guestTranslations = {
         email: 'E-Mail',
         details: 'Reservierungsdetails',
         numberOfGuests: 'Anzahl Personen',
+        person: 'Person',
+        persons: 'Personen',
         date: 'Datum',
         time: 'Uhrzeit',
         selectTime: 'Zeit wählen',
+        loadingSlots: 'Lade verfügbare Zeiten...',
+        selectDateFirst: 'Bitte wählen Sie zuerst ein Datum',
+        additionalInfo: 'Zusätzliche Informationen (optional)',
         specialRequests: 'Besondere Wünsche',
-        specialRequestsPlaceholder: 'z.B. Hochstuhl, Allergien, etc.',
-        submit: 'Reservierung abschicken',
-        loading: 'Wird gesendet...',
+        specialRequestsPlaceholder: 'z.B. Kinderstuhl benötigt, Fensterplatz gewünscht...',
+        notes: 'Anmerkungen',
+        notesPlaceholder: 'Weitere Informationen für das Restaurant...',
+        submit: 'Jetzt reservieren',
+        loading: 'Wird verarbeitet...',
         success: {
           title: 'Reservierung bestätigt!',
           message: 'Vielen Dank für Ihre Reservierung. Sie erhalten in Kürze eine Bestätigungs-E-Mail.',
@@ -225,7 +232,8 @@ export const guestTranslations = {
         errors: {
           selectTime: 'Bitte wählen Sie eine Uhrzeit',
           networkError: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
-          generalError: 'Fehler bei der Reservierung'
+          generalError: 'Fehler bei der Reservierung',
+          loadingError: 'Fehler beim Laden der Zeitslots'
         }
       }
     },
@@ -505,13 +513,20 @@ export const guestTranslations = {
         email: 'Email',
         details: 'Reservation Details',
         numberOfGuests: 'Number of Guests',
+        person: 'Person',
+        persons: 'Persons',
         date: 'Date',
         time: 'Time',
         selectTime: 'Select Time',
+        loadingSlots: 'Loading available times...',
+        selectDateFirst: 'Please select a date first',
+        additionalInfo: 'Additional Information (optional)',
         specialRequests: 'Special Requests',
-        specialRequestsPlaceholder: 'e.g. highchair, allergies, etc.',
-        submit: 'Submit Reservation',
-        loading: 'Sending...',
+        specialRequestsPlaceholder: 'e.g. highchair needed, window seat preferred...',
+        notes: 'Notes',
+        notesPlaceholder: 'Additional information for the restaurant...',
+        submit: 'Reserve Now',
+        loading: 'Processing...',
         success: {
           title: 'Reservation Confirmed!',
           message: 'Thank you for your reservation. You will receive a confirmation email shortly.',
@@ -521,7 +536,8 @@ export const guestTranslations = {
         errors: {
           selectTime: 'Please select a time',
           networkError: 'Network error. Please try again later.',
-          generalError: 'Error making reservation'
+          generalError: 'Error making reservation',
+          loadingError: 'Error loading time slots'
         }
       }
     },
@@ -801,13 +817,20 @@ export const guestTranslations = {
         email: 'البريد الإلكتروني',
         details: 'تفاصيل الحجز',
         numberOfGuests: 'عدد الأشخاص',
+        person: 'شخص',
+        persons: 'أشخاص',
         date: 'التاريخ',
         time: 'الوقت',
         selectTime: 'اختر الوقت',
+        loadingSlots: 'جاري تحميل الأوقات المتاحة...',
+        selectDateFirst: 'الرجاء اختيار التاريخ أولاً',
+        additionalInfo: 'معلومات إضافية (اختياري)',
         specialRequests: 'طلبات خاصة',
-        specialRequestsPlaceholder: 'مثلاً: كرسي أطفال، حساسية، إلخ.',
-        submit: 'إرسال الحجز',
-        loading: 'جاري الإرسال...',
+        specialRequestsPlaceholder: 'مثلاً: كرسي أطفال مطلوب، مقعد بجانب النافذة مفضل...',
+        notes: 'ملاحظات',
+        notesPlaceholder: 'معلومات إضافية للمطعم...',
+        submit: 'احجز الآن',
+        loading: 'جاري المعالجة...',
         success: {
           title: 'تم تأكيد الحجز!',
           message: 'شكراً لحجزك. ستتلقى بريداً إلكترونياً للتأكيد قريباً.',
@@ -817,7 +840,8 @@ export const guestTranslations = {
         errors: {
           selectTime: 'الرجاء اختيار الوقت',
           networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
-          generalError: 'خطأ في الحجز'
+          generalError: 'خطأ في الحجز',
+          loadingError: 'خطأ في تحميل الأوقات المتاحة'
         }
       }
     },

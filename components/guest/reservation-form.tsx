@@ -53,7 +53,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
         setAvailableSlots(data.availableSlots)
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Zeitslots:', error)
+      console.error('Error loading time slots:', error)
     } finally {
       setLoadingSlots(false)
     }
@@ -194,13 +194,13 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
 
           {/* Reservierungsdetails */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Reservierungsdetails</h3>
+            <h3 className="font-semibold">{t('guest.reservationForm.details')}</h3>
             
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="guests">
                   <Users className="inline h-4 w-4 mr-1" />
-                  Anzahl Personen *
+                  {t('guest.reservationForm.numberOfGuests')} *
                 </Label>
                 <Select
                   value={formData.numberOfGuests.toString()}
@@ -215,7 +215,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                   <SelectContent>
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                       <SelectItem key={num} value={num.toString()}>
-                        {num} {num === 1 ? 'Person' : 'Personen'}
+                        {num} {num === 1 ? t('guest.reservationForm.person') : t('guest.reservationForm.persons')}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -225,7 +225,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
               <div>
                 <Label>
                   <CalendarIcon className="inline h-4 w-4 mr-1" />
-                  Datum *
+                  {t('guest.reservationForm.date')} *
                 </Label>
                 <Button
                   type="button"
@@ -242,16 +242,16 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
             <div>
               <Label>
                 <Clock className="inline h-4 w-4 mr-1" />
-                Uhrzeit *
+                {t('guest.reservationForm.time')} *
               </Label>
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mt-2">
                 {loadingSlots ? (
                   <div className="col-span-full text-center py-4 text-gray-500">
-                    Lade verfügbare Zeiten...
+                    {t('guest.reservationForm.loadingSlots')}
                   </div>
                 ) : availableSlots.length === 0 ? (
                   <div className="col-span-full text-center py-4 text-gray-500">
-                    Bitte wählen Sie zuerst ein Datum
+                    {t('guest.reservationForm.selectDateFirst')}
                   </div>
                 ) : (
                   availableSlots.map(slot => (
@@ -273,26 +273,26 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
 
           {/* Zusätzliche Informationen */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Zusätzliche Informationen (optional)</h3>
+            <h3 className="font-semibold">{t('guest.reservationForm.additionalInfo')}</h3>
             
             <div>
-              <Label htmlFor="requests">Besondere Wünsche</Label>
+              <Label htmlFor="requests">{t('guest.reservationForm.specialRequests')}</Label>
               <Textarea
                 id="requests"
                 value={formData.specialRequests}
                 onChange={(e) => setFormData({ ...formData, specialRequests: e.target.value })}
-                placeholder="z.B. Kinderstuhl benötigt, Fensterplatz gewünscht..."
+                placeholder={t('guest.reservationForm.specialRequestsPlaceholder')}
                 rows={3}
               />
             </div>
             
             <div>
-              <Label htmlFor="notes">Anmerkungen</Label>
+              <Label htmlFor="notes">{t('guest.reservationForm.notes')}</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Weitere Informationen für das Restaurant..."
+                placeholder={t('guest.reservationForm.notesPlaceholder')}
                 rows={3}
               />
             </div>
@@ -305,7 +305,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
             size="lg"
             disabled={loading || !formData.reservationTime}
           >
-            {loading ? 'Wird verarbeitet...' : 'Jetzt reservieren'}
+            {loading ? t('guest.reservationForm.loading') : t('guest.reservationForm.submit')}
           </Button>
         </form>
       </CardContent>
