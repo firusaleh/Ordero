@@ -12,6 +12,7 @@ import { CalendarIcon, Clock, Users, Phone, Mail, User, CheckCircle } from 'luci
 import { format } from 'date-fns'
 import { de, ar, enUS } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface ReservationFormProps {
   restaurantSlug: string
@@ -19,6 +20,7 @@ interface ReservationFormProps {
 }
 
 export default function ReservationForm({ restaurantSlug, language = 'de' }: ReservationFormProps) {
+  const { t } = useGuestLanguage()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [confirmationCode, setConfirmationCode] = useState('')
@@ -177,7 +179,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
             <div>
               <Label htmlFor="email">
                 <Mail className="inline h-4 w-4 mr-1" />
-                E-Mail *
+                {t('guest.reservationForm.email')} *
               </Label>
               <Input
                 id="email"

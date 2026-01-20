@@ -199,6 +199,34 @@ export const guestTranslations = {
         tables: 'Tische',
         items: 'Artikel',
         cuisine: 'Küche'
+      },
+      reservationForm: {
+        title: 'Tisch reservieren',
+        subtitle: 'Reservieren Sie Ihren Tisch bequem online',
+        yourData: 'Ihre Daten',
+        name: 'Name',
+        phone: 'Telefon',
+        email: 'E-Mail',
+        details: 'Reservierungsdetails',
+        numberOfGuests: 'Anzahl Personen',
+        date: 'Datum',
+        time: 'Uhrzeit',
+        selectTime: 'Zeit wählen',
+        specialRequests: 'Besondere Wünsche',
+        specialRequestsPlaceholder: 'z.B. Hochstuhl, Allergien, etc.',
+        submit: 'Reservierung abschicken',
+        loading: 'Wird gesendet...',
+        success: {
+          title: 'Reservierung bestätigt!',
+          message: 'Vielen Dank für Ihre Reservierung. Sie erhalten in Kürze eine Bestätigungs-E-Mail.',
+          confirmationCode: 'Bestätigungscode:',
+          newReservation: 'Neue Reservierung'
+        },
+        errors: {
+          selectTime: 'Bitte wählen Sie eine Uhrzeit',
+          networkError: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
+          generalError: 'Fehler bei der Reservierung'
+        }
       }
     },
     item: {
@@ -467,6 +495,34 @@ export const guestTranslations = {
         tables: 'Tables',
         items: 'items',
         cuisine: 'Cuisine'
+      },
+      reservationForm: {
+        title: 'Reserve Table',
+        subtitle: 'Reserve your table conveniently online',
+        yourData: 'Your Information',
+        name: 'Name',
+        phone: 'Phone',
+        email: 'Email',
+        details: 'Reservation Details',
+        numberOfGuests: 'Number of Guests',
+        date: 'Date',
+        time: 'Time',
+        selectTime: 'Select Time',
+        specialRequests: 'Special Requests',
+        specialRequestsPlaceholder: 'e.g. highchair, allergies, etc.',
+        submit: 'Submit Reservation',
+        loading: 'Sending...',
+        success: {
+          title: 'Reservation Confirmed!',
+          message: 'Thank you for your reservation. You will receive a confirmation email shortly.',
+          confirmationCode: 'Confirmation Code:',
+          newReservation: 'New Reservation'
+        },
+        errors: {
+          selectTime: 'Please select a time',
+          networkError: 'Network error. Please try again later.',
+          generalError: 'Error making reservation'
+        }
       }
     },
     item: {
@@ -735,6 +791,34 @@ export const guestTranslations = {
         tables: 'الطاولات',
         items: 'عنصر',
         cuisine: 'المطبخ'
+      },
+      reservationForm: {
+        title: 'حجز طاولة',
+        subtitle: 'احجز طاولتك بسهولة عبر الإنترنت',
+        yourData: 'بياناتك',
+        name: 'الاسم',
+        phone: 'الهاتف',
+        email: 'البريد الإلكتروني',
+        details: 'تفاصيل الحجز',
+        numberOfGuests: 'عدد الأشخاص',
+        date: 'التاريخ',
+        time: 'الوقت',
+        selectTime: 'اختر الوقت',
+        specialRequests: 'طلبات خاصة',
+        specialRequestsPlaceholder: 'مثلاً: كرسي أطفال، حساسية، إلخ.',
+        submit: 'إرسال الحجز',
+        loading: 'جاري الإرسال...',
+        success: {
+          title: 'تم تأكيد الحجز!',
+          message: 'شكراً لحجزك. ستتلقى بريداً إلكترونياً للتأكيد قريباً.',
+          confirmationCode: 'رمز التأكيد:',
+          newReservation: 'حجز جديد'
+        },
+        errors: {
+          selectTime: 'الرجاء اختيار الوقت',
+          networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
+          generalError: 'خطأ في الحجز'
+        }
       }
     },
     item: {
