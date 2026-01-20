@@ -1,3 +1,4 @@
+// Last updated: 2026-01-20 - Complete translations for reservation and preorder
 export const guestTranslations = {
   de: {
     // Header
