@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,7 +8,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Calendar } from '@/components/ui/calendar'
-import { CalendarIcon, Clock, Users, Phone, Mail, User, CheckCircle } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { CalendarIcon, Clock, Users, Phone, Mail, User, CheckCircle, ArrowLeft } from 'lucide-react'
 import { format } from 'date-fns'
 import { de, ar, enUS } from 'date-fns/locale'
 import { toast } from 'sonner'
@@ -39,25 +40,35 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
 
   const [availableSlots, setAvailableSlots] = useState<any[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
 
   // Lade verfügbare Zeiten wenn Datum/Gäste sich ändern
-  const loadAvailableSlots = async () => {
+  const loadAvailableSlots = async (date?: Date, guests?: number) => {
     setLoadingSlots(true)
+    const dateToUse = date || formData.reservationDate
+    const guestsToUse = guests || formData.numberOfGuests
+    
     try {
       const response = await fetch(
-        `/api/public/${restaurantSlug}/reservations?date=${format(formData.reservationDate, 'yyyy-MM-dd')}&guests=${formData.numberOfGuests}`
+        `/api/public/${restaurantSlug}/reservations?date=${format(dateToUse, 'yyyy-MM-dd')}&guests=${guestsToUse}`
       )
       
       if (response.ok) {
         const data = await response.json()
-        setAvailableSlots(data.availableSlots)
+        setAvailableSlots(data.availableSlots || [])
       }
     } catch (error) {
       console.error('Error loading time slots:', error)
+      setAvailableSlots([])
     } finally {
       setLoadingSlots(false)
     }
   }
+
+  // Lade Slots beim ersten Rendern
+  useEffect(() => {
+    loadAvailableSlots()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -134,10 +145,22 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle>Tisch reservieren</CardTitle>
-        <CardDescription>
-          Reservieren Sie Ihren Tisch bequem online
-        </CardDescription>
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => window.location.href = `/${restaurantSlug}`}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <CardTitle>Tisch reservieren</CardTitle>
+            <CardDescription>
+              Reservieren Sie Ihren Tisch bequem online
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -205,8 +228,9 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                 <Select
                   value={formData.numberOfGuests.toString()}
                   onValueChange={(value) => {
-                    setFormData({ ...formData, numberOfGuests: parseInt(value) })
-                    loadAvailableSlots()
+                    const guests = parseInt(value)
+                    setFormData({ ...formData, numberOfGuests: guests })
+                    loadAvailableSlots(formData.reservationDate, guests)
                   }}
                 >
                   <SelectTrigger>
@@ -227,14 +251,33 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                   <CalendarIcon className="inline h-4 w-4 mr-1" />
                   {t('guest.reservationForm.date')} *
                 </Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full justify-start text-left font-normal"
-                  onClick={() => {/* Open calendar popup */}}
-                >
-                  {format(formData.reservationDate, 'PPP', { locale: getLocale() })}
-                </Button>
+                <Popover open={showCalendar} onOpenChange={setShowCalendar}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(formData.reservationDate, 'PPP', { locale: getLocale() })}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.reservationDate}
+                      onSelect={(date) => {
+                        if (date) {
+                          setFormData({ ...formData, reservationDate: date })
+                          setShowCalendar(false)
+                          loadAvailableSlots(date, formData.numberOfGuests)
+                        }
+                      }}
+                      initialFocus
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
