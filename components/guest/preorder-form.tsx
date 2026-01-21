@@ -18,7 +18,8 @@ import {
   Minus, 
   CheckCircle,
   Package,
-  ChefHat
+  ChefHat,
+  ArrowLeft
 } from 'lucide-react'
 import { format, addMinutes } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -229,13 +230,25 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>
-                <ChefHat className="inline h-5 w-5 mr-2" />
-                Vorbestellung aufgeben
-              </CardTitle>
-              <CardDescription>
-                Bestellen Sie vor und sparen Sie Zeit - Mindestens 20 Minuten im Voraus
-              </CardDescription>
+              <div className="flex items-center gap-4 mb-4">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => window.location.href = `/r/${restaurantSlug}`}
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex-1">
+                  <CardTitle>
+                    <ChefHat className="inline h-5 w-5 mr-2" />
+                    Vorbestellung aufgeben
+                  </CardTitle>
+                  <CardDescription>
+                    Bestellen Sie vor und sparen Sie Zeit - Mindestens 20 Minuten im Voraus
+                  </CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {/* Kategorien */}

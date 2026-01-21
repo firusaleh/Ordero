@@ -150,7 +150,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => window.location.href = `/${restaurantSlug}`}
+            onClick={() => window.location.href = `/r/${restaurantSlug}`}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
