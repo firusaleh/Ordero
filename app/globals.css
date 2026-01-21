@@ -4,6 +4,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import react-day-picker styles */
+@import 'react-day-picker/style.css';
+
+/* Calendar specific styles */
+.rdp {
+  --rdp-accent-color: hsl(var(--primary));
+  --rdp-accent-color-dark: hsl(var(--primary));
+  --rdp-background-color: hsl(var(--accent));
+  --rdp-background-color-dark: hsl(var(--accent));
+  --rdp-outline: 2px solid hsl(var(--primary));
+  --rdp-outline-selected: 2px solid hsl(var(--primary));
+}
+
+.rdp-day_selected:not([disabled]) {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.rdp-day_selected:hover:not([disabled]) {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.rdp-day_today:not(.rdp-day_selected) {
+  font-weight: bold;
+  background-color: hsl(var(--accent));
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: hsl(var(--accent));
+}
+
+.rdp-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.rdp-nav {
+  display: flex;
+  align-items: center;
+}
+
 @layer utilities {
   .sr-only {
     position: absolute;

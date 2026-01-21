@@ -262,7 +262,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                       {format(formData.reservationDate, 'PPP', { locale: getLocale() })}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-50" align="start">
                     <Calendar
                       mode="single"
                       selected={formData.reservationDate}
@@ -275,6 +275,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                       }}
                       initialFocus
                       disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      locale={getLocale()}
                     />
                   </PopoverContent>
                 </Popover>
