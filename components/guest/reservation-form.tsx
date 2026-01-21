@@ -262,8 +262,8 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                       {format(formData.reservationDate, 'PPP', { locale: getLocale() })}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start" side="bottom">
-                    <div className="bg-white rounded-lg shadow-lg border">
+                  <PopoverContent className="w-auto p-0" align="start" side="bottom" sideOffset={5}>
+                    <div className="bg-white rounded-lg shadow-lg border" style={{ width: '280px' }}>
                       <Calendar
                         mode="single"
                         selected={formData.reservationDate}
@@ -277,7 +277,18 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                         initialFocus
                         disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                         locale={getLocale()}
-                        className="p-3"
+                        className="p-3 w-full"
+                        formatters={{
+                          formatWeekdayName: (weekday) => {
+                            const weekdayNames = {
+                              de: ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+                              en: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+                              ar: ['أح', 'إث', 'ثل', 'أر', 'خم', 'جم', 'سب']
+                            }
+                            const lang = language as 'de' | 'en' | 'ar'
+                            return weekdayNames[lang]?.[weekday.getDay()] || weekdayNames.de[weekday.getDay()]
+                          }
+                        }}
                       />
                     </div>
                   </PopoverContent>
