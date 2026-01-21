@@ -1,11 +1,9 @@
 @import './oriido.css';
+@import 'react-day-picker/style.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import react-day-picker styles */
-@import 'react-day-picker/style.css';
 
 /* Calendar specific styles */
 .rdp {
