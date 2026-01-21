@@ -205,8 +205,11 @@ export const guestTranslations = {
         subtitle: 'Reservieren Sie Ihren Tisch bequem online',
         yourData: 'Ihre Daten',
         name: 'Name',
+        namePlaceholder: 'Max Mustermann',
         phone: 'Telefon',
+        phonePlaceholder: '+49 123 456789',
         email: 'E-Mail',
+        emailPlaceholder: 'max@example.com',
         details: 'Reservierungsdetails',
         numberOfGuests: 'Anzahl Personen',
         person: 'Person',
@@ -231,9 +234,9 @@ export const guestTranslations = {
         },
         errors: {
           selectTime: 'Bitte wählen Sie eine Uhrzeit',
-          networkError: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
-          generalError: 'Fehler bei der Reservierung',
-          loadingError: 'Fehler beim Laden der Zeitslots'
+          network: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
+          general: 'Fehler bei der Reservierung',
+          loading: 'Fehler beim Laden der Zeitslots'
         }
       }
     },
@@ -509,8 +512,11 @@ export const guestTranslations = {
         subtitle: 'Reserve your table conveniently online',
         yourData: 'Your Information',
         name: 'Name',
+        namePlaceholder: 'John Doe',
         phone: 'Phone',
+        phonePlaceholder: '+1 234 567890',
         email: 'Email',
+        emailPlaceholder: 'john@example.com',
         details: 'Reservation Details',
         numberOfGuests: 'Number of Guests',
         person: 'Person',
@@ -535,9 +541,9 @@ export const guestTranslations = {
         },
         errors: {
           selectTime: 'Please select a time',
-          networkError: 'Network error. Please try again later.',
-          generalError: 'Error making reservation',
-          loadingError: 'Error loading time slots'
+          network: 'Network error. Please try again later.',
+          general: 'Error making reservation',
+          loading: 'Error loading time slots'
         }
       }
     },
@@ -813,8 +819,11 @@ export const guestTranslations = {
         subtitle: 'احجز طاولتك بسهولة عبر الإنترنت',
         yourData: 'بياناتك',
         name: 'الاسم',
+        namePlaceholder: 'أحمد محمد',
         phone: 'الهاتف',
+        phonePlaceholder: '+966 50 123 4567',
         email: 'البريد الإلكتروني',
+        emailPlaceholder: 'ahmed@example.com',
         details: 'تفاصيل الحجز',
         numberOfGuests: 'عدد الأشخاص',
         person: 'شخص',
@@ -839,9 +848,9 @@ export const guestTranslations = {
         },
         errors: {
           selectTime: 'الرجاء اختيار الوقت',
-          networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
-          generalError: 'خطأ في الحجز',
-          loadingError: 'خطأ في تحميل الأوقات المتاحة'
+          network: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
+          general: 'خطأ في الحجز',
+          loading: 'خطأ في تحميل الأوقات المتاحة'
         }
       }
     },

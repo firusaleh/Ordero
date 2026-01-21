@@ -74,7 +74,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
     e.preventDefault()
     
     if (!formData.reservationTime) {
-      toast.error('Bitte wählen Sie eine Uhrzeit')
+      toast.error(t('guest.reservationForm.errors.selectTime'))
       return
     }
 
@@ -97,12 +97,12 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
       if (response.ok) {
         setSuccess(true)
         setConfirmationCode(data.reservation.confirmationToken)
-        toast.success('Reservierung erfolgreich!')
+        toast.success(t('guest.reservationForm.success.title'))
       } else {
-        toast.error(data.error || 'Fehler bei der Reservierung')
+        toast.error(data.error || t('guest.reservationForm.errors.general'))
       }
     } catch (error) {
-      toast.error('Netzwerkfehler. Bitte versuchen Sie es später erneut.')
+      toast.error(t('guest.reservationForm.errors.network'))
     } finally {
       setLoading(false)
     }
@@ -123,17 +123,17 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-            <h2 className="text-2xl font-bold">Reservierung bestätigt!</h2>
+            <h2 className="text-2xl font-bold">{t('guest.reservationForm.success.title')}</h2>
             <p className="text-gray-600">
-              Vielen Dank für Ihre Reservierung. Sie erhalten in Kürze eine Bestätigungs-E-Mail.
+              {t('guest.reservationForm.success.message')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Bestätigungscode:</p>
+              <p className="text-sm text-gray-600">{t('guest.reservationForm.success.confirmationCode')}</p>
               <p className="text-2xl font-mono font-bold">{confirmationCode}</p>
             </div>
             <div className="pt-4">
               <Button onClick={() => window.location.reload()}>
-                Neue Reservierung
+                {t('guest.reservationForm.success.newReservation')}
               </Button>
             </div>
           </div>
@@ -155,9 +155,9 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <CardTitle>Tisch reservieren</CardTitle>
+            <CardTitle>{t('guest.reservationForm.title')}</CardTitle>
             <CardDescription>
-              Reservieren Sie Ihren Tisch bequem online
+              {t('guest.reservationForm.subtitle')}
             </CardDescription>
           </div>
         </div>
@@ -166,27 +166,27 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Persönliche Daten */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Ihre Daten</h3>
+            <h3 className="font-semibold">{t('guest.reservationForm.yourData')}</h3>
             
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label htmlFor="name">
                   <User className="inline h-4 w-4 mr-1" />
-                  Name *
+                  {t('guest.reservationForm.name')} *
                 </Label>
                 <Input
                   id="name"
                   required
                   value={formData.customerName}
                   onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                  placeholder="Max Mustermann"
+                  placeholder={t('guest.reservationForm.namePlaceholder')}
                 />
               </div>
               
               <div>
                 <Label htmlFor="phone">
                   <Phone className="inline h-4 w-4 mr-1" />
-                  Telefon *
+                  {t('guest.reservationForm.phone')} *
                 </Label>
                 <Input
                   id="phone"
@@ -194,7 +194,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                   required
                   value={formData.customerPhone}
                   onChange={(e) => setFormData({ ...formData, customerPhone: e.target.value })}
-                  placeholder="+49 123 456789"
+                  placeholder={t('guest.reservationForm.phonePlaceholder')}
                 />
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function ReservationForm({ restaurantSlug, language = 'de' }: Res
                 required
                 value={formData.customerEmail}
                 onChange={(e) => setFormData({ ...formData, customerEmail: e.target.value })}
-                placeholder="max@example.com"
+                placeholder={t('guest.reservationForm.emailPlaceholder')}
               />
             </div>
           </div>
