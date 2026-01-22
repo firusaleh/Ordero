@@ -267,6 +267,52 @@ export const guestTranslations = {
       outOfStock: 'Nicht verfügbar',
       limitedAvailability: 'Begrenzte Verfügbarkeit'
     },
+    toast: {
+      addedToCart: 'zum Warenkorb hinzugefügt',
+      itemRemoved: 'Artikel entfernt',
+      orderFailed: 'Bestellung fehlgeschlagen',
+      tryAgain: 'Bitte versuchen Sie es erneut',
+      paymentSuccess: 'Zahlung erfolgreich!',
+      paymentError: 'Zahlungsfehler',
+      menuLoadError: 'Fehler beim Laden des Menüs',
+      emptyCart: 'Bitte fügen Sie Artikel zum Warenkorb hinzu',
+      orderError: 'Fehler bei der Bestellung',
+      networkError: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
+      paymentConfirmed: 'Zahlung erfolgreich! Ihre Bestellung wurde bestätigt.',
+      paymentButConfirmFailed: 'Zahlung erfolgreich, aber Bestätigung fehlgeschlagen. Bitte kontaktieren Sie das Restaurant.',
+      confirmationFailed: 'Zahlungsbestätigung fehlgeschlagen',
+      splitBillComingSoon: 'Split-Funktion kommt bald!'
+    },
+    preorderForm: {
+      title: 'Vorbestellung aufgeben',
+      subtitle: 'Bestellen Sie vor und sparen Sie Zeit - Mindestens 20 Minuten im Voraus',
+      cart: 'Warenkorb',
+      emptyCart: 'Ihr Warenkorb ist leer',
+      total: 'Gesamt',
+      yourData: 'Ihre Daten',
+      pickupTime: 'Abholzeit',
+      name: 'Name',
+      phone: 'Telefon',
+      email: 'E-Mail',
+      notes: 'Anmerkungen',
+      notesPlaceholder: 'Besondere Wünsche oder Anmerkungen...',
+      paymentMethod: 'Zahlungsmethode',
+      payNow: 'Jetzt online bezahlen',
+      payLater: 'Bei Abholung bezahlen',
+      placeOrder: 'Bestellung aufgeben',
+      processing: 'Wird verarbeitet...',
+      success: {
+        title: 'Vorbestellung bestätigt!',
+        message: 'Vielen Dank für Ihre Bestellung. Sie erhalten in Kürze eine Bestätigungs-E-Mail.',
+        orderNumber: 'Bestellnummer:',
+        pickupTime: 'Abholzeit:',
+        newOrder: 'Neue Bestellung'
+      },
+      tags: {
+        vegan: 'Vegan',
+        vegetarian: 'Vegetarisch'
+      }
+    },
     checkout: {
       title: 'Kasse',
       orderSummary: 'Bestellübersicht',
@@ -574,6 +620,52 @@ export const guestTranslations = {
       outOfStock: 'Out of Stock',
       limitedAvailability: 'Limited Availability'
     },
+    toast: {
+      addedToCart: 'added to cart',
+      itemRemoved: 'Item removed',
+      orderFailed: 'Order failed',
+      tryAgain: 'Please try again',
+      paymentSuccess: 'Payment successful!',
+      paymentError: 'Payment error',
+      menuLoadError: 'Error loading menu',
+      emptyCart: 'Please add items to cart',
+      orderError: 'Error placing order',
+      networkError: 'Network error. Please try again later.',
+      paymentConfirmed: 'Payment successful! Your order has been confirmed.',
+      paymentButConfirmFailed: 'Payment successful, but confirmation failed. Please contact the restaurant.',
+      confirmationFailed: 'Payment confirmation failed',
+      splitBillComingSoon: 'Split bill feature coming soon!'
+    },
+    preorderForm: {
+      title: 'Place Pre-order',
+      subtitle: 'Order ahead and save time - Minimum 20 minutes in advance',
+      cart: 'Cart',
+      emptyCart: 'Your cart is empty',
+      total: 'Total',
+      yourData: 'Your Information',
+      pickupTime: 'Pickup Time',
+      name: 'Name',
+      phone: 'Phone',
+      email: 'Email',
+      notes: 'Notes',
+      notesPlaceholder: 'Special requests or notes...',
+      paymentMethod: 'Payment Method',
+      payNow: 'Pay Now Online',
+      payLater: 'Pay on Pickup',
+      placeOrder: 'Place Order',
+      processing: 'Processing...',
+      success: {
+        title: 'Pre-order Confirmed!',
+        message: 'Thank you for your order. You will receive a confirmation email shortly.',
+        orderNumber: 'Order Number:',
+        pickupTime: 'Pickup Time:',
+        newOrder: 'New Order'
+      },
+      tags: {
+        vegan: 'Vegan',
+        vegetarian: 'Vegetarian'
+      }
+    },
     checkout: {
       title: 'Checkout',
       orderSummary: 'Order Summary',
@@ -880,6 +972,52 @@ export const guestTranslations = {
       updateCart: 'تحديث السلة',
       outOfStock: 'غير متوفر',
       limitedAvailability: 'التوفر محدود'
+    },
+    toast: {
+      addedToCart: 'أضيف إلى السلة',
+      itemRemoved: 'تم إزالة العنصر',
+      orderFailed: 'فشل الطلب',
+      tryAgain: 'يرجى المحاولة مرة أخرى',
+      paymentSuccess: 'تم الدفع بنجاح!',
+      paymentError: 'خطأ في الدفع',
+      menuLoadError: 'خطأ في تحميل القائمة',
+      emptyCart: 'يرجى إضافة عناصر إلى السلة',
+      orderError: 'خطأ في إرسال الطلب',
+      networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
+      paymentConfirmed: 'تم الدفع بنجاح! تم تأكيد طلبك.',
+      paymentButConfirmFailed: 'تم الدفع بنجاح، لكن فشل التأكيد. يرجى الاتصال بالمطعم.',
+      confirmationFailed: 'فشل تأكيد الدفع',
+      splitBillComingSoon: 'ميزة تقسيم الفاتورة قريباً!'
+    },
+    preorderForm: {
+      title: 'طلب مسبق',
+      subtitle: 'اطلب مسبقاً ووفر الوقت - الحد الأدنى 20 دقيقة مقدماً',
+      cart: 'السلة',
+      emptyCart: 'سلة التسوق فارغة',
+      total: 'المجموع',
+      yourData: 'بياناتك',
+      pickupTime: 'وقت الاستلام',
+      name: 'الاسم',
+      phone: 'الهاتف',
+      email: 'البريد الإلكتروني',
+      notes: 'ملاحظات',
+      notesPlaceholder: 'طلبات خاصة أو ملاحظات...',
+      paymentMethod: 'طريقة الدفع',
+      payNow: 'ادفع الآن عبر الإنترنت',
+      payLater: 'الدفع عند الاستلام',
+      placeOrder: 'تأكيد الطلب',
+      processing: 'جاري المعالجة...',
+      success: {
+        title: 'تم تأكيد الطلب المسبق!',
+        message: 'شكراً لطلبك. ستتلقى بريداً إلكترونياً للتأكيد قريباً.',
+        orderNumber: 'رقم الطلب:',
+        pickupTime: 'وقت الاستلام:',
+        newOrder: 'طلب جديد'
+      },
+      tags: {
+        vegan: 'نباتي',
+        vegetarian: 'نباتي'
+      }
     },
     checkout: {
       title: 'الدفع',

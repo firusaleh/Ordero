@@ -137,7 +137,7 @@ function CheckoutForm({
           const confirmResult = await confirmResponse.json()
           
           if (confirmResult.success) {
-            toast.success('Zahlung erfolgreich! Ihre Bestellung wurde bestätigt.')
+            toast.success(t('guest.toast.paymentConfirmed'))
             onSuccess(paymentIntent.id)
           } else {
             throw new Error(confirmResult.error || 'Zahlungsbestätigung fehlgeschlagen')
@@ -145,8 +145,8 @@ function CheckoutForm({
         } catch (confirmError) {
           console.error('Payment confirmation error:', confirmError)
           // Zahlung war erfolgreich, aber Backend-Bestätigung fehlgeschlagen
-          toast.error('Zahlung erfolgreich, aber Bestätigung fehlgeschlagen. Bitte kontaktieren Sie das Restaurant.')
-          onError('Zahlungsbestätigung fehlgeschlagen')
+          toast.error(t('guest.toast.paymentButConfirmFailed'))
+          onError(t('guest.toast.confirmationFailed'))
         }
       } else {
         setPaymentStatus('failed')

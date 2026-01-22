@@ -22,8 +22,9 @@ import {
   ArrowLeft
 } from 'lucide-react'
 import { format, addMinutes } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { de, ar, enUS } from 'date-fns/locale'
 import { toast } from 'sonner'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface PreOrderFormProps {
   restaurantSlug: string
@@ -41,6 +42,7 @@ interface CartItem {
 }
 
 export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrderFormProps) {
+  const { t } = useGuestLanguage()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [orderId, setOrderId] = useState('')
@@ -84,7 +86,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
       }
     } catch (error) {
       console.error('Fehler beim Laden des Menüs:', error)
-      toast.error('Fehler beim Laden des Menüs')
+      toast.error(t('guest.toast.menuLoadError'))
     }
   }
 
@@ -122,7 +124,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
       }])
     }
 
-    toast.success('Zum Warenkorb hinzugefügt')
+    toast.success(t('guest.toast.addedToCart'))
   }
 
   // Menge ändern
@@ -142,12 +144,20 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
     return cart.reduce((sum, item) => sum + (item.totalPrice * item.quantity), 0)
   }
 
+  const getLocale = () => {
+    switch(language) {
+      case 'ar': return ar
+      case 'en': return enUS
+      default: return de
+    }
+  }
+
   // Bestellung absenden
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (cart.length === 0) {
-      toast.error('Bitte fügen Sie Artikel zum Warenkorb hinzu')
+      toast.error(t('guest.toast.emptyCart'))
       return
     }
 
@@ -182,10 +192,10 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
           window.location.href = data.preOrder.paymentUrl
         }
       } else {
-        toast.error(data.error || 'Fehler bei der Bestellung')
+        toast.error(data.error || t('guest.toast.orderError'))
       }
     } catch (error) {
-      toast.error('Netzwerkfehler. Bitte versuchen Sie es später erneut.')
+      toast.error(t('guest.toast.networkError'))
     } finally {
       setLoading(false)
     }
@@ -198,23 +208,23 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-            <h2 className="text-2xl font-bold">Vorbestellung bestätigt!</h2>
+            <h2 className="text-2xl font-bold">{t('guest.preorderForm.success.title')}</h2>
             <p className="text-gray-600">
-              Vielen Dank für Ihre Bestellung. Sie erhalten in Kürze eine Bestätigungs-E-Mail.
+              {t('guest.preorderForm.success.message')}
             </p>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">Bestellnummer:</p>
+              <p className="text-sm text-gray-600">{t('guest.preorderForm.success.orderNumber')}</p>
               <p className="text-2xl font-mono font-bold">{orderId.slice(-8).toUpperCase()}</p>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <Clock className="h-5 w-5 text-blue-600 mx-auto mb-2" />
               <p className="text-sm text-blue-800">
-                Abholzeit: {format(new Date(formData.pickupTime), 'PPp', { locale: de })}
+                {t('guest.preorderForm.success.pickupTime')} {format(new Date(formData.pickupTime), 'PPp', { locale: getLocale() })}
               </p>
             </div>
             <div className="pt-4">
               <Button onClick={() => window.location.reload()}>
-                Neue Bestellung
+                {t('guest.preorderForm.success.newOrder')}
               </Button>
             </div>
           </div>
@@ -242,10 +252,10 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                 <div className="flex-1">
                   <CardTitle>
                     <ChefHat className="inline h-5 w-5 mr-2" />
-                    Vorbestellung aufgeben
+                    {t('guest.preorderForm.title')}
                   </CardTitle>
                   <CardDescription>
-                    Bestellen Sie vor und sparen Sie Zeit - Mindestens 20 Minuten im Voraus
+                    {t('guest.preorderForm.subtitle')}
                   </CardDescription>
                 </div>
               </div>
@@ -276,10 +286,10 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                               <div className="flex items-center gap-2 mt-2">
                                 <span className="text-lg font-bold">€{item.price.toFixed(2)}</span>
                                 {item.tags?.includes('vegan') && (
-                                  <Badge variant="secondary" className="text-xs">Vegan</Badge>
+                                  <Badge variant="secondary" className="text-xs">{t('guest.preorderForm.tags.vegan')}</Badge>
                                 )}
                                 {item.tags?.includes('vegetarian') && (
-                                  <Badge variant="secondary" className="text-xs">Vegetarisch</Badge>
+                                  <Badge variant="secondary" className="text-xs">{t('guest.preorderForm.tags.vegetarian')}</Badge>
                                 )}
                               </div>
                             </div>
@@ -326,13 +336,13 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
             <CardHeader>
               <CardTitle>
                 <ShoppingCart className="inline h-5 w-5 mr-2" />
-                Warenkorb ({cart.length})
+                {t('guest.preorderForm.cart')} ({cart.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
               {cart.length === 0 ? (
                 <p className="text-center text-gray-500 py-4">
-                  Ihr Warenkorb ist leer
+                  {t('guest.preorderForm.emptyCart')}
                 </p>
               ) : (
                 <div className="space-y-3">
@@ -369,7 +379,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                   
                   <div className="pt-3 border-t">
                     <div className="flex justify-between font-bold">
-                      <span>Gesamt:</span>
+                      <span>{t('guest.preorderForm.total')}:</span>
                       <span>€{getCartTotal().toFixed(2)}</span>
                     </div>
                   </div>
@@ -382,14 +392,14 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
           {cart.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Ihre Daten</CardTitle>
+                <CardTitle>{t('guest.preorderForm.yourData')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
                     <Label htmlFor="pickupTime">
                       <Clock className="inline h-4 w-4 mr-1" />
-                      Abholzeit *
+                      {t('guest.preorderForm.pickupTime')} *
                     </Label>
                     <Input
                       id="pickupTime"
@@ -405,7 +415,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                   <div>
                     <Label htmlFor="name">
                       <User className="inline h-4 w-4 mr-1" />
-                      Name *
+                      {t('guest.preorderForm.name')} *
                     </Label>
                     <Input
                       id="name"
@@ -418,7 +428,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                   <div>
                     <Label htmlFor="phone">
                       <Phone className="inline h-4 w-4 mr-1" />
-                      Telefon *
+                      {t('guest.preorderForm.phone')} *
                     </Label>
                     <Input
                       id="phone"
@@ -432,7 +442,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                   <div>
                     <Label htmlFor="email">
                       <Mail className="inline h-4 w-4 mr-1" />
-                      E-Mail *
+                      {t('guest.preorderForm.email')} *
                     </Label>
                     <Input
                       id="email"
@@ -444,7 +454,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                   </div>
 
                   <div>
-                    <Label htmlFor="notes">Anmerkungen</Label>
+                    <Label htmlFor="notes">{t('guest.preorderForm.notes')}</Label>
                     <Textarea
                       id="notes"
                       value={formData.notes}
@@ -454,7 +464,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                   </div>
 
                   <div>
-                    <Label>Zahlungsmethode</Label>
+                    <Label>{t('guest.preorderForm.paymentMethod')}</Label>
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       <Button
                         type="button"
@@ -462,7 +472,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                         size="sm"
                         onClick={() => setFormData({ ...formData, paymentMethod: 'CASH' })}
                       >
-                        Bar bei Abholung
+                        {t('guest.preorderForm.payLater')}
                       </Button>
                       <Button
                         type="button"
@@ -470,7 +480,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                         size="sm"
                         onClick={() => setFormData({ ...formData, paymentMethod: 'ONLINE' })}
                       >
-                        Online bezahlen
+                        {t('guest.preorderForm.payNow')}
                       </Button>
                     </div>
                   </div>
@@ -481,7 +491,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                     size="lg"
                     disabled={loading}
                   >
-                    {loading ? 'Wird verarbeitet...' : 'Bestellung aufgeben'}
+                    {loading ? t('guest.preorderForm.processing') : t('guest.preorderForm.placeOrder')}
                   </Button>
                 </form>
               </CardContent>
