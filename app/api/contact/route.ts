@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
           { status: 200 }
         )
       } else {
-        return NextResponse.redirect(new URL('/?contact=success', request.url))
+        // Use 303 See Other to force GET request after POST
+        return NextResponse.redirect(new URL('/?contact=success', request.url), 303)
       }
     }
 
@@ -109,8 +110,8 @@ export async function POST(request: NextRequest) {
         { status: 200 }
       )
     } else {
-      // Return redirect for form submissions
-      return NextResponse.redirect(new URL('/?contact=success', request.url))
+      // Use 303 See Other to force GET request after POST
+      return NextResponse.redirect(new URL('/?contact=success', request.url), 303)
     }
     
   } catch (error) {
