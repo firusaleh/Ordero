@@ -101,9 +101,21 @@ export const guestTranslations = {
     
     // Toast messages
     toast: {
-      addedToCart: 'wurde zum Warenkorb hinzugefügt',
+      addedToCart: 'zum Warenkorb hinzugefügt',
+      itemRemoved: 'Artikel entfernt',
+      orderFailed: 'Bestellung fehlgeschlagen',
+      tryAgain: 'Bitte versuchen Sie es erneut',
       orderSuccess: 'Bestellung erfolgreich aufgegeben!',
       paymentSuccess: 'Zahlung erfolgreich!',
+      paymentError: 'Zahlungsfehler',
+      menuLoadError: 'Fehler beim Laden des Menüs',
+      emptyCart: 'Bitte fügen Sie Artikel zum Warenkorb hinzu',
+      orderError: 'Fehler bei der Bestellung',
+      networkError: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
+      paymentConfirmed: 'Zahlung erfolgreich! Ihre Bestellung wurde bestätigt.',
+      paymentButConfirmFailed: 'Zahlung erfolgreich, aber Bestätigung fehlgeschlagen. Bitte kontaktieren Sie das Restaurant.',
+      confirmationFailed: 'Zahlungsbestätigung fehlgeschlagen',
+      splitBillComingSoon: 'Split-Funktion kommt bald!',
       error: 'Ein Fehler ist aufgetreten'
     },
     
@@ -266,22 +278,6 @@ export const guestTranslations = {
       updateCart: 'Warenkorb aktualisieren',
       outOfStock: 'Nicht verfügbar',
       limitedAvailability: 'Begrenzte Verfügbarkeit'
-    },
-    toast: {
-      addedToCart: 'zum Warenkorb hinzugefügt',
-      itemRemoved: 'Artikel entfernt',
-      orderFailed: 'Bestellung fehlgeschlagen',
-      tryAgain: 'Bitte versuchen Sie es erneut',
-      paymentSuccess: 'Zahlung erfolgreich!',
-      paymentError: 'Zahlungsfehler',
-      menuLoadError: 'Fehler beim Laden des Menüs',
-      emptyCart: 'Bitte fügen Sie Artikel zum Warenkorb hinzu',
-      orderError: 'Fehler bei der Bestellung',
-      networkError: 'Netzwerkfehler. Bitte versuchen Sie es später erneut.',
-      paymentConfirmed: 'Zahlung erfolgreich! Ihre Bestellung wurde bestätigt.',
-      paymentButConfirmFailed: 'Zahlung erfolgreich, aber Bestätigung fehlgeschlagen. Bitte kontaktieren Sie das Restaurant.',
-      confirmationFailed: 'Zahlungsbestätigung fehlgeschlagen',
-      splitBillComingSoon: 'Split-Funktion kommt bald!'
     },
     preorderForm: {
       title: 'Vorbestellung aufgeben',
@@ -455,8 +451,20 @@ export const guestTranslations = {
     // Toast messages
     toast: {
       addedToCart: 'added to cart',
+      itemRemoved: 'Item removed',
+      orderFailed: 'Order failed',
+      tryAgain: 'Please try again',
       orderSuccess: 'Order placed successfully!',
       paymentSuccess: 'Payment successful!',
+      paymentError: 'Payment error',
+      menuLoadError: 'Error loading menu',
+      emptyCart: 'Please add items to cart',
+      orderError: 'Error placing order',
+      networkError: 'Network error. Please try again later.',
+      paymentConfirmed: 'Payment successful! Your order has been confirmed.',
+      paymentButConfirmFailed: 'Payment successful, but confirmation failed. Please contact the restaurant.',
+      confirmationFailed: 'Payment confirmation failed',
+      splitBillComingSoon: 'Split bill feature coming soon!',
       error: 'An error occurred'
     },
     
@@ -619,22 +627,6 @@ export const guestTranslations = {
       updateCart: 'Update Cart',
       outOfStock: 'Out of Stock',
       limitedAvailability: 'Limited Availability'
-    },
-    toast: {
-      addedToCart: 'added to cart',
-      itemRemoved: 'Item removed',
-      orderFailed: 'Order failed',
-      tryAgain: 'Please try again',
-      paymentSuccess: 'Payment successful!',
-      paymentError: 'Payment error',
-      menuLoadError: 'Error loading menu',
-      emptyCart: 'Please add items to cart',
-      orderError: 'Error placing order',
-      networkError: 'Network error. Please try again later.',
-      paymentConfirmed: 'Payment successful! Your order has been confirmed.',
-      paymentButConfirmFailed: 'Payment successful, but confirmation failed. Please contact the restaurant.',
-      confirmationFailed: 'Payment confirmation failed',
-      splitBillComingSoon: 'Split bill feature coming soon!'
     },
     preorderForm: {
       title: 'Place Pre-order',
@@ -807,9 +799,21 @@ export const guestTranslations = {
     
     // Toast messages
     toast: {
-      addedToCart: 'تم الإضافة إلى السلة',
+      addedToCart: 'أضيف إلى السلة',
+      itemRemoved: 'تم إزالة العنصر',
+      orderFailed: 'فشل الطلب',
+      tryAgain: 'يرجى المحاولة مرة أخرى',
       orderSuccess: 'تم تأكيد الطلب بنجاح!',
       paymentSuccess: 'تم الدفع بنجاح!',
+      paymentError: 'خطأ في الدفع',
+      menuLoadError: 'خطأ في تحميل القائمة',
+      emptyCart: 'يرجى إضافة عناصر إلى السلة',
+      orderError: 'خطأ في إرسال الطلب',
+      networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
+      paymentConfirmed: 'تم الدفع بنجاح! تم تأكيد طلبك.',
+      paymentButConfirmFailed: 'تم الدفع بنجاح، لكن فشل التأكيد. يرجى الاتصال بالمطعم.',
+      confirmationFailed: 'فشل تأكيد الدفع',
+      splitBillComingSoon: 'ميزة تقسيم الفاتورة قريباً!',
       error: 'حدث خطأ'
     },
     
@@ -972,22 +976,6 @@ export const guestTranslations = {
       updateCart: 'تحديث السلة',
       outOfStock: 'غير متوفر',
       limitedAvailability: 'التوفر محدود'
-    },
-    toast: {
-      addedToCart: 'أضيف إلى السلة',
-      itemRemoved: 'تم إزالة العنصر',
-      orderFailed: 'فشل الطلب',
-      tryAgain: 'يرجى المحاولة مرة أخرى',
-      paymentSuccess: 'تم الدفع بنجاح!',
-      paymentError: 'خطأ في الدفع',
-      menuLoadError: 'خطأ في تحميل القائمة',
-      emptyCart: 'يرجى إضافة عناصر إلى السلة',
-      orderError: 'خطأ في إرسال الطلب',
-      networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
-      paymentConfirmed: 'تم الدفع بنجاح! تم تأكيد طلبك.',
-      paymentButConfirmFailed: 'تم الدفع بنجاح، لكن فشل التأكيد. يرجى الاتصال بالمطعم.',
-      confirmationFailed: 'فشل تأكيد الدفع',
-      splitBillComingSoon: 'ميزة تقسيم الفاتورة قريباً!'
     },
     preorderForm: {
       title: 'طلب مسبق',
