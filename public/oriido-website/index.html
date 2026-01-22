@@ -2694,7 +2694,57 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             createQRCode();
+            
+            // Check for contact form success
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('contact') === 'success') {
+                // Show success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'contact-success-toast';
+                successDiv.innerHTML = `
+                    <div style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 20px; border-radius: 12px; position: fixed; top: 20px; right: 20px; z-index: 9999; box-shadow: 0 20px 60px rgba(16, 185, 129, 0.4); max-width: 400px; animation: slideIn 0.5s ease-out;">
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">✓ Vielen Dank!</div>
+                        <div style="font-size: 14px; opacity: 0.9;">Ihre Nachricht wurde erfolgreich gesendet. Wir werden uns in Kürze bei Ihnen melden.</div>
+                    </div>
+                `;
+                document.body.appendChild(successDiv);
+                
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    successDiv.style.animation = 'slideOut 0.5s ease-out';
+                    setTimeout(() => successDiv.remove(), 500);
+                }, 5000);
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         });
+        
+        // Add animations
+        const style = document.createElement('style');
+        style.innerHTML = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            @keyframes slideOut {
+                from {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
