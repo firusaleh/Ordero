@@ -32,9 +32,12 @@ export function PusherProvider({ children }: { children: ReactNode }) {
     const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
     const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER
     
+    console.log("Pusher Key verfügbar:", !!pusherKey, "Cluster:", pusherCluster)
+    
     // Skip Pusher wenn nicht konfiguriert
     if (!pusherKey || pusherKey === "your-pusher-key" || pusherKey === "local-key") {
       console.info("Pusher ist nicht konfiguriert - Echtzeit-Features sind deaktiviert")
+      console.info("Key:", pusherKey)
       return
     }
 
