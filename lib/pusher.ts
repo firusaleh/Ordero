@@ -1,12 +1,13 @@
 import Pusher from "pusher"
 import PusherClient from "pusher-js"
+import { getPusherKey, getPusherCluster, getPusherAppId, getPusherSecret } from "./pusher-config"
 
 // Server-seitiger Pusher Client
 export const pusherServer = new Pusher({
-  appId: process.env.PUSHER_APP_ID || "local",
-  key: process.env.NEXT_PUBLIC_PUSHER_KEY || "local-key",
-  secret: process.env.PUSHER_SECRET || "local-secret",
-  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "eu",
+  appId: getPusherAppId(),
+  key: getPusherKey(),
+  secret: getPusherSecret(),
+  cluster: getPusherCluster(),
   useTLS: true
 })
 
@@ -17,9 +18,9 @@ export const getPusherClient = () => {
   }
   
   return new PusherClient(
-    process.env.NEXT_PUBLIC_PUSHER_KEY || "local-key",
+    getPusherKey(),
     {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "eu",
+      cluster: getPusherCluster(),
       authEndpoint: "/api/pusher/auth",
       auth: {
         headers: {

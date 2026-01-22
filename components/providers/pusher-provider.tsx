@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { useSession } from "next-auth/react"
 import PusherClient from "pusher-js"
 import { Channel } from "pusher-js"
+import { getPusherKey, getPusherCluster } from "@/lib/pusher-config"
 
 interface PusherContextType {
   pusher: PusherClient | null
@@ -28,16 +29,15 @@ export function PusherProvider({ children }: { children: ReactNode }) {
     if (status === "loading") return
     if (!session?.user) return
 
+    // Hole Pusher Konfiguration
+    const pusherKey = getPusherKey()
+    const pusherCluster = getPusherCluster()
+    
+    console.log("Pusher Konfiguration - Key:", !!pusherKey, "Cluster:", pusherCluster)
+    
     // Prüfe ob Pusher konfiguriert ist
-    const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY
-    const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER
-    
-    console.log("Pusher Key verfügbar:", !!pusherKey, "Cluster:", pusherCluster)
-    
-    // Skip Pusher wenn nicht konfiguriert
-    if (!pusherKey || pusherKey === "your-pusher-key" || pusherKey === "local-key") {
-      console.info("Pusher ist nicht konfiguriert - Echtzeit-Features sind deaktiviert")
-      console.info("Key:", pusherKey)
+    if (!pusherKey) {
+      console.error("Pusher Key fehlt - Echtzeit-Features sind deaktiviert")
       return
     }
 
