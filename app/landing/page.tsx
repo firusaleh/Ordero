@@ -227,7 +227,7 @@ export default function LandingPage() {
             {Object.entries(t.pricing.plans).map(([key, plan]) => (
               <Card key={key} className={`bg-gray-800 border-gray-700 ${key === 'professional' ? 'ring-2 ring-orange-500' : ''}`}>
                 <CardHeader>
-                  {key === 'professional' && (
+                  {key === 'professional' && 'popular' in plan && (
                     <Badge className="w-fit mb-2 bg-orange-500">{plan.popular}</Badge>
                   )}
                   <CardTitle className="text-white text-2xl">{plan.name}</CardTitle>
