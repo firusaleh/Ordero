@@ -60,14 +60,16 @@ export function useRealtimeOrders({
 
     // Überprüfe ob Pusher verfügbar ist
     if (!subscribe || !unsubscribe) {
-      console.log("Pusher ist nicht konfiguriert - Real-time Updates deaktiviert")
+      console.log("Pusher Provider nicht verfügbar - subscribe/unsubscribe functions fehlen")
       return
     }
 
+    console.log("Versuche zu subscriben zu Restaurant:", restaurantId)
     const channelName = `private-restaurant-${restaurantId}`
     const channel = subscribe(channelName)
 
     if (!channel) {
+      console.log("Channel konnte nicht erstellt werden für:", channelName)
       console.log("Real-time Updates nicht verfügbar - Pusher nicht konfiguriert")
       return
     }

@@ -3,6 +3,7 @@
 import { SessionProvider } from 'next-auth/react'
 import { ReactNode } from 'react'
 import { Toaster } from 'sonner'
+import { PusherProvider } from './providers/pusher-provider'
 
 interface ProvidersProps {
   children: ReactNode
@@ -11,7 +12,9 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
-      {children}
+      <PusherProvider>
+        {children}
+      </PusherProvider>
       <Toaster 
         position="top-center"
         toastOptions={{

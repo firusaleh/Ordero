@@ -84,16 +84,23 @@ export function PusherProvider({ children }: { children: ReactNode }) {
   }, [session, status])
 
   const subscribe = (channelName: string): Channel | null => {
-    if (!pusher) return null
+    console.log("Subscribe aufgerufen für:", channelName, "Pusher vorhanden:", !!pusher)
+    
+    if (!pusher) {
+      console.log("Pusher Client ist null - kann nicht subscriben")
+      return null
+    }
     
     try {
       // Prüfe ob bereits subscribed
       const existingChannel = pusher.channel(channelName)
       if (existingChannel) {
+        console.log("Channel existiert bereits:", channelName)
         return existingChannel
       }
       
       // Subscribe zu neuem Channel
+      console.log("Erstelle neuen Channel:", channelName)
       const channel = pusher.subscribe(channelName)
       
       channel.bind("pusher:subscription_succeeded", () => {
