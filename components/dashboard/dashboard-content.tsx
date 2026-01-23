@@ -18,6 +18,8 @@ import {
   Rocket
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/language-context'
+import { formatPrice } from '@/lib/utils/currency'
+import type { Currency } from '@/lib/utils/currency'
 
 interface DashboardContentProps {
   restaurant: any
@@ -43,6 +45,7 @@ export default function DashboardContent({
   userEmail
 }: DashboardContentProps) {
   const { t } = useLanguage()
+  const currency: Currency = restaurant?.settings?.currency || restaurant?.currency || 'EUR'
 
   return (
     <div className="space-y-8">
@@ -137,7 +140,7 @@ export default function DashboardContent({
             <Euro className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{stats.todayRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{formatPrice(stats.todayRevenue, currency)}</div>
             <p className="text-xs text-gray-500">
               <TrendingUp className="inline h-3 w-3 text-green-500 mr-1 rtl:mr-0 rtl:ml-1" />
               +12% {t('dashboard.fromYesterday')}
@@ -168,7 +171,7 @@ export default function DashboardContent({
             <Package className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{stats.averageOrderValue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">{formatPrice(stats.averageOrderValue, currency)}</div>
             <p className="text-xs text-gray-500">{t('dashboard.today')}</p>
           </CardContent>
         </Card>
@@ -267,7 +270,7 @@ export default function DashboardContent({
                     }>
                       {t(`dashboard.orderStatus.${order.status.toLowerCase()}`)}
                     </Badge>
-                    <span className="font-medium">€{Number(order.total).toFixed(2)}</span>
+                    <span className="font-medium">{formatPrice(Number(order.total), currency)}</span>
                   </div>
                 </div>
               ))}

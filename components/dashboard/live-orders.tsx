@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast"
 import { usePusher } from "@/components/providers/pusher-provider"
 import { LiveOrdersFallback } from "./live-orders-fallback"
 import { useLanguage } from "@/contexts/language-context"
+import { useRestaurantCurrency } from "@/hooks/use-restaurant-currency"
 
 interface LiveOrdersProps {
   restaurantId: string
@@ -26,6 +27,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
   const { playSound, isEnabled: soundEnabled, toggleSound } = useNotificationSound()
   const { toast } = useToast()
   const { pusher } = usePusher()
+  const { formatPrice } = useRestaurantCurrency()
   
   // Select date-fns locale based on language
   const getLocale = () => {
@@ -252,7 +254,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold">€{order.total.toFixed(2)}</p>
+                      <p className="text-lg font-semibold">{formatPrice(order.total)}</p>
                       <p className="text-xs text-gray-500">
                         #{order.id.slice(-6).toUpperCase()}
                       </p>
@@ -267,7 +269,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                           <span>
                             {item.quantity}x {item.name}
                           </span>
-                          <span>€{(item.quantity * item.price).toFixed(2)}</span>
+                          <span>{formatPrice(item.quantity * item.price)}</span>
                         </div>
                       ))}
                     </div>

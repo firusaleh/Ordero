@@ -24,6 +24,7 @@ import EmptyState from '@/components/shared/empty-state'
 import Loading from '@/components/ui/loading'
 import ErrorBoundary from '@/components/error-boundary'
 import { cn } from '@/lib/utils'
+import { useRestaurantCurrency } from '@/hooks/use-restaurant-currency'
 
 interface OrderItem {
   id: string
@@ -73,6 +74,7 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [filter, setFilter] = useState('all')
   const [isUpdating, setIsUpdating] = useState<string | null>(null)
+  const { formatPrice } = useRestaurantCurrency()
 
   // Simuliere Realtime Updates (in Produktion würde hier Supabase Realtime verwendet)
   useEffect(() => {
@@ -212,7 +214,7 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              €{orders.reduce((sum, o) => sum + Number(o.total), 0).toFixed(2)}
+              {formatPrice(orders.reduce((sum, o) => sum + Number(o.total), 0))}
             </div>
           </CardContent>
         </Card>
@@ -262,7 +264,7 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
                           {' '}
                           {format(new Date(order.createdAt), 'HH:mm', { locale: de })}
                           {' • '}
-                          €{Number(order.total).toFixed(2)}
+                          {formatPrice(Number(order.total))}
                         </CardDescription>
                       </div>
                       
@@ -313,7 +315,7 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
                               <p className="text-sm text-gray-500">{item.notes}</p>
                             )}
                           </div>
-                          <span className="text-sm">€{Number(item.totalPrice).toFixed(2)}</span>
+                          <span className="text-sm">{formatPrice(Number(item.totalPrice))}</span>
                         </div>
                       ))}
                     </div>
