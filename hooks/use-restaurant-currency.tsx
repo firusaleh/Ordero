@@ -1,37 +1,54 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { formatPrice as formatPriceUtil, getCurrencySymbol as getCurrencySymbolUtil, Currency } from '@/lib/utils/currency'
+import { useRouter } from 'next/navigation'
 
 interface RestaurantCurrency {
   currency: Currency
   formatPrice: (amount: number) => string
   getCurrencySymbol: () => string
+  refreshCurrency: () => Promise<void>
 }
 
 export function useRestaurantCurrency(): RestaurantCurrency {
   const { data: session } = useSession()
   const [currency, setCurrency] = useState<Currency>('EUR')
+  const router = useRouter()
 
-  useEffect(() => {
-    async function fetchRestaurantCurrency() {
-      const restaurantId = (session?.user as any)?.restaurantId
-      if (restaurantId) {
-        try {
-          const response = await fetch(`/api/restaurants/${restaurantId}`)
-          if (response.ok) {
-            const data = await response.json()
-            setCurrency(data.settings?.currency || data.currency || 'EUR')
-          }
-        } catch (error) {
-          console.error('Error fetching restaurant currency:', error)
+  const fetchRestaurantCurrency = useCallback(async () => {
+    const restaurantId = (session?.user as any)?.restaurantId
+    if (restaurantId) {
+      try {
+        const response = await fetch(`/api/restaurants/${restaurantId}`, {
+          cache: 'no-store' // Verhindere Caching
+        })
+        if (response.ok) {
+          const data = await response.json()
+          const newCurrency = data.settings?.currency || data.currency || 'EUR'
+          setCurrency(newCurrency as Currency)
         }
+      } catch (error) {
+        console.error('Error fetching restaurant currency:', error)
       }
     }
-
-    fetchRestaurantCurrency()
   }, [session?.user])
+
+  useEffect(() => {
+    fetchRestaurantCurrency()
+    
+    // Refresh currency when window gets focus (user might have changed it in another tab)
+    const handleFocus = () => {
+      fetchRestaurantCurrency()
+    }
+    
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [fetchRestaurantCurrency])
 
   const formatPrice = (amount: number) => {
     return formatPriceUtil(amount, currency)
@@ -44,6 +61,7 @@ export function useRestaurantCurrency(): RestaurantCurrency {
   return {
     currency,
     formatPrice,
-    getCurrencySymbol
+    getCurrencySymbol,
+    refreshCurrency: fetchRestaurantCurrency
   }
 }

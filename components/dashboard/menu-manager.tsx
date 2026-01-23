@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useRestaurantCurrency } from '@/hooks/use-restaurant-currency'
 import {
   Dialog,
   DialogContent,
@@ -84,6 +85,7 @@ const iconComponents: { [key: string]: any } = {
 }
 
 export default function MenuManager({ restaurantId, initialCategories }: MenuManagerProps) {
+  const { formatPrice, getCurrencySymbol } = useRestaurantCurrency()
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categories[0]?.id || null
@@ -552,7 +554,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                                 <p className="text-sm text-gray-600 mt-1">{item.description}</p>
                               )}
                               <div className="flex items-center gap-4 mt-2">
-                                <span className="font-medium">€{item.price.toFixed(2)}</span>
+                                <span className="font-medium">{formatPrice(item.price)}</span>
                                 {item.variants && item.variants.length > 0 && (
                                   <Badge variant="outline" className="text-xs">
                                     {item.variants.length} Variante{item.variants.length > 1 ? 'n' : ''}
@@ -720,7 +722,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
               />
             </div>
             <div>
-              <Label htmlFor="itemPrice">Preis (€)</Label>
+              <Label htmlFor="itemPrice">Preis ({getCurrencySymbol()})</Label>
               <Input
                 id="itemPrice"
                 type="number"
@@ -802,7 +804,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                       <div key={variant.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <span className="font-medium">{variant.name}</span>
-                          <span className="ml-2 text-gray-600">€{variant.price.toFixed(2)}</span>
+                          <span className="ml-2 text-gray-600">{formatPrice(variant.price)}</span>
                         </div>
                         <Button
                           type="button"
@@ -859,7 +861,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                       <div key={extra.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div>
                           <span className="font-medium">{extra.name}</span>
-                          <span className="ml-2 text-gray-600">+€{extra.price.toFixed(2)}</span>
+                          <span className="ml-2 text-gray-600">+{formatPrice(extra.price)}</span>
                         </div>
                         <Button
                           type="button"

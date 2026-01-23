@@ -2,7 +2,7 @@
  * Currency formatting utilities
  */
 
-export type Currency = 'EUR' | 'USD' | 'SAR'
+export type Currency = 'EUR' | 'USD' | 'SAR' | 'JOD' | 'AED' | 'KWD' | 'QAR' | 'OMR' | 'BHD' | 'EGP' | 'LBP' | 'SYP' | 'IQD' | 'MAD' | 'TND' | 'DZD' | 'LYD'
 
 export interface CurrencySettings {
   currency: Currency
@@ -31,6 +31,104 @@ export const CURRENCY_CONFIG: Record<Currency, CurrencySettings> = {
   SAR: {
     currency: 'SAR',
     symbol: 'ر.س',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  JOD: {
+    currency: 'JOD',
+    symbol: 'د.أ',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  AED: {
+    currency: 'AED',
+    symbol: 'د.إ',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  KWD: {
+    currency: 'KWD',
+    symbol: 'د.ك',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  QAR: {
+    currency: 'QAR',
+    symbol: 'ر.ق',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  OMR: {
+    currency: 'OMR',
+    symbol: 'ر.ع',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  BHD: {
+    currency: 'BHD',
+    symbol: 'د.ب',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  EGP: {
+    currency: 'EGP',
+    symbol: 'ج.م',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  LBP: {
+    currency: 'LBP',
+    symbol: 'ل.ل',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  SYP: {
+    currency: 'SYP',
+    symbol: 'ل.س',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  IQD: {
+    currency: 'IQD',
+    symbol: 'د.ع',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  MAD: {
+    currency: 'MAD',
+    symbol: 'د.م',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  TND: {
+    currency: 'TND',
+    symbol: 'د.ت',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  DZD: {
+    currency: 'DZD',
+    symbol: 'د.ج',
+    position: 'after',
+    decimal: '.',
+    thousand: ','
+  },
+  LYD: {
+    currency: 'LYD',
+    symbol: 'د.ل',
     position: 'after',
     decimal: '.',
     thousand: ','
