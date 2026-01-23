@@ -33,58 +33,38 @@ export default function StatsTranslated() {
   const { language, t } = useLanguage()
   const [timeRange, setTimeRange] = useState('7days')
 
+  // Diese Daten sollten aus der Datenbank kommen
   const stats = {
     revenue: {
-      total: '12.450',
-      change: 12.5,
-      trend: 'up'
+      total: '0',
+      change: 0,
+      trend: 'up' as const
     },
     orders: {
-      total: '342',
-      change: 8.2,
-      trend: 'up'
+      total: '0',
+      change: 0,
+      trend: 'up' as const
     },
     avgOrder: {
-      total: '36,40',
-      change: -2.1,
-      trend: 'down'
+      total: '0',
+      change: 0,
+      trend: 'down' as const
     },
     customers: {
-      total: '289',
-      change: 15.3,
-      trend: 'up'
+      total: '0',
+      change: 0,
+      trend: 'up' as const
     }
   }
 
-  const topDishes = [
-    { name: 'Pizza Margherita', orders: 89, revenue: '801 €' },
-    { name: 'Spaghetti Carbonara', orders: 76, revenue: '912 €' },
-    { name: 'Caesar Salat', orders: 65, revenue: '520 €' },
-    { name: 'Burger Classic', orders: 58, revenue: '754 €' },
-    { name: 'Tiramisu', orders: 52, revenue: '364 €' }
-  ]
+  // Diese Daten sollten aus der Datenbank kommen
+  const topDishes: Array<{ name: string; orders: number; revenue: string }> = []
 
-  const hourlyData = [
-    { hour: '11:00', orders: 5 },
-    { hour: '12:00', orders: 18 },
-    { hour: '13:00', orders: 25 },
-    { hour: '14:00', orders: 15 },
-    { hour: '15:00', orders: 8 },
-    { hour: '16:00', orders: 6 },
-    { hour: '17:00', orders: 10 },
-    { hour: '18:00', orders: 22 },
-    { hour: '19:00', orders: 35 },
-    { hour: '20:00', orders: 38 },
-    { hour: '21:00', orders: 28 },
-    { hour: '22:00', orders: 12 }
-  ]
+  // Diese Daten sollten aus der Datenbank kommen
+  const hourlyData: Array<{ hour: string; orders: number }> = []
 
-  const categoryRevenue = [
-    { category: t('statistics.appetizers'), revenue: '1.250 €', percentage: 10 },
-    { category: t('statistics.mainCourses'), revenue: '6.890 €', percentage: 55 },
-    { category: t('statistics.desserts'), revenue: '1.560 €', percentage: 13 },
-    { category: t('statistics.drinks'), revenue: '2.750 €', percentage: 22 }
-  ]
+  // Diese Daten sollten aus der Datenbank kommen
+  const categoryRevenue: Array<{ category: string; revenue: string; percentage: number }> = []
 
   return (
     <div className={`p-6 space-y-6 ${language === 'ar' ? 'rtl:space-x-reverse' : ''}`}>
@@ -347,21 +327,8 @@ export default function StatsTranslated() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span>{t('statistics.mainCourses')}</span>
-                    <span className="font-medium">18,50 €</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>{t('statistics.appetizers')}</span>
-                    <span className="font-medium">8,90 €</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>{t('statistics.desserts')}</span>
-                    <span className="font-medium">7,20 €</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>{t('statistics.drinks')}</span>
-                    <span className="font-medium">4,50 €</span>
+                  <div className="text-center text-gray-500 py-4">
+                    <p>{t('statistics.noData')}</p>
                   </div>
                 </div>
               </CardContent>
