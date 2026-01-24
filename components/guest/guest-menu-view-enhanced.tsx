@@ -424,7 +424,11 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
                     }}
                   >
                     {IconComponent && <IconComponent className="h-4 w-4" />}
-                    <span className="font-medium">{category.name}</span>
+                    <span className="font-medium">
+                      {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(category.name) 
+                        ? (language === 'ar' ? 'الأطباق' : language === 'de' ? 'Gerichte' : 'Dishes')
+                        : category.name}
+                    </span>
                     <Badge 
                       variant={isSelected ? 'secondary' : 'outline'}
                       className={cn(
@@ -455,7 +459,10 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
               >
-                {category.description && (
+                {category.description && 
+                 !category.description.includes('إدارة') && 
+                 !category.description.includes('Verwalten') && 
+                 !category.description.includes('Manage') && (
                   <p className="text-gray-600 mb-6 text-center">{category.description}</p>
                 )}
                 

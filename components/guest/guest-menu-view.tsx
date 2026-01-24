@@ -398,7 +398,9 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
                     }}
                   >
                     {IconComponent && <IconComponent className="h-4 w-4" />}
-                    {category.name}
+                    {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(category.name) 
+                      ? (language === 'ar' ? 'الأطباق' : language === 'de' ? 'Gerichte' : 'Dishes')
+                      : category.name}
                     <Badge 
                       variant={isSelected ? 'secondary' : 'outline'}
                       className={cn(
@@ -422,7 +424,10 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
           .filter(cat => cat.id === selectedCategory)
           .map((category) => (
             <div key={category.id}>
-              {category.description && (
+              {category.description && 
+               !category.description.includes('إدارة') && 
+               !category.description.includes('Verwalten') && 
+               !category.description.includes('Manage') && (
                 <p className="text-gray-600 mb-4">{category.description}</p>
               )}
               

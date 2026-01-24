@@ -330,7 +330,9 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                     }
                   `}
                 >
-                  {category.name}
+                  {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(category.name) 
+                    ? (language === 'ar' ? 'الأطباق' : language === 'de' ? 'Gerichte' : 'Dishes')
+                    : category.name}
                 </button>
               )
             })}
@@ -343,7 +345,10 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         {currentCategory && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">{currentCategory.name}</h2>
-            {currentCategory.description && (
+            {currentCategory.description && 
+             !currentCategory.description.includes('إدارة') && 
+             !currentCategory.description.includes('Verwalten') && 
+             !currentCategory.description.includes('Manage') && (
               <p className="text-gray-600">{currentCategory.description}</p>
             )}
           </div>

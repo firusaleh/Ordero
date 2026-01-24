@@ -342,7 +342,11 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">{category.icon || '🍽️'}</span>
-                    <span>{category.name}</span>
+                    <span>
+                      {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(category.name) 
+                        ? (language === 'ar' ? 'الأطباق' : language === 'de' ? 'Gerichte' : 'Dishes')
+                        : category.name}
+                    </span>
                     {isSelected && (
                       <Sparkles className="h-4 w-4 animate-pulse" />
                     )}

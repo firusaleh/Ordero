@@ -490,7 +490,12 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                       : undefined
                   }}
                 >
-                  <span className="font-medium">{category.name}</span>
+                  <span className="font-medium">
+                    {/* Avoid showing generic menu names as category names */}
+                    {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(category.name) 
+                      ? (language === 'ar' ? 'الأصناف' : language === 'de' ? 'Gerichte' : 'Dishes')
+                      : category.name}
+                  </span>
                   <Badge 
                     variant={isSelected ? "secondary" : "outline"}
                     className={isSelected ? "bg-white/20 text-white border-white/30" : ""}
@@ -510,7 +515,11 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
           .filter(cat => cat.id === selectedCategory)
           .map((category) => (
             <div key={category.id}>
-              {category.description && (
+              {/* Don't show admin descriptions in guest view */}
+              {category.description && 
+               !category.description.includes('إدارة') && 
+               !category.description.includes('Verwalten') && 
+               !category.description.includes('Manage') && (
                 <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
                   <p className="text-gray-600">{category.description}</p>
                 </div>
