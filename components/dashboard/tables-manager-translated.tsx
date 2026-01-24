@@ -55,6 +55,12 @@ interface TablesManagerProps {
 export default function TablesManagerTranslated({ restaurant, initialTables }: TablesManagerProps) {
   const { language, t } = useLanguage()
   const [tables, setTables] = useState<Table[]>(initialTables)
+  const [, forceUpdate] = useState({})
+  
+  // Force re-render when language changes
+  useEffect(() => {
+    forceUpdate({})
+  }, [language])
   const [showTableDialog, setShowTableDialog] = useState(false)
   const [showBatchDialog, setShowBatchDialog] = useState(false)
   const [editingTable, setEditingTable] = useState<Table | null>(null)
