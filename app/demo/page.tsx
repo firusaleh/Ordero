@@ -105,7 +105,7 @@ const demoSteps = [
     subtitle: "Bereit für die digitale Transformation?",
     description: "Schließen Sie sich hunderten von Restaurants an, die bereits mit Ordero ihre Prozesse optimiert haben.",
     features: [
-      "14 Tage kostenlos testen",
+      "100 Bestellungen kostenlos testen",
       "Keine Kreditkarte erforderlich",
       "Persönlicher Support",
       "Schnelle Einrichtung"
@@ -366,7 +366,7 @@ const MockScreen = ({ type }: { type: string }) => {
         <div className="bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-8 h-[400px] flex items-center justify-center text-white">
           <div className="text-center">
             <h3 className="text-3xl font-bold mb-4">Bereit loszulegen?</h3>
-            <p className="mb-6">Keine Kreditkarte erforderlich • 14 Tage kostenlos testen</p>
+            <p className="mb-6">Keine Kreditkarte erforderlich • 100 Bestellungen kostenlos testen</p>
             <Button size="lg" className="bg-white text-orange-500 hover:bg-gray-100">
               Jetzt starten
             </Button>

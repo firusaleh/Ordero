@@ -23,11 +23,11 @@ const plans = [
     id: 'trial',
     name: 'Trial',
     price: '0',
-    duration: '14 Tage',
+    duration: '100 Bestellungen',
     description: 'Testen Sie Oriido kostenlos',
     features: [
       'Alle Features inklusive',
-      'Unbegrenzte Bestellungen',
+      'Bis zu 100 Bestellungen',
       'Unbegrenzte Tische',
       'E-Mail Support',
       'Keine Kreditkarte erforderlich',

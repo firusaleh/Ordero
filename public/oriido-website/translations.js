@@ -105,7 +105,7 @@ const translations = {
     'faq.q1': 'Benötigen meine Gäste eine App?',
     'faq.a1': 'Nein! Ihre Gäste müssen keine App herunterladen. Sie scannen einfach den QR-Code und können direkt im Browser bestellen.',
     'faq.q2': 'Wie schnell kann ich starten?',
-    'faq.a2': 'Die Einrichtung dauert weniger als 30 Minuten. Sie können noch heute mit der kostenlosen Testversion beginnen.',
+    'faq.a2': 'Die Einrichtung dauert weniger als 30 Minuten. Sie können noch heute mit der kostenlosen Testversion (100 Bestellungen) beginnen.',
     'faq.q3': 'Welche Zahlungsmethoden werden unterstützt?',
     'faq.a3': 'Wir unterstützen alle gängigen Zahlungsmethoden: Kreditkarten, PayPal, Apple Pay, Google Pay und Barzahlung.',
     'faq.q4': 'Kann ich meine Speisekarte jederzeit ändern?',

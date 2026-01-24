@@ -157,7 +157,7 @@ export async function sendWelcomeEmail({
                   </ul>
                   
                   <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-                    Während Ihrer <strong>14-tägigen kostenlosen Testphase</strong> haben Sie vollen Zugriff auf alle Premium-Funktionen.
+                    Während Ihrer <strong>kostenlosen Testphase (100 Bestellungen)</strong> haben Sie vollen Zugriff auf alle Premium-Funktionen.
                   </p>
                 </td>
               </tr>
