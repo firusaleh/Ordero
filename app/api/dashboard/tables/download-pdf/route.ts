@@ -5,7 +5,12 @@ import { generateQRCodesPDF } from '@/lib/qr-code'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { tables, restaurantSlug = 'demo-restaurant', restaurantName = 'Demo Restaurant' } = body
+    const { 
+      tables, 
+      restaurantSlug = 'demo-restaurant', 
+      restaurantName = 'Demo Restaurant',
+      language = 'de' 
+    } = body
     
     if (!tables || !Array.isArray(tables) || tables.length === 0) {
       return NextResponse.json(
@@ -14,7 +19,7 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const pdfBlob = await generateQRCodesPDF(tables, restaurantSlug, restaurantName)
+    const pdfBlob = await generateQRCodesPDF(tables, restaurantSlug, restaurantName, language)
     
     // Convert Blob to ArrayBuffer for response
     const arrayBuffer = await pdfBlob.arrayBuffer()

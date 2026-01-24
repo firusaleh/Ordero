@@ -42,15 +42,46 @@ export async function generateQRCodeSVG(text: string): Promise<string> {
 }
 
 export async function generateTableQRCode(tableNumber: number, restaurantSlug: string): Promise<string> {
-  const url = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/r/${restaurantSlug}/tisch/${tableNumber}`
+  const url = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/r/${restaurantSlug}/table/${tableNumber}`
   return generateQRCode(url)
+}
+
+// Translation helpers for QR PDF
+const qrTranslations = {
+  de: {
+    qrCodesTitle: 'QR-Codes für Tisch-Bestellungen',
+    table: 'Tisch',
+    scanQrCode: 'QR-Code scannen',
+    toOrder: 'zum Bestellen',
+    createdOn: 'Erstellt am',
+    locale: 'de-DE'
+  },
+  en: {
+    qrCodesTitle: 'QR Codes for Table Orders',
+    table: 'Table',
+    scanQrCode: 'Scan QR Code',
+    toOrder: 'to order',
+    createdOn: 'Created on',
+    locale: 'en-US'
+  },
+  ar: {
+    qrCodesTitle: 'رموز QR لطلبات الطاولة',
+    table: 'طاولة',
+    scanQrCode: 'امسح رمز QR',
+    toOrder: 'للطلب',
+    createdOn: 'تم الإنشاء في',
+    locale: 'ar-SA'
+  }
 }
 
 export async function generateQRCodesPDF(
   tables: { number: number; name?: string }[],
   restaurantSlug: string,
-  restaurantName: string
+  restaurantName: string,
+  language: 'de' | 'en' | 'ar' = 'de'
 ): Promise<Blob> {
+  const t = qrTranslations[language]
+  
   const pdf = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -86,7 +117,7 @@ export async function generateQRCodesPDF(
       
       pdf.setFontSize(12)
       pdf.setTextColor(100, 100, 100)
-      pdf.text('QR-Codes für Tisch-Bestellungen', pageWidth / 2, 28, { align: 'center' })
+      pdf.text(t.qrCodesTitle, pageWidth / 2, 28, { align: 'center' })
     }
 
     // Calculate position on grid
@@ -115,13 +146,13 @@ export async function generateQRCodesPDF(
     // Add table label
     pdf.setFontSize(16)
     pdf.setTextColor(0, 0, 0)
-    const label = table.name || `Tisch ${table.number}`
+    const label = table.name || `${t.table} ${table.number}`
     pdf.text(label, x + qrSize / 2, y + qrSize + 8, { align: 'center' })
     
     pdf.setFontSize(10)
     pdf.setTextColor(100, 100, 100)
-    pdf.text('QR-Code scannen', x + qrSize / 2, y + qrSize + 14, { align: 'center' })
-    pdf.text('zum Bestellen', x + qrSize / 2, y + qrSize + 19, { align: 'center' })
+    pdf.text(t.scanQrCode, x + qrSize / 2, y + qrSize + 14, { align: 'center' })
+    pdf.text(t.toOrder, x + qrSize / 2, y + qrSize + 19, { align: 'center' })
     
     position++
   }
@@ -129,7 +160,7 @@ export async function generateQRCodesPDF(
   // Add footer on last page
   pdf.setFontSize(8)
   pdf.setTextColor(150, 150, 150)
-  pdf.text(`Erstellt am ${new Date().toLocaleDateString('de-DE')}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
+  pdf.text(`${t.createdOn} ${new Date().toLocaleDateString(t.locale)}`, pageWidth / 2, pageHeight - 10, { align: 'center' })
 
   // Return as Blob
   return pdf.output('blob')

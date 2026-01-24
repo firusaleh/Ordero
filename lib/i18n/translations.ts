@@ -879,7 +879,9 @@ export const translations = {
       pdfGenerating: 'جاري إنشاء ملف PDF...',
       pdfDescription: 'رموز QR يتم تحضيرها كملف PDF.',
       qrCodesDownloaded: 'تم تحميل رموز QR كملف PDF!',
-      startNumberHigher: 'رقم البداية يجب أن يكون أصغر من رقم النهاية'
+      startNumberHigher: 'رقم البداية يجب أن يكون أصغر من رقم النهاية',
+      downloadSuccess: 'تم تحميل رموز QR بنجاح',
+      downloadError: 'خطأ في تحميل رموز QR'
     },
     // Statistics
     statistics: {
@@ -1918,7 +1920,9 @@ export const translations = {
       pdfGenerating: 'PDF wird generiert...',
       pdfDescription: 'Die QR-Codes werden als PDF vorbereitet.',
       qrCodesDownloaded: 'QR-Codes als PDF heruntergeladen!',
-      startNumberHigher: 'Startnummer muss kleiner als Endnummer sein'
+      startNumberHigher: 'Startnummer muss kleiner als Endnummer sein',
+      downloadSuccess: 'QR-Codes erfolgreich heruntergeladen',
+      downloadError: 'Fehler beim Herunterladen der QR-Codes'
     },
     // Statistics
     statistics: {
@@ -2250,7 +2254,9 @@ export const translations = {
       noTables: 'No Tables',
       table: 'Table',
       number: 'Number',
-      qrCodeFor: 'QR Code for'
+      qrCodeFor: 'QR Code for',
+      downloadSuccess: 'QR codes downloaded successfully',
+      downloadError: 'Error downloading QR codes'
     },
     // Orders
     orders: {

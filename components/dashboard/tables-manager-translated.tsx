@@ -84,6 +84,43 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
 
   const [qrPreview, setQrPreview] = useState<{ [key: string]: string }>({})
 
+  // Download all QR codes as PDF
+  const handleDownloadQRCodes = async () => {
+    try {
+      const response = await fetch('/api/dashboard/tables/download-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tables: tables.map(t => ({ number: t.number, name: t.name })),
+          restaurantSlug: restaurant.slug,
+          restaurantName: restaurant.name,
+          language: language as 'de' | 'en' | 'ar' // Pass the current language
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `qr-codes-${restaurant.slug}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      
+      toast.success(t('tables.downloadSuccess') || 'QR-Codes erfolgreich heruntergeladen')
+    } catch (error) {
+      console.error('Error downloading QR codes:', error)
+      toast.error(t('tables.downloadError') || 'Fehler beim Herunterladen der QR-Codes')
+    }
+  }
+
   // Generate QR codes for existing tables on mount
   useEffect(() => {
     const generateExistingQRCodes = async () => {
@@ -280,50 +317,6 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
     }
   }
 
-  const handleDownloadQRCodes = async () => {
-    try {
-      toast.info(t('tables.pdfGenerating'), {
-        description: t('tables.pdfDescription')
-      })
-      
-      const selectedTablesList = selectedTables.length > 0 
-        ? tables.filter(t => selectedTables.includes(t.id))
-        : tables
-      
-      const response = await fetch('/api/dashboard/tables/download-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tables: selectedTablesList.map(t => ({
-            number: t.number,
-            name: t.name
-          })),
-          restaurantSlug: restaurant.slug,
-          restaurantName: restaurant.name
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error(t('tables.errorDownloading'))
-      }
-
-      // Download the PDF
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `qr-codes-${restaurant.slug}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      
-      toast.success(t('tables.qrCodesDownloaded'))
-    } catch (error) {
-      console.error('Download error:', error)
-      toast.error(t('tables.errorDownloading'))
-    }
-  }
 
   const resetTableForm = () => {
     setTableForm({
