@@ -92,7 +92,7 @@ const iconComponents: { [key: string]: any } = {
 }
 
 export default function GuestMenuView({ restaurant, table, tableNumber }: GuestMenuViewProps) {
-  const { language } = useGuestLanguage()
+  const { language, t } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
@@ -250,7 +250,11 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold">{restaurant.name}</h1>
+              <h1 className="text-xl font-bold">
+                {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                  ? t('common.welcome') 
+                  : restaurant.name}
+              </h1>
               <p className="text-sm text-gray-600">
                 {getLocalizedTableName(tableNumber, language)}
               </p>

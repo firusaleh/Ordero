@@ -128,7 +128,7 @@ const cuisineEmojis: { [key: string]: string } = {
 }
 
 export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }: GuestMenuViewProps) {
-  const { language } = useGuestLanguage()
+  const { language, t } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
@@ -332,7 +332,11 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
                     {getLocalizedTableName(tableNumber, language)}
                   </Badge>
                 </div>
-                <h1 className="text-4xl font-bold text-white mb-2">{restaurant.name}</h1>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                    ? t('common.welcome') 
+                    : restaurant.name}
+                </h1>
                 {restaurant.description && (
                   <p className="text-white/90 text-lg">{restaurant.description}</p>
                 )}
@@ -366,7 +370,11 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
         {!showHero && (
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold">{restaurant.name}</h2>
+              <h2 className="text-lg font-bold">
+                {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                  ? t('common.welcome') 
+                  : restaurant.name}
+              </h2>
               <p className="text-sm text-gray-600">{getLocalizedTableName(tableNumber, language)}</p>
             </div>
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>

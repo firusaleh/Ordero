@@ -282,7 +282,9 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-white drop-shadow-lg">
-                    {restaurant.name}
+                    {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                      ? t('common.welcome') 
+                      : restaurant.name}
                   </h1>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="flex items-center">

@@ -272,7 +272,11 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{restaurant.name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                  ? t('common.welcome') 
+                  : restaurant.name}
+              </h1>
               <div className="flex items-center gap-4 mt-1">
                 <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />

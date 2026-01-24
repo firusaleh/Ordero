@@ -386,7 +386,12 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
         <div className="px-3 py-2">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-gray-900 truncate">{restaurant.name}</h1>
+              <h1 className="text-lg font-bold text-gray-900 truncate">
+                {/* Don't show generic menu names as restaurant name */}
+                {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                  ? t('common.welcome') || 'Welcome' 
+                  : restaurant.name}
+              </h1>
               <div className="flex items-center gap-1 mt-0.5">
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
                   {cuisineEmojis[restaurant.cuisine || 'other']} {getLocalizedTableName(tableNumber, language)}
