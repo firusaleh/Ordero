@@ -35,6 +35,7 @@ import OrderSuccessDialog from './order-success-dialog'
 import OrderHistorySheet from './order-history-sheet'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSelector from './language-selector'
+import { getLocalizedTableName } from '@/lib/table-helpers'
 
 // Types (gleich wie vorher)
 interface MenuItemVariant {
@@ -104,7 +105,7 @@ interface GuestMenuViewProps {
 }
 
 export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber }: GuestMenuViewProps) {
-  const { t } = useGuestLanguage()
+  const { t, language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
@@ -360,7 +361,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                 <MapPin className="h-6 w-6 text-orange-600" />
               </div>
               <div>
-                <p className="font-bold text-gray-800">Tisch {tableNumber}</p>
+                <p className="font-bold text-gray-800">{getLocalizedTableName(tableNumber, language)}</p>
                 <p className="text-sm text-gray-600">{restaurant.cuisine || 'International'} • Schnelle Lieferung</p>
               </div>
             </div>

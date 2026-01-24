@@ -159,12 +159,13 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
       const method = editingTable ? 'PATCH' : 'POST'
       const url = editingTable 
         ? `/api/restaurants/${restaurant.id}/tables/${editingTable.id}`
-        : `/api/restaurants/${restaurant.id}/tables`
+        : `/api/dashboard/tables`
       
       const tableData = {
         ...tableForm,
         number: parseInt(tableForm.number),
-        seats: parseInt(tableForm.seats)
+        seats: parseInt(tableForm.seats),
+        language: language // Pass the current language
       }
       
       const response = await fetch(url, {
@@ -205,27 +206,34 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
     }
     
     try {
-      const tablesToCreate = []
-      for (let i = start; i <= end; i++) {
-        tablesToCreate.push({
-          number: i,
-          name: `${batchForm.prefix}${i}`,
-          seats,
-          isActive: true
-        })
-      }
+      // Use translated prefix if no custom prefix is provided
+      const prefix = batchForm.prefix || t('tables.tablePrefix') || 'Table'
       
-      const response = await fetch(`/api/restaurants/${restaurant.id}/tables/batch`, {
+      const response = await fetch(`/api/dashboard/tables`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tables: tablesToCreate })
+        body: JSON.stringify({ 
+          batch: {
+            from: start,
+            to: end,
+            prefix: prefix
+          },
+          seats,
+          language: language // Pass the current language
+        })
       })
 
       if (!response.ok) throw new Error(t('tables.errorCreating'))
 
       const result = await response.json()
-      setTables([...tables, ...result.data])
-      toast.success(`${tablesToCreate.length} ${t('tables.tablesCreated')}`)
+      const createdCount = end - start + 1
+      // Refresh the table list
+      const refreshResponse = await fetch('/api/dashboard/tables')
+      if (refreshResponse.ok) {
+        const refreshData = await refreshResponse.json()
+        setTables(refreshData.data)
+      }
+      toast.success(`${createdCount} ${t('tables.tablesCreated')}`)
       setShowBatchDialog(false)
       resetBatchForm()
     } catch (error) {

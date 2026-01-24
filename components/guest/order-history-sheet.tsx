@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { getLocalizedTableName } from '@/lib/table-helpers'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface OrderItem {
   id: string
@@ -62,6 +64,7 @@ export default function OrderHistorySheet({
   currency = 'EUR',
   primaryColor = '#FF6B35'
 }: OrderHistorySheetProps) {
+  const { language } = useGuestLanguage()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
@@ -323,7 +326,7 @@ export default function OrderHistorySheet({
               </span>
             </div>
             <p className="text-xs text-gray-500 text-center">
-              Tisch {tableNumber} • {orders.length} {orders.length === 1 ? 'Bestellung' : 'Bestellungen'}
+              {getLocalizedTableName(tableNumber, language)} • {orders.length} {orders.length === 1 ? 'Bestellung' : 'Bestellungen'}
             </p>
           </div>
         )}

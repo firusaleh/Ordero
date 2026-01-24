@@ -35,6 +35,7 @@ import OrderSuccessDialog from './order-success-dialog'
 import OrderHistorySheet from './order-history-sheet'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSelector from './language-selector'
+import { getLocalizedTableName } from '@/lib/table-helpers'
 
 // Types
 interface MenuItemVariant {
@@ -104,7 +105,7 @@ interface GuestMenuViewProps {
 }
 
 export default function GuestMenuViewElegant({ restaurant, table, tableNumber }: GuestMenuViewProps) {
-  const { t } = useGuestLanguage()
+  const { t, language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
@@ -281,7 +282,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                 <span className="text-sm text-gray-500">•</span>
                 <span className="text-sm text-gray-600">{restaurant.cuisine || 'International'}</span>
                 <span className="text-sm text-gray-500">•</span>
-                <span className="text-sm text-gray-600">Tisch {tableNumber}</span>
+                <span className="text-sm text-gray-600">{getLocalizedTableName(tableNumber, language)}</span>
               </div>
             </div>
             

@@ -32,6 +32,8 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import MenuItemDetail from './menu-item-detail'
 import OrderConfirmation from './order-confirmation'
+import { getLocalizedTableName } from '@/lib/table-helpers'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface MenuItemVariant {
   id: string
@@ -126,6 +128,7 @@ const cuisineEmojis: { [key: string]: string } = {
 }
 
 export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }: GuestMenuViewProps) {
+  const { language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
@@ -326,7 +329,7 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-4xl">{cuisineEmojis[restaurant.cuisine || 'other']}</span>
                   <Badge className="bg-white/20 text-white border-white/40">
-                    Tisch {tableNumber}
+                    {getLocalizedTableName(tableNumber, language)}
                   </Badge>
                 </div>
                 <h1 className="text-4xl font-bold text-white mb-2">{restaurant.name}</h1>
@@ -364,7 +367,7 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
           <div className="container mx-auto px-4 py-3 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold">{restaurant.name}</h2>
-              <p className="text-sm text-gray-600">Tisch {tableNumber}</p>
+              <p className="text-sm text-gray-600">{getLocalizedTableName(tableNumber, language)}</p>
             </div>
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
               <SheetTrigger asChild>

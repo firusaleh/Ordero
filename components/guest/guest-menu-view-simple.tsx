@@ -26,6 +26,7 @@ import {
 import { toast } from 'sonner'
 import { GuestLanguageProvider, useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSelector from './language-selector'
+import { getLocalizedTableName } from '@/lib/table-helpers'
 
 interface MenuItemVariant {
   id: string
@@ -109,7 +110,7 @@ const cuisineEmojis: { [key: string]: string } = {
 }
 
 export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: GuestMenuViewProps) {
-  const { t } = useGuestLanguage()
+  const { t, language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
@@ -388,7 +389,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
               <h1 className="text-lg font-bold text-gray-900 truncate">{restaurant.name}</h1>
               <div className="flex items-center gap-1 mt-0.5">
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                  {cuisineEmojis[restaurant.cuisine || 'other']} Tisch {tableNumber}
+                  {cuisineEmojis[restaurant.cuisine || 'other']} {getLocalizedTableName(tableNumber, language)}
                 </Badge>
               </div>
             </div>

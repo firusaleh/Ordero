@@ -159,12 +159,12 @@ export async function POST(
       }
     })
 
-    // Erstelle Tisch
+    // Erstelle Tisch (default to English for API routes)
     const table = await prisma.table.create({
       data: {
         restaurantId: id,
         number: tableNumber,
-        name: name || `Tisch ${tableNumber}`,
+        name: name || `Table ${tableNumber}`,
         seats: seats || 4,
         area: area,
         qrCode: qrCodeDataUrl,

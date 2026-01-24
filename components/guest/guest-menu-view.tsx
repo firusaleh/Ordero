@@ -26,6 +26,8 @@ import {
 import { toast } from 'sonner'
 import MenuItemDetail from './menu-item-detail'
 import OrderConfirmation from './order-confirmation'
+import { getLocalizedTableName } from '@/lib/table-helpers'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface MenuItemVariant {
   id: string
@@ -90,6 +92,7 @@ const iconComponents: { [key: string]: any } = {
 }
 
 export default function GuestMenuView({ restaurant, table, tableNumber }: GuestMenuViewProps) {
+  const { language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
@@ -249,7 +252,7 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
             <div>
               <h1 className="text-xl font-bold">{restaurant.name}</h1>
               <p className="text-sm text-gray-600">
-                Tisch {tableNumber}
+                {getLocalizedTableName(tableNumber, language)}
               </p>
             </div>
             <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>

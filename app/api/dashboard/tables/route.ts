@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { number, name, area, seats, isActive, batch } = body
+    const { number, name, area, seats, isActive, batch, language = 'de' } = body
 
     const restaurant = await prisma.restaurant.findFirst({
       where: {
@@ -67,6 +67,9 @@ export async function POST(request: Request) {
       const { from, to, prefix } = batch
       const tables = []
       
+      // Generate table prefix based on language
+      const defaultTablePrefix = language === 'ar' ? 'طاولة' : language === 'en' ? 'Table' : 'Tisch'
+      
       for (let i = from; i <= to; i++) {
         const existingTable = await prisma.table.findFirst({
           where: {
@@ -76,12 +79,12 @@ export async function POST(request: Request) {
         })
         
         if (!existingTable) {
-          const qrCode = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${i}`
+          const qrCode = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/table/${i}`
           
           tables.push({
             restaurantId: restaurant.id,
             number: i,
-            name: prefix ? `${prefix} ${i}` : `Tisch ${i}`,
+            name: prefix ? `${prefix} ${i}` : `${defaultTablePrefix} ${i}`,
             area: area || 'Hauptbereich',
             seats: seats || 4,
             qrCode,
@@ -116,13 +119,17 @@ export async function POST(request: Request) {
       )
     }
 
-    const qrCode = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${number}`
+    const qrCode = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/table/${number}`
+    
+    // Generate table name based on language
+    const tablePrefix = language === 'ar' ? 'طاولة' : language === 'en' ? 'Table' : 'Tisch'
+    const defaultName = `${tablePrefix} ${number}`
 
     const table = await prisma.table.create({
       data: {
         restaurantId: restaurant.id,
         number,
-        name: name || `Tisch ${number}`,
+        name: name || defaultName,
         area: area || 'Hauptbereich',
         seats: seats || 4,
         qrCode,
