@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Shield, Key, Lock, UserCheck, AlertTriangle, Loader2 } from 'lucide-react'
 import { showErrorToast, showSuccessToast, parseApiResponse } from '@/lib/error-handling'
+import { useLanguage } from '@/contexts/language-context'
 
 export default function SecuritySettingsClient() {
+  const { t } = useLanguage()
   const [twoFactor, setTwoFactor] = useState(false)
   const [sessionTimeout, setSessionTimeout] = useState('30')
   const [passwordExpiry, setPasswordExpiry] = useState('90')
@@ -26,16 +28,16 @@ export default function SecuritySettingsClient() {
         setTimeout(() => {
           // Simuliere zufälligen Fehler für Demo (20% Chance)
           if (Math.random() < 0.2) {
-            reject(new Error('Passwort-Richtlinien konnten nicht aktualisiert werden. Bitte versuchen Sie es erneut.'))
+            reject(new Error(t('settings.security.password.updateError')))
           } else {
             resolve(true)
           }
         }, 1000)
       })
       
-      showSuccessToast('Passwort-Einstellungen aktualisiert')
+      showSuccessToast(t('settings.security.password.updateSuccess'))
     } catch (error) {
-      showErrorToast(error, 'Passwort-Richtlinien konnten nicht gespeichert werden')
+      showErrorToast(error, t('settings.security.password.saveError'))
     } finally {
       setSaving(null)
     }
@@ -47,7 +49,7 @@ export default function SecuritySettingsClient() {
       // Validierung
       const timeout = parseInt(sessionTimeout)
       if (isNaN(timeout) || timeout < 5 || timeout > 1440) {
-        throw new Error('Sitzungs-Timeout muss zwischen 5 und 1440 Minuten liegen')
+        throw new Error(t('settings.security.session.timeoutError'))
       }
 
       // Simuliere API-Call für Demo
@@ -56,16 +58,16 @@ export default function SecuritySettingsClient() {
         setTimeout(() => {
           // Simuliere zufälligen Fehler für Demo (20% Chance)
           if (Math.random() < 0.2) {
-            reject(new Error('Verbindung zum Server fehlgeschlagen'))
+            reject(new Error(t('common.connectionError')))
           } else {
             resolve(true)
           }
         }, 1000)
       })
       
-      showSuccessToast('Sicherheitseinstellungen gespeichert')
+      showSuccessToast(t('settings.security.saveSuccess'))
     } catch (error) {
-      showErrorToast(error, 'Sitzungseinstellungen konnten nicht gespeichert werden')
+      showErrorToast(error, t('settings.security.session.saveError'))
     } finally {
       setSaving(null)
     }
@@ -81,22 +83,22 @@ export default function SecuritySettingsClient() {
         await new Promise((resolve, reject) => {
           setTimeout(() => {
             if (Math.random() < 0.2) {
-              reject(new Error('2FA-Aktivierung fehlgeschlagen. Der QR-Code konnte nicht generiert werden.'))
+              reject(new Error(t('settings.security.twoFactor.activationError')))
             } else {
               resolve(true)
             }
           }, 1000)
         })
         
-        showSuccessToast('Zwei-Faktor-Authentifizierung aktiviert')
+        showSuccessToast(t('settings.security.twoFactor.activated'))
       } catch (error) {
         setTwoFactor(false) // Zurücksetzen bei Fehler
-        showErrorToast(error, '2FA konnte nicht aktiviert werden')
+        showErrorToast(error, t('settings.security.twoFactor.enableError'))
       } finally {
         setSaving(null)
       }
     } else {
-      showSuccessToast('Zwei-Faktor-Authentifizierung deaktiviert')
+      showSuccessToast(t('settings.security.twoFactor.deactivated'))
     }
   }
 
@@ -106,23 +108,23 @@ export default function SecuritySettingsClient() {
       // Validierung
       const attempts = parseInt(loginAttempts)
       if (isNaN(attempts) || attempts < 1 || attempts > 10) {
-        throw new Error('Anmeldeversuche müssen zwischen 1 und 10 liegen')
+        throw new Error(t('settings.security.access.attemptsError'))
       }
 
       // Simuliere API-Call
       await new Promise((resolve, reject) => {
         setTimeout(() => {
           if (Math.random() < 0.2) {
-            reject(new Error('Zugriffskontrolle konnte nicht aktualisiert werden'))
+            reject(new Error(t('settings.security.access.updateError')))
           } else {
             resolve(true)
           }
         }, 1000)
       })
       
-      showSuccessToast('Zugriffskontrolle aktualisiert')
+      showSuccessToast(t('settings.security.access.updateSuccess'))
     } catch (error) {
-      showErrorToast(error, 'Zugriffseinstellungen konnten nicht gespeichert werden')
+      showErrorToast(error, t('settings.security.access.saveError'))
     } finally {
       setSaving(null)
     }
@@ -131,8 +133,8 @@ export default function SecuritySettingsClient() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Sicherheit</h1>
-        <p className="text-gray-600">Verwalten Sie Sicherheitseinstellungen und Zugriffsrechte</p>
+        <h1 className="text-3xl font-bold">{t('settings.security.title')}</h1>
+        <p className="text-gray-600">{t('settings.security.description')}</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -140,15 +142,15 @@ export default function SecuritySettingsClient() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Key className="h-5 w-5" />
-              Passwort-Richtlinien
+              {t('settings.security.password.title')}
             </CardTitle>
             <CardDescription>
-              Konfigurieren Sie Anforderungen für sichere Passwörter
+              {t('settings.security.password.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="passwordExpiry">Passwort-Gültigkeit (Tage)</Label>
+              <Label htmlFor="passwordExpiry">{t('settings.security.password.expiry')}</Label>
               <Input
                 id="passwordExpiry"
                 type="number"
@@ -157,12 +159,12 @@ export default function SecuritySettingsClient() {
                 disabled={saving === 'password'}
               />
               <p className="text-sm text-gray-500 mt-1">
-                Benutzer müssen ihr Passwort nach dieser Zeit ändern
+                {t('settings.security.password.expiryHelp')}
               </p>
             </div>
             
             <div className="flex items-center justify-between">
-              <Label htmlFor="strongPassword">Starke Passwörter erzwingen</Label>
+              <Label htmlFor="strongPassword">{t('settings.security.password.enforceStrong')}</Label>
               <Switch id="strongPassword" defaultChecked disabled={saving === 'password'} />
             </div>
 
@@ -172,7 +174,7 @@ export default function SecuritySettingsClient() {
               disabled={saving !== null}
             >
               {saving === 'password' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Passwort-Richtlinien speichern
+              {t('settings.security.password.save')}
             </Button>
           </CardContent>
         </Card>
@@ -181,15 +183,15 @@ export default function SecuritySettingsClient() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Zwei-Faktor-Authentifizierung
+              {t('settings.security.twoFactor.title')}
             </CardTitle>
             <CardDescription>
-              Erhöhen Sie die Sicherheit mit 2FA
+              {t('settings.security.twoFactor.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <Label htmlFor="2fa">2FA aktivieren</Label>
+              <Label htmlFor="2fa">{t('settings.security.twoFactor.enable')}</Label>
               <Switch
                 id="2fa"
                 checked={twoFactor}
@@ -201,17 +203,17 @@ export default function SecuritySettingsClient() {
             {twoFactor && (
               <div className="p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  Scannen Sie den QR-Code mit Ihrer Authenticator-App
+                  {t('settings.security.twoFactor.scanQR')}
                 </p>
                 <div className="mt-4 bg-white p-4 rounded flex items-center justify-center">
-                  <div className="text-gray-400">QR-Code Placeholder</div>
+                  <div className="text-gray-400">{t('settings.security.twoFactor.qrPlaceholder')}</div>
                 </div>
               </div>
             )}
 
             <Button disabled={!twoFactor || saving === '2fa'} className="w-full">
               {saving === '2fa' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              2FA einrichten
+              {t('settings.security.twoFactor.setup')}
             </Button>
           </CardContent>
         </Card>
@@ -220,15 +222,15 @@ export default function SecuritySettingsClient() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
-              Sitzungsverwaltung
+              {t('settings.security.session.title')}
             </CardTitle>
             <CardDescription>
-              Kontrollieren Sie Benutzer-Sitzungen
+              {t('settings.security.session.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="sessionTimeout">Sitzungs-Timeout (Minuten)</Label>
+              <Label htmlFor="sessionTimeout">{t('settings.security.session.timeout')}</Label>
               <Input
                 id="sessionTimeout"
                 type="number"
@@ -239,12 +241,12 @@ export default function SecuritySettingsClient() {
                 max="1440"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Automatische Abmeldung nach Inaktivität
+                {t('settings.security.session.timeoutHelp')}
               </p>
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="singleSession">Nur eine Sitzung erlauben</Label>
+              <Label htmlFor="singleSession">{t('settings.security.session.singleSession')}</Label>
               <Switch id="singleSession" disabled={saving === 'session'} />
             </div>
 
@@ -254,7 +256,7 @@ export default function SecuritySettingsClient() {
               disabled={saving !== null}
             >
               {saving === 'session' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sitzungseinstellungen speichern
+              {t('settings.security.session.save')}
             </Button>
           </CardContent>
         </Card>
@@ -263,15 +265,15 @@ export default function SecuritySettingsClient() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="h-5 w-5" />
-              Zugriffskontrolle
+              {t('settings.security.access.title')}
             </CardTitle>
             <CardDescription>
-              Verwalten Sie Anmeldeversuche und IP-Beschränkungen
+              {t('settings.security.access.description')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="loginAttempts">Max. Anmeldeversuche</Label>
+              <Label htmlFor="loginAttempts">{t('settings.security.access.maxAttempts')}</Label>
               <Input
                 id="loginAttempts"
                 type="number"
@@ -282,12 +284,12 @@ export default function SecuritySettingsClient() {
                 max="10"
               />
               <p className="text-sm text-gray-500 mt-1">
-                Konto wird nach dieser Anzahl fehlgeschlagener Versuche gesperrt
+                {t('settings.security.access.maxAttemptsHelp')}
               </p>
             </div>
 
             <div className="flex items-center justify-between">
-              <Label htmlFor="ipRestriction">IP-Beschränkung aktivieren</Label>
+              <Label htmlFor="ipRestriction">{t('settings.security.access.ipRestriction')}</Label>
               <Switch
                 id="ipRestriction"
                 checked={ipRestriction}
@@ -302,10 +304,10 @@ export default function SecuritySettingsClient() {
                   <AlertTriangle className="h-4 w-4 text-yellow-600 mt-0.5" />
                   <div>
                     <p className="text-sm text-yellow-800 font-medium">
-                      IP-Beschränkung aktiv
+                      {t('settings.security.access.ipRestrictionActive')}
                     </p>
                     <p className="text-sm text-yellow-700 mt-1">
-                      Zugriff nur von freigegebenen IP-Adressen möglich
+                      {t('settings.security.access.ipRestrictionHelp')}
                     </p>
                   </div>
                 </div>
@@ -318,7 +320,7 @@ export default function SecuritySettingsClient() {
               disabled={saving !== null}
             >
               {saving === 'access' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Zugriffseinstellungen speichern
+              {t('settings.security.access.save')}
             </Button>
           </CardContent>
         </Card>

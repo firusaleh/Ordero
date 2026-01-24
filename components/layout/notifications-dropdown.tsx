@@ -36,55 +36,10 @@ export default function NotificationsDropdown() {
     setMounted(true)
   }, [])
 
-  // Beispiel-Benachrichtigungen
+  // Echte Benachrichtigungen werden aus der Datenbank geladen
   useEffect(() => {
-    const sampleNotifications: Notification[] = [
-      {
-        id: '1',
-        type: 'order',
-        title: language === 'de' ? 'Neue Bestellung' : language === 'en' ? 'New Order' : 'طلب جديد',
-        message: language === 'de' ? 'Tisch 5 hat eine neue Bestellung aufgegeben' : 
-                 language === 'en' ? 'Table 5 has placed a new order' : 
-                 'الطاولة 5 قدمت طلباً جديداً',
-        timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 Minuten her
-        read: false,
-        icon: ShoppingCart
-      },
-      {
-        id: '2',
-        type: 'payment',
-        title: language === 'de' ? 'Zahlung erhalten' : language === 'en' ? 'Payment Received' : 'تم استلام الدفعة',
-        message: language === 'de' ? 'Bestellung #1234 wurde bezahlt' : 
-                 language === 'en' ? 'Order #1234 has been paid' : 
-                 'تم دفع الطلب #1234',
-        timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 Minuten her
-        read: false,
-        icon: CheckCircle
-      },
-      {
-        id: '3',
-        type: 'alert',
-        title: language === 'de' ? 'Niedriger Bestand' : language === 'en' ? 'Low Stock' : 'مخزون منخفض',
-        message: language === 'de' ? 'Pizza Margherita ist fast ausverkauft' : 
-                 language === 'en' ? 'Pizza Margherita is almost sold out' : 
-                 'بيتزا مارغريتا على وشك النفاد',
-        timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1 Stunde her
-        read: true,
-        icon: AlertCircle
-      },
-      {
-        id: '4',
-        type: 'info',
-        title: language === 'de' ? 'Bestellung bereit' : language === 'en' ? 'Order Ready' : 'الطلب جاهز',
-        message: language === 'de' ? 'Bestellung #1233 ist abholbereit' : 
-                 language === 'en' ? 'Order #1233 is ready for pickup' : 
-                 'الطلب #1233 جاهز للاستلام',
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 Stunden her
-        read: true,
-        icon: Package
-      }
-    ]
-    setNotifications(sampleNotifications)
+    // TODO: Fetch real notifications from database
+    setNotifications([])
   }, [language])
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -46,6 +47,7 @@ interface CustomFeesClientProps {
 }
 
 export default function CustomFeesClient({ restaurant, settings }: CustomFeesClientProps) {
+  const { t } = useLanguage()
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [fees, setFees] = useState<CustomFee[]>(settings?.customFees || [])
@@ -93,7 +95,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
   
   const handleSaveFee = () => {
     if (!feeForm.name) {
-      toast.error('Bitte geben Sie einen Namen ein')
+      toast.error(t('customFees.pleaseEnterName'))
       return
     }
     
@@ -106,13 +108,13 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
     }
     
     setShowFeeDialog(false)
-    toast.success(editingFee ? 'Gebühr aktualisiert' : 'Gebühr hinzugefügt')
+    toast.success(editingFee ? t('customFees.feeUpdated') : t('customFees.feeAdded'))
   }
   
   const handleDeleteFee = (id: string | undefined) => {
     if (!id) return
     setFees(fees.filter(f => f.id !== id))
-    toast.success('Gebühr gelöscht')
+    toast.success(t('customFees.feeDeleted'))
   }
   
   const handleToggleFee = (id: string | undefined) => {
@@ -135,13 +137,13 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
       })
       
       if (!response.ok) {
-        throw new Error('Fehler beim Speichern')
+        throw new Error(t('customFees.errorSaving'))
       }
       
-      toast.success('Gebühren gespeichert')
+      toast.success(t('customFees.feesSaved'))
       router.refresh()
     } catch (error) {
-      toast.error('Fehler beim Speichern der Gebühren')
+      toast.error(t('customFees.errorSavingFees'))
     } finally {
       setSaving(false)
     }
@@ -167,15 +169,15 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Individuelle Gebühren</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('customFees.title')}</h1>
           <p className="text-muted-foreground">
-            Erstellen Sie eigene Gebühren für Ihr Restaurant
+            {t('customFees.description')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleAddFee}>
             <Plus className="mr-2 h-4 w-4" />
-            Gebühr hinzufügen
+            {t('customFees.addFee')}
           </Button>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? (
@@ -183,7 +185,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Speichern
+            {t('customFees.save')}
           </Button>
         </div>
       </div>
@@ -191,17 +193,17 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
       {/* Fees List */}
       <Card>
         <CardHeader>
-          <CardTitle>Aktive Gebühren</CardTitle>
+          <CardTitle>{t('customFees.activeFees')}</CardTitle>
           <CardDescription>
-            Diese Gebühren werden automatisch zu allen Bestellungen hinzugefügt
+            {t('customFees.activeFeesDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {fees.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <DollarSign className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p className="text-lg font-medium mb-1">Noch keine Gebühren</p>
-              <p className="text-sm">Fügen Sie Ihre erste Gebühr hinzu</p>
+              <p className="text-lg font-medium mb-1">{t('customFees.noFees')}</p>
+              <p className="text-sm">{t('customFees.noFeesDesc')}</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -320,27 +322,27 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {editingFee ? 'Gebühr bearbeiten' : 'Neue Gebühr hinzufügen'}
+              {editingFee ? t('customFees.editFee') : t('customFees.addNewFee')}
             </DialogTitle>
             <DialogDescription>
-              Definieren Sie eine individuelle Gebühr für Ihr Restaurant
+              {t('customFees.defineFee')}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="fee-name">Name der Gebühr *</Label>
+                <Label htmlFor="fee-name">{t('customFees.feeName')} *</Label>
                 <Input
                   id="fee-name"
                   value={feeForm.name}
                   onChange={(e) => setFeeForm({ ...feeForm, name: e.target.value })}
-                  placeholder="z.B. Service-Gebühr"
+                  placeholder={t('customFees.feeNamePlaceholder')}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label>Gebührentyp</Label>
+                <Label>{t('customFees.feeType')}</Label>
                 <RadioGroup 
                   value={feeForm.type} 
                   onValueChange={(value: 'PERCENT' | 'FIXED') => setFeeForm({ ...feeForm, type: value })}
@@ -349,14 +351,14 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
                     <RadioGroupItem value="PERCENT" id="percent" />
                     <Label htmlFor="percent" className="flex items-center gap-1">
                       <Percent className="h-4 w-4" />
-                      Prozentual
+                      {t('customFees.percentage')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="FIXED" id="fixed" />
                     <Label htmlFor="fixed" className="flex items-center gap-1">
                       <DollarSign className="h-4 w-4" />
-                      Festbetrag
+                      {t('customFees.fixedAmount')}
                     </Label>
                   </div>
                 </RadioGroup>
@@ -366,7 +368,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="fee-value">
-                  {feeForm.type === 'PERCENT' ? 'Prozentsatz' : 'Betrag'} *
+                  {feeForm.type === 'PERCENT' ? t('customFees.percentageValue') : t('customFees.amount')} *
                 </Label>
                 <div className="flex items-center gap-2">
                   <Input
@@ -384,18 +386,18 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="fee-description">Beschreibung (optional)</Label>
+                <Label htmlFor="fee-description">{t('customFees.descriptionOptional')}</Label>
                 <Input
                   id="fee-description"
                   value={feeForm.description || ''}
                   onChange={(e) => setFeeForm({ ...feeForm, description: e.target.value })}
-                  placeholder="Kurze Beschreibung"
+                  placeholder={t('customFees.shortDescription')}
                 />
               </div>
             </div>
             
             <div className="space-y-4 pt-4 border-t">
-              <Label>Bestelltypen</Label>
+              <Label>{t('customFees.orderTypes')}</Label>
               <div className="flex gap-4">
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -403,7 +405,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
                     checked={feeForm.applyToDineIn}
                     onCheckedChange={(checked) => setFeeForm({ ...feeForm, applyToDineIn: checked })}
                   />
-                  <Label htmlFor="dine-in">Vor Ort</Label>
+                  <Label htmlFor="dine-in">{t('customFees.dineIn')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -411,7 +413,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
                     checked={feeForm.applyToTakeaway}
                     onCheckedChange={(checked) => setFeeForm({ ...feeForm, applyToTakeaway: checked })}
                   />
-                  <Label htmlFor="takeaway">Abholung</Label>
+                  <Label htmlFor="takeaway">{t('customFees.takeaway')}</Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch
@@ -419,16 +421,16 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
                     checked={feeForm.applyToDelivery}
                     onCheckedChange={(checked) => setFeeForm({ ...feeForm, applyToDelivery: checked })}
                   />
-                  <Label htmlFor="delivery">Lieferung</Label>
+                  <Label htmlFor="delivery">{t('customFees.delivery')}</Label>
                 </div>
               </div>
             </div>
             
             <div className="space-y-4 pt-4 border-t">
-              <Label>Bedingungen (optional)</Label>
+              <Label>{t('customFees.conditions')}</Label>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="min-amount">Mindestbestellwert</Label>
+                  <Label htmlFor="min-amount">{t('customFees.minimumOrderValue')}</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="min-amount"
@@ -447,7 +449,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="max-amount">Maximalbestellwert</Label>
+                  <Label htmlFor="max-amount">{t('customFees.maximumOrderValue')}</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="max-amount"
@@ -459,7 +461,7 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
                         ...feeForm, 
                         maxOrderAmount: e.target.value ? parseFloat(e.target.value) : undefined 
                       })}
-                      placeholder="Unbegrenzt"
+                      placeholder={t('customFees.unlimited')}
                     />
                     <span className="text-muted-foreground">{currencySymbol}</span>
                   </div>
@@ -470,10 +472,10 @@ export default function CustomFeesClient({ restaurant, settings }: CustomFeesCli
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowFeeDialog(false)}>
-              Abbrechen
+              {t('customFees.cancel')}
             </Button>
             <Button onClick={handleSaveFee}>
-              {editingFee ? 'Aktualisieren' : 'Hinzufügen'}
+              {editingFee ? t('customFees.update') : t('customFees.add')}
             </Button>
           </DialogFooter>
         </DialogContent>

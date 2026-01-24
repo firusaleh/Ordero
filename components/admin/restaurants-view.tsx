@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -84,6 +85,7 @@ interface AdminRestaurantsViewProps {
 }
 
 export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsViewProps) {
+  const { t } = useLanguage()
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null)
@@ -117,31 +119,31 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
       })
 
       if (response.ok) {
-        toast.success(`Status erfolgreich geändert zu: ${newStatus}`)
+        toast.success(`${t('admin.restaurants.statusChanged')} ${newStatus}`)
         router.refresh()
       } else {
-        throw new Error('Fehler beim Ändern des Status')
+        throw new Error(t('admin.restaurants.errorChangingStatus'))
       }
     } catch (error) {
-      toast.error('Fehler beim Ändern des Status')
+      toast.error(t('admin.restaurants.errorChangingStatus'))
     }
   }
 
   const handleCreateRestaurant = async () => {
     if (!newRestaurant.name || !newRestaurant.ownerEmail || !newRestaurant.ownerName || !newRestaurant.ownerPassword) {
-      toast.error('Bitte füllen Sie alle Pflichtfelder aus')
+      toast.error(t('admin.restaurants.fillAllFields'))
       return
     }
     
     if (newRestaurant.ownerPassword.length < 8) {
-      toast.error('Das Passwort muss mindestens 8 Zeichen lang sein')
+      toast.error(t('admin.restaurants.passwordMinLength'))
       return
     }
     
     // Validiere E-Mail-Format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(newRestaurant.ownerEmail)) {
-      toast.error('Bitte geben Sie eine gültige E-Mail-Adresse ein')
+      toast.error(t('admin.restaurants.validEmail'))
       return
     }
 
@@ -155,7 +157,7 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
 
       if (response.ok) {
         const data = await response.json()
-        toast.success('Restaurant erfolgreich angelegt!')
+        toast.success(t('admin.restaurants.restaurantCreated'))
         setCreateDialogOpen(false)
         setNewRestaurant({
           name: '',
@@ -168,10 +170,10 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
         router.refresh()
       } else {
         const error = await response.json()
-        throw new Error(error.error || 'Fehler beim Anlegen')
+        throw new Error(error.error || t('admin.restaurants.errorCreating'))
       }
     } catch (error: any) {
-      toast.error(error.message || 'Fehler beim Anlegen des Restaurants')
+      toast.error(error.message || t('admin.restaurants.errorCreating'))
     } finally {
       setIsCreating(false)
     }
@@ -191,13 +193,13 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
       })
 
       if (response.ok) {
-        toast.success('Anmeldung erfolgreich!')
+        toast.success(t('admin.restaurants.loginSuccess'))
         window.location.href = '/dashboard'
       } else {
-        throw new Error('Fehler beim Anmelden')
+        throw new Error(t('admin.restaurants.errorLogin'))
       }
     } catch (error) {
-      toast.error('Fehler beim Anmelden als Restaurant-Besitzer')
+      toast.error(t('admin.restaurants.errorLogin'))
     }
   }
 
@@ -212,16 +214,16 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
       })
 
       if (response.ok) {
-        toast.success(`Restaurant "${restaurantToDelete.name}" wurde vollständig gelöscht`)
+        toast.success(`Restaurant "${restaurantToDelete.name}" ${t('admin.restaurants.restaurantDeleted')}`)
         setDeleteDialogOpen(false)
         setRestaurantToDelete(null)
         router.refresh()
       } else {
         const error = await response.json()
-        throw new Error(error.error || 'Fehler beim Löschen')
+        throw new Error(error.error || t('admin.restaurants.errorDeleting'))
       }
     } catch (error: any) {
-      toast.error(error.message || 'Fehler beim Löschen des Restaurants')
+      toast.error(error.message || t('admin.restaurants.errorDeleting'))
     } finally {
       setIsDeleting(false)
     }
@@ -262,8 +264,8 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-white">Restaurants verwalten</h1>
-          <p className="text-gray-400">Alle registrierten Restaurants auf der Plattform</p>
+          <h1 className="text-2xl font-bold text-white">{t('admin.restaurants.title')}</h1>
+          <p className="text-gray-400">{t('admin.restaurants.description')}</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -271,12 +273,12 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Restaurant anlegen
+            {t('admin.restaurants.addRestaurant')}
           </Button>
           <div className="flex items-center space-x-2 bg-gray-800 rounded-lg px-3">
             <Search className="w-4 h-4 text-gray-400" />
             <Input
-              placeholder="Suche nach Restaurant oder Besitzer..."
+              placeholder={t('admin.restaurants.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-96 border-0 bg-transparent text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -289,44 +291,44 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Gesamt</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-300">{t('admin.restaurants.total')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{restaurants.length}</div>
-            <p className="text-xs text-gray-500 mt-1">Restaurants</p>
+            <p className="text-xs text-gray-500 mt-1">{t('admin.restaurants.totalRestaurants')}</p>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Aktiv</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-300">{t('admin.restaurants.active')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-500">
               {restaurants.filter(r => r.status === 'ACTIVE').length}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Zahlende Kunden</p>
+            <p className="text-xs text-gray-500 mt-1">{t('admin.restaurants.payingCustomers')}</p>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Trial/Pending</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-300">{t('admin.restaurants.trialPending')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-500">
               {restaurants.filter(r => r.status === 'TRIAL' || r.status === 'PENDING').length}
             </div>
-            <p className="text-xs text-gray-500 mt-1">Testphase/Onboarding</p>
+            <p className="text-xs text-gray-500 mt-1">{t('admin.restaurants.testPhaseOnboarding')}</p>
           </CardContent>
         </Card>
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-300">Monatsumsatz</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-300">{t('admin.restaurants.monthlyRevenue')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
               {restaurants.reduce((sum, r) => sum + r.monthlyRevenue, 0).toLocaleString()} €
             </div>
-            <p className="text-xs text-gray-500 mt-1">Gesamt Plattform</p>
+            <p className="text-xs text-gray-500 mt-1">{t('admin.restaurants.totalPlatform')}</p>
           </CardContent>
         </Card>
       </div>
@@ -337,14 +339,14 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
           <Table>
             <TableHeader>
               <TableRow className="border-gray-700 hover:bg-gray-700/50">
-                <TableHead className="text-gray-300">Restaurant</TableHead>
-                <TableHead className="text-gray-300">Besitzer</TableHead>
-                <TableHead className="text-gray-300">Land</TableHead>
-                <TableHead className="text-gray-300">Plan</TableHead>
-                <TableHead className="text-gray-300">Status</TableHead>
-                <TableHead className="text-gray-300">Monatsumsatz</TableHead>
-                <TableHead className="text-gray-300">Erstellt</TableHead>
-                <TableHead className="text-right text-gray-300">Aktionen</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.restaurant')}</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.owner')}</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.country')}</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.plan')}</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.status')}</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.monthlyRevenue')}</TableHead>
+                <TableHead className="text-gray-300">{t('admin.restaurants.created')}</TableHead>
+                <TableHead className="text-right text-gray-300">{t('admin.restaurants.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -358,7 +360,7 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
                   </TableCell>
                   <TableCell>
                     <div>
-                      <p className="text-gray-300">{restaurant.owner.name || 'Nicht angegeben'}</p>
+                      <p className="text-gray-300">{restaurant.owner.name || t('admin.restaurants.notSpecified')}</p>
                       <p className="text-xs text-gray-500">{restaurant.owner.email}</p>
                     </div>
                   </TableCell>
@@ -387,7 +389,7 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
                   <TableCell>
                     <div>
                       <p className="font-medium text-white">{restaurant.monthlyRevenue.toLocaleString()} €</p>
-                      <p className="text-xs text-gray-500">{restaurant.totalOrders} Bestellungen</p>
+                      <p className="text-xs text-gray-500">{restaurant.totalOrders} {t('billing.orders')}</p>
                     </div>
                   </TableCell>
                   <TableCell>

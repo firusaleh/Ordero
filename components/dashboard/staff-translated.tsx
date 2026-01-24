@@ -62,48 +62,15 @@ export default function StaffTranslated() {
     role: 'waiter'
   })
 
-  const staff = [
-    {
-      id: '1',
-      name: 'Max Mustermann',
-      email: 'max@ordero.de',
-      role: 'manager',
-      status: 'active',
-      lastActive: '2024-01-15 14:30'
-    },
-    {
-      id: '2',
-      name: 'Anna Schmidt',
-      email: 'anna@ordero.de',
-      role: 'waiter',
-      status: 'active',
-      lastActive: '2024-01-15 15:45'
-    },
-    {
-      id: '3',
-      name: 'Tom Weber',
-      email: 'tom@ordero.de',
-      role: 'kitchen',
-      status: 'inactive',
-      lastActive: '2024-01-10 18:20'
-    },
-    {
-      id: '4',
-      name: 'Lisa Müller',
-      email: 'lisa@ordero.de',
-      role: 'waiter',
-      status: 'active',
-      lastActive: '2024-01-15 16:10'
-    },
-    {
-      id: '5',
-      name: 'Klaus Fischer',
-      email: 'klaus@ordero.de',
-      role: 'kitchen',
-      status: 'active',
-      lastActive: '2024-01-15 12:00'
-    }
-  ]
+  // Diese Daten sollten aus der Datenbank kommen
+  const staff: Array<{
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    status: string;
+    lastActive: string;
+  }> = []
 
   const roleMap = {
     manager: { label: t('staff.manager'), color: 'bg-purple-500' },
@@ -156,7 +123,7 @@ export default function StaffTranslated() {
                   id="name"
                   value={newStaff.name}
                   onChange={(e) => setNewStaff({...newStaff, name: e.target.value})}
-                  placeholder="Max Mustermann"
+                  placeholder={t('profile.name')}
                 />
               </div>
               <div className="space-y-2">
@@ -166,7 +133,7 @@ export default function StaffTranslated() {
                   type="email"
                   value={newStaff.email}
                   onChange={(e) => setNewStaff({...newStaff, email: e.target.value})}
-                  placeholder="max@restaurant.de"
+                  placeholder={t('profile.email')}
                 />
               </div>
               <div className="space-y-2">

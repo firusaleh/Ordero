@@ -352,11 +352,9 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
           </select>
           
           <div className="mt-4 p-4 border rounded-lg" style={{ fontFamily: design.fontFamily }}>
-            <p className="text-2xl font-bold mb-2">Beispielüberschrift</p>
-            <p>
-              Dies ist ein Beispieltext, um zu zeigen, wie Ihre gewählte 
-              Schriftart aussieht. Prüfen Sie, ob sie gut lesbar ist und 
-              zu Ihrem Restaurant passt.
+            <p className="text-2xl font-bold mb-2">{design.fontFamily}</p>
+            <p className="text-sm text-muted-foreground">
+              Preview
             </p>
           </div>
         </CardContent>

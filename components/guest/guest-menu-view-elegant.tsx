@@ -456,7 +456,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                 {/* Variants */}
                 {selectedItem.variants.length > 0 && (
                   <div>
-                    <Label className="text-sm font-semibold mb-2 block">Größe wählen</Label>
+                    <Label className="text-sm font-semibold mb-2 block">{t('menu.chooseSize')}</Label>
                     <RadioGroup
                       value={selectedVariant?.id}
                       onValueChange={(value) => {
@@ -489,7 +489,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                 {/* Extras */}
                 {selectedItem.extras.length > 0 && (
                   <div>
-                    <Label className="text-sm font-semibold mb-2 block">Extras hinzufügen</Label>
+                    <Label className="text-sm font-semibold mb-2 block">{t('menu.addExtras')}</Label>
                     <div className="space-y-2">
                       {selectedItem.extras.map((extra) => (
                         <div
@@ -529,7 +529,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
 
                 {/* Notes */}
                 <div>
-                  <Label className="text-sm font-semibold mb-2 block">Besondere Wünsche?</Label>
+                  <Label className="text-sm font-semibold mb-2 block">{t('menu.specialRequests')}</Label>
                   <Textarea
                     placeholder="z.B. ohne Zwiebeln, extra scharf..."
                     value={itemNotes}
@@ -541,7 +541,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
 
                 {/* Quantity */}
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold">Menge</Label>
+                  <Label className="text-sm font-semibold">{t('menu.quantity')}</Label>
                   <div className="flex items-center gap-3">
                     <Button
                       variant="outline"
@@ -620,7 +620,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
             {cart.length === 0 ? (
               <div className="text-center py-12">
                 <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">Ihr Warenkorb ist leer</p>
+                <p className="text-gray-500 text-lg">{t('cart.empty')}</p>
                 <p className="text-gray-400 text-sm mt-2">Wählen Sie Gerichte aus der Speisekarte</p>
               </div>
             ) : (

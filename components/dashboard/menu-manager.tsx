@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -85,6 +86,7 @@ const iconComponents: { [key: string]: any } = {
 }
 
 export default function MenuManager({ restaurantId, initialCategories }: MenuManagerProps) {
+  const { t } = useLanguage()
   const { formatPrice, getCurrencySymbol } = useRestaurantCurrency()
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
@@ -132,7 +134,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         body: JSON.stringify(categoryForm)
       })
 
-      if (!response.ok) throw new Error('Fehler beim Speichern')
+      if (!response.ok) throw new Error(t('menu.errorSaving'))
 
       const savedCategory = await response.json()
       
@@ -140,16 +142,16 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         setCategories(categories.map(cat => 
           cat.id === editingCategory.id ? { ...cat, ...categoryForm } : cat
         ))
-        toast.success('Kategorie aktualisiert')
+        toast.success(t('menu.categoryUpdated'))
       } else {
         setCategories([...categories, savedCategory.data])
-        toast.success('Kategorie erstellt')
+        toast.success(t('menu.categoryCreated'))
       }
       
       setShowCategoryDialog(false)
       resetCategoryForm()
     } catch (error) {
-      toast.error('Fehler beim Speichern der Kategorie')
+      toast.error(t('menu.errorSavingCategory'))
     }
   }
 
@@ -179,7 +181,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         body: JSON.stringify(itemData)
       })
 
-      if (!response.ok) throw new Error('Fehler beim Speichern')
+      if (!response.ok) throw new Error(t('menu.errorSaving'))
 
       const savedItem = await response.json()
       
@@ -202,16 +204,16 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         return cat
       }))
       
-      toast.success(editingItem ? 'Artikel aktualisiert' : 'Artikel erstellt')
+      toast.success(editingItem ? t('menu.itemUpdated') : t('menu.itemCreated'))
       setShowItemDialog(false)
       resetItemForm()
     } catch (error) {
-      toast.error('Fehler beim Speichern des Artikels')
+      toast.error(t('menu.errorSavingItem'))
     }
   }
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (!confirm('Möchten Sie diese Kategorie wirklich löschen? Alle Artikel werden ebenfalls gelöscht.')) {
+    if (!confirm(t('menu.confirmDeleteCategory'))) {
       return
     }
     
@@ -220,20 +222,20 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         method: 'DELETE'
       })
 
-      if (!response.ok) throw new Error('Fehler beim Löschen')
+      if (!response.ok) throw new Error(t('menu.errorDeleting'))
 
       setCategories(categories.filter(cat => cat.id !== categoryId))
       if (selectedCategory === categoryId) {
         setSelectedCategory(categories[0]?.id || null)
       }
-      toast.success('Kategorie gelöscht')
+      toast.success(t('menu.categoryDeleted'))
     } catch (error) {
-      toast.error('Fehler beim Löschen der Kategorie')
+      toast.error(t('menu.errorDeletingCategory'))
     }
   }
 
   const handleDeleteItem = async (itemId: string) => {
-    if (!confirm('Möchten Sie diesen Artikel wirklich löschen?')) {
+    if (!confirm(t('menu.confirmDeleteItem'))) {
       return
     }
     
@@ -242,15 +244,15 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         method: 'DELETE'
       })
 
-      if (!response.ok) throw new Error('Fehler beim Löschen')
+      if (!response.ok) throw new Error(t('menu.errorDeleting'))
 
       setCategories(categories.map(cat => ({
         ...cat,
         menuItems: cat.menuItems.filter(item => item.id !== itemId)
       })))
-      toast.success('Artikel gelöscht')
+      toast.success(t('menu.itemDeleted'))
     } catch (error) {
-      toast.error('Fehler beim Löschen des Artikels')
+      toast.error(t('menu.errorDeletingItem'))
     }
   }
 
@@ -262,7 +264,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         body: JSON.stringify({ isAvailable })
       })
 
-      if (!response.ok) throw new Error('Fehler beim Aktualisieren')
+      if (!response.ok) throw new Error(t('menu.errorUpdating'))
 
       setCategories(categories.map(cat => ({
         ...cat,
@@ -271,9 +273,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         )
       })))
       
-      toast.success(isAvailable ? 'Artikel ist verfügbar' : 'Artikel ist ausverkauft')
+      toast.success(isAvailable ? t('menu.itemAvailable') : t('menu.itemOutOfStock'))
     } catch (error) {
-      toast.error('Fehler beim Aktualisieren der Verfügbarkeit')
+      toast.error(t('menu.errorUpdatingAvailability'))
     }
   }
 
@@ -307,7 +309,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
   
   const addVariant = () => {
     if (!variantForm.name || !variantForm.price) {
-      toast.error('Bitte Name und Preis eingeben')
+      toast.error(t('menu.pleaseEnterNameAndPrice'))
       return
     }
     const newVariant: MenuItemVariant = {
@@ -328,7 +330,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
   
   const addExtra = () => {
     if (!extraForm.name || !extraForm.price) {
-      toast.error('Bitte Name und Preis eingeben')
+      toast.error(t('menu.pleaseEnterNameAndPrice'))
       return
     }
     const newExtra: MenuItemExtra = {
@@ -381,8 +383,8 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Speisekarte</h1>
-          <p className="text-gray-600">Verwalten Sie Ihre Kategorien und Artikel</p>
+          <h1 className="text-3xl font-bold">{t('menu.title')}</h1>
+          <p className="text-gray-600">{t('menu.subtitle')}</p>
         </div>
         <div className="flex gap-2">
           <Button 
@@ -393,12 +395,12 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
             }}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Kategorie
+            {t('menu.addCategory')}
           </Button>
           <Button 
             onClick={() => {
               if (!selectedCategory && categories.length > 0) {
-                toast.error('Bitte wählen Sie zuerst eine Kategorie')
+                toast.error(t('menu.selectCategory'))
                 return
               }
               resetItemForm()
@@ -407,7 +409,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
             disabled={categories.length === 0}
           >
             <Plus className="mr-2 h-4 w-4" />
-            Artikel
+            {t('menu.addItem')}
           </Button>
         </div>
       </div>
@@ -417,10 +419,10 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
           <CardContent className="py-12">
             <EmptyState
               icon={ChefHat}
-              title="Keine Kategorien"
-              description="Erstellen Sie Ihre erste Kategorie, um Artikel hinzuzufügen"
+              title={t('menu.noCategories')}
+              description={t('menu.createFirstCategory')}
               action={{
-                label: 'Kategorie erstellen',
+                label: t('menu.addCategory'),
                 onClick: () => {
                   resetCategoryForm()
                   setShowCategoryDialog(true)
@@ -435,9 +437,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>Kategorien</CardTitle>
+                <CardTitle>{t('menu.categories')}</CardTitle>
                 <CardDescription>
-                  {categories.length} {categories.length === 1 ? 'Kategorie' : 'Kategorien'}
+                  {categories.length} {categories.length === 1 ? t('menu.category') : t('menu.categories')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -469,7 +471,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                         <div>
                           <p className="font-medium">{category.name}</p>
                           <p className="text-sm text-gray-500">
-                            {category.menuItems.length} Artikel
+                            {category.menuItems.length} {t('menu.itemsInCategory')}
                           </p>
                         </div>
                       </div>
@@ -509,17 +511,17 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                 <CardHeader>
                   <CardTitle>{selectedCategoryData.name}</CardTitle>
                   <CardDescription>
-                    {selectedCategoryData.description || 'Artikel in dieser Kategorie'}
+                    {selectedCategoryData.description || t('menu.itemsInCategory')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {selectedCategoryData.menuItems.length === 0 ? (
                     <EmptyState
                       icon={Pizza}
-                      title="Keine Artikel"
-                      description="Fügen Sie Artikel zu dieser Kategorie hinzu"
+                      title={t('menu.noItems')}
+                      description={t('menu.addItemsToCategory')}
                       action={{
-                        label: 'Artikel hinzufügen',
+                        label: t('menu.addItem'),
                         onClick: () => {
                           resetItemForm()
                           setShowItemDialog(true)
@@ -544,10 +546,10 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                               <div className="flex items-center gap-2">
                                 <h4 className="font-medium">{item.name}</h4>
                                 {!item.isAvailable && (
-                                  <Badge variant="secondary">Ausverkauft</Badge>
+                                  <Badge variant="secondary">{t('menu.outOfStock')}</Badge>
                                 )}
                                 {!item.isActive && (
-                                  <Badge variant="outline">Inaktiv</Badge>
+                                  <Badge variant="outline">{t('menu.inactive')}</Badge>
                                 )}
                               </div>
                               {item.description && (
@@ -557,12 +559,12 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                                 <span className="font-medium">{formatPrice(item.price)}</span>
                                 {item.variants && item.variants.length > 0 && (
                                   <Badge variant="outline" className="text-xs">
-                                    {item.variants.length} Variante{item.variants.length > 1 ? 'n' : ''}
+                                    {item.variants.length} {item.variants.length === 1 ? t('menu.variant') : t('menu.variants_plural')}
                                   </Badge>
                                 )}
                                 {item.extras && item.extras.length > 0 && (
                                   <Badge variant="outline" className="text-xs">
-                                    {item.extras.length} Extra{item.extras.length > 1 ? 's' : ''}
+                                    {item.extras.length} {item.extras.length === 1 ? t('menu.extra') : t('menu.extras_plural')}
                                   </Badge>
                                 )}
                                 {item.allergens.length > 0 && (
@@ -616,8 +618,8 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                 <CardContent className="py-12">
                   <EmptyState
                     icon={Pizza}
-                    title="Kategorie wählen"
-                    description="Wählen Sie eine Kategorie aus, um die Artikel zu sehen"
+                    title={t('menu.selectCategoryFirst')}
+                    description={t('menu.selectCategoryDesc')}
                   />
                 </CardContent>
               </Card>
@@ -631,39 +633,39 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {editingCategory ? 'Kategorie bearbeiten' : 'Neue Kategorie'}
+              {editingCategory ? t('menu.editCategory') : t('menu.newCategory')}
             </DialogTitle>
             <DialogDescription>
-              Erstellen oder bearbeiten Sie eine Kategorie für Ihre Speisekarte
+              {t('menu.createEditCategory')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="categoryName">Name</Label>
+              <Label htmlFor="categoryName">{t('menu.name')}</Label>
               <Input
                 id="categoryName"
                 value={categoryForm.name}
                 onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                placeholder="z.B. Hauptgerichte"
+                placeholder={t('menu.categoryNamePlaceholder')}
               />
             </div>
             <div>
-              <Label htmlFor="categoryDescription">Beschreibung (optional)</Label>
+              <Label htmlFor="categoryDescription">{t('menu.description')}</Label>
               <Textarea
                 id="categoryDescription"
                 value={categoryForm.description}
                 onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
-                placeholder="Beschreiben Sie diese Kategorie..."
+                placeholder={t('menu.categoryDescPlaceholder')}
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowCategoryDialog(false)}>
-              Abbrechen
+              {t('menu.cancel')}
             </Button>
             <Button onClick={handleSaveCategory}>
-              {editingCategory ? 'Speichern' : 'Erstellen'}
+              {editingCategory ? t('menu.save') : t('menu.create')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -674,80 +676,80 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingItem ? 'Artikel bearbeiten' : 'Neuer Artikel'}
+              {editingItem ? t('menu.editItem') : t('menu.newItem')}
             </DialogTitle>
             <DialogDescription>
-              Fügen Sie einen neuen Artikel zur Speisekarte hinzu
+              {t('menu.addNewMenuItem')}
             </DialogDescription>
           </DialogHeader>
           
           <Tabs defaultValue="basic" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="basic">Grunddaten</TabsTrigger>
-              <TabsTrigger value="variants">Varianten</TabsTrigger>
-              <TabsTrigger value="extras">Extras</TabsTrigger>
+              <TabsTrigger value="basic">{t('menu.basic')}</TabsTrigger>
+              <TabsTrigger value="variants">{t('menu.variants')}</TabsTrigger>
+              <TabsTrigger value="extras">{t('menu.extras')}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="basic" className="space-y-4">
             <div>
-              <Label htmlFor="itemName">Name</Label>
+              <Label htmlFor="itemName">{t('menu.name')}</Label>
               <Input
                 id="itemName"
                 value={itemForm.name}
                 onChange={(e) => setItemForm({ ...itemForm, name: e.target.value })}
-                placeholder="z.B. Pizza Margherita"
+                placeholder={t('menu.itemNamePlaceholder')}
               />
             </div>
             
             <div>
-              <Label>Bild</Label>
+              <Label>{t('menu.image')}</Label>
               <ImageUpload
                 value={itemForm.image}
                 onChange={(url) => setItemForm({ ...itemForm, image: url })}
                 onRemove={() => setItemForm({ ...itemForm, image: '' })}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Empfohlen: 800x600px, max. 2MB
+                {t('menu.imageRecommendation')}
               </p>
             </div>
             
             <div>
-              <Label htmlFor="itemDescription">Beschreibung (optional)</Label>
+              <Label htmlFor="itemDescription">{t('menu.description')}</Label>
               <Textarea
                 id="itemDescription"
                 value={itemForm.description}
                 onChange={(e) => setItemForm({ ...itemForm, description: e.target.value })}
-                placeholder="Beschreiben Sie das Gericht..."
+                placeholder={t('menu.itemDescPlaceholder')}
                 rows={3}
               />
             </div>
             <div>
-              <Label htmlFor="itemPrice">Preis ({getCurrencySymbol()})</Label>
+              <Label htmlFor="itemPrice">{t('menu.price')} ({getCurrencySymbol()})</Label>
               <Input
                 id="itemPrice"
                 type="number"
                 step="0.01"
                 value={itemForm.price}
                 onChange={(e) => setItemForm({ ...itemForm, price: e.target.value })}
-                placeholder="12.50"
+                placeholder={t('menu.pricePlaceholder')}
               />
             </div>
             <div>
-              <Label htmlFor="itemAllergens">Allergene (kommagetrennt)</Label>
+              <Label htmlFor="itemAllergens">{t('menu.allergens')}</Label>
               <Input
                 id="itemAllergens"
                 value={itemForm.allergens}
                 onChange={(e) => setItemForm({ ...itemForm, allergens: e.target.value })}
-                placeholder="Gluten, Milch, Eier"
+                placeholder={t('menu.allergensPlaceholder')}
               />
             </div>
             <div>
-              <Label htmlFor="itemTags">Tags (kommagetrennt)</Label>
+              <Label htmlFor="itemTags">{t('menu.tags')}</Label>
               <Input
                 id="itemTags"
                 value={itemForm.tags}
                 onChange={(e) => setItemForm({ ...itemForm, tags: e.target.value })}
-                placeholder="vegetarisch, scharf, vegan"
+                placeholder={t('menu.tagsPlaceholder')}
               />
             </div>
             <div className="flex items-center space-x-4">
@@ -757,7 +759,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                   checked={itemForm.isActive}
                   onCheckedChange={(checked) => setItemForm({ ...itemForm, isActive: checked })}
                 />
-                <Label htmlFor="itemActive">Aktiv</Label>
+                <Label htmlFor="itemActive">{t('menu.active')}</Label>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
@@ -765,27 +767,27 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                   checked={itemForm.isAvailable}
                   onCheckedChange={(checked) => setItemForm({ ...itemForm, isAvailable: checked })}
                 />
-                <Label htmlFor="itemAvailable">Verfügbar</Label>
+                <Label htmlFor="itemAvailable">{t('menu.available')}</Label>
               </div>
             </div>
             </TabsContent>
             
             <TabsContent value="variants" className="space-y-4">
               <div>
-                <Label>Varianten hinzufügen</Label>
+                <Label>{t('menu.addVariants')}</Label>
                 <p className="text-sm text-gray-600 mb-3">
-                  Fügen Sie verschiedene Größen oder Varianten hinzu (z.B. Klein, Mittel, Groß)
+                  {t('menu.variantsDescription')}
                 </p>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Name (z.B. Klein)"
+                    placeholder={t('menu.variantNamePlaceholder')}
                     value={variantForm.name}
                     onChange={(e) => setVariantForm({ ...variantForm, name: e.target.value })}
                   />
                   <Input
                     type="number"
                     step="0.01"
-                    placeholder="Preis"
+                    placeholder={t('menu.price')}
                     value={variantForm.price}
                     onChange={(e) => setVariantForm({ ...variantForm, price: e.target.value })}
                     className="w-32"
@@ -798,7 +800,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
               
               {itemForm.variants.length > 0 && (
                 <div>
-                  <Label>Vorhandene Varianten</Label>
+                  <Label>{t('menu.existingVariants')}</Label>
                   <div className="space-y-2 mt-2">
                     {itemForm.variants.map((variant) => (
                       <div key={variant.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -822,27 +824,27 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
               
               {itemForm.variants.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  Keine Varianten hinzugefügt
+                  {t('menu.noVariantsAdded')}
                 </div>
               )}
             </TabsContent>
             
             <TabsContent value="extras" className="space-y-4">
               <div>
-                <Label>Extras hinzufügen</Label>
+                <Label>{t('menu.addExtras')}</Label>
                 <p className="text-sm text-gray-600 mb-3">
-                  Fügen Sie optionale Extras hinzu (z.B. Extra Käse, Bacon)
+                  {t('menu.extrasDescription')}
                 </p>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Name (z.B. Extra Käse)"
+                    placeholder={t('menu.extraNamePlaceholder')}
                     value={extraForm.name}
                     onChange={(e) => setExtraForm({ ...extraForm, name: e.target.value })}
                   />
                   <Input
                     type="number"
                     step="0.01"
-                    placeholder="Preis"
+                    placeholder={t('menu.price')}
                     value={extraForm.price}
                     onChange={(e) => setExtraForm({ ...extraForm, price: e.target.value })}
                     className="w-32"
@@ -855,7 +857,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
               
               {itemForm.extras.length > 0 && (
                 <div>
-                  <Label>Vorhandene Extras</Label>
+                  <Label>{t('menu.existingExtras')}</Label>
                   <div className="space-y-2 mt-2">
                     {itemForm.extras.map((extra) => (
                       <div key={extra.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -879,7 +881,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
               
               {itemForm.extras.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
-                  Keine Extras hinzugefügt
+                  {t('menu.noExtrasAdded')}
                 </div>
               )}
             </TabsContent>
@@ -887,10 +889,10 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowItemDialog(false)}>
-              Abbrechen
+              {t('menu.cancel')}
             </Button>
             <Button onClick={handleSaveItem}>
-              {editingItem ? 'Speichern' : 'Erstellen'}
+              {editingItem ? t('menu.save') : t('menu.create')}
             </Button>
           </DialogFooter>
         </DialogContent>

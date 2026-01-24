@@ -9,6 +9,7 @@ import {
   Text,
 } from '@react-email/components'
 import * as React from 'react'
+// Email templates use static translations, not hooks
 
 interface OrderStatusUpdateEmailProps {
   orderNumber: string
@@ -58,16 +59,16 @@ export const OrderStatusUpdateEmail = ({
       case 'DELIVERED':
         return 'Ihre Bestellung wurde serviert. Guten Appetit!'
       case 'CANCELLED':
-        return 'Ihre Bestellung wurde leider storniert. Bei Fragen wenden Sie sich bitte an das Personal.'
+        return 'Ihre Bestellung wurde leider storniert.'
       default:
-        return 'Der Status Ihrer Bestellung wurde aktualisiert.'
+        return 'Ihre Bestellung wurde aktualisiert.'
     }
   }
 
   return (
     <Html>
       <Head />
-      <Preview>Bestellung #{orderNumber} {statusText}</Preview>
+      <Preview>Update zu Ihrer Bestellung #{orderNumber}: {statusText}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Section style={{
@@ -80,7 +81,7 @@ export const OrderStatusUpdateEmail = ({
               ...statusTextStyle,
               color: getStatusColor()
             }}>
-              Bestellung {statusText}
+              {status === 'CONFIRMED' ? 'Bestellung bestätigt' : status === 'PREPARING' ? 'In Zubereitung' : status === 'READY' ? 'Fertig' : status === 'DELIVERED' ? 'Geliefert' : 'Storniert'}
             </Text>
           </Section>
 
@@ -99,7 +100,7 @@ export const OrderStatusUpdateEmail = ({
             
             {estimatedTime && status === 'PREPARING' && (
               <Text style={timeEstimate}>
-                ⏱ Geschätzte Zeit: {estimatedTime} Minuten
+                Geschätzte Zeit: {estimatedTime} Minuten
               </Text>
             )}
           </Section>
@@ -107,14 +108,14 @@ export const OrderStatusUpdateEmail = ({
           {status === 'READY' && (
             <Section style={alertBox}>
               <Text style={alertText}>
-                🔔 Ihre Bestellung ist abholbereit!
+                Ihre Bestellung ist abholbereit!
               </Text>
             </Section>
           )}
 
           <Text style={footer}>
-            Diese E-Mail wurde automatisch von Oriido gesendet.<br />
-            Bei Fragen wenden Sie sich bitte an das Restaurant-Personal.
+            Dies ist eine automatische E-Mail.<br />
+            Bei Fragen wenden Sie sich bitte direkt an das Restaurant.
           </Text>
         </Container>
       </Body>

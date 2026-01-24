@@ -82,9 +82,9 @@ export default function RegisterPage() {
         throw new Error(result.error || t.errors.genericError)
       }
 
-      toast.success('✓')
+      toast.success(t.success.registrationSuccessful)
       
-      // Automatisch anmelden nach Registrierung
+      // Automatically redirect to login after registration
       router.push('/login?registered=true')
     } catch (error: any) {
       toast.error(error.message || t.errors.genericError)

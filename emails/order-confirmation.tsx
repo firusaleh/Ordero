@@ -10,6 +10,7 @@ import {
   Text,
 } from '@react-email/components'
 import * as React from 'react'
+// Email templates use static translations, not hooks
 
 interface OrderConfirmationEmailProps {
   orderNumber: string
@@ -94,9 +95,9 @@ export const OrderConfirmationEmail = ({
           <Section style={infoBox}>
             <Text style={infoTitle}>Was passiert als Nächstes?</Text>
             <Text style={infoText}>
-              1. Das Restaurant bestätigt Ihre Bestellung<br />
-              2. Ihre Speisen werden zubereitet<br />
-              3. Sie erhalten eine Benachrichtigung, wenn Ihre Bestellung fertig ist
+              Das Restaurant bestätigt Ihre Bestellung<br />
+              Ihre Bestellung wird zubereitet<br />
+              Sie erhalten eine Benachrichtigung, wenn Ihre Bestellung fertig ist
             </Text>
           </Section>
 

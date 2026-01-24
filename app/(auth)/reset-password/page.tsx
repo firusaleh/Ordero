@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import LanguageSelector from '@/components/language-selector'
+import { translations, type Language } from '@/lib/translations'
 
 function ResetPasswordContent() {
   const router = useRouter()
@@ -22,20 +24,23 @@ function ResetPasswordContent() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [language, setLanguage] = useState<Language>('de')
+  
+  const t = translations[language].resetPassword
 
   useEffect(() => {
     if (!token) {
-      setError('Kein gültiger Reset-Token gefunden. Bitte fordern Sie einen neuen Link an.')
+      setError(t.error.tokenNotFound)
     }
   }, [token])
 
   const validatePassword = () => {
     if (password.length < 8) {
-      toast.error('Passwort muss mindestens 8 Zeichen lang sein')
+      toast.error(t.validation.passwordTooShortToast)
       return false
     }
     if (password !== confirmPassword) {
-      toast.error('Passwörter stimmen nicht überein')
+      toast.error(t.validation.passwordMismatchToast)
       return false
     }
     return true
@@ -57,19 +62,19 @@ function ResetPasswordContent() {
 
       if (response.ok) {
         setSuccess(true)
-        toast.success('Passwort erfolgreich zurückgesetzt!')
+        toast.success(t.errors.successToast)
         
-        // Weiterleitung zum Login nach 3 Sekunden
+        // Redirect to login after 3 seconds
         setTimeout(() => {
           router.push('/login')
         }, 3000)
       } else {
         const data = await response.json()
-        throw new Error(data.error || 'Fehler beim Zurücksetzen des Passworts')
+        throw new Error(data.error || t.errors.resetError)
       }
     } catch (error: any) {
       console.error('Reset password error:', error)
-      toast.error(error.message || 'Fehler beim Zurücksetzen des Passworts')
+      toast.error(error.message || t.errors.resetError)
       setError(error.message)
     } finally {
       setLoading(false)
@@ -79,21 +84,27 @@ function ResetPasswordContent() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-red-50 p-4">
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageSelector 
+            currentLang={language}
+            onLanguageChange={(lang) => setLanguage(lang)}
+          />
+        </div>
+        
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl">Passwort zurückgesetzt!</CardTitle>
+            <CardTitle className="text-2xl">{t.success.title}</CardTitle>
             <CardDescription className="mt-2">
-              Ihr Passwort wurde erfolgreich geändert.
-              Sie werden in wenigen Sekunden zum Login weitergeleitet...
+              {t.success.description}
             </CardDescription>
           </CardHeader>
           <CardFooter>
             <Link href="/login" className="w-full">
               <Button className="w-full">
-                Jetzt anmelden
+{t.success.loginNow}
               </Button>
             </Link>
           </CardFooter>
@@ -105,12 +116,19 @@ function ResetPasswordContent() {
   if (error && !token) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-red-50 p-4">
+        <div className="absolute top-4 right-4 z-10">
+          <LanguageSelector 
+            currentLang={language}
+            onLanguageChange={(lang) => setLanguage(lang)}
+          />
+        </div>
+        
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="h-8 w-8 text-red-600" />
             </div>
-            <CardTitle className="text-2xl">Ungültiger Link</CardTitle>
+            <CardTitle className="text-2xl">{t.error.invalidToken}</CardTitle>
             <CardDescription className="mt-2">
               {error}
             </CardDescription>
@@ -118,12 +136,12 @@ function ResetPasswordContent() {
           <CardFooter className="flex flex-col gap-3">
             <Link href="/forgot-password" className="w-full">
               <Button className="w-full">
-                Neuen Link anfordern
+{t.error.requestNewLink}
               </Button>
             </Link>
             <Link href="/login" className="w-full">
               <Button variant="outline" className="w-full">
-                Zum Login
+{t.error.goToLogin}
               </Button>
             </Link>
           </CardFooter>
@@ -134,18 +152,25 @@ function ResetPasswordContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 via-white to-red-50 p-4">
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelector 
+          currentLang={language}
+          onLanguageChange={(lang) => setLanguage(lang)}
+        />
+      </div>
+      
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Neues Passwort festlegen</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t.title}</CardTitle>
           <CardDescription>
-            Geben Sie Ihr neues Passwort ein. Es sollte mindestens 8 Zeichen lang sein.
+            {t.subtitle}
           </CardDescription>
         </CardHeader>
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Neues Passwort</Label>
+              <Label htmlFor="password">{t.newPassword}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
@@ -154,7 +179,7 @@ function ResetPasswordContent() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 pr-10"
-                  placeholder="Mindestens 8 Zeichen"
+                  placeholder={t.passwordPlaceholder}
                   required
                   disabled={loading}
                   minLength={8}
@@ -174,7 +199,7 @@ function ResetPasswordContent() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
+              <Label htmlFor="confirmPassword">{t.confirmPassword}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
@@ -183,7 +208,7 @@ function ResetPasswordContent() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="pl-10"
-                  placeholder="Passwort wiederholen"
+                  placeholder={t.confirmPasswordPlaceholder}
                   required
                   disabled={loading}
                   minLength={8}
@@ -195,7 +220,7 @@ function ResetPasswordContent() {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Die Passwörter stimmen nicht überein
+                  {t.validation.passwordMismatch}
                 </AlertDescription>
               </Alert>
             )}
@@ -204,7 +229,7 @@ function ResetPasswordContent() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Passwort muss mindestens 8 Zeichen lang sein
+                  {t.validation.passwordTooShort}
                 </AlertDescription>
               </Alert>
             )}
@@ -219,16 +244,16 @@ function ResetPasswordContent() {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Passwort wird zurückgesetzt...
+                  {t.resetting}
                 </>
               ) : (
-                'Passwort zurücksetzen'
+t.resetButton
               )}
             </Button>
             
             <Link href="/login" className="w-full">
               <Button variant="outline" className="w-full">
-                Abbrechen
+{t.cancel}
               </Button>
             </Link>
           </CardFooter>

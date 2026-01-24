@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
+import { useLanguage } from '@/contexts/language-context'
 import { Loader2, Save, Calculator, Percent, DollarSign } from 'lucide-react'
 
 interface FeesSettingsClientProps {
@@ -17,6 +18,7 @@ interface FeesSettingsClientProps {
 }
 
 export default function FeesSettingsClient({ restaurant, settings }: FeesSettingsClientProps) {
+  const { t } = useLanguage()
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   
@@ -52,13 +54,13 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
       })
       
       if (!response.ok) {
-        throw new Error('Fehler beim Speichern')
+        throw new Error(t('common.errorSaving'))
       }
       
-      toast.success('Gebühreneinstellungen gespeichert')
+      toast.success(t('settings.fees.feesSaved'))
       router.refresh()
     } catch (error) {
-      toast.error('Fehler beim Speichern der Einstellungen')
+      toast.error(t('common.errorSaving'))
     } finally {
       setSaving(false)
     }
@@ -77,9 +79,9 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gebühren & Steuern</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t('settings.fees.title')}</h1>
           <p className="text-muted-foreground">
-            Verwalten Sie Service-Gebühren und Steuereinstellungen
+            {t('settings.fees.description')}
           </p>
         </div>
         <Button onClick={handleSave} disabled={saving}>
@@ -88,7 +90,7 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
           ) : (
             <Save className="mr-2 h-4 w-4" />
           )}
-          Speichern
+          {saving ? t('common.saving') : t('common.save')}
         </Button>
       </div>
 
@@ -97,18 +99,18 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            Service-Gebühr
+            {t('settings.fees.serviceFeeSettings')}
           </CardTitle>
           <CardDescription>
-            Fügen Sie eine Service-Gebühr zu allen Bestellungen hinzu
+            {t('settings.fees.serviceFeeDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="service-fee-enabled">Service-Gebühr aktivieren</Label>
+              <Label htmlFor="service-fee-enabled">{t('settings.fees.enableServiceFee')}</Label>
               <p className="text-sm text-muted-foreground">
-                Eine zusätzliche Gebühr wird zu jeder Bestellung hinzugefügt
+                {t('settings.fees.serviceFeeNote')}
               </p>
             </div>
             <Switch
@@ -121,20 +123,20 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
           {serviceFeeEnabled && (
             <>
               <div className="space-y-4">
-                <Label>Gebührentyp</Label>
+                <Label>{t('settings.fees.feeType')}</Label>
                 <RadioGroup value={serviceFeeType} onValueChange={setServiceFeeType}>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="PERCENT" id="percent" />
                     <Label htmlFor="percent" className="flex items-center gap-2 cursor-pointer">
                       <Percent className="h-4 w-4" />
-                      Prozentual vom Zwischensumme
+                      {t('settings.fees.percentOfSubtotal')}
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="FIXED" id="fixed" />
                     <Label htmlFor="fixed" className="flex items-center gap-2 cursor-pointer">
                       <DollarSign className="h-4 w-4" />
-                      Fester Betrag
+                      {t('settings.fees.fixedAmountFee')}
                     </Label>
                   </div>
                 </RadioGroup>
@@ -142,7 +144,7 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
               
               {serviceFeeType === 'PERCENT' ? (
                 <div className="space-y-2">
-                  <Label htmlFor="service-fee-percent">Service-Gebühr (%)</Label>
+                  <Label htmlFor="service-fee-percent">{t('settings.fees.serviceFeePercent')}</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="service-fee-percent"
@@ -157,12 +159,12 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
                     <span className="text-muted-foreground">%</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Bei {currencySymbol}{exampleSubtotal.toFixed(2)} = {currencySymbol}{(exampleSubtotal * serviceFeePercent / 100).toFixed(2)} Service-Gebühr
+                    {t('settings.fees.atAmount')} {currencySymbol}{exampleSubtotal.toFixed(2)} {t('settings.fees.equals')} {currencySymbol}{(exampleSubtotal * serviceFeePercent / 100).toFixed(2)} {t('settings.fees.serviceFeeLabel')}
                   </p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="service-fee-amount">Service-Gebühr (Betrag)</Label>
+                  <Label htmlFor="service-fee-amount">{t('settings.fees.serviceFeeAmount')}</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       id="service-fee-amount"
@@ -176,7 +178,7 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
                     <span className="text-muted-foreground">{currencySymbol}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Feste Gebühr von {currencySymbol}{serviceFeeAmount.toFixed(2)} pro Bestellung
+                    {t('settings.fees.fixedFeeOf')} {currencySymbol}{serviceFeeAmount.toFixed(2)} {t('settings.fees.perOrder')}
                   </p>
                 </div>
               )}
@@ -190,15 +192,15 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Percent className="h-5 w-5" />
-            Steuereinstellungen
+            {t('settings.fees.taxSettings')}
           </CardTitle>
           <CardDescription>
-            Konfigurieren Sie die Mehrwertsteuer für Ihre Preise
+            {t('settings.fees.taxSettingsDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="tax-rate">Steuersatz (%)</Label>
+            <Label htmlFor="tax-rate">{t('settings.fees.vatRate')}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="tax-rate"
@@ -216,9 +218,9 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
           
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="include-tax">Preise inkl. MwSt.</Label>
+              <Label htmlFor="include-tax">{t('settings.fees.pricesIncludeTax')}</Label>
               <p className="text-sm text-muted-foreground">
-                {includeTax ? 'Menüpreise enthalten bereits die MwSt.' : 'MwSt. wird zu den Menüpreisen hinzugefügt'}
+                {includeTax ? t('settings.fees.taxIncludedNote') : t('settings.fees.taxExcludedNote')}
               </p>
             </div>
             <Switch
@@ -233,29 +235,29 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
       {/* Example Calculation */}
       <Card>
         <CardHeader>
-          <CardTitle>Beispielrechnung</CardTitle>
+          <CardTitle>{t('settings.fees.exampleCalculation')}</CardTitle>
           <CardDescription>
-            So sieht eine Bestellung mit Ihren aktuellen Einstellungen aus
+            {t('settings.fees.exampleDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3 p-4 bg-muted rounded-lg">
             <div className="flex justify-between">
-              <span>Zwischensumme</span>
+              <span>{t('settings.fees.subtotal')}</span>
               <span>{currencySymbol}{exampleSubtotal.toFixed(2)}</span>
             </div>
             {serviceFeeEnabled && (
               <div className="flex justify-between text-sm">
-                <span>Service-Gebühr ({serviceFeeType === 'PERCENT' ? `${serviceFeePercent}%` : 'Fest'})</span>
+                <span>{t('settings.fees.serviceFeeLabel')} ({serviceFeeType === 'PERCENT' ? `${serviceFeePercent}%` : t('settings.fees.fixed')})</span>
                 <span>+{currencySymbol}{exampleServiceFee.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm">
-              <span>MwSt. ({taxRate}% {includeTax ? 'inkl.' : 'zzgl.'})</span>
+              <span>{t('settings.fees.vatLabel')} ({taxRate}% {includeTax ? t('settings.fees.included') : t('settings.fees.additional')})</span>
               <span>{includeTax ? `(${currencySymbol}${exampleTax.toFixed(2)})` : `+${currencySymbol}${exampleTax.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between font-bold text-lg pt-2 border-t">
-              <span>Gesamt</span>
+              <span>{t('settings.fees.total')}</span>
               <span>{currencySymbol}{exampleTotal.toFixed(2)}</span>
             </div>
           </div>

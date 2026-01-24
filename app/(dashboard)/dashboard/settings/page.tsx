@@ -32,8 +32,8 @@ export default function SettingsPage() {
       color: 'bg-blue-500'
     },
     {
-      title: 'Standort & Region',
-      description: 'Land und Adresse festlegen (bestimmt Zahlungsanbieter)',
+      title: t('settings.location.title'),
+      description: t('settings.location.description'),
       href: '/dashboard/settings/location',
       icon: MapPin,
       color: 'bg-red-500',
@@ -47,24 +47,24 @@ export default function SettingsPage() {
       color: 'bg-purple-500'
     },
     {
-      title: 'Zahlungen',
-      description: 'Stripe Connect und Zahlungsmethoden verwalten',
+      title: t('settings.payments.title'),
+      description: t('settings.payments.description'),
       href: '/dashboard/settings/payments',
       icon: CreditCard,
       color: 'bg-emerald-500',
       badge: 'NEU'
     },
     {
-      title: 'Gebühren & Steuern',
-      description: 'Service-Gebühren und Steuereinstellungen',
+      title: t('settings.fees.title'),
+      description: t('settings.fees.description'),
       href: '/dashboard/settings/fees',
       icon: CreditCard,
       color: 'bg-amber-500',
       badge: 'NEU'
     },
     {
-      title: 'Individuelle Gebühren',
-      description: 'Eigene Gebühren erstellen und verwalten',
+      title: t('settings.customFees.title'),
+      description: t('settings.customFees.description'),
       href: '/dashboard/settings/custom-fees',
       icon: CreditCard,
       color: 'bg-orange-500',
@@ -153,9 +153,9 @@ export default function SettingsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Brauchen Sie Hilfe?</CardTitle>
+          <CardTitle>{t('settings.help.title')}</CardTitle>
           <CardDescription>
-            Unser Support-Team steht Ihnen zur Verfügung
+            {t('settings.help.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>

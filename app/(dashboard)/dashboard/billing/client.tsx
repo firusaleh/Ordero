@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -23,6 +24,7 @@ interface BillingClientProps {
 }
 
 export default function BillingClient({ restaurant }: BillingClientProps) {
+  const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -40,8 +42,8 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
 
     if (success === 'true') {
       toast({
-        title: 'Erfolgreich!',
-        description: 'Ihr Abonnement wurde erfolgreich aktiviert.',
+        title: t('billing.success'),
+        description: t('billing.subscriptionActivated'),
       })
       // Clear params
       router.replace('/dashboard/billing')
@@ -49,8 +51,8 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
 
     if (canceled === 'true') {
       toast({
-        title: 'Abgebrochen',
-        description: 'Die Zahlung wurde abgebrochen.',
+        title: t('billing.cancelled'),
+        description: t('billing.paymentCancelled'),
         variant: 'destructive'
       })
       // Clear params  
@@ -76,24 +78,24 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
         
         if (response.ok) {
           toast({
-            title: 'Plan aktiviert!',
-            description: 'Der Pay-per-Order Plan wurde erfolgreich aktiviert. Die Abrechnung erfolgt automatisch bei jeder Bestellung.',
+            title: t('billing.planActivated'),
+            description: t('billing.payPerOrderActivated'),
           })
           router.refresh()
         } else {
-          throw new Error('Fehler bei der Aktivierung')
+          throw new Error(t('billing.activationError'))
         }
       } else {
         // Für Deutschland: Kontaktaufnahme erforderlich
         toast({
-          title: 'Kontaktieren Sie uns',
-          description: 'Bitte kontaktieren Sie unser Sales-Team unter support@oriido.com für die Aktivierung dieses Plans.',
+          title: t('billing.contactUs'),
+          description: t('billing.contactSalesTeam'),
         })
       }
     } catch (error) {
       toast({
-        title: 'Fehler',
-        description: 'Es gab ein Problem bei der Aktivierung. Bitte versuchen Sie es später erneut.',
+        title: t('billing.error'),
+        description: t('billing.activationError'),
         variant: 'destructive'
       })
     } finally {
@@ -110,7 +112,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.error || 'Fehler beim Öffnen des Kundenportals')
+        throw new Error(error.error || t('billing.errorOpeningPortal'))
       }
 
       const { url } = await response.json()
@@ -120,8 +122,8 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
       }
     } catch (error) {
       toast({
-        title: 'Fehler',
-        description: error instanceof Error ? error.message : 'Es gab ein Problem beim Öffnen des Kundenportals.',
+        title: t('billing.error'),
+        description: error instanceof Error ? error.message : t('billing.portalError'),
         variant: 'destructive'
       })
     } finally {
@@ -135,19 +137,19 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
     name: 'Pay-per-Order',
     price: '0,10',
     currency: 'JD',
-    unit: 'pro Bestellung',
+    unit: t('billing.perOrder'),
     icon: Receipt,
     features: [
-      'Keine monatliche Grundgebühr',
-      'Nur 0,10 JD pro erfolgter Bestellung',
-      'Automatische Abrechnung bei jeder Bestellung',
-      'Unbegrenzte Menü-Artikel',
-      'Unbegrenzte Tische',
-      'Vollständiger Funktionsumfang',
-      'E-Mail & WhatsApp Support',
-      'Monatliche Sammelrechnung'
+      t('billing.features.noMonthlyFee'),
+      t('billing.features.perOrderJordan'),
+      t('billing.features.automaticBilling'),
+      t('billing.features.unlimitedMenuItems'),
+      t('billing.features.unlimitedTables'),
+      t('billing.features.fullFunctionality'),
+      t('billing.features.emailWhatsappSupport'),
+      t('billing.features.monthlyInvoice')
     ],
-    buttonText: currentPlan === 'JO_PAY_PER_ORDER' ? 'Aktueller Plan' : 'Plan aktivieren',
+    buttonText: currentPlan === 'JO_PAY_PER_ORDER' ? t('billing.currentPlanButton') : t('billing.activatePlan'),
     isActive: currentPlan === 'JO_PAY_PER_ORDER',
     onClick: () => handleUpgrade('JO_PAY_PER_ORDER')
   }
@@ -163,16 +165,16 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
       setupFee: '250',
       icon: Receipt,
       features: [
-        'Keine monatliche Grundgebühr',
-        'Nur 0,35 € pro erfolgter Bestellung',
-        'Einmalige Setup-Gebühr: 250 €',
-        'Unbegrenzte Menü-Artikel',
-        'Unbegrenzte Tische',
-        'Vollständiger Funktionsumfang',
-        'Priority E-Mail Support',
-        'Monatliche Abrechnung nach Nutzung'
+        t('billing.features.noMonthlyFee'),
+        t('billing.features.perOrderGermany'),
+        t('billing.features.setupFeeGermany'),
+        t('billing.features.unlimitedMenuItems'),
+        t('billing.features.unlimitedTables'),
+        t('billing.features.fullFunctionality'),
+        t('billing.features.priorityEmailSupport'),
+        t('billing.features.monthlyBilling')
       ],
-      buttonText: currentPlan === 'DE_PAY_PER_ORDER' ? 'Aktueller Plan' : 'Pay-per-Order wählen',
+      buttonText: currentPlan === 'DE_PAY_PER_ORDER' ? t('billing.currentPlanButton') : t('billing.selectPayPerOrder'),
       isActive: currentPlan === 'DE_PAY_PER_ORDER',
       onClick: () => handleUpgrade('DE_PAY_PER_ORDER')
     },
@@ -186,17 +188,17 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
       icon: Calendar,
       popular: true,
       features: [
-        'Unbegrenzte Bestellungen',
-        'Monatlich: 279 € / Monat',
-        'Jährlich: 2.150 € / Jahr (spare 1.198 €)',
-        'Einmalige Setup-Gebühr: 250 €',
-        'Unbegrenzte Menü-Artikel',
-        'Unbegrenzte Tische',
-        'Priority Support mit SLA',
-        'Dedizierter Account Manager',
-        'Kostenlose Updates & neue Features'
+        t('billing.features.unlimitedOrders'),
+        t('billing.features.monthlyPrice'),
+        t('billing.features.yearlyPrice'),
+        t('billing.features.setupFeeGermany'),
+        t('billing.features.unlimitedMenuItems'),
+        t('billing.features.unlimitedTables'),
+        t('billing.features.prioritySupportSLA'),
+        t('billing.features.dedicatedAccountManager'),
+        t('billing.features.freeUpdates')
       ],
-      buttonText: currentPlan === 'DE_MONTHLY' ? 'Aktueller Plan' : 'Flatrate wählen',
+      buttonText: currentPlan === 'DE_MONTHLY' ? t('billing.currentPlanButton') : t('billing.selectFlatrate'),
       isActive: currentPlan === 'DE_MONTHLY' || currentPlan === 'DE_YEARLY',
       onClick: () => handleUpgrade('DE_MONTHLY')
     }
@@ -205,20 +207,20 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Abrechnung & Pläne</h1>
+        <h1 className="text-2xl font-bold">{t('billing.title')}</h1>
         <p className="text-gray-600">
           {country === 'JO' 
-            ? 'Ihr Abrechnungsplan für Jordanien' 
-            : 'Ihre Abrechnungspläne für Deutschland'}
+            ? t('billing.planForJordan')
+            : t('billing.planForGermany')}
         </p>
       </div>
 
       <Tabs defaultValue="subscription" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="subscription">Abonnement</TabsTrigger>
-          <TabsTrigger value="payment">Zahlungen verwalten</TabsTrigger>
+          <TabsTrigger value="subscription">{t('billing.subscription')}</TabsTrigger>
+          <TabsTrigger value="payment">{t('billing.managePayments')}</TabsTrigger>
           {currentPlan !== 'FREE' && (
-            <TabsTrigger value="usage">Nutzung & Statistiken</TabsTrigger>
+            <TabsTrigger value="usage">{t('billing.usageStatistics')}</TabsTrigger>
           )}
         </TabsList>
 
@@ -227,9 +229,9 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
           {currentPlan !== 'FREE' && (
             <Card>
               <CardHeader>
-                <CardTitle>Aktueller Plan</CardTitle>
+                <CardTitle>{t('billing.currentPlan')}</CardTitle>
                 <CardDescription>
-                  Ihr aktives Abonnement
+                  {t('billing.activeSubscription')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -237,19 +239,19 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                   <div>
                     <h3 className="font-semibold text-lg flex items-center gap-2">
                       <Receipt className="w-5 h-5" />
-                      {currentPlan === 'JO_PAY_PER_ORDER' && 'Pay-per-Order Jordanien'}
-                      {currentPlan === 'DE_PAY_PER_ORDER' && 'Pay-per-Order Deutschland'}
-                      {currentPlan === 'DE_MONTHLY' && 'Flatrate Monatlich'}
-                      {currentPlan === 'DE_YEARLY' && 'Flatrate Jährlich'}
+                      {currentPlan === 'JO_PAY_PER_ORDER' && t('billing.payPerOrderJordan')}
+                      {currentPlan === 'DE_PAY_PER_ORDER' && t('billing.payPerOrderGermany')}
+                      {currentPlan === 'DE_MONTHLY' && t('billing.flatrateMonthly')}
+                      {currentPlan === 'DE_YEARLY' && t('billing.flatrateYearly')}
                     </h3>
                     <p className="text-gray-600">
-                      {currentPlan === 'JO_PAY_PER_ORDER' && '0,10 JD pro Bestellung'}
-                      {currentPlan === 'DE_PAY_PER_ORDER' && '0,35 € pro Bestellung'}
-                      {currentPlan === 'DE_MONTHLY' && '279 € / Monat'}
-                      {currentPlan === 'DE_YEARLY' && '2.150 € / Jahr'}
+                      {currentPlan === 'JO_PAY_PER_ORDER' && `0,10 JD ${t('billing.perOrder')}`}
+                      {currentPlan === 'DE_PAY_PER_ORDER' && `0,35 € ${t('billing.perOrder')}`}
+                      {currentPlan === 'DE_MONTHLY' && `279 € ${t('billing.perMonth')}`}
+                      {currentPlan === 'DE_YEARLY' && `2.150 € ${t('billing.perYear')}`}
                     </p>
                   </div>
-                  <Badge className="bg-green-500">Aktiv</Badge>
+                  <Badge className="bg-green-500">{t('billing.active')}</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -258,7 +260,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
           {/* Available Plans based on Country */}
           <div>
             <h2 className="text-xl font-semibold mb-4">
-              {currentPlan === 'FREE' ? 'Verfügbare Pläne' : 'Planübersicht'}
+              {currentPlan === 'FREE' ? t('billing.availablePlans') : t('billing.planOverview')}
             </h2>
             
             {country === 'JO' ? (
@@ -271,7 +273,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                       {jordanPlan.name}
                     </CardTitle>
                     {jordanPlan.isActive && (
-                      <Badge className="bg-green-500">Aktiv</Badge>
+                      <Badge className="bg-green-500">{t('billing.active')}</Badge>
                     )}
                   </div>
                   <div className="flex items-baseline mt-2">
@@ -315,7 +317,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                         {germanyPlans.payPerOrder.name}
                       </CardTitle>
                       {germanyPlans.payPerOrder.isActive && (
-                        <Badge className="bg-green-500">Aktiv</Badge>
+                        <Badge className="bg-green-500">{t('billing.active')}</Badge>
                       )}
                     </div>
                     <div className="space-y-2 mt-2">
@@ -325,7 +327,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                         <span className="text-gray-500 ml-2">/ {germanyPlans.payPerOrder.unit}</span>
                       </div>
                       <Badge variant="secondary" className="inline-flex">
-                        + {germanyPlans.payPerOrder.setupFee} € Setup-Gebühr
+                        + {germanyPlans.payPerOrder.setupFee} € {t('billing.setupFee')}
                       </Badge>
                     </div>
                   </CardHeader>
@@ -357,7 +359,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                 <Card className={`relative ${germanyPlans.monthly.isActive ? 'ring-2 ring-green-500' : 'ring-2 ring-blue-500'} shadow-lg`}>
                   {!germanyPlans.monthly.isActive && (
                     <Badge className="absolute -top-3 right-4 bg-blue-500">
-                      Beliebt
+                      {t('billing.popular')}
                     </Badge>
                   )}
                   {germanyPlans.monthly.isActive && (
@@ -374,14 +376,14 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
                       <div>
                         <div className="flex items-baseline">
                           <span className="text-2xl font-bold">{germanyPlans.monthly.monthlyPrice}</span>
-                          <span className="text-gray-500 ml-1">{germanyPlans.monthly.currency} / Monat</span>
+                          <span className="text-gray-500 ml-1">{germanyPlans.monthly.currency} {t('billing.perMonth')}</span>
                         </div>
                         <div className="flex items-baseline text-sm text-gray-600">
-                          oder <span className="font-semibold mx-1">{germanyPlans.monthly.yearlyPrice} €</span> / Jahr
+                          oder <span className="font-semibold mx-1">{germanyPlans.monthly.yearlyPrice} €</span> {t('billing.perYear')}
                         </div>
                       </div>
                       <Badge variant="secondary" className="inline-flex">
-                        + {germanyPlans.monthly.setupFee} € Setup-Gebühr
+                        + {germanyPlans.monthly.setupFee} € {t('billing.setupFee')}
                       </Badge>
                     </div>
                   </CardHeader>

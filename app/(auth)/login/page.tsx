@@ -50,9 +50,9 @@ function LoginForm() {
       const result = await handleLogin(data.email, data.password)
 
       if (result?.error) {
-        // Zeige Fehlermeldung direkt im UI
+        // Show error message directly in UI
         setLoginError(result.error)
-        // Auch als Toast für zusätzliche Sichtbarkeit
+        // Also show as toast for additional visibility
         toast.error(result.error, {
           duration: 5000,
           position: 'top-center',
@@ -64,13 +64,13 @@ function LoginForm() {
         })
         setIsLoading(false)
       } else if (result?.success) {
-        // Login war erfolgreich - Client macht den Redirect
-        toast.success('Anmeldung erfolgreich!', {
+        // Login was successful - client handles redirect
+        toast.success(t.success.loginSuccessful, {
           duration: 1000,
           position: 'top-center'
         })
         
-        // Redirect zum Dashboard oder callbackUrl
+        // Redirect to dashboard or callbackUrl
         setTimeout(() => {
           router.push(callbackUrl)
           router.refresh()
@@ -78,7 +78,7 @@ function LoginForm() {
       }
     } catch (error) {
       console.error('Login error:', error)
-      const errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
+      const errorMessage = t.errors.genericError
       setLoginError(errorMessage)
       toast.error(errorMessage, {
         duration: 5000,
@@ -113,7 +113,7 @@ function LoginForm() {
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
-            {/* Fehleranzeige direkt im Formular */}
+            {/* Error display directly in form */}
             {loginError && (
               <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-start space-x-2">
                 <svg className="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
