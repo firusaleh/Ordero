@@ -85,7 +85,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
       
       for (const table of tables) {
         if (table.qrCodeUrl || table.number) {
-          const url = table.qrCodeUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${table.number}`
+          const url = table.qrCodeUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/table/${table.number}`
           try {
             const qrDataUrl = await QRCode.toDataURL(url, {
               width: 300,
@@ -231,7 +231,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
 
   const generateQRCode = async (tableNumber: number) => {
     try {
-      const url = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${tableNumber}`
+      const url = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/table/${tableNumber}`
       const qrDataUrl = await QRCode.toDataURL(url, {
         width: 300,
         margin: 2,
@@ -350,7 +350,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
   }
 
   const getTableUrl = (tableNumber: number) => {
-    return `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/tisch/${tableNumber}`
+    return `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurant.slug}/table/${tableNumber}`
   }
 
   return (
@@ -518,7 +518,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
                   
                   <div className="flex items-center gap-2 text-xs text-gray-500 mb-4">
                     <ExternalLink className="h-3 w-3" />
-                    <span className="truncate">/r/{restaurant.slug}/tisch/{table.number}</span>
+                    <span className="truncate">/r/{restaurant.slug}/table/{table.number}</span>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">

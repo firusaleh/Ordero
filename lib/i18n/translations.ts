@@ -2003,6 +2003,41 @@ export const translations = {
       billing: 'Billing',
       settings: 'Settings',
       setup: 'Setup'
+    },
+    // Tables
+    tables: {
+      title: 'Tables & QR Codes',
+      subtitle: 'Manage your tables and generate QR codes',
+      addTable: 'Add Table',
+      editTable: 'Edit Table',
+      deleteTable: 'Delete Table',
+      multipleTables: 'Multiple Tables',
+      createMultipleTables: 'Create Multiple Tables',
+      generateQrCodes: 'Generate QR Codes',
+      downloadAsPdf: 'Download as PDF',
+      print: 'Print',
+      tableNumber: 'Table Number',
+      tableName: 'Table Name',
+      seats: 'Seats',
+      active: 'Active',
+      inactive: 'Inactive',
+      available: 'Available',
+      total: 'Total',
+      totalSeats: 'Total Seats',
+      qrCodesReady: 'QR Codes Ready',
+      noTables: 'No Tables',
+      table: 'Table',
+      number: 'Number',
+      qrCodeFor: 'QR Code for'
+    },
+    // Orders
+    orders: {
+      title: 'Orders',
+      table: 'Table',
+      takeaway: 'Takeaway',
+      unknownTable: 'Unknown Table',
+      newOrder: 'New Order',
+      newOrderDesc: 'New order from {{table}}'
     }
   }
 };
