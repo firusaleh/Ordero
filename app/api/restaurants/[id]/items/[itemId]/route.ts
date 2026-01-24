@@ -30,7 +30,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
     }
 
-    // Aktualisiere Menü-Artikel
+    // Aktualisiere Menü-Artikel mit neuen Varianten und Extras
     const menuItem = await prisma.menuItem.update({
       where: { id: itemId },
       data: {
@@ -42,7 +42,20 @@ export async function PATCH(
         allergens: data.allergens || [],
         tags: data.tags || [],
         isActive: data.isActive !== undefined ? data.isActive : true,
-        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true
+        isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+        // In MongoDB werden Varianten und Extras als embedded documents gespeichert
+        variants: data.variants?.map((v: any) => ({
+          id: v.id || new Date().getTime().toString() + Math.random().toString(36).substr(2, 9),
+          name: v.name,
+          price: v.price,
+          sortOrder: v.sortOrder || 0
+        })) || [],
+        extras: data.extras?.map((e: any) => ({
+          id: e.id || new Date().getTime().toString() + Math.random().toString(36).substr(2, 9),
+          name: e.name,
+          price: e.price,
+          sortOrder: e.sortOrder || 0
+        })) || []
       }
     })
 

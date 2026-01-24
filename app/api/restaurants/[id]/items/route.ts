@@ -30,7 +30,7 @@ export async function POST(
       return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
     }
 
-    // Erstelle neuen Menü-Artikel
+    // Erstelle neuen Menü-Artikel mit Varianten und Extras
     const menuItem = await prisma.menuItem.create({
       data: {
         id: data.id,
@@ -44,7 +44,20 @@ export async function POST(
         tags: data.tags || [],
         isActive: data.isActive !== undefined ? data.isActive : true,
         isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
-        sortOrder: data.sortOrder || 0
+        sortOrder: data.sortOrder || 0,
+        // In MongoDB werden Varianten und Extras als embedded documents gespeichert
+        variants: data.variants?.map((v: any) => ({
+          id: v.id || new Date().getTime().toString() + Math.random().toString(36).substr(2, 9),
+          name: v.name,
+          price: v.price,
+          sortOrder: v.sortOrder || 0
+        })) || [],
+        extras: data.extras?.map((e: any) => ({
+          id: e.id || new Date().getTime().toString() + Math.random().toString(36).substr(2, 9),
+          name: e.name,
+          price: e.price,
+          sortOrder: e.sortOrder || 0
+        })) || []
       }
     })
 

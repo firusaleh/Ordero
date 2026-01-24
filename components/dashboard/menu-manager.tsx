@@ -88,10 +88,6 @@ const iconComponents: { [key: string]: any } = {
 export default function MenuManager({ restaurantId, initialCategories }: MenuManagerProps) {
   const { t } = useLanguage()
   const { formatPrice, getCurrencySymbol, currency } = useRestaurantCurrency(restaurantId)
-  
-  // Debug logging
-  console.log('MenuManager - RestaurantId:', restaurantId, 'Currency:', currency, 'Symbol:', getCurrencySymbol())
-  
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categories[0]?.id || null

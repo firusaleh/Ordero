@@ -30,15 +30,11 @@ export function useRestaurantCurrency(restaurantIdParam?: string): RestaurantCur
         if (response.ok) {
           const data = await response.json()
           const newCurrency = data.settings?.currency || data.currency || 'EUR'
-          console.log('Fetched restaurant data:', data)
-          console.log('Currency found:', newCurrency)
           setCurrency(newCurrency as Currency)
         }
       } catch (error) {
         console.error('Error fetching restaurant currency:', error)
       }
-    } else {
-      console.log('No restaurantId available:', restaurantIdParam, session?.user)
     }
     setIsLoading(false)
   }, [session?.user, restaurantIdParam])
