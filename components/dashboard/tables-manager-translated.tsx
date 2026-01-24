@@ -78,7 +78,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
   const [batchForm, setBatchForm] = useState({
     startNumber: '1',
     endNumber: '10',
-    prefix: t('tables.table') + ' ',
+    prefix: (language === 'ar' ? 'طاولة ' : language === 'en' ? 'Table ' : 'Tisch '),
     seats: '4'
   })
 
@@ -339,7 +339,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
     setBatchForm({
       startNumber: '1',
       endNumber: '10',
-      prefix: t('tables.table') + ' ',
+      prefix: (language === 'ar' ? 'طاولة ' : language === 'en' ? 'Table ' : 'Tisch '),
       seats: '4'
     })
   }
@@ -495,7 +495,11 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-lg">
-                        {table.name || `${t('tables.table')} ${table.number}`}
+                        {table.name || (
+                          language === 'ar' ? `طاولة ${table.number}` :
+                          language === 'en' ? `Table ${table.number}` :
+                          `Tisch ${table.number}`
+                        )}
                       </CardTitle>
                       <CardDescription>
                         {t('tables.number')}: {table.number}
@@ -512,7 +516,11 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
                     <div className="mb-4">
                       <img 
                         src={qrPreview[table.id]} 
-                        alt={t('tables.qrCodeFor') + ` ${table.name || t('tables.table') + ' ' + table.number}`}
+                        alt={t('tables.qrCodeFor') + ` ${table.name || (
+                          language === 'ar' ? `طاولة ${table.number}` :
+                          language === 'en' ? `Table ${table.number}` :
+                          `Tisch ${table.number}`
+                        )}`}
                         className="w-32 h-32 mx-auto"
                       />
                     </div>
@@ -661,7 +669,7 @@ export default function TablesManagerTranslated({ restaurant, initialTables }: T
                 id="prefix"
                 value={batchForm.prefix}
                 onChange={(e) => setBatchForm({ ...batchForm, prefix: e.target.value })}
-                placeholder={t('tables.table') + ' '}
+                placeholder={(language === 'ar' ? 'طاولة ' : language === 'en' ? 'Table ' : 'Tisch ')}
               />
             </div>
             <div>
