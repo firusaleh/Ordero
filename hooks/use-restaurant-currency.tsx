@@ -10,15 +10,18 @@ interface RestaurantCurrency {
   formatPrice: (amount: number) => string
   getCurrencySymbol: () => string
   refreshCurrency: () => Promise<void>
+  isLoading: boolean
 }
 
-export function useRestaurantCurrency(): RestaurantCurrency {
+export function useRestaurantCurrency(restaurantIdParam?: string): RestaurantCurrency {
   const { data: session } = useSession()
   const [currency, setCurrency] = useState<Currency>('EUR')
+  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   const fetchRestaurantCurrency = useCallback(async () => {
-    const restaurantId = (session?.user as any)?.restaurantId
+    setIsLoading(true)
+    const restaurantId = restaurantIdParam || (session?.user as any)?.restaurantId
     if (restaurantId) {
       try {
         const response = await fetch(`/api/restaurants/${restaurantId}`, {
@@ -27,13 +30,18 @@ export function useRestaurantCurrency(): RestaurantCurrency {
         if (response.ok) {
           const data = await response.json()
           const newCurrency = data.settings?.currency || data.currency || 'EUR'
+          console.log('Fetched restaurant data:', data)
+          console.log('Currency found:', newCurrency)
           setCurrency(newCurrency as Currency)
         }
       } catch (error) {
         console.error('Error fetching restaurant currency:', error)
       }
+    } else {
+      console.log('No restaurantId available:', restaurantIdParam, session?.user)
     }
-  }, [session?.user])
+    setIsLoading(false)
+  }, [session?.user, restaurantIdParam])
 
   useEffect(() => {
     fetchRestaurantCurrency()
@@ -62,6 +70,7 @@ export function useRestaurantCurrency(): RestaurantCurrency {
     currency,
     formatPrice,
     getCurrencySymbol,
-    refreshCurrency: fetchRestaurantCurrency
+    refreshCurrency: fetchRestaurantCurrency,
+    isLoading
   }
 }
