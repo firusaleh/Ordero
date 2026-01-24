@@ -827,7 +827,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                   <Input
                     type="number"
                     step="0.01"
-                    placeholder={t('menu.price')}
+                    placeholder={`${t('menu.price')} (${getCurrencySymbol()})`}
                     value={variantForm.price}
                     onChange={(e) => setVariantForm({ ...variantForm, price: e.target.value })}
                     className="w-32"
@@ -884,7 +884,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                   <Input
                     type="number"
                     step="0.01"
-                    placeholder={t('menu.price')}
+                    placeholder={`${t('menu.price')} (${getCurrencySymbol()})`}
                     value={extraForm.price}
                     onChange={(e) => setExtraForm({ ...extraForm, price: e.target.value })}
                     className="w-32"
