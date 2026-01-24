@@ -291,7 +291,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
       const orderData = {
         restaurantId: restaurant.id,
         tableId: table?.id,
-        tableNumber,
+        tableNumber: table?.number || tableNumber, // Include tableNumber
         type: 'DINE_IN',
         items: cart.map(item => ({
           menuItemId: item.menuItem.id,

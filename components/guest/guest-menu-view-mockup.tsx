@@ -221,6 +221,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
     try {
       const orderData = {
         tableId: table?.id,
+        tableNumber: table?.number || tableNumber, // Include tableNumber
         items: cart.map(item => ({
           menuItemId: item.menuItem.id,
           quantity: item.quantity,

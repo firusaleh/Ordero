@@ -7,7 +7,8 @@ import { toast } from "sonner"
 export interface RealtimeOrder {
   id: string
   restaurantId: string
-  tableNumber: string
+  tableNumber: string | number | null
+  type?: "DINE_IN" | "TAKEAWAY" | "DELIVERY"
   customerName?: string
   status: "PENDING" | "CONFIRMED" | "PREPARING" | "READY" | "DELIVERED" | "CANCELLED"
   items: Array<{

@@ -77,7 +77,8 @@ export async function GET(
           include: {
             menuItem: true
           }
-        }
+        },
+        table: true // Include table relation
       },
       orderBy: {
         createdAt: "desc"
@@ -89,7 +90,8 @@ export async function GET(
     const formattedOrders = orders.map(order => ({
       id: order.id,
       orderNumber: order.orderNumber,
-      tableNumber: order.tableNumber,
+      tableNumber: order.table?.number || order.tableNumber, // Use table.number if available, fallback to tableNumber
+      type: order.type, // Include order type
       customerName: order.guestName,
       customerEmail: order.guestEmail,
       customerPhone: order.guestPhone,

@@ -63,7 +63,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
       newOrders.forEach(order => {
         toast({
           title: `🔔 ${t('orders.newOrder')}`,
-          description: t('orders.newOrderDesc').replace('{{table}}', order.tableNumber || t('orders.takeaway')),
+          description: t('orders.newOrderDesc').replace('{{table}}', order.tableNumber?.toString() || t('orders.takeaway')),
           duration: 5000,
         })
       })
@@ -237,7 +237,7 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                     <div>
                       <div className="flex items-center gap-2 rtl:gap-x-reverse">
                         <span className="font-semibold">
-                          {order.tableNumber ? `${t('orders.table')} ${order.tableNumber}` : t('orders.takeaway')}
+                          {order.tableNumber ? `${t('orders.table')} ${order.tableNumber}` : (order.type === 'TAKEAWAY' ? t('orders.takeaway') : t('orders.unknownTable'))}
                         </span>
                         <StatusBadge status={order.status} />
                       </div>
