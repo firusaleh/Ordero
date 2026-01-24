@@ -92,6 +92,46 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categories[0]?.id || null
   )
+  
+  // Helper function to translate category names
+  const translateCategoryName = (name: string): string => {
+    const lowerName = name.toLowerCase()
+    // Check common German category names
+    if (lowerName === 'vorspeisen' || lowerName === 'appetizers' || lowerName === 'starters') {
+      return t('menu.categoryNames.appetizers') || name
+    }
+    if (lowerName === 'hauptgerichte' || lowerName === 'main courses' || lowerName === 'mains') {
+      return t('menu.categoryNames.mainCourses') || name
+    }
+    if (lowerName === 'nachspeisen' || lowerName === 'desserts') {
+      return t('menu.categoryNames.desserts') || name
+    }
+    if (lowerName === 'getränke' || lowerName === 'beverages' || lowerName === 'drinks') {
+      return t('menu.categoryNames.beverages') || name
+    }
+    return name
+  }
+  
+  // Helper function to translate tags
+  const translateTag = (tag: string): string => {
+    const lowerTag = tag.toLowerCase()
+    if (lowerTag === 'vegetarisch' || lowerTag === 'vegetarian') {
+      return t('menu.tagNames.vegetarian') || tag
+    }
+    if (lowerTag === 'vegan') {
+      return t('menu.tagNames.vegan') || tag
+    }
+    if (lowerTag === 'scharf' || lowerTag === 'spicy') {
+      return t('menu.tagNames.spicy') || tag
+    }
+    if (lowerTag === 'beliebt' || lowerTag === 'popular') {
+      return t('menu.tagNames.popular') || tag
+    }
+    if (lowerTag === 'glutenfrei' || lowerTag === 'glutenfree' || lowerTag === 'gluten-free') {
+      return t('menu.tagNames.glutenFree') || tag
+    }
+    return tag
+  }
   const [showCategoryDialog, setShowCategoryDialog] = useState(false)
   const [showItemDialog, setShowItemDialog] = useState(false)
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
@@ -469,7 +509,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">{category.name}</p>
+                          <p className="font-medium">{translateCategoryName(category.name)}</p>
                           <p className="text-sm text-gray-500">
                             {category.menuItems.length} {t('menu.itemsInCategory')}
                           </p>
@@ -509,9 +549,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
             {selectedCategoryData ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>{selectedCategoryData.name}</CardTitle>
+                  <CardTitle>{translateCategoryName(selectedCategoryData.name)}</CardTitle>
                   <CardDescription>
-                    {selectedCategoryData.description || t('menu.itemsInCategory')}
+                    {selectedCategoryData.description || `${selectedCategoryData.menuItems.length} ${t('menu.itemsInCategory')}`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -579,7 +619,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                                   <div className="flex gap-1">
                                     {item.tags.map((tag) => (
                                       <Badge key={tag} variant="outline" className="text-xs">
-                                        {tag}
+                                        {translateTag(tag)}
                                       </Badge>
                                     ))}
                                   </div>
