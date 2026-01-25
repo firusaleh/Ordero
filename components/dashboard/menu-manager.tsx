@@ -421,11 +421,7 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">{t('menu.title')}</h1>
-          <p className="text-gray-600">{t('menu.subtitle')}</p>
-        </div>
+      <div className="flex justify-end">
         <div className="flex gap-2">
           <Button 
             variant="outline"
