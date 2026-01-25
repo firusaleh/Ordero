@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
-        payment_method_types: ['card'],
+        automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
         statement_descriptor_suffix: statementSuffix,
         metadata: {
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
-        payment_method_types: ['card'],
+        automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
         statement_descriptor_suffix: statementSuffix,
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
