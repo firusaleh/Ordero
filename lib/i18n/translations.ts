@@ -156,6 +156,7 @@ export const translations = {
         preparing: 'قيد التحضير',
         ready: 'جاهز',
         completed: 'مكتمل',
+        delivered: 'تم التسليم',
         cancelled: 'ملغى'
       }
     },
@@ -1254,6 +1255,7 @@ export const translations = {
         preparing: 'In Zubereitung',
         ready: 'Fertig',
         completed: 'Abgeschlossen',
+        delivered: 'Ausgeliefert',
         cancelled: 'Storniert'
       }
     },
@@ -2222,6 +2224,7 @@ export const translations = {
         preparing: 'Preparing',
         ready: 'Ready',
         completed: 'Completed',
+        delivered: 'Delivered',
         cancelled: 'Cancelled'
       }
     },
