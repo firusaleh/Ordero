@@ -127,15 +127,12 @@ function CheckoutForm({
 
       if (paymentIntent?.status === 'succeeded') {
         try {
-          const confirmResponse = await fetch('/api/payment/confirm', {
-            method: 'POST',
+          // WICHTIG: Verwende stripe-connect Route für Bestätigung!
+          const confirmResponse = await fetch('/api/stripe-connect/create-payment', {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              paymentIntentId: paymentIntent.id,
-              orderId,
-              restaurantId,
-              currency,
-              country: 'DE'
+              paymentIntentId: paymentIntent.id
             })
           })
 
@@ -325,41 +322,29 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        const response = await fetch('/api/payment/create-intent', {
+        // WICHTIG: Verwende stripe-connect Route für korrekte Geldverteilung!
+        const response = await fetch('/api/stripe-connect/create-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderId: props.orderId,
-            amount: props.amount,
-            currency: props.currency,
-            restaurantId: props.restaurantId,
-            tip: props.tip,
-            metadata: {
-              source: 'guest-checkout',
-              timestamp: new Date().toISOString()
-            }
+            amount: Math.round((props.amount + props.tip) * 100), // Konvertiere zu Cents
+            currency: props.currency.toLowerCase(),
+            restaurantId: props.restaurantId
           })
         })
 
         const result = await response.json()
         console.log('Payment intent result:', result)
         
-        if (result.success && result.clientSecret) {
+        if (result.clientSecret) {
           setClientSecret(result.clientSecret)
-          if (result.provider) {
-            const provider = result.provider.toLowerCase()
-            setPaymentProvider(provider as 'stripe' | 'paytabs')
-            
-            // Check if we should use PayTabs (only if it's actually PayTabs, not a fallback)
-            if (provider === 'paytabs' && !result.fallbackMessage) {
-              setShouldUsePayTabs(true)
-            }
-          }
-          if (result.fallbackMessage) {
-            setFallbackMessage(result.fallbackMessage)
-            // Show toast notification about fallback
-            toast.info(result.fallbackMessage)
-          }
+          setPaymentProvider('stripe')
+          console.log('Payment Intent created with platform fee:', {
+            total: result.amount,
+            platformFee: result.platformFee,
+            restaurantAmount: result.restaurantAmount
+          })
         } else {
           throw new Error(result.error || 'Payment intent could not be created')
         }
