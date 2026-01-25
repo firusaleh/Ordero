@@ -99,13 +99,42 @@ export async function POST(req: NextRequest) {
     }
 
     // Speichere Payment Intent ID in der Bestellung
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paymentIntentId: paymentIntent.id,
-        paymentMethod: 'STRIPE'
+    // Versuche zuerst mit der ID direkt, falls es eine MongoDB ObjectId ist
+    try {
+      // Prüfe ob es eine MongoDB ObjectId ist (24 Zeichen hex)
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(orderId);
+      
+      if (isObjectId) {
+        await prisma.order.update({
+          where: { id: orderId },
+          data: {
+            paymentIntentId: paymentIntent.id,
+            paymentMethod: 'STRIPE'
+          }
+        });
+      } else {
+        // Falls es eine orderNumber ist, suche die Order danach
+        const order = await prisma.order.findFirst({
+          where: { orderNumber: orderId }
+        });
+        
+        if (order) {
+          await prisma.order.update({
+            where: { id: order.id },
+            data: {
+              paymentIntentId: paymentIntent.id,
+              paymentMethod: 'STRIPE'
+            }
+          });
+        } else {
+          console.warn(`Order nicht gefunden: ${orderId}`);
+          // Fahre trotzdem fort, da die Zahlung wichtiger ist
+        }
       }
-    });
+    } catch (updateError) {
+      console.error('Fehler beim Update der Order:', updateError);
+      // Fahre trotzdem fort, da die Zahlung wichtiger ist
+    }
 
     const platformFee = isDirectPayment ? 0 : Math.round(amount * (PLATFORM_FEE_PERCENTAGE / 100));
     
@@ -188,9 +217,26 @@ export async function PUT(req: NextRequest) {
 
     if (paymentIntent.status === 'succeeded') {
       // Update Bestellstatus
-      const order = await prisma.order.findFirst({
+      // Versuche zuerst über paymentIntentId zu finden
+      let order = await prisma.order.findFirst({
         where: { paymentIntentId: paymentIntentId }
       });
+      
+      // Falls nicht gefunden, versuche über die Metadata
+      if (!order && paymentIntent.metadata?.orderId) {
+        const orderId = paymentIntent.metadata.orderId;
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(orderId);
+        
+        if (isObjectId) {
+          order = await prisma.order.findUnique({
+            where: { id: orderId }
+          });
+        } else {
+          order = await prisma.order.findFirst({
+            where: { orderNumber: orderId }
+          });
+        }
+      }
 
       if (order) {
         await prisma.order.update({
