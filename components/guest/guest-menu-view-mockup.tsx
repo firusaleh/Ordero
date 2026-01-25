@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import CheckoutWithTip from './checkout-with-tip'
-import StripeCheckout from './stripe-checkout-new'
+import IntegratedCheckout from './integrated-checkout'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -115,7 +114,6 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [itemNotes, setItemNotes] = useState('')
   const [itemQuantity, setItemQuantity] = useState(1)
   const [showCheckout, setShowCheckout] = useState(false)
-  const [showStripeCheckout, setShowStripeCheckout] = useState(false)
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
   const [selectedTipOption, setSelectedTipOption] = useState<string>('10')
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
@@ -208,21 +206,13 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
     }))
   }
 
-  const handleOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string) => {
-    setCurrentTipAmount(tipAmount)
-
-    // For CARD payments: Don't create order yet, show Stripe checkout
-    // Order will be created by webhook after successful payment
-    if (paymentMethod === 'CARD') {
-      setShowCheckout(false)
-      setShowStripeCheckout(true)
-      return
-    }
-
-    // For CASH payments: Create order immediately
+  // Handle cash order (called from IntegratedCheckout)
+  const handleCashOrder = async () => {
     setIsOrdering(true)
 
     try {
+      const tipPercent = selectedTipOption === 'round' ? 0 : parseInt(selectedTipOption) || 0
+
       const orderData = {
         tableId: table?.id,
         tableNumber: table?.number || tableNumber,
@@ -233,8 +223,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           extraIds: item.extras.map(e => e.id),
           notes: item.notes
         })),
-        paymentMethod,
-        tipAmount,
+        paymentMethod: 'CASH',
+        tipAmount: currentTipAmount,
         tipPercent
       }
 
@@ -274,6 +264,20 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
     } finally {
       setIsOrdering(false)
     }
+  }
+
+  // Handle successful card payment (called from IntegratedCheckout)
+  const handlePaymentSuccess = (pendingPaymentId: string, orderNumber: string) => {
+    // Save to order history
+    const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
+    const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+    storedOrderIds.push(pendingPaymentId)
+    localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
+
+    setOrderNumber(orderNumber)
+    setCart([])
+    setShowCheckout(false)
+    setShowSuccessDialog(true)
   }
 
   const currentCategory = restaurant.categories.find(c => c.id === selectedCategory)
@@ -756,367 +760,49 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         </SheetContent>
       </Sheet>
 
-      {/* Checkout Dialog - Payment Methods */}
+      {/* Unified Checkout Dialog - Single payment mask with Stripe integration */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
           <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
           <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode und Trinkgeld</DialogDescription>
-          {/* Payment Header */}
-          <div className="bg-white px-6 py-6 border-b">
-            {/* Price Breakdown */}
-            <div className="space-y-2 mb-4 p-4 bg-gray-50 rounded-xl">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600">{t('payment.subtotal')}</span>
-                <span className="text-gray-900">{formatPrice(getCartTotal())}</span>
-              </div>
-              {restaurant.settings?.serviceFeeEnabled && (
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-600">
-                    {t('payment.serviceFee')}
-                    {restaurant.settings.serviceFeeType === 'PERCENT' && 
-                      ` (${restaurant.settings.serviceFeePercent}%)`}
-                  </span>
-                  <span className="text-gray-900">{formatPrice(calculateServiceFee(getCartTotal()))}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-center font-semibold pt-2 border-t">
-                <span>{t('payment.totalBeforeTip')}</span>
-                <span className="text-xl text-[#FF6B35]">{formatPrice(getCartTotal() + calculateServiceFee(getCartTotal()))}</span>
-              </div>
-            </div>
-            
-            {/* Tip Options */}
-            <div className="mt-6">
-              <p className="text-sm font-semibold text-gray-700 mb-3">{t('payment.tipQuestion')}</p>
-              <div className="grid grid-cols-3 gap-2 mb-2">
-                {/* No Tip */}
-                <button
-                  onClick={() => {
-                    setSelectedTipOption('0')
-                    setCurrentTipAmount(0)
-                    setShowCustomTip(false)
-                  }}
-                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                    selectedTipOption === '0' 
-                      ? 'bg-[#FF6B35] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span className="text-xl">😐</span>
-                  <span className="text-xs font-medium">{t('payment.noTip')}</span>
-                </button>
-                
-                {/* 5% */}
-                <button
-                  onClick={() => {
-                    setSelectedTipOption('5')
-                    setCurrentTipAmount(getCartTotal() * 0.05)
-                    setShowCustomTip(false)
-                  }}
-                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                    selectedTipOption === '5' 
-                      ? 'bg-[#FF6B35] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span className="text-xl">🙂</span>
-                  <span className="text-xs font-medium">5%</span>
-                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.05).toFixed(2)}</span>
-                </button>
-                
-                {/* 10% */}
-                <button
-                  onClick={() => {
-                    setSelectedTipOption('10')
-                    setCurrentTipAmount(getCartTotal() * 0.10)
-                    setShowCustomTip(false)
-                  }}
-                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                    selectedTipOption === '10' 
-                      ? 'bg-[#FF6B35] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span className="text-xl">😊</span>
-                  <span className="text-xs font-medium">10%</span>
-                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.10).toFixed(2)}</span>
-                </button>
-                
-                {/* 15% */}
-                <button
-                  onClick={() => {
-                    setSelectedTipOption('15')
-                    setCurrentTipAmount(getCartTotal() * 0.15)
-                    setShowCustomTip(false)
-                  }}
-                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                    selectedTipOption === '15' 
-                      ? 'bg-[#FF6B35] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span className="text-xl">😃</span>
-                  <span className="text-xs font-medium">15%</span>
-                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.15).toFixed(2)}</span>
-                </button>
-                
-                {/* 20% */}
-                <button
-                  onClick={() => {
-                    setSelectedTipOption('20')
-                    setCurrentTipAmount(getCartTotal() * 0.20)
-                    setShowCustomTip(false)
-                  }}
-                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                    selectedTipOption === '20' 
-                      ? 'bg-[#FF6B35] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span className="text-xl">😍</span>
-                  <span className="text-xs font-medium">20%</span>
-                  <span className="text-xs opacity-75">{currencySymbol}{(getCartTotal() * 0.20).toFixed(2)}</span>
-                </button>
-                
-                {/* Round Up */}
-                <button
-                  onClick={() => {
-                    setSelectedTipOption('round')
-                    const total = getCartTotal()
-                    const nextFive = Math.ceil(total / 5) * 5
-                    const nextTen = Math.ceil(total / 10) * 10
-                    const roundedUp = (nextFive - total) < (nextTen - total) && (nextFive - total) > 0.5 ? nextFive : nextTen
-                    setCurrentTipAmount(roundedUp - total)
-                    setShowCustomTip(false)
-                  }}
-                  className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                    selectedTipOption === 'round' 
-                      ? 'bg-[#FF6B35] text-white' 
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span className="text-xl">💝</span>
-                  <span className="text-xs font-medium">{t('payment.roundUp')}</span>
-                  <span className="text-xs opacity-75">
-                    {(() => {
-                      const total = getCartTotal()
-                      const nextFive = Math.ceil(total / 5) * 5
-                      const nextTen = Math.ceil(total / 10) * 10
-                      const roundedUp = (nextFive - total) < (nextTen - total) && (nextFive - total) > 0.5 ? nextFive : nextTen
-                      return `+${currencySymbol}${(roundedUp - total).toFixed(2)}`
-                    })()}
-                  </span>
-                </button>
-              </div>
-              
-              {/* Custom Amount Button */}
-              <button
-                onClick={() => {
-                  setShowCustomTip(!showCustomTip)
-                  setSelectedTipOption('custom')
-                  if (!showCustomTip) {
-                    setCustomTipAmount('')
-                    setCurrentTipAmount(0)
-                  }
-                }}
-                className={`w-full py-2 px-3 rounded-xl text-sm font-medium transition-all ${
-                  selectedTipOption === 'custom' 
-                    ? 'bg-[#FF6B35] text-white' 
-                    : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                {t('payment.customAmount')}
-              </button>
-              
-              {/* Custom Amount Input */}
-              {showCustomTip && (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-gray-600">{currencySymbol}</span>
-                  <input
-                    type="number"
-                    value={customTipAmount}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      setCustomTipAmount(value)
-                      const amount = parseFloat(value) || 0
-                      setCurrentTipAmount(amount)
-                    }}
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FF6B35] focus:border-transparent"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.50"
-                  />
-                </div>
-              )}
-              
-              {/* Tip Amount Display */}
-              {currentTipAmount > 0 && (
-                <div className="mt-3 p-3 bg-orange-50 rounded-xl">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">{t('payment.tip')}</span>
-                    <span className="font-semibold text-[#FF6B35]">
-                      +{currencySymbol}{currentTipAmount.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-orange-100">
-                    <span className="text-sm font-semibold text-gray-700">{t('payment.total')}</span>
-                    <span className="text-lg font-bold text-gray-900">
-                      {currencySymbol}{(getCartTotal() + currentTipAmount).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Payment Methods */}
-          <div className="bg-[#f8f8f8] px-5 py-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              {t('payment.selectPaymentMethod')}
-            </p>
-            
-            <div className="space-y-3">
-              {/* Apple Pay */}
-              <button
-                className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-                  selectedPaymentMethod === 'APPLE_PAY' ? 'border-[#FF6B35] bg-orange-50' : 'border-transparent hover:border-[#FF6B35]'
-                }`}
-                onClick={() => setSelectedPaymentMethod('APPLE_PAY')}
-              >
-                <div className="w-12 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xs">
-                  Pay
-                </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.applePay')}</span>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  selectedPaymentMethod === 'APPLE_PAY' ? 'bg-[#FF6B35]' : 'bg-gray-200'
-                }`}>
-                  {selectedPaymentMethod === 'APPLE_PAY' && <Check className="h-3 w-3 text-white" />}
-                </div>
-              </button>
-              
-              {/* Google Pay */}
-              <button
-                className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-                  selectedPaymentMethod === 'GOOGLE_PAY' ? 'border-[#FF6B35] bg-orange-50' : 'border-transparent hover:border-[#FF6B35]'
-                }`}
-                onClick={() => setSelectedPaymentMethod('GOOGLE_PAY')}
-              >
-                <div className="w-12 h-8 bg-white border rounded-lg flex items-center justify-center font-bold text-xs">
-                  G Pay
-                </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.googlePay')}</span>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  selectedPaymentMethod === 'GOOGLE_PAY' ? 'bg-[#FF6B35]' : 'bg-gray-200'
-                }`}>
-                  {selectedPaymentMethod === 'GOOGLE_PAY' && <Check className="h-3 w-3 text-white" />}
-                </div>
-              </button>
-              
-              {/* Credit Card */}
-              <button
-                className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-                  selectedPaymentMethod === 'CARD' ? 'border-[#FF6B35] bg-orange-50' : 'border-transparent hover:border-[#FF6B35]'
-                }`}
-                onClick={() => setSelectedPaymentMethod('CARD')}
-              >
-                <div className="w-12 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center text-white">
-                  💳
-                </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.creditCard')}</span>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  selectedPaymentMethod === 'CARD' ? 'bg-[#FF6B35]' : 'bg-gray-200'
-                }`}>
-                  {selectedPaymentMethod === 'CARD' && <Check className="h-3 w-3 text-white" />}
-                </div>
-              </button>
-              
-              {/* Cash */}
-              <button
-                className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-                  selectedPaymentMethod === 'CASH' ? 'border-[#FF6B35] bg-orange-50' : 'border-transparent hover:border-[#FF6B35]'
-                }`}
-                onClick={() => setSelectedPaymentMethod('CASH')}
-              >
-                <div className="w-12 h-8 bg-green-500 rounded-lg flex items-center justify-center text-white">
-                  💵
-                </div>
-                <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.cash')}</span>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  selectedPaymentMethod === 'CASH' ? 'bg-[#FF6B35]' : 'bg-gray-200'
-                }`}>
-                  {selectedPaymentMethod === 'CASH' && <Check className="h-3 w-3 text-white" />}
-                </div>
-              </button>
-            </div>
-            
-            {/* Pay Button */}
-            <Button
-              onClick={() => {
-                const tipPercent = selectedTipOption === 'round' ? 0 : parseInt(selectedTipOption) || 0
-                handleOrder(tipPercent, currentTipAmount, selectedPaymentMethod)
-              }}
-              className="w-full bg-gradient-to-r from-[#FF6B35] to-[#E85A24] hover:from-[#E85A24] hover:to-[#FF6B35] text-white rounded-2xl py-5 text-lg font-bold mt-6 shadow-lg flex items-center justify-center gap-2"
-            >
-              {selectedPaymentMethod === 'CASH' ? t('payment.placeOrder') : t('payment.payNow')}
-              • {currencySymbol}{(getCartTotal() + calculateServiceFee(getCartTotal()) + currentTipAmount).toFixed(2)}
-              <span>→</span>
-            </Button>
-          </div>
+          <IntegratedCheckout
+            restaurantId={restaurant.id}
+            tableId={table?.id}
+            tableNumber={tableNumber}
+            subtotal={getCartTotal()}
+            serviceFee={calculateServiceFee(getCartTotal())}
+            tipAmount={currentTipAmount}
+            currency={currency}
+            currencySymbol={currencySymbol}
+            cartItems={cart.map(item => ({
+              menuItemId: item.menuItem.id,
+              name: item.menuItem.name,
+              quantity: item.quantity,
+              unitPrice: item.variant?.price || item.menuItem.price,
+              variantId: item.variant?.id,
+              variantName: item.variant?.name,
+              extraIds: item.extras.map(e => e.id),
+              extraNames: item.extras.map(e => e.name),
+              extraPrices: item.extras.map(e => e.price),
+              notes: item.notes
+            }))}
+            selectedPaymentMethod={selectedPaymentMethod}
+            selectedTipOption={selectedTipOption}
+            onTipChange={(option, amount) => {
+              setSelectedTipOption(option)
+              setCurrentTipAmount(amount)
+            }}
+            onPaymentMethodChange={setSelectedPaymentMethod}
+            onSuccess={handlePaymentSuccess}
+            onCashOrder={handleCashOrder}
+            onError={(error) => toast.error(error)}
+            isProcessingCash={isOrdering}
+            primaryColor={primaryColor}
+            t={t}
+            formatPrice={formatPrice}
+          />
         </DialogContent>
       </Dialog>
-
-      {/* Stripe Checkout - Pass cart data, order created after payment */}
-      {showStripeCheckout && (
-        <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
-          <DialogContent className="max-w-md rounded-3xl">
-            <DialogTitle className="sr-only">Stripe Zahlung</DialogTitle>
-            <DialogDescription className="sr-only">Sichere Zahlung mit Stripe</DialogDescription>
-            <StripeCheckout
-              restaurantId={restaurant.id}
-              tableId={table?.id}
-              tableNumber={tableNumber}
-              amount={getCartTotal() + (getCartTotal() * 0.19) + currentTipAmount}
-              tip={currentTipAmount}
-              currency={currency}
-              cartData={{
-                items: cart.map(item => ({
-                  menuItemId: item.menuItem.id,
-                  name: item.menuItem.name,
-                  quantity: item.quantity,
-                  unitPrice: item.variant?.price || item.menuItem.price,
-                  variantId: item.variant?.id,
-                  variantName: item.variant?.name,
-                  extraIds: item.extras.map(e => e.id),
-                  extraNames: item.extras.map(e => e.name),
-                  extraPrices: item.extras.map(e => e.price),
-                  notes: item.notes
-                })),
-                subtotal: getCartTotal(),
-                tax: getCartTotal() * 0.19,
-                tip: currentTipAmount
-              }}
-              onSuccess={async (pendingPaymentId: string, orderNumber: string) => {
-                // Save to order history
-                const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
-                const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
-                storedOrderIds.push(pendingPaymentId)
-                localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
-
-                setOrderNumber(orderNumber)
-                setCart([])
-                setShowStripeCheckout(false)
-                setShowSuccessDialog(true)
-              }}
-              onError={(error) => {
-                toast.error(`Error: ${error}`)
-              }}
-              onCancel={() => {
-                setShowStripeCheckout(false)
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
 
       {/* Order Success Dialog */}
       <OrderSuccessDialog

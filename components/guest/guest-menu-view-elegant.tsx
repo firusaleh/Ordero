@@ -6,8 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
-import CheckoutWithTip from './checkout-with-tip'
-import StripeCheckout from './stripe-checkout-new'
+import IntegratedCheckout from './integrated-checkout'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -118,8 +117,9 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
   const [itemNotes, setItemNotes] = useState('')
   const [itemQuantity, setItemQuantity] = useState(1)
   const [showCheckout, setShowCheckout] = useState(false)
-  const [showStripeCheckout, setShowStripeCheckout] = useState(false)
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
+  const [selectedTipOption, setSelectedTipOption] = useState<string>('10')
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
 
@@ -194,21 +194,16 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
     }))
   }
 
-  const handleOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string) => {
-    setCurrentTipAmount(tipAmount)
-    
-    if (paymentMethod === 'CARD') {
-      setShowCheckout(false)
-      setShowStripeCheckout(true)
-      return
-    }
-    
+  // Handle cash order (called from IntegratedCheckout)
+  const handleCashOrder = async () => {
     setIsOrdering(true)
-    
+
     try {
+      const tipPercent = selectedTipOption === 'round' ? 0 : parseInt(selectedTipOption) || 0
+
       const orderData = {
         tableId: table?.id,
-        tableNumber: table?.number || tableNumber, // Include tableNumber
+        tableNumber: table?.number || tableNumber,
         items: cart.map(item => ({
           menuItemId: item.menuItem.id,
           quantity: item.quantity,
@@ -216,35 +211,33 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
           extraIds: item.extras.map(e => e.id),
           notes: item.notes
         })),
-        paymentMethod,
-        tipAmount,
+        paymentMethod: 'CASH',
+        tipAmount: currentTipAmount,
         tipPercent
       }
-      
+
       const response = await fetch(`/api/public/${restaurant.slug}/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         const orderId = data.data?.id
         const orderNum = data.data?.orderNumber || '#0000'
-        
-        // Save order ID to localStorage for history
+
         const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
         const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
         if (!storedOrderIds.includes(orderId)) {
           storedOrderIds.push(orderId)
           localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
         }
-        
-        // Dispatch event for order history component
-        window.dispatchEvent(new CustomEvent('orderCreated', { 
+
+        window.dispatchEvent(new CustomEvent('orderCreated', {
           detail: { orderNumber: orderNum, orderId }
         }))
-        
+
         setOrderNumber(orderNum)
         setCart([])
         setShowCheckout(false)
@@ -257,6 +250,19 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
     } finally {
       setIsOrdering(false)
     }
+  }
+
+  // Handle successful card payment (called from IntegratedCheckout)
+  const handlePaymentSuccess = (pendingPaymentId: string, orderNumber: string) => {
+    const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
+    const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+    storedOrderIds.push(pendingPaymentId)
+    localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
+
+    setOrderNumber(orderNumber)
+    setCart([])
+    setShowCheckout(false)
+    setShowSuccessDialog(true)
   }
 
   const currentCategory = restaurant.categories.find(c => c.id === selectedCategory)
@@ -721,73 +727,49 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         </SheetContent>
       </Sheet>
 
-      {/* Checkout Dialog */}
+      {/* Unified Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <CheckoutWithTip
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
+          <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode</DialogDescription>
+          <IntegratedCheckout
+            restaurantId={restaurant.id}
+            tableId={table?.id}
+            tableNumber={tableNumber}
             subtotal={getCartTotal()}
-            tax={getCartTotal() * 0.19}
-            onConfirm={handleOrder}
-            isProcessing={isOrdering}
+            serviceFee={getCartTotal() * 0.19}
+            tipAmount={currentTipAmount}
             currency={currency}
             currencySymbol={currencySymbol}
-            paymentProvider="Stripe"
+            cartItems={cart.map(item => ({
+              menuItemId: item.menuItem.id,
+              name: item.menuItem.name,
+              quantity: item.quantity,
+              unitPrice: item.variant?.price || item.menuItem.price,
+              variantId: item.variant?.id,
+              variantName: item.variant?.name,
+              extraIds: item.extras.map(e => e.id),
+              extraNames: item.extras.map(e => e.name),
+              extraPrices: item.extras.map(e => e.price),
+              notes: item.notes
+            }))}
+            selectedPaymentMethod={selectedPaymentMethod}
+            selectedTipOption={selectedTipOption}
+            onTipChange={(option, amount) => {
+              setSelectedTipOption(option)
+              setCurrentTipAmount(amount)
+            }}
+            onPaymentMethodChange={setSelectedPaymentMethod}
+            onSuccess={handlePaymentSuccess}
+            onCashOrder={handleCashOrder}
+            onError={(error) => toast.error(error)}
+            isProcessingCash={isOrdering}
+            primaryColor="#10B981"
+            t={t}
+            formatPrice={formatPrice}
           />
         </DialogContent>
       </Dialog>
-
-      {/* Stripe Checkout Dialog - Pass cart data, order created after payment */}
-      {showStripeCheckout && (
-        <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogTitle className="sr-only">Stripe Zahlung</DialogTitle>
-            <DialogDescription className="sr-only">Sichere Zahlung mit Stripe</DialogDescription>
-            <StripeCheckout
-              restaurantId={restaurant.id}
-              tableId={table?.id}
-              tableNumber={tableNumber}
-              amount={getCartTotal() + (getCartTotal() * 0.19) + currentTipAmount}
-              tip={currentTipAmount}
-              currency={currency}
-              cartData={{
-                items: cart.map(item => ({
-                  menuItemId: item.menuItem.id,
-                  name: item.menuItem.name,
-                  quantity: item.quantity,
-                  unitPrice: item.variant?.price || item.menuItem.price,
-                  variantId: item.variant?.id,
-                  variantName: item.variant?.name,
-                  extraIds: item.extras.map(e => e.id),
-                  extraNames: item.extras.map(e => e.name),
-                  extraPrices: item.extras.map(e => e.price),
-                  notes: item.notes
-                })),
-                subtotal: getCartTotal(),
-                tax: getCartTotal() * 0.19,
-                tip: currentTipAmount
-              }}
-              onSuccess={async (pendingPaymentId: string, orderNumber: string) => {
-                // Save to order history
-                const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
-                const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
-                storedOrderIds.push(pendingPaymentId)
-                localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
-
-                setOrderNumber(orderNumber)
-                setCart([])
-                setShowStripeCheckout(false)
-                setShowSuccessDialog(true)
-              }}
-              onError={(error) => {
-                toast.error(`Fehler: ${error}`)
-              }}
-              onCancel={() => {
-                setShowStripeCheckout(false)
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
 
       {/* Order Success Dialog */}
       <OrderSuccessDialog

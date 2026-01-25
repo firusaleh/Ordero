@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import CheckoutWithTip from './checkout-with-tip'
-import StripeCheckout from './stripe-checkout-new'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import IntegratedCheckout from './integrated-checkout'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -123,8 +122,8 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
   const [itemNotes, setItemNotes] = useState('')
   const [itemQuantity, setItemQuantity] = useState(1)
   const [showCheckout, setShowCheckout] = useState(false)
-  const [showStripeCheckout, setShowStripeCheckout] = useState(false)
-  const [currentPaymentMethod, setCurrentPaymentMethod] = useState<string>('CASH')
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
+  const [selectedTipOption, setSelectedTipOption] = useState<string>('10')
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
 
   // Debug logging
@@ -265,34 +264,19 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
     return cart.reduce((sum, item) => sum + item.quantity, 0)
   }
 
-  const handleOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string) => {
-    if (cart.length === 0) return
-
-    // Speichere die aktuellen Zahlungsdetails
-    setCurrentPaymentMethod(paymentMethod)
-    setCurrentTipAmount(tipAmount)
-
-    // Wenn Kartenzahlung gewählt wurde, öffne Stripe Checkout
-    if (paymentMethod === 'CARD') {
-      setShowCheckout(false)
-      setShowStripeCheckout(true)
-      return
-    }
-
-    // Ansonsten normale Barzahlung verarbeiten
-    await processOrder(tipPercent, tipAmount, paymentMethod)
-  }
-
-  const processOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string, paymentIntentId?: string) => {
+  // Handle cash order (called from IntegratedCheckout)
+  const handleCashOrder = async () => {
     if (cart.length === 0) return
 
     setIsOrdering(true)
-    
+
     try {
+      const tipPercent = selectedTipOption === 'round' ? 0 : parseInt(selectedTipOption) || 0
+
       const orderData = {
         restaurantId: restaurant.id,
         tableId: table?.id,
-        tableNumber: table?.number || tableNumber, // Include tableNumber
+        tableNumber: table?.number || tableNumber,
         type: 'DINE_IN',
         items: cart.map(item => ({
           menuItemId: item.menuItem.id,
@@ -306,9 +290,8 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
           notes: item.notes
         })),
         tipPercent,
-        tipAmount,
-        paymentMethod,
-        paymentIntentId // Für Kartenzahlungen
+        tipAmount: currentTipAmount,
+        paymentMethod: 'CASH'
       }
 
       const response = await fetch(`/api/public/${restaurant.slug}/order`, {
@@ -322,13 +305,12 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
       }
 
       const result = await response.json()
-      
+
       toast.success(`${t('guest.orderNumber')} #${result.data.orderNumber} - ${t('guest.orderConfirmed')}`)
       setCart([])
       setIsCartOpen(false)
       setShowCheckout(false)
-      setShowStripeCheckout(false)
-      
+
     } catch (error) {
       toast.error(`${t('checkout.orderFailed')}. ${t('checkout.tryAgain')}.`)
     } finally {
@@ -336,8 +318,8 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
     }
   }
 
-  const handleStripeSuccess = async (pendingPaymentId: string, orderNumber: string) => {
-    // Save to order history
+  // Handle successful card payment (called from IntegratedCheckout)
+  const handlePaymentSuccess = (pendingPaymentId: string, orderNumber: string) => {
     const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
     const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
     storedOrderIds.push(pendingPaymentId)
@@ -346,20 +328,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
     toast.success(t('guest.orderConfirmed'))
     setCart([])
     setIsCartOpen(false)
-    setShowStripeCheckout(false)
-  }
-
-  const handleStripeError = (error: string) => {
-    toast.error(error)
-    // Zurück zum normalen Checkout
-    setShowStripeCheckout(false)
-    setShowCheckout(true)
-  }
-
-  const handleStripeCancel = () => {
-    // Zurück zum normalen Checkout
-    setShowStripeCheckout(false)
-    setShowCheckout(true)
+    setShowCheckout(false)
   }
 
   const calculateTax = () => {
@@ -867,81 +836,50 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
         </DialogContent>
       </Dialog>
 
-      {/* Checkout Dialog with Tip */}
+      {/* Unified Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{t('checkout.title')}</DialogTitle>
-          </DialogHeader>
-          
+        <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
+          <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode</DialogDescription>
           {cart.length > 0 && (() => {
             const { subtotal, tax } = calculateTax()
-            const isMiddleEast = ['JO', 'SA', 'AE', 'KW', 'BH', 'QA', 'OM', 'EG'].includes(restaurant.country || '')
-            const paymentProvider = isMiddleEast ? 'PayTabs' : 'Stripe'
-            
-            return (
-              <CheckoutWithTip
-                subtotal={subtotal}
-                tax={tax}
-                onConfirm={handleOrder}
-                isProcessing={isOrdering}
-                currency={currency}
-                currencySymbol={currencySymbol}
-                paymentProvider={paymentProvider}
-              />
-            )
-          })()}
-        </DialogContent>
-      </Dialog>
-
-      {/* Stripe Checkout Dialog */}
-      <Dialog open={showStripeCheckout} onOpenChange={(open) => {
-        if (!open && !isOrdering) {
-          handleStripeCancel()
-        }
-      }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              💳 {t('payment.cardPayment') || 'Kartenzahlung'}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {cart.length > 0 && (() => {
-            const { subtotal, tax } = calculateTax()
-            const baseAmount = subtotal + tax + currentTipAmount
-
-            // Verwende die Währung aus den Restaurant-Einstellungen oder fallback auf EUR
-            const currency = restaurant.settings?.currency || 'EUR'
 
             return (
-              <StripeCheckout
-                amount={baseAmount}
-                currency={currency}
+              <IntegratedCheckout
                 restaurantId={restaurant.id}
                 tableId={table?.id}
                 tableNumber={tableNumber}
-                tip={currentTipAmount}
-                cartData={{
-                  items: cart.map(item => ({
-                    menuItemId: item.menuItem.id,
-                    name: item.menuItem.name,
-                    quantity: item.quantity,
-                    unitPrice: item.variant?.price || item.menuItem.price,
-                    variantId: item.variant?.id,
-                    variantName: item.variant?.name,
-                    extraIds: item.extras.map(e => e.id),
-                    extraNames: item.extras.map(e => e.name),
-                    extraPrices: item.extras.map(e => e.price),
-                    notes: item.notes
-                  })),
-                  subtotal: getCartTotal(),
-                  tax: tax,
-                  tip: currentTipAmount
+                subtotal={subtotal}
+                serviceFee={tax}
+                tipAmount={currentTipAmount}
+                currency={currency}
+                currencySymbol={currencySymbol}
+                cartItems={cart.map(item => ({
+                  menuItemId: item.menuItem.id,
+                  name: item.menuItem.name,
+                  quantity: item.quantity,
+                  unitPrice: item.variant?.price || item.menuItem.price,
+                  variantId: item.variant?.id,
+                  variantName: item.variant?.name,
+                  extraIds: item.extras.map(e => e.id),
+                  extraNames: item.extras.map(e => e.name),
+                  extraPrices: item.extras.map(e => e.price),
+                  notes: item.notes
+                }))}
+                selectedPaymentMethod={selectedPaymentMethod}
+                selectedTipOption={selectedTipOption}
+                onTipChange={(option, amount) => {
+                  setSelectedTipOption(option)
+                  setCurrentTipAmount(amount)
                 }}
-                onSuccess={handleStripeSuccess}
-                onError={handleStripeError}
-                onCancel={handleStripeCancel}
+                onPaymentMethodChange={setSelectedPaymentMethod}
+                onSuccess={handlePaymentSuccess}
+                onCashOrder={handleCashOrder}
+                onError={(error) => toast.error(error)}
+                isProcessingCash={isOrdering}
+                primaryColor={restaurant.primaryColor || '#FF6B35'}
+                t={t}
+                formatPrice={formatPrice}
               />
             )
           })()}
