@@ -114,6 +114,25 @@ export const translations = {
         resetError: "Fehler beim Zurücksetzen des Passworts",
         successToast: "Passwort erfolgreich zurückgesetzt!"
       }
+    },
+    dashboard: {
+      title: "Dashboard",
+      welcome: "Willkommen zurück",
+      order: "Bestellung",
+      table: "Tisch",
+      takeaway: "Zum Mitnehmen", 
+      delivery: "Lieferung",
+      recentOrders: "Letzte Bestellungen",
+      viewAll: "Alle anzeigen",
+      noOrders: "Noch keine Bestellungen heute",
+      orderStatus: {
+        pending: "Ausstehend",
+        confirmed: "Bestätigt",
+        preparing: "In Vorbereitung",
+        ready: "Fertig",
+        delivered: "Ausgeliefert",
+        cancelled: "Storniert"
+      }
     }
   },
   en: {
@@ -231,6 +250,25 @@ export const translations = {
         resetError: "Error resetting password",
         successToast: "Password successfully reset!"
       }
+    },
+    dashboard: {
+      title: "Dashboard",
+      welcome: "Welcome back",
+      order: "Order",
+      table: "Table",
+      takeaway: "Takeaway",
+      delivery: "Delivery",
+      recentOrders: "Recent Orders",
+      viewAll: "View all",
+      noOrders: "No orders today yet",
+      orderStatus: {
+        pending: "Pending",
+        confirmed: "Confirmed",
+        preparing: "Preparing",
+        ready: "Ready",
+        delivered: "Delivered",
+        cancelled: "Cancelled"
+      }
     }
   },
   ar: {
@@ -347,6 +385,25 @@ export const translations = {
       errors: {
         resetError: "خطأ في إعادة تعيين كلمة المرور",
         successToast: "تم إعادة تعيين كلمة المرور بنجاح!"
+      }
+    },
+    dashboard: {
+      title: "لوحة التحكم",
+      welcome: "مرحباً بعودتك",
+      order: "طلب",
+      table: "طاولة",
+      takeaway: "للاصطحاب",
+      delivery: "توصيل",
+      recentOrders: "الطلبات الأخيرة",
+      viewAll: "عرض الكل",
+      noOrders: "لا توجد طلبات اليوم بعد",
+      orderStatus: {
+        pending: "قيد الانتظار",
+        confirmed: "مؤكد",
+        preparing: "قيد التحضير",
+        ready: "جاهز",
+        delivered: "تم التسليم",
+        cancelled: "ملغى"
       }
     }
   }
