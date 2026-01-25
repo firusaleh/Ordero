@@ -60,9 +60,38 @@ export async function POST(req: NextRequest) {
     }
 
     let accountId = restaurant.stripeAccountId;
+    let accountExists = false;
 
-    // Erstelle ein neues Stripe Connect Konto wenn noch keines existiert
-    if (!accountId) {
+    // Prüfe ob der gespeicherte Account noch existiert
+    if (accountId) {
+      try {
+        await stripe.accounts.retrieve(accountId);
+        accountExists = true;
+      } catch (error: any) {
+        if (error.code === 'resource_missing' || error.statusCode === 404) {
+          console.log('Stripe Account existiert nicht mehr, erstelle neuen:', accountId);
+          accountExists = false;
+          // Lösche die ungültige Account ID
+          await prisma.restaurant.update({
+            where: { id: restaurantId },
+            data: { 
+              stripeAccountId: null,
+              stripeAccountStatus: null,
+              stripeChargesEnabled: false,
+              stripePayoutsEnabled: false,
+              stripeDetailsSubmitted: false,
+              stripeOnboardingCompleted: false
+            }
+          });
+          accountId = null;
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    // Erstelle ein neues Stripe Connect Konto wenn keines existiert oder das alte gelöscht wurde
+    if (!accountId || !accountExists) {
       const accountEmail = restaurant.email || session.user.email;
       
       // Map country codes to Stripe-supported countries
@@ -91,7 +120,7 @@ export async function POST(req: NextRequest) {
 
       accountId = account.id;
 
-      // Speichere die Stripe Account ID
+      // Speichere die neue Stripe Account ID
       await prisma.restaurant.update({
         where: { id: restaurantId },
         data: { 
@@ -185,7 +214,32 @@ export async function GET(req: NextRequest) {
     }
 
     // Hole aktuelle Account-Informationen von Stripe
-    const account = await stripe.accounts.retrieve(restaurant.stripeAccountId);
+    let account;
+    try {
+      account = await stripe.accounts.retrieve(restaurant.stripeAccountId);
+    } catch (error: any) {
+      if (error.code === 'resource_missing' || error.statusCode === 404) {
+        // Account existiert nicht mehr, lösche die ungültige ID
+        await prisma.restaurant.update({
+          where: { id: restaurantId },
+          data: { 
+            stripeAccountId: null,
+            stripeAccountStatus: null,
+            stripeChargesEnabled: false,
+            stripePayoutsEnabled: false,
+            stripeDetailsSubmitted: false,
+            stripeOnboardingCompleted: false
+          }
+        });
+        return NextResponse.json({ 
+          connected: false,
+          onboardingCompleted: false,
+          accountDeleted: true 
+        });
+      } else {
+        throw error;
+      }
+    }
 
     // Update lokale Datenbank mit aktuellen Stripe-Daten
     await prisma.restaurant.update({
