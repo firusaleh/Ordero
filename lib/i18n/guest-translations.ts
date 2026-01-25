@@ -99,9 +99,12 @@ export const guestTranslations = {
       payNow: 'Jetzt bezahlen',
       placeOrder: 'Bestellung aufgeben',
       confirmPayment: 'ادفع الآن',
-      splitBill: 'Rechnung teilen'
+      splitBill: 'Rechnung teilen',
+      expressCheckout: 'Schnellzahlung',
+      expressNotAvailable: 'Apple Pay / Google Pay wird geladen...',
+      or: 'oder'
     },
-    
+
     // Toast messages
     toast: {
       addedToCart: 'zum Warenkorb hinzugefügt',
@@ -451,7 +454,10 @@ export const guestTranslations = {
       payNow: 'Pay Now',
       placeOrder: 'Place Order',
       confirmPayment: 'Pay Now',
-      splitBill: 'Split the bill'
+      splitBill: 'Split the bill',
+      expressCheckout: 'Express Checkout',
+      expressNotAvailable: 'Loading Apple Pay / Google Pay...',
+      or: 'or'
     },
 
     // Toast messages
@@ -803,7 +809,10 @@ export const guestTranslations = {
       payNow: 'ادفع الآن',
       placeOrder: 'تأكيد الطلب',
       confirmPayment: 'ادفع الآن',
-      splitBill: 'تقسيم الفاتورة'
+      splitBill: 'تقسيم الفاتورة',
+      expressCheckout: 'الدفع السريع',
+      expressNotAvailable: 'جاري تحميل Apple Pay / Google Pay...',
+      or: 'أو'
     },
 
     // Toast messages

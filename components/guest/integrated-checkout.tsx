@@ -5,6 +5,7 @@ import { loadStripe } from '@stripe/stripe-js'
 import {
   Elements,
   PaymentElement,
+  ExpressCheckoutElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js'
@@ -86,6 +87,7 @@ function CheckoutFormContent({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [showCustomTip, setShowCustomTip] = useState(false)
   const [customTipAmount, setCustomTipAmount] = useState('')
+  const [expressCheckoutReady, setExpressCheckoutReady] = useState(false)
 
   const total = subtotal + serviceFee + tipAmount
 
@@ -384,7 +386,71 @@ function CheckoutFormContent({
         </p>
 
         <div className="space-y-3">
-          {/* Card Payment Option */}
+          {/* Express Checkout (Apple Pay / Google Pay) - Native Stripe buttons */}
+          <div className="bg-white rounded-2xl p-4 border">
+            <p className="text-xs text-gray-500 mb-3">{t('payment.expressCheckout') || 'Schnellzahlung'}</p>
+            <ExpressCheckoutElement
+              onReady={({ availablePaymentMethods }) => {
+                setExpressCheckoutReady(
+                  !!(availablePaymentMethods?.applePay || availablePaymentMethods?.googlePay)
+                )
+              }}
+              onClick={({ resolve }) => {
+                resolve({})
+              }}
+              onConfirm={async () => {
+                setIsProcessing(true)
+                setErrorMessage(null)
+                try {
+                  // Poll for order completion - payment is handled by Stripe
+                  await pollForOrderCompletion()
+                } catch (err) {
+                  console.error('Express checkout error:', err)
+                  setErrorMessage('Zahlung fehlgeschlagen')
+                  onError('Zahlung fehlgeschlagen')
+                } finally {
+                  setIsProcessing(false)
+                }
+              }}
+              onCancel={() => {
+                // User cancelled - do nothing
+              }}
+              options={{
+                buttonHeight: 50,
+                buttonTheme: {
+                  applePay: 'black',
+                  googlePay: 'black'
+                },
+                buttonType: {
+                  applePay: 'buy',
+                  googlePay: 'buy'
+                },
+                layout: {
+                  maxColumns: 2,
+                  maxRows: 1
+                },
+                paymentMethods: {
+                  applePay: 'always',
+                  googlePay: 'always',
+                  link: 'never'
+                }
+              }}
+            />
+            {!expressCheckoutReady && (
+              <p className="text-xs text-gray-400 mt-2 text-center">
+                {t('payment.expressNotAvailable') || 'Apple Pay / Google Pay wird geladen...'}
+              </p>
+            )}
+          </div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 py-2">
+            <div className="flex-1 border-t border-gray-300"></div>
+            <span className="text-xs text-gray-500">{t('payment.or') || 'oder'}</span>
+            <div className="flex-1 border-t border-gray-300"></div>
+          </div>
+
+          {/* Credit Card Option */}
           <button
             className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
               selectedPaymentMethod === 'CARD' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
@@ -395,10 +461,7 @@ function CheckoutFormContent({
             <div className="w-12 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center text-white">
               💳
             </div>
-            <div className="flex-1 text-left">
-              <span className="font-semibold text-gray-900">{t('payment.cardPayment') || 'Kartenzahlung'}</span>
-              <p className="text-xs text-gray-500">{t('payment.cardPaymentDesc') || 'Karte, Apple Pay, Google Pay'}</p>
-            </div>
+            <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.creditCard') || 'Kredit-/Debitkarte'}</span>
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center"
               style={{ backgroundColor: selectedPaymentMethod === 'CARD' ? primaryColor : '#e5e7eb' }}
@@ -407,20 +470,21 @@ function CheckoutFormContent({
             </div>
           </button>
 
-          {/* Payment Element - shown when Card is selected */}
+          {/* Card Input - shown inline when Card is selected */}
           {selectedPaymentMethod === 'CARD' && (
-            <div className="mt-2 p-4 bg-white rounded-xl border">
+            <div className="p-4 bg-white rounded-xl border">
               <PaymentElement
                 options={{
                   layout: 'tabs',
+                  paymentMethodOrder: ['card'],
                   fields: {
                     billingDetails: {
                       address: { country: 'never' }
                     }
                   },
                   wallets: {
-                    applePay: 'auto',
-                    googlePay: 'auto'
+                    applePay: 'never',
+                    googlePay: 'never'
                   }
                 }}
               />
