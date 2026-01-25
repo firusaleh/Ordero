@@ -181,7 +181,7 @@ function CheckoutFormContent({
   const handlePayClick = () => {
     if (selectedPaymentMethod === 'CASH') {
       onCashOrder()
-    } else if (selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') {
+    } else if (selectedPaymentMethod === 'CARD') {
       handleCardPayment()
     }
   }
@@ -384,47 +384,7 @@ function CheckoutFormContent({
         </p>
 
         <div className="space-y-3">
-          {/* Apple Pay - always show */}
-          <button
-            className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-              selectedPaymentMethod === 'APPLE_PAY' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
-            }`}
-            style={selectedPaymentMethod === 'APPLE_PAY' ? { borderColor: primaryColor } : {}}
-            onClick={() => onPaymentMethodChange('APPLE_PAY')}
-          >
-            <div className="w-12 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xs">
-              Pay
-            </div>
-            <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.applePay')}</span>
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: selectedPaymentMethod === 'APPLE_PAY' ? primaryColor : '#e5e7eb' }}
-            >
-              {selectedPaymentMethod === 'APPLE_PAY' && <Check className="h-3 w-3 text-white" />}
-            </div>
-          </button>
-
-          {/* Google Pay - always show */}
-          <button
-            className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-              selectedPaymentMethod === 'GOOGLE_PAY' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
-            }`}
-            style={selectedPaymentMethod === 'GOOGLE_PAY' ? { borderColor: primaryColor } : {}}
-            onClick={() => onPaymentMethodChange('GOOGLE_PAY')}
-          >
-            <div className="w-12 h-8 bg-white border rounded-lg flex items-center justify-center font-bold text-xs">
-              G Pay
-            </div>
-            <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.googlePay')}</span>
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: selectedPaymentMethod === 'GOOGLE_PAY' ? primaryColor : '#e5e7eb' }}
-            >
-              {selectedPaymentMethod === 'GOOGLE_PAY' && <Check className="h-3 w-3 text-white" />}
-            </div>
-          </button>
-
-          {/* Credit Card */}
+          {/* Card Payment Option */}
           <button
             className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
               selectedPaymentMethod === 'CARD' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
@@ -435,7 +395,10 @@ function CheckoutFormContent({
             <div className="w-12 h-8 bg-gradient-to-r from-purple-500 to-purple-700 rounded-lg flex items-center justify-center text-white">
               💳
             </div>
-            <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.creditCard')}</span>
+            <div className="flex-1 text-left">
+              <span className="font-semibold text-gray-900">{t('payment.cardPayment') || 'Kartenzahlung'}</span>
+              <p className="text-xs text-gray-500">{t('payment.cardPaymentDesc') || 'Karte, Apple Pay, Google Pay'}</p>
+            </div>
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center"
               style={{ backgroundColor: selectedPaymentMethod === 'CARD' ? primaryColor : '#e5e7eb' }}
@@ -444,25 +407,20 @@ function CheckoutFormContent({
             </div>
           </button>
 
-          {/* Payment Element - shown for Card, Apple Pay, and Google Pay */}
-          {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
+          {/* Payment Element - shown when Card is selected */}
+          {selectedPaymentMethod === 'CARD' && (
             <div className="mt-2 p-4 bg-white rounded-xl border">
               <PaymentElement
                 options={{
                   layout: 'tabs',
-                  paymentMethodOrder: selectedPaymentMethod === 'CARD'
-                    ? ['card']
-                    : selectedPaymentMethod === 'APPLE_PAY'
-                      ? ['apple_pay', 'card']
-                      : ['google_pay', 'card'],
                   fields: {
                     billingDetails: {
                       address: { country: 'never' }
                     }
                   },
                   wallets: {
-                    applePay: selectedPaymentMethod === 'APPLE_PAY' ? 'auto' : 'never',
-                    googlePay: selectedPaymentMethod === 'GOOGLE_PAY' ? 'auto' : 'never'
+                    applePay: 'auto',
+                    googlePay: 'auto'
                   }
                 }}
               />
@@ -512,11 +470,11 @@ function CheckoutFormContent({
           </Alert>
         )}
 
-        {/* Pay Button - shown for Card, Cash, Apple Pay, and Google Pay */}
-        {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'CASH' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
+        {/* Pay Button - shown for Card and Cash */}
+        {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'CASH') && (
           <Button
             onClick={handlePayClick}
-            disabled={isProcessing || isProcessingCash || ((selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && !stripe)}
+            disabled={isProcessing || isProcessingCash || (selectedPaymentMethod === 'CARD' && !stripe)}
             className="w-full text-white rounded-2xl py-5 text-lg font-bold mt-6 shadow-lg flex items-center justify-center gap-2"
             style={{
               background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}dd)`
