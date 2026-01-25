@@ -617,7 +617,6 @@ export const translations = {
       editFee: 'تعديل الرسوم',
       noCustomFees: 'لا توجد رسوم مخصصة',
       noCustomFeesDesc: 'قم بإنشاء رسوم مخصصة لطلباتك'
-    }
     },
     // Guest Pages
     guest: {
