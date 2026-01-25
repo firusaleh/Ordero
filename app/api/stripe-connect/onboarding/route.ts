@@ -68,9 +68,16 @@ export async function POST(req: NextRequest) {
         await stripe.accounts.retrieve(accountId);
         accountExists = true;
       } catch (error: any) {
-        if (error.code === 'resource_missing' || error.statusCode === 404) {
-          console.log('Stripe Account existiert nicht mehr, erstelle neuen:', accountId);
+        // Account existiert nicht oder kein Zugriff (z.B. Test-Account mit Live-Key)
+        if (error.code === 'resource_missing' || 
+            error.statusCode === 404 ||
+            error.code === 'account_invalid' ||
+            error.raw?.message?.includes('does not have access to account') ||
+            error.raw?.message?.includes('does not exist')) {
+          
+          console.log('Stripe Account nicht zugreifbar, erstelle neuen. Fehler:', error.message);
           accountExists = false;
+          
           // Lösche die ungültige Account ID
           await prisma.restaurant.update({
             where: { id: restaurantId },
@@ -85,6 +92,8 @@ export async function POST(req: NextRequest) {
           });
           accountId = null;
         } else {
+          // Unerwarteter Fehler
+          console.error('Unerwarteter Fehler beim Abrufen des Stripe Accounts:', error);
           throw error;
         }
       }
@@ -218,7 +227,15 @@ export async function GET(req: NextRequest) {
     try {
       account = await stripe.accounts.retrieve(restaurant.stripeAccountId);
     } catch (error: any) {
-      if (error.code === 'resource_missing' || error.statusCode === 404) {
+      // Account existiert nicht oder kein Zugriff (z.B. Test-Account mit Live-Key)
+      if (error.code === 'resource_missing' || 
+          error.statusCode === 404 ||
+          error.code === 'account_invalid' ||
+          error.raw?.message?.includes('does not have access to account') ||
+          error.raw?.message?.includes('does not exist')) {
+        
+        console.log('Stripe Account nicht zugreifbar beim Status-Check:', error.message);
+        
         // Account existiert nicht mehr, lösche die ungültige ID
         await prisma.restaurant.update({
           where: { id: restaurantId },
@@ -237,6 +254,7 @@ export async function GET(req: NextRequest) {
           accountDeleted: true 
         });
       } else {
+        console.error('Unerwarteter Fehler beim Status-Check:', error);
         throw error;
       }
     }
