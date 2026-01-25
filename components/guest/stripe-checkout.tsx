@@ -120,17 +120,13 @@ function CheckoutForm({
       if (paymentIntent?.status === 'succeeded') {
         setPaymentStatus('succeeded')
         
-        // Informiere Backend über erfolgreiche Zahlung
+        // Informiere Backend über erfolgreiche Zahlung (Stripe Connect Route)
         try {
-          const confirmResponse = await fetch('/api/payment/confirm', {
-            method: 'POST',
+          const confirmResponse = await fetch('/api/stripe-connect/create-payment', {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              paymentIntentId: paymentIntent.id,
-              orderId,
-              restaurantId,
-              currency,
-              country: 'DE' // TODO: Aus Restaurant-Einstellungen holen
+              paymentIntentId: paymentIntent.id
             })
           })
 
@@ -321,27 +317,27 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        const response = await fetch('/api/payment/create-intent', {
+        // WICHTIG: Verwende stripe-connect Route für korrekte Geldverteilung!
+        const response = await fetch('/api/stripe-connect/create-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             orderId: props.orderId,
-            amount: props.amount,
-            currency: props.currency,
-            restaurantId: props.restaurantId,
-            tip: props.tip,
-            country: 'DE', // TODO: Aus Restaurant-Einstellungen holen
-            metadata: {
-              source: 'guest-checkout',
-              timestamp: new Date().toISOString()
-            }
+            amount: Math.round((props.amount + props.tip) * 100), // Konvertiere zu Cents
+            currency: props.currency.toLowerCase(),
+            restaurantId: props.restaurantId
           })
         })
 
         const result = await response.json()
         
-        if (result.success && result.clientSecret) {
+        if (result.clientSecret) {
           setClientSecret(result.clientSecret)
+          console.log('Payment Intent created with platform fee:', {
+            total: result.amount,
+            platformFee: result.platformFee,
+            restaurantAmount: result.restaurantAmount
+          })
         } else {
           throw new Error(result.error || 'Zahlungs-Intent konnte nicht erstellt werden')
         }
