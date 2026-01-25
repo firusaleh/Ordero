@@ -85,8 +85,18 @@ function CheckoutFormContent({
     applePay: false,
     googlePay: false
   })
+  const [showCustomTip, setShowCustomTip] = useState(false)
+  const [customTipAmount, setCustomTipAmount] = useState('')
 
   const total = subtotal + serviceFee + tipAmount
+
+  // Calculate round up amount
+  const calculateRoundUp = () => {
+    const nextFive = Math.ceil(subtotal / 5) * 5
+    const nextTen = Math.ceil(subtotal / 10) * 10
+    const roundedUp = (nextFive - subtotal) < (nextTen - subtotal) && (nextFive - subtotal) > 0.5 ? nextFive : nextTen
+    return roundedUp - subtotal
+  }
 
   // Express Checkout handlers
   const onExpressCheckoutReady = useCallback(({ availablePaymentMethods }: any) => {
@@ -225,14 +235,6 @@ function CheckoutFormContent({
     // Apple Pay and Google Pay are handled by ExpressCheckoutElement
   }
 
-  const tipOptions = [
-    { value: '0', percent: 0, emoji: '😐' },
-    { value: '5', percent: 5, emoji: '🙂' },
-    { value: '10', percent: 10, emoji: '😊' },
-    { value: '15', percent: 15, emoji: '😃' },
-    { value: '20', percent: 20, emoji: '😍' },
-  ]
-
   return (
     <div className="bg-white">
       {/* Hidden Express Checkout for detection */}
@@ -257,95 +259,228 @@ function CheckoutFormContent({
               <span className="text-gray-900">{formatPrice(serviceFee)}</span>
             </div>
           )}
-          {tipAmount > 0 && (
-            <div className="flex justify-between items-center text-sm text-green-600">
-              <span>{t('checkout.tip') || 'Trinkgeld'}</span>
-              <span>{formatPrice(tipAmount)}</span>
-            </div>
-          )}
           <div className="flex justify-between items-center font-semibold pt-2 border-t">
-            <span>{t('payment.total') || 'Gesamt'}</span>
-            <span className="text-xl" style={{ color: primaryColor }}>{formatPrice(total)}</span>
+            <span>{t('payment.totalBeforeTip') || 'Zwischensumme'}</span>
+            <span className="text-xl" style={{ color: primaryColor }}>{formatPrice(subtotal + serviceFee)}</span>
           </div>
         </div>
 
-        {/* Tip Options */}
+        {/* Tip Options - 3 column grid like original Oriido */}
         <div className="mt-6">
           <p className="text-sm font-semibold text-gray-700 mb-3">{t('payment.tipQuestion')}</p>
-          <div className="grid grid-cols-5 gap-2">
-            {tipOptions.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => onTipChange(option.value, subtotal * (option.percent / 100))}
-                className={`py-3 px-2 rounded-xl transition-all flex flex-col items-center gap-1 ${
-                  selectedTipOption === option.value
-                    ? 'text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-                style={selectedTipOption === option.value ? { backgroundColor: primaryColor } : {}}
-              >
-                <span className="text-xl">{option.emoji}</span>
-                <span className="text-xs font-medium">
-                  {option.percent === 0 ? (t('payment.noTip') || 'Nein') : `${option.percent}%`}
-                </span>
-                {option.percent > 0 && (
-                  <span className="text-xs opacity-75">
-                    {currencySymbol}{(subtotal * option.percent / 100).toFixed(2)}
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            {/* No Tip */}
+            <button
+              onClick={() => {
+                onTipChange('0', 0)
+                setShowCustomTip(false)
+              }}
+              className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                selectedTipOption === '0'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={selectedTipOption === '0' ? { backgroundColor: primaryColor } : {}}
+            >
+              <span className="text-xl">😐</span>
+              <span className="text-xs font-medium">{t('payment.noTip') || 'Nein'}</span>
+            </button>
+
+            {/* 5% */}
+            <button
+              onClick={() => {
+                onTipChange('5', subtotal * 0.05)
+                setShowCustomTip(false)
+              }}
+              className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                selectedTipOption === '5'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={selectedTipOption === '5' ? { backgroundColor: primaryColor } : {}}
+            >
+              <span className="text-xl">🙂</span>
+              <span className="text-xs font-medium">5%</span>
+              <span className="text-xs opacity-75">{currencySymbol}{(subtotal * 0.05).toFixed(2)}</span>
+            </button>
+
+            {/* 10% */}
+            <button
+              onClick={() => {
+                onTipChange('10', subtotal * 0.10)
+                setShowCustomTip(false)
+              }}
+              className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                selectedTipOption === '10'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={selectedTipOption === '10' ? { backgroundColor: primaryColor } : {}}
+            >
+              <span className="text-xl">😊</span>
+              <span className="text-xs font-medium">10%</span>
+              <span className="text-xs opacity-75">{currencySymbol}{(subtotal * 0.10).toFixed(2)}</span>
+            </button>
+
+            {/* 15% */}
+            <button
+              onClick={() => {
+                onTipChange('15', subtotal * 0.15)
+                setShowCustomTip(false)
+              }}
+              className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                selectedTipOption === '15'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={selectedTipOption === '15' ? { backgroundColor: primaryColor } : {}}
+            >
+              <span className="text-xl">😃</span>
+              <span className="text-xs font-medium">15%</span>
+              <span className="text-xs opacity-75">{currencySymbol}{(subtotal * 0.15).toFixed(2)}</span>
+            </button>
+
+            {/* 20% */}
+            <button
+              onClick={() => {
+                onTipChange('20', subtotal * 0.20)
+                setShowCustomTip(false)
+              }}
+              className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                selectedTipOption === '20'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={selectedTipOption === '20' ? { backgroundColor: primaryColor } : {}}
+            >
+              <span className="text-xl">😍</span>
+              <span className="text-xs font-medium">20%</span>
+              <span className="text-xs opacity-75">{currencySymbol}{(subtotal * 0.20).toFixed(2)}</span>
+            </button>
+
+            {/* Round Up */}
+            <button
+              onClick={() => {
+                onTipChange('round', calculateRoundUp())
+                setShowCustomTip(false)
+              }}
+              className={`py-3 px-3 rounded-xl transition-all flex flex-col items-center gap-1 ${
+                selectedTipOption === 'round'
+                  ? 'text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+              style={selectedTipOption === 'round' ? { backgroundColor: primaryColor } : {}}
+            >
+              <span className="text-xl">💝</span>
+              <span className="text-xs font-medium">{t('payment.roundUp') || 'Aufrunden'}</span>
+              <span className="text-xs opacity-75">+{currencySymbol}{calculateRoundUp().toFixed(2)}</span>
+            </button>
           </div>
+
+          {/* Custom Amount Button */}
+          <button
+            onClick={() => {
+              setShowCustomTip(!showCustomTip)
+              onTipChange('custom', parseFloat(customTipAmount) || 0)
+            }}
+            className={`w-full py-2 px-3 rounded-xl text-sm font-medium transition-all ${
+              selectedTipOption === 'custom'
+                ? 'text-white'
+                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+            }`}
+            style={selectedTipOption === 'custom' ? { backgroundColor: primaryColor } : {}}
+          >
+            {t('payment.customAmount') || 'Eigener Betrag'}
+          </button>
+
+          {/* Custom Amount Input */}
+          {showCustomTip && (
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-gray-600">{currencySymbol}</span>
+              <input
+                type="number"
+                value={customTipAmount}
+                onChange={(e) => {
+                  const value = e.target.value
+                  setCustomTipAmount(value)
+                  const amount = parseFloat(value) || 0
+                  onTipChange('custom', amount)
+                }}
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent"
+                style={{ '--tw-ring-color': primaryColor } as any}
+                placeholder="0.00"
+                min="0"
+                step="0.50"
+              />
+            </div>
+          )}
+
+          {/* Tip Amount Display */}
+          {tipAmount > 0 && (
+            <div className="mt-3 p-3 bg-orange-50 rounded-xl">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">{t('payment.tip') || 'Trinkgeld'}</span>
+                <span className="font-semibold" style={{ color: primaryColor }}>
+                  +{currencySymbol}{tipAmount.toFixed(2)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center mt-2 pt-2 border-t border-orange-100">
+                <span className="text-sm font-semibold text-gray-700">{t('payment.total') || 'Gesamt'}</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {currencySymbol}{(subtotal + serviceFee + tipAmount).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Payment Methods */}
-      <div className="px-6 py-4 bg-gray-50">
-        <p className="text-sm font-semibold text-gray-700 mb-3">{t('payment.selectMethod')}</p>
-        <div className="space-y-2">
-          {/* Apple Pay - only show if available */}
-          {availableExpressMethods.applePay && (
-            <button
-              className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-                selectedPaymentMethod === 'APPLE_PAY' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
-              }`}
-              style={selectedPaymentMethod === 'APPLE_PAY' ? { borderColor: primaryColor } : {}}
-              onClick={() => onPaymentMethodChange('APPLE_PAY')}
-            >
-              <div className="w-12 h-8 bg-black rounded-lg flex items-center justify-center text-white text-lg">
+      <div className="px-5 py-4 bg-[#f8f8f8]">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+          {t('payment.selectPaymentMethod') || 'Zahlungsmethode wählen'}
+        </p>
 
-              </div>
-              <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.applePay')}</span>
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: selectedPaymentMethod === 'APPLE_PAY' ? primaryColor : '#e5e7eb' }}
-              >
-                {selectedPaymentMethod === 'APPLE_PAY' && <Check className="h-3 w-3 text-white" />}
-              </div>
-            </button>
-          )}
-
-          {/* Google Pay - only show if available */}
-          {availableExpressMethods.googlePay && (
-            <button
-              className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
-                selectedPaymentMethod === 'GOOGLE_PAY' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
-              }`}
-              style={selectedPaymentMethod === 'GOOGLE_PAY' ? { borderColor: primaryColor } : {}}
-              onClick={() => onPaymentMethodChange('GOOGLE_PAY')}
+        <div className="space-y-3">
+          {/* Apple Pay - always show */}
+          <button
+            className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
+              selectedPaymentMethod === 'APPLE_PAY' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
+            }`}
+            style={selectedPaymentMethod === 'APPLE_PAY' ? { borderColor: primaryColor } : {}}
+            onClick={() => onPaymentMethodChange('APPLE_PAY')}
+          >
+            <div className="w-12 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-xs">
+              Pay
+            </div>
+            <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.applePay')}</span>
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: selectedPaymentMethod === 'APPLE_PAY' ? primaryColor : '#e5e7eb' }}
             >
-              <div className="w-12 h-8 bg-white border rounded-lg flex items-center justify-center font-bold text-xs">
-                G Pay
-              </div>
-              <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.googlePay')}</span>
-              <div
-                className="w-6 h-6 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: selectedPaymentMethod === 'GOOGLE_PAY' ? primaryColor : '#e5e7eb' }}
-              >
-                {selectedPaymentMethod === 'GOOGLE_PAY' && <Check className="h-3 w-3 text-white" />}
-              </div>
-            </button>
-          )}
+              {selectedPaymentMethod === 'APPLE_PAY' && <Check className="h-3 w-3 text-white" />}
+            </div>
+          </button>
+
+          {/* Google Pay - always show */}
+          <button
+            className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 border-2 transition-all ${
+              selectedPaymentMethod === 'GOOGLE_PAY' ? 'bg-orange-50' : 'border-transparent hover:border-gray-300'
+            }`}
+            style={selectedPaymentMethod === 'GOOGLE_PAY' ? { borderColor: primaryColor } : {}}
+            onClick={() => onPaymentMethodChange('GOOGLE_PAY')}
+          >
+            <div className="w-12 h-8 bg-white border rounded-lg flex items-center justify-center font-bold text-xs">
+              G Pay
+            </div>
+            <span className="flex-1 text-left font-semibold text-gray-900">{t('payment.googlePay')}</span>
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: selectedPaymentMethod === 'GOOGLE_PAY' ? primaryColor : '#e5e7eb' }}
+            >
+              {selectedPaymentMethod === 'GOOGLE_PAY' && <Check className="h-3 w-3 text-white" />}
+            </div>
+          </button>
 
           {/* Credit Card */}
           <button
@@ -366,6 +501,63 @@ function CheckoutFormContent({
               {selectedPaymentMethod === 'CARD' && <Check className="h-3 w-3 text-white" />}
             </div>
           </button>
+
+          {/* Card Input - shown inline when Card is selected */}
+          {selectedPaymentMethod === 'CARD' && (
+            <div className="mt-2 p-4 bg-white rounded-xl border">
+              <PaymentElement
+                options={{
+                  layout: 'tabs',
+                  paymentMethodOrder: ['card'],
+                  fields: {
+                    billingDetails: {
+                      address: { country: 'never' }
+                    }
+                  },
+                  wallets: {
+                    applePay: 'never',
+                    googlePay: 'never'
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {/* Apple Pay / Google Pay Express Checkout - shown when selected */}
+          {(selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
+            <div className="mt-2">
+              {(selectedPaymentMethod === 'APPLE_PAY' && !availableExpressMethods.applePay) ||
+               (selectedPaymentMethod === 'GOOGLE_PAY' && !availableExpressMethods.googlePay) ? (
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-800">
+                  {selectedPaymentMethod === 'APPLE_PAY'
+                    ? (t('payment.applePayNotAvailable') || 'Apple Pay ist auf diesem Gerät nicht verfügbar. Bitte wählen Sie eine andere Zahlungsmethode.')
+                    : (t('payment.googlePayNotAvailable') || 'Google Pay ist auf diesem Gerät nicht verfügbar. Bitte wählen Sie eine andere Zahlungsmethode.')
+                  }
+                </div>
+              ) : (
+                <ExpressCheckoutElement
+                  onReady={onExpressCheckoutReady}
+                  onClick={onExpressCheckoutClick}
+                  onConfirm={onExpressCheckoutConfirm}
+                  options={{
+                    buttonType: {
+                      applePay: 'buy',
+                      googlePay: 'buy'
+                    },
+                    buttonTheme: {
+                      applePay: 'black',
+                      googlePay: 'black'
+                    },
+                    buttonHeight: 56,
+                    paymentMethods: {
+                      applePay: selectedPaymentMethod === 'APPLE_PAY' ? 'always' : 'never',
+                      googlePay: selectedPaymentMethod === 'GOOGLE_PAY' ? 'always' : 'never'
+                    }
+                  }}
+                />
+              )}
+            </div>
+          )}
 
           {/* Cash */}
           <button
@@ -388,53 +580,6 @@ function CheckoutFormContent({
           </button>
         </div>
 
-        {/* Card Input - shown inline when Card is selected */}
-        {selectedPaymentMethod === 'CARD' && (
-          <div className="mt-4 p-4 bg-white rounded-xl border">
-            <PaymentElement
-              options={{
-                layout: 'tabs',
-                paymentMethodOrder: ['card'],
-                fields: {
-                  billingDetails: {
-                    address: { country: 'never' }
-                  }
-                },
-                wallets: {
-                  applePay: 'never',
-                  googlePay: 'never'
-                }
-              }}
-            />
-          </div>
-        )}
-
-        {/* Apple Pay / Google Pay button - shown when selected */}
-        {(selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
-          <div className="mt-4">
-            <ExpressCheckoutElement
-              onReady={onExpressCheckoutReady}
-              onClick={onExpressCheckoutClick}
-              onConfirm={onExpressCheckoutConfirm}
-              options={{
-                buttonType: {
-                  applePay: 'buy',
-                  googlePay: 'buy'
-                },
-                buttonTheme: {
-                  applePay: 'black',
-                  googlePay: 'black'
-                },
-                buttonHeight: 56,
-                paymentMethods: {
-                  applePay: selectedPaymentMethod === 'APPLE_PAY' ? 'always' : 'never',
-                  googlePay: selectedPaymentMethod === 'GOOGLE_PAY' ? 'always' : 'never'
-                }
-              }}
-            />
-          </div>
-        )}
-
         {/* Error Message */}
         {errorMessage && (
           <Alert variant="destructive" className="mt-4">
@@ -456,7 +601,7 @@ function CheckoutFormContent({
             {isProcessing || isProcessingCash ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
-                {t('checkout.processing') || 'Verarbeitung...'}
+                {t('checkout.processing') || 'Wird verarbeitet...'}
               </>
             ) : (
               <>
@@ -469,12 +614,11 @@ function CheckoutFormContent({
         )}
 
         {/* Security note */}
-        <p className="text-xs text-center text-gray-500 mt-4">
-          {selectedPaymentMethod === 'CASH'
-            ? t('checkout.payAtRestaurant') || 'Bezahlung erfolgt im Restaurant'
-            : '🔒 ' + (t('checkout.securePayment') || 'Sichere Zahlung über Stripe')
-          }
-        </p>
+        {selectedPaymentMethod === 'CARD' && (
+          <p className="text-xs text-center text-gray-500 mt-4">
+            🔒 {t('checkout.securePayment') || 'Sichere Zahlung mit Stripe'}
+          </p>
+        )}
       </div>
     </div>
   )
@@ -535,7 +679,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
             cartData: {
               items: cartItems,
               subtotal,
-              tax: serviceFee, // Using serviceFee as tax for now
+              tax: serviceFee,
               tip: tipAmount
             }
           })
