@@ -50,31 +50,53 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    let paymentIntent;
+    let isDirectPayment = false;
+    
+    // Prüfe ob Restaurant Stripe Connect eingerichtet hat
     if (!restaurant.stripeAccountId || !restaurant.stripeOnboardingCompleted) {
-      return NextResponse.json(
-        { error: 'Stripe Connect nicht vollständig eingerichtet' },
-        { status: 400 }
-      );
+      console.warn(`Restaurant ${restaurantId} hat kein vollständiges Stripe Connect. Verwende direktes Payment.`);
+      
+      // FALLBACK: Erstelle normales Payment Intent ohne Connect
+      // Das Geld geht erstmal an Oriido und muss manuell überwiesen werden
+      isDirectPayment = true;
+      
+      paymentIntent = await stripe.paymentIntents.create({
+        amount: amount, // Betrag in Cents
+        currency: currency,
+        payment_method_types: ['card'],
+        metadata: {
+          orderId: orderId,
+          restaurantId: restaurantId,
+          restaurantName: restaurant.name,
+          platform: 'Oriido',
+          paymentType: 'DIRECT_FALLBACK',
+          note: 'Manueller Transfer erforderlich - Restaurant hat kein Stripe Connect'
+        }
+      });
+      
+      console.warn('WICHTIG: Direktzahlung erstellt. Manueller Transfer an Restaurant erforderlich!');
+      
+    } else {
+      // NORMAL: Verwende Stripe Connect mit automatischem Transfer
+      const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENTAGE / 100));
+      
+      paymentIntent = await stripe.paymentIntents.create({
+        amount: amount, // Betrag in Cents
+        currency: currency,
+        payment_method_types: ['card'],
+        application_fee_amount: platformFee, // Plattformgebühr
+        transfer_data: {
+          destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
+        },
+        metadata: {
+          orderId: orderId,
+          restaurantId: restaurantId,
+          platform: 'Oriido',
+          paymentType: 'STRIPE_CONNECT'
+        }
+      });
     }
-
-    // Berechne die Plattformgebühr (in Cents)
-    const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENTAGE / 100));
-
-    // Erstelle Payment Intent mit Plattformgebühr
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount, // Betrag in Cents
-      currency: currency,
-      payment_method_types: ['card'],
-      application_fee_amount: platformFee, // Plattformgebühr
-      transfer_data: {
-        destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
-      },
-      metadata: {
-        orderId: orderId,
-        restaurantId: restaurantId,
-        platform: 'Oriido'
-      }
-    });
 
     // Speichere Payment Intent ID in der Bestellung
     await prisma.order.update({
@@ -85,17 +107,56 @@ export async function POST(req: NextRequest) {
       }
     });
 
+    const platformFee = isDirectPayment ? 0 : Math.round(amount * (PLATFORM_FEE_PERCENTAGE / 100));
+    
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
       amount: amount,
       platformFee: platformFee,
-      restaurantAmount: amount - platformFee
+      restaurantAmount: amount - platformFee,
+      isDirectPayment: isDirectPayment,
+      warning: isDirectPayment ? 'Restaurant hat kein Stripe Connect. Zahlung erfolgt direkt an Plattform.' : null
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create Payment Intent Error:', error);
+    
+    // Spezifische Stripe-Fehler behandeln
+    if (error?.type === 'StripeAuthenticationError') {
+      return NextResponse.json(
+        { 
+          error: 'Stripe API-Authentifizierung fehlgeschlagen. Bitte Administrator kontaktieren.',
+          details: 'Stripe API key issue'
+        },
+        { status: 503 }
+      );
+    }
+    
+    if (error?.code === 'account_invalid') {
+      return NextResponse.json(
+        { 
+          error: 'Das Stripe Connect Konto des Restaurants ist ungültig.',
+          details: error.message
+        },
+        { status: 400 }
+      );
+    }
+    
+    if (error?.message?.includes('No such account')) {
+      return NextResponse.json(
+        { 
+          error: 'Das Stripe Connect Konto existiert nicht mehr. Bitte Restaurant kontaktieren.',
+          details: error.message
+        },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: 'Fehler beim Erstellen der Zahlung' },
+      { 
+        error: 'Fehler beim Erstellen der Zahlung',
+        details: error?.message || 'Unknown error'
+      },
       { status: 500 }
     );
   }
