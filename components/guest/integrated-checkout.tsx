@@ -434,7 +434,8 @@ function CheckoutFormContent({
                 paymentMethods: {
                   applePay: 'always',
                   googlePay: 'always',
-                  link: 'never'
+                  link: 'never',
+                  amazonPay: 'never'
                 }
               }}
             />
