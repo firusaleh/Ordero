@@ -86,9 +86,26 @@ export async function POST(req: Request) {
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   const { orderId, restaurantId, tableNumber } = paymentIntent.metadata || {}
-  
+
   if (!orderId) {
     console.error('No orderId in payment metadata')
+    return
+  }
+
+  // Check if orderId is a valid MongoDB ObjectId
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(orderId)
+  if (!isObjectId) {
+    console.error(`Invalid orderId format: ${orderId}. Expected MongoDB ObjectId.`)
+    return
+  }
+
+  // Find order first to ensure it exists
+  const order = await prisma.order.findUnique({
+    where: { id: orderId }
+  })
+
+  if (!order) {
+    console.error(`Order not found: ${orderId}`)
     return
   }
 
@@ -107,7 +124,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   // Create invoice
   await createInvoice(orderId)
 
-  console.log(`Order ${orderId} marked as paid`)
+  console.log(`Order ${orderId} marked as paid (Table: ${tableNumber || 'N/A'})`)
 }
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {

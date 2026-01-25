@@ -36,6 +36,7 @@ interface StripeCheckoutProps {
   currency: string
   orderId: string
   restaurantId: string
+  tableNumber?: number
   tip: number
   onSuccess: (paymentIntentId: string) => void
   onError: (error: string) => void
@@ -330,7 +331,8 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
             orderId: props.orderId,
             amount: Math.round((props.amount + props.tip) * 100), // Konvertiere zu Cents
             currency: props.currency.toLowerCase(),
-            restaurantId: props.restaurantId
+            restaurantId: props.restaurantId,
+            tableNumber: props.tableNumber
           })
         })
 

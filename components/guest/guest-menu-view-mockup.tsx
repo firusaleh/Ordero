@@ -123,7 +123,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [showCustomTip, setShowCustomTip] = useState<boolean>(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
-  
+  const [createdOrderId, setCreatedOrderId] = useState<string>('')
+
   // Use restaurant's primary color or fallback to orange
   const primaryColor = restaurant.primaryColor || '#FF6B35'
   const primaryColorHover = restaurant.primaryColor ? 
@@ -209,19 +210,12 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
 
   const handleOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string) => {
     setCurrentTipAmount(tipAmount)
-    
-    if (paymentMethod === 'CARD') {
-      setShowCheckout(false)
-      setShowStripeCheckout(true)
-      return
-    }
-    
     setIsOrdering(true)
-    
+
     try {
       const orderData = {
         tableId: table?.id,
-        tableNumber: table?.number || tableNumber, // Include tableNumber
+        tableNumber: table?.number || tableNumber,
         items: cart.map(item => ({
           menuItemId: item.menuItem.id,
           quantity: item.quantity,
@@ -233,18 +227,19 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         tipAmount,
         tipPercent
       }
-      
+
+      // Always create order first
       const response = await fetch(`/api/public/${restaurant.slug}/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       })
-      
+
       if (response.ok) {
         const data = await response.json()
         const orderId = data.data?.id
         const orderNum = data.data?.orderNumber || '#0000'
-        
+
         // Save order ID to localStorage for history
         const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
         const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
@@ -252,16 +247,25 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           storedOrderIds.push(orderId)
           localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
         }
-        
+
         // Dispatch event for order history component
-        window.dispatchEvent(new CustomEvent('orderCreated', { 
+        window.dispatchEvent(new CustomEvent('orderCreated', {
           detail: { orderNumber: orderNum, orderId }
         }))
-        
+
         setOrderNumber(orderNum)
-        setCart([])
-        setShowCheckout(false)
-        setShowSuccessDialog(true)
+        setCreatedOrderId(orderId)
+
+        if (paymentMethod === 'CARD') {
+          // For CARD: Order created, now show Stripe checkout
+          setShowCheckout(false)
+          setShowStripeCheckout(true)
+        } else {
+          // For CASH: Show success dialog immediately
+          setCart([])
+          setShowCheckout(false)
+          setShowSuccessDialog(true)
+        }
       } else {
         throw new Error('Order failed')
       }
@@ -1069,20 +1073,15 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
             <DialogDescription className="sr-only">Sichere Zahlung mit Stripe</DialogDescription>
             <StripeCheckout
               restaurantId={restaurant.id}
-              orderId={`order-${Date.now()}`}
+              orderId={createdOrderId}
+              tableNumber={tableNumber}
               amount={getCartTotal() + (getCartTotal() * 0.19) + currentTipAmount}
               tip={currentTipAmount}
               currency={currency}
               onSuccess={(paymentIntentId) => {
                 setCart([])
                 setShowStripeCheckout(false)
-                toast.success(t('toast.paymentSuccess'), {
-                  style: {
-                    background: primaryColor,
-                    color: 'white',
-                    border: 'none'
-                  }
-                })
+                setShowSuccessDialog(true)
               }}
               onError={(error) => {
                 toast.error(`Error: ${error}`)

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
     const body = await req.json();
-    const { orderId, restaurantId, amount, currency = 'eur' } = body;
+    const { orderId, restaurantId, amount, currency = 'eur', tableNumber } = body;
 
     if (!orderId || !restaurantId || !amount) {
       return NextResponse.json(
@@ -37,6 +37,10 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Create payment description for bank statement
+    const tableInfo = tableNumber ? `Tisch ${tableNumber}` : 'Bestellung';
+    const statementSuffix = tableNumber ? `TISCH${tableNumber}` : 'ORDER';
 
     // Hole Restaurant mit Stripe Connect Account
     const restaurant = await prisma.restaurant.findUnique({
@@ -65,10 +69,13 @@ export async function POST(req: NextRequest) {
         amount: amount, // Betrag in Cents
         currency: currency,
         payment_method_types: ['card'],
+        description: `${tableInfo} bei ${restaurant.name}`,
+        statement_descriptor_suffix: statementSuffix,
         metadata: {
           orderId: orderId,
           restaurantId: restaurantId,
           restaurantName: restaurant.name,
+          tableNumber: tableNumber?.toString() || '',
           platform: 'Oriido',
           paymentType: 'DIRECT_FALLBACK',
           note: 'Manueller Transfer erforderlich - Restaurant hat kein Stripe Connect'
@@ -85,6 +92,8 @@ export async function POST(req: NextRequest) {
         amount: amount, // Betrag in Cents
         currency: currency,
         payment_method_types: ['card'],
+        description: `${tableInfo} bei ${restaurant.name}`,
+        statement_descriptor_suffix: statementSuffix,
         application_fee_amount: platformFee, // Plattformgebühr
         transfer_data: {
           destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
@@ -92,6 +101,8 @@ export async function POST(req: NextRequest) {
         metadata: {
           orderId: orderId,
           restaurantId: restaurantId,
+          restaurantName: restaurant.name,
+          tableNumber: tableNumber?.toString() || '',
           platform: 'Oriido',
           paymentType: 'STRIPE_CONNECT'
         }
