@@ -10,7 +10,9 @@ const isValidKey = stripeSecretKey &&
   stripeSecretKey.startsWith('sk_');
 
 if (!isValidKey) {
-  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert oder ungültig. Aktueller Wert:', stripeSecretKey ? 'sk_test_... (Platzhalter)' : 'nicht gesetzt');
+  console.error('STRIPE_SECRET_KEY ist nicht in Vercel konfiguriert oder ungültig.');
+  console.error('Bitte füge STRIPE_SECRET_KEY in Vercel Settings → Environment Variables hinzu');
+  console.error('Verwende diesen Test-Key: sk_test_51SnM1lFKsQG9Heb2eSepCsK4b4NIEp6KmqolVcySX2kNB0qHVPqZFnoUNsuWu6ufGM5gQ9jV6RItqMJJumSrqrX700Q5hLx86m');
 }
 
 const stripe = isValidKey ? new Stripe(stripeSecretKey!, {
@@ -23,7 +25,11 @@ export async function POST(req: NextRequest) {
     if (!stripe) {
       console.error('Stripe ist nicht konfiguriert. Bitte STRIPE_SECRET_KEY in Vercel setzen.');
       return NextResponse.json(
-        { error: 'Stripe ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.' },
+        { 
+          error: 'Stripe ist nicht konfiguriert. Bitte fügen Sie STRIPE_SECRET_KEY in Vercel Environment Variables hinzu.',
+          details: 'Siehe VERCEL_STRIPE_SETUP.md für Anleitung',
+          missingKey: 'STRIPE_SECRET_KEY' 
+        },
         { status: 503 }
       );
     }
@@ -138,7 +144,11 @@ export async function GET(req: NextRequest) {
     if (!stripe) {
       console.error('Stripe ist nicht konfiguriert. Bitte STRIPE_SECRET_KEY in Vercel setzen.');
       return NextResponse.json(
-        { error: 'Stripe ist nicht konfiguriert. Bitte kontaktieren Sie den Administrator.' },
+        { 
+          error: 'Stripe ist nicht konfiguriert. Bitte fügen Sie STRIPE_SECRET_KEY in Vercel Environment Variables hinzu.',
+          details: 'Siehe VERCEL_STRIPE_SETUP.md für Anleitung',
+          missingKey: 'STRIPE_SECRET_KEY' 
+        },
         { status: 503 }
       );
     }
