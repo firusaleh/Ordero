@@ -124,18 +124,22 @@ export async function GET(
       ? (((parseFloat(avgOrderValue) - previousAvgOrderValue) / previousAvgOrderValue) * 100).toFixed(1)
       : 0
     
-    // Unique Customers (basierend auf E-Mail oder Telefon)
-    const uniqueCustomers = new Set(
-      currentOrders
-        .filter(o => o.guestEmail || o.guestPhone)
-        .map(o => o.guestEmail || o.guestPhone)
-    ).size
+    // Unique Customers (zähle alle Bestellungen, auch ohne E-Mail/Telefon)
+    // Falls E-Mail/Telefon vorhanden, nutze sie für Deduplizierung
+    // Ansonsten zähle jede Bestellung als separaten Kunden
+    const customerIdentifiers = currentOrders.map(o => {
+      if (o.guestEmail) return `email:${o.guestEmail}`
+      if (o.guestPhone) return `phone:${o.guestPhone}`
+      return `order:${o.id}` // Jede Bestellung ohne Kontaktdaten als separater Kunde
+    })
+    const uniqueCustomers = new Set(customerIdentifiers).size
     
-    const previousUniqueCustomers = new Set(
-      previousOrders
-        .filter(o => o.guestEmail || o.guestPhone)
-        .map(o => o.guestEmail || o.guestPhone)
-    ).size
+    const previousCustomerIdentifiers = previousOrders.map(o => {
+      if (o.guestEmail) return `email:${o.guestEmail}`
+      if (o.guestPhone) return `phone:${o.guestPhone}`
+      return `order:${o.id}`
+    })
+    const previousUniqueCustomers = new Set(previousCustomerIdentifiers).size
     
     const customerChange = previousUniqueCustomers > 0
       ? ((uniqueCustomers - previousUniqueCustomers) / previousUniqueCustomers * 100).toFixed(1)
@@ -206,25 +210,55 @@ export async function GET(
           : 0
       }))
     
-    // Täglicher Umsatz (letzte 7 Tage)
+    // Täglicher Umsatz - zeige immer die letzten 7 Tage unabhängig vom gewählten Zeitraum
     const dailyRevenue: { [key: string]: number } = {}
-    const days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag']
+    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
+    
+    // Initialisiere die letzten 7 Tage mit 0
+    const last7Days: { [key: string]: number } = {}
+    const dateToKey: { [key: string]: string } = {}
     
     for (let i = 6; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
-      const dayIndex = date.getDay()
-      const dayName = days[dayIndex === 0 ? 6 : dayIndex - 1]
-      dailyRevenue[dayName] = 0
+      date.setHours(0, 0, 0, 0)
+      const dateStr = date.toISOString().split('T')[0]
+      const dayName = dayNames[date.getDay()]
+      last7Days[dateStr] = 0
+      dateToKey[dateStr] = dayName
     }
     
-    currentOrders.forEach(order => {
-      if (timeRange === '7days' || timeRange === 'today' || timeRange === 'yesterday') {
-        const orderDate = new Date(order.createdAt)
-        const dayIndex = orderDate.getDay()
-        const dayName = days[dayIndex === 0 ? 6 : dayIndex - 1]
-        dailyRevenue[dayName] = (dailyRevenue[dayName] || 0) + order.total
+    // Aggregiere Umsätze für die letzten 7 Tage
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    sevenDaysAgo.setHours(0, 0, 0, 0)
+    
+    const recentOrders = await prisma.order.findMany({
+      where: {
+        restaurantId: id,
+        createdAt: {
+          gte: sevenDaysAgo,
+          lte: now
+        }
+      },
+      select: {
+        createdAt: true,
+        total: true
       }
+    })
+    
+    recentOrders.forEach(order => {
+      const orderDate = new Date(order.createdAt)
+      const dateStr = orderDate.toISOString().split('T')[0]
+      if (last7Days.hasOwnProperty(dateStr)) {
+        last7Days[dateStr] += order.total
+      }
+    })
+    
+    // Konvertiere zu Wochentag-basiertem Object für Frontend
+    Object.entries(last7Days).forEach(([dateStr, revenue]) => {
+      const dayName = dateToKey[dateStr]
+      dailyRevenue[dayName] = revenue
     })
     
     return NextResponse.json({

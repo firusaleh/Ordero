@@ -367,22 +367,29 @@ export default function StatsClient({ restaurantId }: StatsClientProps) {
               <CardDescription>{t('statistics.dailyRevenueLast7Days') || 'Täglicher Umsatz der letzten 7 Tage'}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-64 flex items-end justify-between gap-2">
-                {Object.entries(dailyRevenue).map(([day, revenue]) => {
-                  const maxRevenue = Math.max(...Object.values(dailyRevenue), 1)
-                  const height = (revenue / maxRevenue) * 100
-                  return (
-                    <div key={day} className="flex-1 flex flex-col items-center gap-2">
-                      <span className="text-xs text-gray-600">{formatPrice(revenue)}</span>
-                      <div 
-                        className="w-full bg-blue-500 rounded-t"
-                        style={{ height: `${height}%` }}
-                      />
-                      <span className="text-xs text-gray-600">{t(`statistics.${day.toLowerCase()}`) || day}</span>
-                    </div>
-                  )
-                })}
-              </div>
+              {Object.keys(dailyRevenue).length > 0 ? (
+                <div className="h-64 flex items-end justify-between gap-2">
+                  {Object.entries(dailyRevenue).map(([day, revenue]) => {
+                    const maxRevenue = Math.max(...Object.values(dailyRevenue), 1)
+                    const height = revenue > 0 ? (revenue / maxRevenue) * 100 : 2
+                    return (
+                      <div key={day} className="flex-1 flex flex-col items-center gap-2">
+                        <span className="text-xs text-gray-600 font-medium">{formatPrice(revenue)}</span>
+                        <div 
+                          className="w-full bg-blue-500 rounded-t transition-all duration-300 hover:bg-blue-600"
+                          style={{ height: `${height}%`, minHeight: '2px' }}
+                          title={`${day}: ${formatPrice(revenue)}`}
+                        />
+                        <span className="text-xs text-gray-600">{day.substring(0, 2)}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="h-64 flex items-center justify-center">
+                  <p className="text-gray-500">{t('statistics.noData') || 'Keine Daten für diesen Zeitraum'}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
