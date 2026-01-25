@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { loadStripe } from '@stripe/stripe-js'
 import {
   Elements,
   PaymentElement,
-  ExpressCheckoutElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js'
@@ -85,11 +84,6 @@ function CheckoutFormContent({
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [expressCheckoutReady, setExpressCheckoutReady] = useState(false)
-  const [availableExpressMethods, setAvailableExpressMethods] = useState<{applePay: boolean, googlePay: boolean}>({
-    applePay: false,
-    googlePay: false
-  })
   const [showCustomTip, setShowCustomTip] = useState(false)
   const [customTipAmount, setCustomTipAmount] = useState('')
 
@@ -102,53 +96,6 @@ function CheckoutFormContent({
     const roundedUp = (nextFive - subtotal) < (nextTen - subtotal) && (nextFive - subtotal) > 0.5 ? nextFive : nextTen
     return roundedUp - subtotal
   }
-
-  // Express Checkout handlers
-  const onExpressCheckoutReady = useCallback(({ availablePaymentMethods }: any) => {
-    if (availablePaymentMethods) {
-      setAvailableExpressMethods({
-        applePay: !!availablePaymentMethods.applePay,
-        googlePay: !!availablePaymentMethods.googlePay
-      })
-      setExpressCheckoutReady(
-        !!availablePaymentMethods.applePay || !!availablePaymentMethods.googlePay
-      )
-    }
-  }, [])
-
-  const onExpressCheckoutClick = useCallback(({ resolve }: any) => {
-    resolve({ emailRequired: false, phoneNumberRequired: false })
-  }, [])
-
-  const onExpressCheckoutConfirm = useCallback(async () => {
-    if (!stripe || !elements) return
-
-    setIsProcessing(true)
-    setErrorMessage(null)
-
-    try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/payment/success`,
-        },
-        redirect: 'if_required'
-      })
-
-      if (error) {
-        setErrorMessage(error.message || 'Zahlung fehlgeschlagen')
-        onError(error.message || 'Zahlung fehlgeschlagen')
-      } else {
-        await pollForOrderCompletion()
-      }
-    } catch (err) {
-      console.error('Express checkout error:', err)
-      setErrorMessage('Ein unerwarteter Fehler ist aufgetreten')
-      onError('Unerwarteter Fehler')
-    } finally {
-      setIsProcessing(false)
-    }
-  }, [stripe, elements, onError])
 
   // Poll for order completion
   const pollForOrderCompletion = async () => {
@@ -230,11 +177,11 @@ function CheckoutFormContent({
     }
   }
 
-  // Handle pay button click (Card and Cash only - Apple Pay/Google Pay use ExpressCheckoutElement's native button)
+  // Handle pay button click
   const handlePayClick = () => {
     if (selectedPaymentMethod === 'CASH') {
       onCashOrder()
-    } else if (selectedPaymentMethod === 'CARD') {
+    } else if (selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') {
       handleCardPayment()
     }
   }
@@ -497,51 +444,30 @@ function CheckoutFormContent({
             </div>
           </button>
 
-          {/* Card Input - shown inline when Card is selected */}
-          {selectedPaymentMethod === 'CARD' && (
+          {/* Payment Element - shown for Card, Apple Pay, and Google Pay */}
+          {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
             <div className="mt-2 p-4 bg-white rounded-xl border">
               <PaymentElement
                 options={{
                   layout: 'tabs',
-                  paymentMethodOrder: ['card'],
+                  paymentMethodOrder: selectedPaymentMethod === 'CARD'
+                    ? ['card']
+                    : selectedPaymentMethod === 'APPLE_PAY'
+                      ? ['apple_pay', 'card']
+                      : ['google_pay', 'card'],
                   fields: {
                     billingDetails: {
                       address: { country: 'never' }
                     }
                   },
                   wallets: {
-                    applePay: 'never',
-                    googlePay: 'never'
+                    applePay: selectedPaymentMethod === 'APPLE_PAY' ? 'auto' : 'never',
+                    googlePay: selectedPaymentMethod === 'GOOGLE_PAY' ? 'auto' : 'never'
                   }
                 }}
               />
             </div>
           )}
-
-          {/* Apple Pay / Google Pay Express Checkout - always rendered for detection, shown when selected */}
-          <div className={selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY' ? 'mt-2' : 'hidden'}>
-            <ExpressCheckoutElement
-              onReady={onExpressCheckoutReady}
-              onClick={onExpressCheckoutClick}
-              onConfirm={onExpressCheckoutConfirm}
-              options={{
-                buttonType: {
-                  applePay: 'buy',
-                  googlePay: 'buy'
-                },
-                buttonTheme: {
-                  applePay: 'black',
-                  googlePay: 'black'
-                },
-                buttonHeight: 55,
-                paymentMethods: {
-                  applePay: 'auto',
-                  googlePay: 'auto',
-                  link: 'never'
-                }
-              }}
-            />
-          </div>
 
           {/* Cash */}
           <button
@@ -586,11 +512,11 @@ function CheckoutFormContent({
           </Alert>
         )}
 
-        {/* Pay Button - shown for Card and Cash only (Apple Pay/Google Pay use their own native buttons) */}
-        {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'CASH') && (
+        {/* Pay Button - shown for Card, Cash, Apple Pay, and Google Pay */}
+        {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'CASH' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
           <Button
             onClick={handlePayClick}
-            disabled={isProcessing || isProcessingCash || (selectedPaymentMethod === 'CARD' && !stripe)}
+            disabled={isProcessing || isProcessingCash || ((selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && !stripe)}
             className="w-full text-white rounded-2xl py-5 text-lg font-bold mt-6 shadow-lg flex items-center justify-center gap-2"
             style={{
               background: `linear-gradient(to right, ${primaryColor}, ${primaryColor}dd)`
