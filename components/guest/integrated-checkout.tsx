@@ -230,13 +230,11 @@ function CheckoutFormContent({
     }
   }
 
-  // Handle pay button click
+  // Handle pay button click (Card and Cash only - Apple Pay/Google Pay use ExpressCheckoutElement's native button)
   const handlePayClick = () => {
     if (selectedPaymentMethod === 'CASH') {
       onCashOrder()
-    } else if (selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') {
-      // For Apple Pay/Google Pay, the ExpressCheckoutElement handles its own button
-      // But if the user clicks the fallback button, we process as card payment
+    } else if (selectedPaymentMethod === 'CARD') {
       handleCardPayment()
     }
   }
@@ -538,7 +536,8 @@ function CheckoutFormContent({
                 buttonHeight: 55,
                 paymentMethods: {
                   applePay: 'auto',
-                  googlePay: 'auto'
+                  googlePay: 'auto',
+                  link: 'never'
                 }
               }}
             />
@@ -587,8 +586,8 @@ function CheckoutFormContent({
           </Alert>
         )}
 
-        {/* Pay Button - shown for Card, Cash, Apple Pay, and Google Pay */}
-        {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'CASH' || selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
+        {/* Pay Button - shown for Card and Cash only (Apple Pay/Google Pay use their own native buttons) */}
+        {(selectedPaymentMethod === 'CARD' || selectedPaymentMethod === 'CASH') && (
           <Button
             onClick={handlePayClick}
             disabled={isProcessing || isProcessingCash || (selectedPaymentMethod === 'CARD' && !stripe)}
