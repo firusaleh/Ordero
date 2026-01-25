@@ -101,7 +101,8 @@ export const guestTranslations = {
       confirmPayment: 'ادفع الآن',
       splitBill: 'Rechnung teilen',
       expressCheckout: 'Schnellzahlung',
-      expressNotAvailable: 'Apple Pay / Google Pay wird geladen...',
+      expressLoading: 'Apple Pay / Google Pay wird geladen...',
+      expressUnavailable: 'Apple Pay / Google Pay nicht verfügbar auf diesem Gerät',
       or: 'oder'
     },
 
@@ -456,7 +457,8 @@ export const guestTranslations = {
       confirmPayment: 'Pay Now',
       splitBill: 'Split the bill',
       expressCheckout: 'Express Checkout',
-      expressNotAvailable: 'Loading Apple Pay / Google Pay...',
+      expressLoading: 'Loading Apple Pay / Google Pay...',
+      expressUnavailable: 'Apple Pay / Google Pay not available on this device',
       or: 'or'
     },
 
@@ -811,7 +813,8 @@ export const guestTranslations = {
       confirmPayment: 'ادفع الآن',
       splitBill: 'تقسيم الفاتورة',
       expressCheckout: 'الدفع السريع',
-      expressNotAvailable: 'جاري تحميل Apple Pay / Google Pay...',
+      expressLoading: 'جاري تحميل Apple Pay / Google Pay...',
+      expressUnavailable: 'Apple Pay / Google Pay غير متاح على هذا الجهاز',
       or: 'أو'
     },
 

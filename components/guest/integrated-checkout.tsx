@@ -88,6 +88,7 @@ function CheckoutFormContent({
   const [showCustomTip, setShowCustomTip] = useState(false)
   const [customTipAmount, setCustomTipAmount] = useState('')
   const [expressCheckoutReady, setExpressCheckoutReady] = useState(false)
+  const [expressCheckoutChecked, setExpressCheckoutChecked] = useState(false)
 
   const total = subtotal + serviceFee + tipAmount
 
@@ -391,6 +392,7 @@ function CheckoutFormContent({
             <p className="text-xs text-gray-500 mb-3">{t('payment.expressCheckout') || 'Schnellzahlung'}</p>
             <ExpressCheckoutElement
               onReady={({ availablePaymentMethods }) => {
+                setExpressCheckoutChecked(true)
                 setExpressCheckoutReady(
                   !!(availablePaymentMethods?.applePay || availablePaymentMethods?.googlePay)
                 )
@@ -438,7 +440,10 @@ function CheckoutFormContent({
             />
             {!expressCheckoutReady && (
               <p className="text-xs text-gray-400 mt-2 text-center">
-                {t('payment.expressNotAvailable') || 'Apple Pay / Google Pay wird geladen...'}
+                {expressCheckoutChecked
+                  ? (t('payment.expressUnavailable') || 'Apple Pay / Google Pay nicht verfügbar auf diesem Gerät')
+                  : (t('payment.expressLoading') || 'Apple Pay / Google Pay wird geladen...')
+                }
               </p>
             )}
           </div>
