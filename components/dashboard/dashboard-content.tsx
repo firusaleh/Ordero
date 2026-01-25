@@ -251,7 +251,11 @@ export default function DashboardContent({
                   <div>
                     <p className="font-medium">{t('dashboard.order')} #{order.orderNumber}</p>
                     <p className="text-sm text-gray-500">
-                      {order.tableId ? `${t('dashboard.table')} ${order.tableId}` : t('dashboard.takeaway')}
+                      {order.table?.number || order.tableNumber ? 
+                        `${t('dashboard.table')} ${order.table?.number || order.tableNumber}` : 
+                        order.type === 'TAKEAWAY' ? t('dashboard.takeaway') : 
+                        order.type === 'DELIVERY' ? t('dashboard.delivery') :
+                        t('dashboard.order')}
                       {' • '}
                       <Clock className="inline h-3 w-3" />
                       {' '}

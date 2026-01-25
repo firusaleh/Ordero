@@ -39,7 +39,8 @@ async function getDashboardData(userId: string) {
       createdAt: { gte: today }
     },
     include: {
-      items: true
+      items: true,
+      table: true // Include table relation to get table number
     }
   })
 
