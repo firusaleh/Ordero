@@ -38,6 +38,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate orderId is a valid MongoDB ObjectId (24 hex characters)
+    const isValidOrderId = /^[0-9a-fA-F]{24}$/.test(orderId);
+    if (!isValidOrderId) {
+      console.error('Invalid orderId format:', orderId);
+      return NextResponse.json(
+        { error: 'Ungültige Bestellungs-ID' },
+        { status: 400 }
+      );
+    }
+
+    // Verify order exists in database
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    });
+
+    if (!order) {
+      console.error('Order not found:', orderId);
+      return NextResponse.json(
+        { error: 'Bestellung nicht gefunden' },
+        { status: 404 }
+      );
+    }
+
     // Create payment description for bank statement
     const tableInfo = tableNumber ? `Tisch ${tableNumber}` : 'Bestellung';
     const statementSuffix = tableNumber ? `TISCH${tableNumber}` : 'ORDER';

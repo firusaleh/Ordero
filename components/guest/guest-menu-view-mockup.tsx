@@ -1065,8 +1065,8 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         </DialogContent>
       </Dialog>
 
-      {/* Stripe Checkout */}
-      {showStripeCheckout && (
+      {/* Stripe Checkout - Only show when we have a valid order ID */}
+      {showStripeCheckout && createdOrderId && (
         <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
           <DialogContent className="max-w-md rounded-3xl">
             <DialogTitle className="sr-only">Stripe Zahlung</DialogTitle>
@@ -1083,11 +1083,36 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
                 setShowStripeCheckout(false)
                 setShowSuccessDialog(true)
               }}
-              onError={(error) => {
+              onError={async (error) => {
                 toast.error(`Error: ${error}`)
+                // Cancel the order if payment fails
+                if (createdOrderId) {
+                  try {
+                    await fetch(`/api/orders/${createdOrderId}/cancel`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ reason: 'Payment failed' })
+                    })
+                  } catch (e) {
+                    console.error('Failed to cancel order:', e)
+                  }
+                }
               }}
-              onCancel={() => {
+              onCancel={async () => {
                 setShowStripeCheckout(false)
+                // Cancel the order if user cancels payment
+                if (createdOrderId) {
+                  try {
+                    await fetch(`/api/orders/${createdOrderId}/cancel`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ reason: 'User cancelled payment' })
+                    })
+                  } catch (e) {
+                    console.error('Failed to cancel order:', e)
+                  }
+                }
+                setCreatedOrderId('')
               }}
             />
           </DialogContent>

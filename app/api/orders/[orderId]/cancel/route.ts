@@ -10,51 +10,57 @@ export async function POST(
   try {
     const { orderId } = await params
     const session = await auth()
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 })
-    }
-    
+
     const body = await req.json()
     const { reason } = body
-    
+
     // Hole Bestellung mit Restaurant-Info
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: { restaurant: true }
     })
-    
+
     if (!order) {
       return NextResponse.json({ error: "Bestellung nicht gefunden" }, { status: 404 })
     }
-    
+
     // Prüfe ob Bestellung bereits storniert ist
     if (order.status === "CANCELLED") {
       return NextResponse.json({ error: "Bestellung ist bereits storniert" }, { status: 400 })
     }
-    
-    // Prüfe Berechtigung
-    if (session.user.role !== "SUPER_ADMIN") {
-      const hasAccess = await prisma.restaurant.findFirst({
-        where: {
-          id: order.restaurantId,
-          OR: [
-            { ownerId: session.user.id },
-            { staff: { some: { userId: session.user.id } } }
-          ]
+
+    // Allow unauthenticated cancellation ONLY for unpaid orders (payment failed/cancelled)
+    const isUnpaidOrder = order.paymentStatus === "PENDING" && order.status === "PENDING"
+
+    if (!session?.user && !isUnpaidOrder) {
+      return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 })
+    }
+
+    // For authenticated users, check permissions (skip for unpaid order cancellation)
+    if (session?.user && !isUnpaidOrder) {
+      if (session.user.role !== "SUPER_ADMIN") {
+        const hasAccess = await prisma.restaurant.findFirst({
+          where: {
+            id: order.restaurantId,
+            OR: [
+              { ownerId: session.user.id },
+              { staff: { some: { userId: session.user.id } } }
+            ]
+          }
+        })
+
+        if (!hasAccess) {
+          return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
         }
-      })
-      
-      if (!hasAccess) {
-        return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 })
       }
     }
     
     // Storniere Bestellung
     const cancelledOrder = await prisma.order.update({
       where: { id: orderId },
-      data: { 
+      data: {
         status: "CANCELLED",
+        paymentStatus: order.paymentStatus === "PENDING" ? "CANCELLED" : order.paymentStatus,
         notes: reason ? `Storniert: ${reason}` : "Bestellung storniert",
         updatedAt: new Date()
       },
@@ -74,7 +80,7 @@ export async function POST(
       {
         orderId: cancelledOrder.id,
         reason: reason || "Keine Begründung angegeben",
-        cancelledBy: session.user.name || session.user.email
+        cancelledBy: session?.user?.name || session?.user?.email || "Guest"
       }
     )
     

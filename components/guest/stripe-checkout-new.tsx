@@ -322,6 +322,14 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
 
   useEffect(() => {
     const createPaymentIntent = async () => {
+      // Validate orderId before creating payment intent
+      if (!props.orderId || props.orderId.length !== 24) {
+        console.error('Invalid orderId:', props.orderId)
+        setError('Bestellung konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.')
+        setIsLoading(false)
+        return
+      }
+
       try {
         // WICHTIG: Verwende stripe-connect Route für korrekte Geldverteilung!
         const response = await fetch('/api/stripe-connect/create-payment', {
