@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Initialize Stripe only if key is available
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+const isValidKey = stripeSecretKey &&
+  stripeSecretKey !== 'sk_test_...' &&
+  stripeSecretKey.startsWith('sk_');
+
+const stripe = isValidKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2024-11-20.acacia' as any,
-});
+}) : null;
 
 // GET - Check domain status
 export async function GET(req: NextRequest) {
+  if (!stripe) {
+    return NextResponse.json({ error: 'Stripe is not configured' }, { status: 503 });
+  }
+
   try {
     // List all Apple Pay domains
     const domains = await stripe.applePayDomains.list({ limit: 10 });
@@ -27,6 +37,10 @@ export async function GET(req: NextRequest) {
 
 // POST - Register a new domain
 export async function POST(req: NextRequest) {
+  if (!stripe) {
+    return NextResponse.json({ error: 'Stripe is not configured' }, { status: 503 });
+  }
+
   try {
     const { domain } = await req.json();
 
