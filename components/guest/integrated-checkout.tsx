@@ -392,6 +392,7 @@ function CheckoutFormContent({
             <p className="text-xs text-gray-500 mb-3">{t('payment.expressCheckout') || 'Schnellzahlung'}</p>
             <ExpressCheckoutElement
               onReady={({ availablePaymentMethods }) => {
+                console.log('ExpressCheckout availablePaymentMethods:', availablePaymentMethods)
                 setExpressCheckoutChecked(true)
                 setExpressCheckoutReady(
                   !!(availablePaymentMethods?.applePay || availablePaymentMethods?.googlePay)
