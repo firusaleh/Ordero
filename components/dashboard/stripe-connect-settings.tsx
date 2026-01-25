@@ -10,9 +10,10 @@ import { toast } from 'sonner';
 
 interface StripeConnectSettingsProps {
   restaurantId: string;
+  restaurantCountry?: string;
 }
 
-export function StripeConnectSettings({ restaurantId }: StripeConnectSettingsProps) {
+export function StripeConnectSettings({ restaurantId, restaurantCountry = 'DE' }: StripeConnectSettingsProps) {
   const [loading, setLoading] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(true);
   const [accountStatus, setAccountStatus] = useState<{
@@ -51,7 +52,7 @@ export function StripeConnectSettings({ restaurantId }: StripeConnectSettingsPro
       const response = await fetch('/api/stripe-connect/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurantId })
+        body: JSON.stringify({ restaurantId, country: restaurantCountry })
       });
 
       if (!response.ok) {

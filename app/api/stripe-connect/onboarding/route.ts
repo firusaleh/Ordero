@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { restaurantId } = body;
+    const { restaurantId, country } = body;
 
     if (!restaurantId) {
       return NextResponse.json({ error: 'Restaurant ID erforderlich' }, { status: 400 });
@@ -58,9 +58,14 @@ export async function POST(req: NextRequest) {
     // Erstelle ein neues Stripe Connect Konto wenn noch keines existiert
     if (!accountId) {
       const accountEmail = restaurant.email || session.user.email;
+      
+      // Map country codes to Stripe-supported countries
+      // Default to DE for European countries, use restaurant country if supported
+      const stripeCountry = country || restaurant.country || 'DE';
+      
       const account = await stripe.accounts.create({
         type: 'express',
-        country: 'DE',
+        country: stripeCountry,
         email: accountEmail || undefined,
         capabilities: {
           card_payments: { requested: true },

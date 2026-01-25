@@ -63,6 +63,9 @@ export function PayTabsVendorSettings({
       if (response.ok) {
         const data = await response.json()
         setVendorData(data)
+      } else if (response.status === 404) {
+        // API route doesn't exist yet, this is expected for now
+        console.log('PayTabs vendor API not implemented yet')
       }
     } catch (error) {
       console.error('Fehler beim Laden der Vendor-Daten:', error)

@@ -27,6 +27,7 @@ export default async function PaymentsSettingsPage() {
     <PaymentsSettingsClient 
       restaurantId={restaurant.id}
       restaurantName={restaurant.name}
+      restaurantCountry={restaurant.country}
       userRole={session.user.role || 'USER'}
     />
   )

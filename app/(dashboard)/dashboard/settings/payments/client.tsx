@@ -14,18 +14,24 @@ import { toast } from 'sonner'
 interface PaymentsSettingsClientProps {
   restaurantId: string
   restaurantName: string
+  restaurantCountry: string
   userRole: string
 }
 
 export default function PaymentsSettingsClient({ 
   restaurantId, 
   restaurantName, 
+  restaurantCountry,
   userRole 
 }: PaymentsSettingsClientProps) {
   const router = useRouter()
   
   // Check if user is Super Admin or Admin (NOT restaurant owner)
   const isSuperAdmin = userRole === 'SUPER_ADMIN' || userRole === 'ADMIN'
+  
+  // Determine which payment providers to show based on country
+  const isMiddleEast = ['JO', 'SA', 'AE', 'KW', 'QA', 'BH', 'OM'].includes(restaurantCountry)
+  const isEurope = !isMiddleEast // All other countries use Stripe
 
   useEffect(() => {
     // Check for Stripe Connect callback parameters
@@ -84,7 +90,7 @@ export default function PaymentsSettingsClient({
           </TabsList>
 
           <TabsContent value="stripe" className="space-y-6">
-            <StripeConnectSettings restaurantId={restaurantId} />
+            <StripeConnectSettings restaurantId={restaurantId} restaurantCountry={restaurantCountry} />
           </TabsContent>
 
           <TabsContent value="paytabs" className="space-y-6">
@@ -115,15 +121,20 @@ export default function PaymentsSettingsClient({
           </Card>
           
           {/* Stripe Connect für Europa */}
-          <StripeConnectSettings 
-            restaurantId={restaurantId}
-          />
+          {isEurope && (
+            <StripeConnectSettings 
+              restaurantId={restaurantId}
+              restaurantCountry={restaurantCountry}
+            />
+          )}
           
           {/* PayTabs Bankdaten für Naher Osten */}
-          <PayTabsVendorSettings 
-            restaurantId={restaurantId} 
-            restaurantName={restaurantName}
-          />
+          {isMiddleEast && (
+            <PayTabsVendorSettings 
+              restaurantId={restaurantId} 
+              restaurantName={restaurantName}
+            />
+          )}
           
           {/* Info-Box über das Zahlungssystem */}
           <Card>
