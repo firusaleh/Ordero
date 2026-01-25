@@ -305,8 +305,7 @@ export function calculatePlatformFee(amount: number, customFeeFixed?: number) {
   return {
     totalAmount: amount,
     platformFee: parseFloat(platformFee.toFixed(2)),
-    vendorAmount: parseFloat(vendorAmount.toFixed(2)),
-    feePercent
+    vendorAmount: parseFloat(vendorAmount.toFixed(2))
   }
 }
 
