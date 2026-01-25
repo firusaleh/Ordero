@@ -243,15 +243,6 @@ function CheckoutFormContent({
 
   return (
     <div className="bg-white">
-      {/* Hidden Express Checkout for detection */}
-      <div className="hidden">
-        <ExpressCheckoutElement
-          onReady={onExpressCheckoutReady}
-          onClick={onExpressCheckoutClick}
-          onConfirm={onExpressCheckoutConfirm}
-        />
-      </div>
-
       {/* Price Breakdown */}
       <div className="px-6 py-6 border-b">
         <div className="space-y-2 mb-4 p-4 bg-gray-50 rounded-xl">
@@ -529,31 +520,29 @@ function CheckoutFormContent({
             </div>
           )}
 
-          {/* Apple Pay / Google Pay Express Checkout - shown when selected */}
-          {(selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY') && (
-            <div className="mt-2">
-              <ExpressCheckoutElement
-                onReady={onExpressCheckoutReady}
-                onClick={onExpressCheckoutClick}
-                onConfirm={onExpressCheckoutConfirm}
-                options={{
-                  buttonType: {
-                    applePay: 'buy',
-                    googlePay: 'buy'
-                  },
-                  buttonTheme: {
-                    applePay: 'black',
-                    googlePay: 'black'
-                  },
-                  buttonHeight: 56,
-                  paymentMethods: {
-                    applePay: selectedPaymentMethod === 'APPLE_PAY' ? 'always' : 'never',
-                    googlePay: selectedPaymentMethod === 'GOOGLE_PAY' ? 'always' : 'never'
-                  }
-                }}
-              />
-            </div>
-          )}
+          {/* Apple Pay / Google Pay Express Checkout - always rendered for detection, shown when selected */}
+          <div className={selectedPaymentMethod === 'APPLE_PAY' || selectedPaymentMethod === 'GOOGLE_PAY' ? 'mt-2' : 'hidden'}>
+            <ExpressCheckoutElement
+              onReady={onExpressCheckoutReady}
+              onClick={onExpressCheckoutClick}
+              onConfirm={onExpressCheckoutConfirm}
+              options={{
+                buttonType: {
+                  applePay: 'buy',
+                  googlePay: 'buy'
+                },
+                buttonTheme: {
+                  applePay: 'black',
+                  googlePay: 'black'
+                },
+                buttonHeight: 56,
+                paymentMethods: {
+                  applePay: 'auto',
+                  googlePay: 'auto'
+                }
+              }}
+            />
+          </div>
 
           {/* Cash */}
           <button
