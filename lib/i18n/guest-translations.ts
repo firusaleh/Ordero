@@ -96,7 +96,8 @@ export const guestTranslations = {
       cash: 'Bargeld',
       payNow: 'Jetzt bezahlen',
       placeOrder: 'Bestellung aufgeben',
-      confirmPayment: 'ادفع الآن'
+      confirmPayment: 'ادفع الآن',
+      splitBill: 'Rechnung teilen'
     },
     
     // Toast messages
@@ -445,9 +446,10 @@ export const guestTranslations = {
       cash: 'Cash',
       payNow: 'Pay Now',
       placeOrder: 'Place Order',
-      confirmPayment: 'Pay Now'
+      confirmPayment: 'Pay Now',
+      splitBill: 'Split the bill'
     },
-    
+
     // Toast messages
     toast: {
       addedToCart: 'added to cart',
@@ -794,9 +796,10 @@ export const guestTranslations = {
       cash: 'نقد',
       payNow: 'ادفع الآن',
       placeOrder: 'تأكيد الطلب',
-      confirmPayment: 'ادفع الآن'
+      confirmPayment: 'ادفع الآن',
+      splitBill: 'تقسيم الفاتورة'
     },
-    
+
     // Toast messages
     toast: {
       addedToCart: 'أضيف إلى السلة',

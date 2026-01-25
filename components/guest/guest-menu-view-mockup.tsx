@@ -116,7 +116,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [itemQuantity, setItemQuantity] = useState(1)
   const [showCheckout, setShowCheckout] = useState(false)
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
-  const [selectedTipOption, setSelectedTipOption] = useState<string>('10')
+  const [selectedTipOption, setSelectedTipOption] = useState<string>('0')
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [orderNumber, setOrderNumber] = useState('')

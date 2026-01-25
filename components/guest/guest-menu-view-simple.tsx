@@ -123,7 +123,7 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
   const [itemQuantity, setItemQuantity] = useState(1)
   const [showCheckout, setShowCheckout] = useState(false)
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('CARD')
-  const [selectedTipOption, setSelectedTipOption] = useState<string>('10')
+  const [selectedTipOption, setSelectedTipOption] = useState<string>('0')
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
 
   // Debug logging
