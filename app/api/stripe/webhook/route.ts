@@ -230,7 +230,6 @@ export async function POST(req: NextRequest) {
         await prisma.payment.create({
           data: {
             restaurantId: pendingPayment.restaurantId,
-            orderId: order.id,
             stripePaymentId: paymentIntent.id,
             amount: pendingPayment.total,
             currency: paymentIntent.currency,
