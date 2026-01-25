@@ -535,7 +535,7 @@ function CheckoutFormContent({
                   applePay: 'black',
                   googlePay: 'black'
                 },
-                buttonHeight: 56,
+                buttonHeight: 55,
                 paymentMethods: {
                   applePay: 'auto',
                   googlePay: 'auto'
