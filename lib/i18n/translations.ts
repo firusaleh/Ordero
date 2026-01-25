@@ -438,9 +438,17 @@ export const translations = {
         notConnected: 'غير متصل',
         testConnection: 'اختبار الاتصال'
       },
+      fees: {
+        title: 'الرسوم والعمولات',
+        description: 'إدارة رسوم الخدمة والعمولات'
+      },
+      customFees: {
+        title: 'رسوم مخصصة',
+        description: 'إضافة رسوم إضافية مخصصة'
+      },
       pos: {
-        title: 'تكامل نظام نقاط البيع',
-        description: 'ربط نظام الكاشير مع Oriido',
+        title: 'أنظمة نقاط البيع',
+        description: 'ربط نظام POS الخاص بك',
         posSystem: 'نظام نقاط البيع',
         selectSystem: 'اختر النظام',
         none: 'لا يوجد',
@@ -461,9 +469,23 @@ export const translations = {
         lastSync: 'آخر مزامنة',
         syncNow: 'مزامنة الآن'
       },
+      language: {
+        title: 'اللغة والمنطقة',
+        description: 'إعدادات اللغة والمنطقة الجغرافية'
+      },
       security: {
         title: 'الأمان',
-        description: 'إدارة إعدادات الأمان وصلاحيات الوصول',
+        description: 'إعدادات الأمان وكلمة المرور'
+      },
+      data: {
+        title: 'البيانات',
+        description: 'تصدير واستيراد البيانات'
+      },
+      help: {
+        title: 'تحتاج مساعدة؟',
+        description: 'اعثر على الإجابات في الوثائق أو اتصل بالدعم'
+      },
+      passwordSettings: {
         passwordPolicy: 'سياسة كلمات المرور',
         minimumLength: 'أقل طول',
         requireUppercase: 'يتطلب أحرف كبيرة',
@@ -511,90 +533,91 @@ export const translations = {
         accessControlUpdated: 'تم تحديث التحكم في الوصول',
         sessionTimeoutError: 'يجب أن يكون انتهاء الجلسة بين 5 و 1440 دقيقة',
         loginAttemptsError: 'يجب أن تكون محاولات تسجيل الدخول بين 1 و 10'
-      },
-      localization: {
-        title: 'الترجمة والإقليمية',
-        description: 'اللغة والعملة والمنطقة الزمنية',
-        defaultLanguage: 'اللغة الافتراضية',
-        supportedLanguages: 'اللغات المدعومة',
-        arabic: 'العربية',
-        english: 'الإنجليزية',
-        german: 'الألمانية',
-        turkish: 'التركية',
-        rtlSupport: 'دعم الكتابة من اليمين لليسار',
-        dateFormat: 'تنسيق التاريخ',
-        timeFormat: 'تنسيق الوقت',
-        numberFormat: 'تنسيق الأرقام',
-        currencySymbol: 'رمز العملة',
-        currencyPosition: 'موضع العملة',
-        before: 'قبل',
-        after: 'بعد',
-        decimalPlaces: 'المنازل العشرية'
-      },
-      fees: {
-        title: 'الرسوم والضرائب',
-        description: 'إدارة رسوم الخدمة وإعدادات الضرائب',
-        serviceCharge: 'رسوم الخدمة',
-        deliveryFee: 'رسوم التوصيل',
-        processingFee: 'رسوم المعالجة',
-        percentage: 'نسبة مئوية',
-        fixedAmount: 'مبلغ ثابت',
-        minimumOrderForFree: 'أقل طلب للإعفاء',
-        taxRate: 'معدل الضريبة',
-        taxIncluded: 'شامل الضريبة',
-        taxExcluded: 'غير شامل الضريبة',
-        feeStructure: 'هيكل الرسوم',
-        addFee: 'إضافة رسوم',
-        serviceFeeSettings: 'إعدادات رسوم الخدمة',
-        serviceFeeDescription: 'إضافة رسوم خدمة لجميع الطلبات',
-        enableServiceFee: 'تفعيل رسوم الخدمة',
-        serviceFeeNote: 'سيتم إضافة رسوم إضافية لكل طلب',
-        feeType: 'نوع الرسوم',
-        percentOfSubtotal: 'نسبة مئوية من المجموع الفرعي',
-        fixedAmountFee: 'مبلغ ثابت',
-        serviceFeePercent: 'رسوم الخدمة (%)',
-        serviceFeeAmount: 'رسوم الخدمة (المبلغ)',
-        taxSettings: 'إعدادات الضرائب',
-        taxSettingsDescription: 'تكوين ضريبة القيمة المضافة لأسعارك',
-        vatRate: 'معدل ضريبة القيمة المضافة (%)',
-        pricesIncludeTax: 'الأسعار تشمل ضريبة القيمة المضافة',
-        taxIncludedNote: 'أسعار القائمة تتضمن بالفعل ضريبة القيمة المضافة',
-        taxExcludedNote: 'سيتم إضافة ضريبة القيمة المضافة إلى أسعار القائمة',
-        exampleCalculation: 'مثال على الحساب',
-        exampleDescription: 'هكذا سيبدو الطلب بإعداداتك الحالية',
-        subtotal: 'المجموع الفرعي',
-        serviceFeeLabel: 'رسوم الخدمة',
-        vatLabel: 'ضريبة القيمة المضافة',
-        total: 'المجموع',
-        fixed: 'ثابت',
-        included: 'شامل',
-        additional: 'إضافي',
-        atAmount: 'عند',
-        equals: '=',
-        fixedFeeOf: 'رسوم ثابتة بقيمة',
-        perOrder: 'لكل طلب',
-        feesSaved: 'تم حفظ إعدادات الرسوم'
-      },
-      customFees: {
-        title: 'الرسوم المخصصة',
-        description: 'إنشاء رسوم إضافية مخصصة',
-        createFee: 'إنشاء رسوم',
-        feeName: 'اسم الرسوم',
-        feeDescription: 'وصف الرسوم',
-        feeType: 'نوع الرسوم',
-        feeAmount: 'مبلغ الرسوم',
-        applyTo: 'تطبيق على',
-        allOrders: 'جميع الطلبات',
-        deliveryOnly: 'التوصيل فقط',
-        dineInOnly: 'تناول الطعام داخلياً فقط',
-        takeawayOnly: 'الاصطحاب فقط',
-        minimumOrderValue: 'أقل قيمة طلب',
-        maximumOrderValue: 'أعلى قيمة طلب',
-        deleteFee: 'حذف الرسوم',
-        editFee: 'تعديل الرسوم',
-        noCustomFees: 'لا توجد رسوم مخصصة',
-        noCustomFeesDesc: 'قم بإنشاء رسوم مخصصة لطلباتك'
       }
+    },
+  localization: {
+      title: 'الترجمة والإقليمية',
+      description: 'اللغة والعملة والمنطقة الزمنية',
+      defaultLanguage: 'اللغة الافتراضية',
+      supportedLanguages: 'اللغات المدعومة',
+      arabic: 'العربية',
+      english: 'الإنجليزية',
+      german: 'الألمانية',
+      turkish: 'التركية',
+      rtlSupport: 'دعم الكتابة من اليمين لليسار',
+      dateFormat: 'تنسيق التاريخ',
+      timeFormat: 'تنسيق الوقت',
+      numberFormat: 'تنسيق الأرقام',
+      currencySymbol: 'رمز العملة',
+      currencyPosition: 'موضع العملة',
+      before: 'قبل',
+      after: 'بعد',
+      decimalPlaces: 'المنازل العشرية'
+    },
+    fees: {
+      title: 'الرسوم والضرائب',
+      description: 'إدارة رسوم الخدمة وإعدادات الضرائب',
+      serviceCharge: 'رسوم الخدمة',
+      deliveryFee: 'رسوم التوصيل',
+      processingFee: 'رسوم المعالجة',
+      percentage: 'نسبة مئوية',
+      fixedAmount: 'مبلغ ثابت',
+      minimumOrderForFree: 'أقل طلب للإعفاء',
+      taxRate: 'معدل الضريبة',
+      taxIncluded: 'شامل الضريبة',
+      taxExcluded: 'غير شامل الضريبة',
+      feeStructure: 'هيكل الرسوم',
+      addFee: 'إضافة رسوم',
+      serviceFeeSettings: 'إعدادات رسوم الخدمة',
+      serviceFeeDescription: 'إضافة رسوم خدمة لجميع الطلبات',
+      enableServiceFee: 'تفعيل رسوم الخدمة',
+      serviceFeeNote: 'سيتم إضافة رسوم إضافية لكل طلب',
+      feeType: 'نوع الرسوم',
+      percentOfSubtotal: 'نسبة مئوية من المجموع الفرعي',
+      fixedAmountFee: 'مبلغ ثابت',
+      serviceFeePercent: 'رسوم الخدمة (%)',
+      serviceFeeAmount: 'رسوم الخدمة (المبلغ)',
+      taxSettings: 'إعدادات الضرائب',
+      taxSettingsDescription: 'تكوين ضريبة القيمة المضافة لأسعارك',
+      vatRate: 'معدل ضريبة القيمة المضافة (%)',
+      pricesIncludeTax: 'الأسعار تشمل ضريبة القيمة المضافة',
+      taxIncludedNote: 'أسعار القائمة تتضمن بالفعل ضريبة القيمة المضافة',
+      taxExcludedNote: 'سيتم إضافة ضريبة القيمة المضافة إلى أسعار القائمة',
+      exampleCalculation: 'مثال على الحساب',
+      exampleDescription: 'هكذا سيبدو الطلب بإعداداتك الحالية',
+      subtotal: 'المجموع الفرعي',
+      serviceFeeLabel: 'رسوم الخدمة',
+      vatLabel: 'ضريبة القيمة المضافة',
+      total: 'المجموع',
+      fixed: 'ثابت',
+      included: 'شامل',
+      additional: 'إضافي',
+      atAmount: 'عند',
+      equals: '=',
+      fixedFeeOf: 'رسوم ثابتة بقيمة',
+      perOrder: 'لكل طلب',
+      feesSaved: 'تم حفظ إعدادات الرسوم'
+    },
+    customFees: {
+      title: 'الرسوم المخصصة',
+      description: 'إنشاء رسوم إضافية مخصصة',
+      createFee: 'إنشاء رسوم',
+      feeName: 'اسم الرسوم',
+      feeDescription: 'وصف الرسوم',
+      feeType: 'نوع الرسوم',
+      feeAmount: 'مبلغ الرسوم',
+      applyTo: 'تطبيق على',
+      allOrders: 'جميع الطلبات',
+      deliveryOnly: 'التوصيل فقط',
+      dineInOnly: 'تناول الطعام داخلياً فقط',
+      takeawayOnly: 'الاصطحاب فقط',
+      minimumOrderValue: 'أقل قيمة طلب',
+      maximumOrderValue: 'أعلى قيمة طلب',
+      deleteFee: 'حذف الرسوم',
+      editFee: 'تعديل الرسوم',
+      noCustomFees: 'لا توجد رسوم مخصصة',
+      noCustomFeesDesc: 'قم بإنشاء رسوم مخصصة لطلباتك'
+    }
     },
     // Guest Pages
     guest: {
@@ -1513,9 +1536,17 @@ export const translations = {
         notConnected: 'Nicht verbunden',
         testConnection: 'Verbindung testen'
       },
+      fees: {
+        title: 'Gebühren & Provisionen',
+        description: 'Servicegebühren und Provisionen verwalten'
+      },
+      customFees: {
+        title: 'Individuelle Gebühren',
+        description: 'Zusätzliche benutzerdefinierte Gebühren hinzufügen'
+      },
       pos: {
-        title: 'POS-System Integration',
-        description: 'Verbinden Sie Ihr Kassensystem mit Oriido',
+        title: 'Kassensystem',
+        description: 'Verbinden Sie Ihr POS-System',
         posSystem: 'POS-System',
         selectSystem: 'System auswählen',
         none: 'Keines',
@@ -1536,9 +1567,23 @@ export const translations = {
         lastSync: 'Letzte Synchronisation',
         syncNow: 'Jetzt synchronisieren'
       },
+      language: {
+        title: 'Sprache & Region',
+        description: 'Sprach- und Regionseinstellungen'
+      },
       security: {
         title: 'Sicherheit',
-        description: 'Passwörter und Zugriffsberechtigungen',
+        description: 'Sicherheits- und Passworteinstellungen'
+      },
+      data: {
+        title: 'Daten',
+        description: 'Daten exportieren und importieren'
+      },
+      help: {
+        title: 'Brauchen Sie Hilfe?',
+        description: 'Finden Sie Antworten in der Dokumentation oder kontaktieren Sie den Support'
+      },
+      passwordSettings: {
         passwordPolicy: 'Passwort-Richtlinien',
         minimumLength: 'Mindestlänge',
         requireUppercase: 'Großbuchstaben erforderlich',
@@ -1553,90 +1598,90 @@ export const translations = {
         dataRetention: 'Datenspeicherung',
         retentionPeriod: 'Aufbewahrungsdauer',
         autoDelete: 'Automatisches Löschen'
-      },
-      localization: {
-        title: 'Lokalisierung',
-        description: 'Sprache, Währung und Zeitzone',
-        defaultLanguage: 'Standardsprache',
-        supportedLanguages: 'Unterstützte Sprachen',
-        arabic: 'Arabisch',
-        english: 'Englisch',
-        german: 'Deutsch',
-        turkish: 'Türkisch',
-        rtlSupport: 'RTL-Unterstützung',
-        dateFormat: 'Datumsformat',
-        timeFormat: 'Zeitformat',
-        numberFormat: 'Zahlenformat',
-        currencySymbol: 'Währungssymbol',
-        currencyPosition: 'Währungsposition',
-        before: 'Vor',
-        after: 'Nach',
-        decimalPlaces: 'Dezimalstellen'
-      },
-      fees: {
-        title: 'Gebühren & Steuern',
-        description: 'Verwalten Sie Service-Gebühren und Steuereinstellungen',
-        serviceCharge: 'Servicegebühr',
-        deliveryFee: 'Liefergebühr',
-        processingFee: 'Bearbeitungsgebühr',
-        percentage: 'Prozentsatz',
-        fixedAmount: 'Fester Betrag',
-        minimumOrderForFree: 'Mindestbestellung für kostenlos',
-        taxRate: 'Steuersatz',
-        taxIncluded: 'Steuer inklusive',
-        taxExcluded: 'Steuer exklusive',
-        feeStructure: 'Gebührenstruktur',
-        addFee: 'Gebühr hinzufügen',
-        serviceFeeSettings: 'Service-Gebühr',
-        serviceFeeDescription: 'Fügen Sie eine Service-Gebühr zu allen Bestellungen hinzu',
-        enableServiceFee: 'Service-Gebühr aktivieren',
-        serviceFeeNote: 'Eine zusätzliche Gebühr wird zu jeder Bestellung hinzugefügt',
-        feeType: 'Gebührentyp',
-        percentOfSubtotal: 'Prozentual vom Zwischensumme',
-        fixedAmountFee: 'Fester Betrag',
-        serviceFeePercent: 'Service-Gebühr (%)',
-        serviceFeeAmount: 'Service-Gebühr (Betrag)',
-        taxSettings: 'Steuereinstellungen',
-        taxSettingsDescription: 'Konfigurieren Sie die Mehrwertsteuer für Ihre Preise',
-        vatRate: 'Steuersatz (%)',
-        pricesIncludeTax: 'Preise inkl. MwSt.',
-        taxIncludedNote: 'Menüpreise enthalten bereits die MwSt.',
-        taxExcludedNote: 'MwSt. wird zu den Menüpreisen hinzugefügt',
-        exampleCalculation: 'Beispielrechnung',
-        exampleDescription: 'So sieht eine Bestellung mit Ihren aktuellen Einstellungen aus',
-        subtotal: 'Zwischensumme',
-        serviceFeeLabel: 'Service-Gebühr',
-        vatLabel: 'MwSt.',
-        total: 'Gesamt',
-        fixed: 'Fest',
-        included: 'inkl.',
-        additional: 'zzgl.',
-        atAmount: 'Bei',
-        equals: '=',
-        fixedFeeOf: 'Feste Gebühr von',
-        perOrder: 'pro Bestellung',
-        feesSaved: 'Gebühreneinstellungen gespeichert'
-      },
-      customFees: {
-        title: 'Benutzerdefinierte Gebühren',
-        description: 'Erstellen Sie benutzerdefinierte Zusatzgebühren',
-        createFee: 'Gebühr erstellen',
-        feeName: 'Gebührenname',
-        feeDescription: 'Gebührenbeschreibung',
-        feeType: 'Gebührentyp',
-        feeAmount: 'Gebührenbetrag',
-        applyTo: 'Anwenden auf',
-        allOrders: 'Alle Bestellungen',
-        deliveryOnly: 'Nur Lieferung',
-        dineInOnly: 'Nur vor Ort',
-        takeawayOnly: 'Nur Abholung',
-        minimumOrderValue: 'Mindestbestellwert',
-        maximumOrderValue: 'Höchstbestellwert',
-        deleteFee: 'Gebühr löschen',
-        editFee: 'Gebühr bearbeiten',
-        noCustomFees: 'Keine benutzerdefinierten Gebühren',
-        noCustomFeesDesc: 'Erstellen Sie benutzerdefinierte Gebühren für Ihre Bestellungen'
       }
+    },
+  localization: {
+      title: 'Lokalisierung',
+      description: 'Sprache, Währung und Zeitzone',
+      defaultLanguage: 'Standardsprache',
+      supportedLanguages: 'Unterstützte Sprachen',
+      arabic: 'Arabisch',
+      english: 'Englisch',
+      german: 'Deutsch',
+      turkish: 'Türkisch',
+      rtlSupport: 'RTL-Unterstützung',
+      dateFormat: 'Datumsformat',
+      timeFormat: 'Zeitformat',
+      numberFormat: 'Zahlenformat',
+      currencySymbol: 'Währungssymbol',
+      currencyPosition: 'Währungsposition',
+      before: 'Vor',
+      after: 'Nach',
+      decimalPlaces: 'Dezimalstellen'
+    },
+    fees: {
+      title: 'Gebühren & Steuern',
+      description: 'Verwalten Sie Service-Gebühren und Steuereinstellungen',
+      serviceCharge: 'Servicegebühr',
+      deliveryFee: 'Liefergebühr',
+      processingFee: 'Bearbeitungsgebühr',
+      percentage: 'Prozentsatz',
+      fixedAmount: 'Fester Betrag',
+      minimumOrderForFree: 'Mindestbestellung für kostenlos',
+      taxRate: 'Steuersatz',
+      taxIncluded: 'Steuer inklusive',
+      taxExcluded: 'Steuer exklusive',
+      feeStructure: 'Gebührenstruktur',
+      addFee: 'Gebühr hinzufügen',
+      serviceFeeSettings: 'Service-Gebühr',
+      serviceFeeDescription: 'Fügen Sie eine Service-Gebühr zu allen Bestellungen hinzu',
+      enableServiceFee: 'Service-Gebühr aktivieren',
+      serviceFeeNote: 'Eine zusätzliche Gebühr wird zu jeder Bestellung hinzugefügt',
+      feeType: 'Gebührentyp',
+      percentOfSubtotal: 'Prozentual vom Zwischensumme',
+      fixedAmountFee: 'Fester Betrag',
+      serviceFeePercent: 'Service-Gebühr (%)',
+      serviceFeeAmount: 'Service-Gebühr (Betrag)',
+      taxSettings: 'Steuereinstellungen',
+      taxSettingsDescription: 'Konfigurieren Sie die Mehrwertsteuer für Ihre Preise',
+      vatRate: 'Steuersatz (%)',
+      pricesIncludeTax: 'Preise inkl. MwSt.',
+      taxIncludedNote: 'Menüpreise enthalten bereits die MwSt.',
+      taxExcludedNote: 'MwSt. wird zu den Menüpreisen hinzugefügt',
+      exampleCalculation: 'Beispielrechnung',
+      exampleDescription: 'So sieht eine Bestellung mit Ihren aktuellen Einstellungen aus',
+      subtotal: 'Zwischensumme',
+      serviceFeeLabel: 'Service-Gebühr',
+      vatLabel: 'MwSt.',
+      total: 'Gesamt',
+      fixed: 'Fest',
+      included: 'inkl.',
+      additional: 'zzgl.',
+      atAmount: 'Bei',
+      equals: '=',
+      fixedFeeOf: 'Feste Gebühr von',
+      perOrder: 'pro Bestellung',
+      feesSaved: 'Gebühreneinstellungen gespeichert'
+    },
+    customFees: {
+      title: 'Benutzerdefinierte Gebühren',
+      description: 'Erstellen Sie benutzerdefinierte Zusatzgebühren',
+      createFee: 'Gebühr erstellen',
+      feeName: 'Gebührenname',
+      feeDescription: 'Gebührenbeschreibung',
+      feeType: 'Gebührentyp',
+      feeAmount: 'Gebührenbetrag',
+      applyTo: 'Anwenden auf',
+      allOrders: 'Alle Bestellungen',
+      deliveryOnly: 'Nur Lieferung',
+      dineInOnly: 'Nur vor Ort',
+      takeawayOnly: 'Nur Abholung',
+      minimumOrderValue: 'Mindestbestellwert',
+      maximumOrderValue: 'Höchstbestellwert',
+      deleteFee: 'Gebühr löschen',
+      editFee: 'Gebühr bearbeiten',
+      noCustomFees: 'Keine benutzerdefinierten Gebühren',
+      noCustomFeesDesc: 'Erstellen Sie benutzerdefinierte Gebühren für Ihre Bestellungen'
     },
     // Guest Pages
     guest: {
@@ -2302,6 +2347,64 @@ export const translations = {
       unknownTable: 'Unknown Table',
       newOrder: 'New Order',
       newOrderDesc: 'New order from {{table}}'
+    },
+    // Settings
+    settings: {
+      title: 'Settings',
+      subtitle: 'Manage your restaurant settings',
+      general: {
+        title: 'General Settings',
+        description: 'Restaurant information and basic settings'
+      },
+      location: {
+        title: 'Location',
+        description: 'Restaurant address and location information'
+      },
+      design: {
+        title: 'Design & Appearance',
+        description: 'Customize colors, logo and branding'
+      },
+      features: {
+        title: 'Advanced Features',
+        description: 'Opening hours, images and notifications'
+      },
+      payments: {
+        title: 'Payment Methods',
+        description: 'Set up accepted payment types'
+      },
+      fees: {
+        title: 'Fees & Commissions',
+        description: 'Manage service fees and commissions'
+      },
+      customFees: {
+        title: 'Custom Fees',
+        description: 'Add additional custom fees'
+      },
+      pos: {
+        title: 'POS Systems',
+        description: 'Connect your POS system'
+      },
+      language: {
+        title: 'Language & Region',
+        description: 'Language and region settings'
+      },
+      security: {
+        title: 'Security',
+        description: 'Security and password settings'
+      },
+      data: {
+        title: 'Data',
+        description: 'Export and import data'
+      },
+      help: {
+        title: 'Need Help?',
+        description: 'Find answers in the documentation or contact support'
+      }
+    },
+    // Common
+    common: {
+      documentation: 'Documentation',
+      support: 'Support'
     }
   }
 };
