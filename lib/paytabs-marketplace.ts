@@ -2,7 +2,7 @@ import { PAYTABS_CONFIG, getPayTabsHeaders, isPayTabsConfigured } from './paytab
 
 // PayTabs Marketplace Konfiguration
 const MARKETPLACE_CONFIG = {
-  platformFeePercent: parseFloat(process.env.PAYTABS_PLATFORM_FEE || '2.5'), // 2.5% Plattformgebühr
+  platformFeeFixed: 0.45, // Fixe Plattformgebühr von 0.45 EUR pro Bestellung
   settlementPeriod: process.env.PAYTABS_SETTLEMENT_PERIOD || 'daily', // daily, weekly, monthly
   autoTransfer: process.env.PAYTABS_AUTO_TRANSFER === 'true', // Automatische Überweisung
 }
@@ -129,7 +129,7 @@ export async function createSplitPayment(orderData: {
   customerEmail: string
   customerPhone: string
   vendorId: string // Restaurant's PayTabs Vendor ID
-  platformFeePercent?: number // Optional: Override default platform fee
+  platformFeeFixed?: number // Optional: Override default platform fee in amount (0.45 EUR)
   returnUrl: string
   callbackUrl: string
 }) {
@@ -137,8 +137,8 @@ export async function createSplitPayment(orderData: {
     return null
   }
 
-  const platformFee = orderData.platformFeePercent || MARKETPLACE_CONFIG.platformFeePercent
-  const platformAmount = parseFloat((orderData.amount * (platformFee / 100)).toFixed(2))
+  // Fixe Plattformgebühr von 0.45 EUR (oder custom)
+  const platformAmount = orderData.platformFeeFixed || MARKETPLACE_CONFIG.platformFeeFixed
   const vendorAmount = parseFloat((orderData.amount - platformAmount).toFixed(2))
 
   const payload = {
@@ -156,18 +156,16 @@ export async function createSplitPayment(orderData: {
       phone: orderData.customerPhone,
       country: 'JO'
     },
-    // Split Payment Configuration
-    split_type: 'percentage', // oder 'amount'
+    // Split Payment Configuration mit fixen Beträgen
+    split_type: 'amount', // Feste Beträge statt Prozentsätze
     split_vendors: [
       {
         vendor_id: orderData.vendorId,
-        vendor_amount: vendorAmount,
-        vendor_percentage: 100 - platformFee
+        vendor_amount: vendorAmount
       },
       {
         vendor_id: 'platform', // Platform vendor ID
-        vendor_amount: platformAmount,
-        vendor_percentage: platformFee
+        vendor_amount: platformAmount
       }
     ],
     callback: orderData.callbackUrl,
@@ -299,9 +297,9 @@ export async function getVendorTransactions(
 }
 
 // Berechne Platform Fee für Anzeige
-export function calculatePlatformFee(amount: number, customFeePercent?: number) {
-  const feePercent = customFeePercent || MARKETPLACE_CONFIG.platformFeePercent
-  const platformFee = amount * (feePercent / 100)
+export function calculatePlatformFee(amount: number, customFeeFixed?: number) {
+  // Fixe Gebühr von 0.45 EUR pro Bestellung
+  const platformFee = customFeeFixed || MARKETPLACE_CONFIG.platformFeeFixed
   const vendorAmount = amount - platformFee
   
   return {

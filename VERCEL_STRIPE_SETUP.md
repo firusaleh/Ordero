@@ -30,10 +30,11 @@ Die Stripe-Integration funktioniert nicht auf www.oriido.com, weil die Umgebungs
 - **Value:** `whsec_test_secret` (Temporär, später durch echten Webhook Secret ersetzen)
 - **Environment:** ✅ Production, ✅ Preview, ✅ Development
 
-#### STRIPE_CONNECT_PLATFORM_FEE_PERCENTAGE
-- **Key:** `STRIPE_CONNECT_PLATFORM_FEE_PERCENTAGE`
-- **Value:** `2.5`
+#### STRIPE_CONNECT_PLATFORM_FEE_FIXED
+- **Key:** `STRIPE_CONNECT_PLATFORM_FEE_FIXED`
+- **Value:** `45` (in Cents, entspricht 0.45 EUR)
 - **Environment:** ✅ Production, ✅ Preview, ✅ Development
+- **Hinweis:** Dies ist eine Fixgebühr pro Bestellung, keine prozentuale Gebühr
 
 ### 4. Speichern und Neu deployen
 1. Klicke auf **Save** für jede Variable
@@ -72,3 +73,16 @@ Falls es immer noch nicht funktioniert:
 1. Prüfe ob das Deployment erfolgreich war
 2. Schaue in die Vercel Function Logs: **Functions** → **api/stripe-connect/onboarding** → **Logs**
 3. Dort siehst du die genaue Fehlermeldung
+
+## Gebührenstruktur
+
+- **Plattformgebühr**: 0.45 EUR pro Bestellung (Fixbetrag)
+- **Restaurant erhält**: Bestellbetrag minus 0.45 EUR
+- **Automatische Verteilung**: Nur mit Stripe Connect möglich
+
+### Was passiert wenn Stripe Connect nicht eingerichtet ist?
+
+1. **Fallback Modus**: Das System wechselt automatisch in den "DIRECT_FALLBACK" Modus
+2. **Zahlungsfluss**: Alle Zahlungen gehen direkt an das Oriido Hauptkonto
+3. **Keine automatische Verteilung**: Die automatische Abzügung der 0.45 EUR Plattformgebühr funktioniert nicht
+4. **Manuelle Überweisung**: Oriido muss das Geld manuell an die Restaurants überweisen (abzüglich 0.45 EUR Gebühr)

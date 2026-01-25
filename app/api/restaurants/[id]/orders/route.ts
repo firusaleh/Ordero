@@ -18,6 +18,12 @@ export async function GET(
     // Await params
     const { id } = await params
     
+    console.log('[ORDERS GET] Fetching orders for restaurant:', {
+      restaurantId: id,
+      userId: session.user.id,
+      userRole: session.user.role
+    })
+    
     // Prüfe Berechtigung
     if (session.user.role !== "SUPER_ADMIN") {
       const hasAccess = await prisma.restaurant.findFirst({
@@ -69,6 +75,11 @@ export async function GET(
       }
     }
     
+    console.log('[ORDERS GET] Query parameters:', {
+      where,
+      limit
+    })
+    
     // Hole Bestellungen
     const orders = await prisma.order.findMany({
       where,
@@ -84,6 +95,11 @@ export async function GET(
         createdAt: "desc"
       },
       take: limit
+    })
+    
+    console.log('[ORDERS GET] Found orders:', {
+      count: orders.length,
+      orderIds: orders.slice(0, 5).map(o => ({ id: o.id, orderNumber: o.orderNumber, restaurantId: o.restaurantId }))
     })
     
     // Formatiere Daten für Frontend

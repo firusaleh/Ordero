@@ -16,8 +16,8 @@ const stripe = isValidKey ? new Stripe(stripeSecretKey!, {
   apiVersion: '2024-11-20.acacia' as any,
 }) : null;
 
-// Plattformgebühr in Prozent
-const PLATFORM_FEE_PERCENTAGE = 2.5; // 2.5% Plattformgebühr
+// Plattformgebühr als Fixbetrag in Cents
+const PLATFORM_FEE_CENTS = 45; // 0.45 EUR Fixgebühr pro Bestellung
 
 interface CartItem {
   menuItemId: string;
@@ -134,15 +134,16 @@ export async function POST(req: NextRequest) {
 
     } else {
       // NORMAL: Verwende Stripe Connect mit automatischem Transfer
-      const platformFee = Math.round(amount * (PLATFORM_FEE_PERCENTAGE / 100));
-
+      // Fixe Plattformgebühr von 0.45 EUR (45 Cents) pro Bestellung
+      const platformFee = PLATFORM_FEE_CENTS;
+      
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
         payment_method_types: ['card'],
         description: `${tableInfo} bei ${restaurant.name}`,
         statement_descriptor_suffix: statementSuffix,
-        application_fee_amount: platformFee, // Plattformgebühr
+        application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
         transfer_data: {
           destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
         },
@@ -152,7 +153,8 @@ export async function POST(req: NextRequest) {
           restaurantName: restaurant.name,
           tableNumber: tableNumber?.toString() || '',
           platform: 'Oriido',
-          paymentType: 'STRIPE_CONNECT'
+          paymentType: 'STRIPE_CONNECT',
+          platformFee: `${platformFee} cents`
         }
       });
     }
@@ -163,14 +165,15 @@ export async function POST(req: NextRequest) {
       data: { paymentIntentId: paymentIntent.id }
     });
 
-    const platformFee = isDirectPayment ? 0 : Math.round(amount * (PLATFORM_FEE_PERCENTAGE / 100));
-
+    // Bei Direktzahlung keine Gebühr, sonst fixe 0.45 EUR
+    const platformFee = isDirectPayment ? 0 : PLATFORM_FEE_CENTS;
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       pendingPaymentId: pendingPayment.id,
       paymentIntentId: paymentIntent.id,
       amount: amount,
       platformFee: platformFee,
+      platformFeeEUR: platformFee / 100, // Gebühr in EUR für Frontend-Anzeige
       restaurantAmount: amount - platformFee,
       isDirectPayment: isDirectPayment,
       warning: isDirectPayment ? 'Restaurant hat kein Stripe Connect. Zahlung erfolgt direkt an Plattform.' : null

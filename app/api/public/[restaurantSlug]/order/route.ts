@@ -135,6 +135,19 @@ export async function POST(
     const orderPrefix = settings?.orderPrefix || 'ORD'
     const orderNumber = `${orderPrefix}-${String(count + 1).padStart(5, '0')}`
 
+    // Debug-Logging für Restaurant
+    console.log('[ORDER CREATE] Creating order for restaurant:', {
+      restaurantId: restaurant.id,
+      restaurantName: restaurant.name,
+      restaurantSlug: restaurant.slug,
+      stripeAccountId: restaurant.stripeAccountId,
+      stripeOnboardingCompleted: restaurant.stripeOnboardingCompleted,
+      orderNumber,
+      tableNumber,
+      total,
+      paymentMethod: paymentMethod || 'CASH'
+    })
+
     // Erstelle Bestellung
     const order = await prisma.order.create({
       data: {
@@ -165,6 +178,13 @@ export async function POST(
       }
     })
 
+    console.log('[ORDER CREATE] Order created successfully:', {
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      restaurantId: order.restaurantId,
+      status: order.status
+    })
+
     // Automatische Abrechnung für Jordanien Pay-per-Order
     if (restaurant.country === 'JO' && restaurant.payPerOrderEnabled && restaurant.payPerOrderRate) {
       try {
@@ -185,6 +205,17 @@ export async function POST(
         // Billing-Fehler sollten die Bestellung nicht verhindern
         console.error('Fehler bei der automatischen Abrechnung:', billingError)
       }
+    }
+
+    // WICHTIG: Prüfe ob Restaurant Stripe Connect hat für spätere Zahlungen
+    if (!restaurant.stripeAccountId || !restaurant.stripeOnboardingCompleted) {
+      console.warn('[STRIPE WARNING] Restaurant hat kein Stripe Connect eingerichtet:', {
+        restaurantId: restaurant.id,
+        name: restaurant.name,
+        stripeAccountId: restaurant.stripeAccountId,
+        onboardingCompleted: restaurant.stripeOnboardingCompleted,
+        info: 'Zahlungen werden direkt an Oriido gehen und müssen manuell übertragen werden'
+      })
     }
 
     // E-Mail-Benachrichtigungen senden

@@ -333,9 +333,10 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
         
         if (result.clientSecret) {
           setClientSecret(result.clientSecret)
-          console.log('Payment Intent created with platform fee:', {
+          console.log('Payment Intent created with fixed platform fee:', {
             total: result.amount,
-            platformFee: result.platformFee,
+            platformFeeCents: result.platformFee,
+            platformFeeEUR: result.platformFeeEUR || (result.platformFee / 100),
             restaurantAmount: result.restaurantAmount
           })
         } else {

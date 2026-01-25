@@ -376,9 +376,12 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
         if (result.clientSecret && result.pendingPaymentId) {
           setClientSecret(result.clientSecret)
           setPendingPaymentId(result.pendingPaymentId)
-          console.log('Payment Intent created:', {
+          console.log('Payment Intent created with fixed platform fee:', {
             pendingPaymentId: result.pendingPaymentId,
-            total: result.amount
+            total: result.amount,
+            platformFeeCents: result.platformFee,
+            platformFeeEUR: result.platformFeeEUR || (result.platformFee / 100),
+            restaurantAmount: result.restaurantAmount
           })
         } else {
           throw new Error(result.error || 'Payment intent could not be created')
