@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        
+
         // Speichere fehlgeschlagene Zahlung
         if ((invoice as any).subscription && (invoice as any).metadata?.restaurantId) {
           await prisma.payment.create({
@@ -143,6 +143,104 @@ export async function POST(req: NextRequest) {
           // Optional: Sende E-Mail-Benachrichtigung
           // await sendPaymentFailedEmail(...)
         }
+        break
+      }
+
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.log('Payment Intent Succeeded:', paymentIntent.id)
+
+        // Get pendingPaymentId from metadata
+        const pendingPaymentId = paymentIntent.metadata?.pendingPaymentId
+
+        if (!pendingPaymentId) {
+          console.log('No pendingPaymentId in metadata, skipping order creation')
+          break
+        }
+
+        // Find the pending payment
+        const pendingPayment = await prisma.pendingPayment.findUnique({
+          where: { id: pendingPaymentId }
+        })
+
+        if (!pendingPayment) {
+          console.error('PendingPayment not found:', pendingPaymentId)
+          break
+        }
+
+        // Check if order already exists (avoid duplicates)
+        if (pendingPayment.orderId) {
+          console.log('Order already created for this payment:', pendingPayment.orderId)
+          break
+        }
+
+        // Generate order number
+        const orderCount = await prisma.order.count({
+          where: { restaurantId: pendingPayment.restaurantId }
+        })
+        const orderNumber = `ORD-${String(orderCount + 1).padStart(5, '0')}`
+
+        // Create the order
+        const order = await prisma.order.create({
+          data: {
+            orderNumber,
+            restaurantId: pendingPayment.restaurantId,
+            tableId: pendingPayment.tableId,
+            status: 'PENDING',
+            paymentStatus: 'PAID',
+            paymentMethod: 'CARD',
+            subtotal: pendingPayment.subtotal,
+            tax: pendingPayment.tax,
+            tip: pendingPayment.tip,
+            total: pendingPayment.total,
+            items: {
+              create: (pendingPayment.items as any[]).map((item: any) => ({
+                menuItemId: item.menuItemId,
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.quantity * item.unitPrice,
+                notes: item.notes || null,
+                selectedVariant: item.variantName ? {
+                  id: item.variantId,
+                  name: item.variantName
+                } : undefined,
+                selectedExtras: item.extraNames?.length > 0 ? item.extraNames.map((name: string, idx: number) => ({
+                  id: item.extraIds[idx],
+                  name: name,
+                  price: item.extraPrices[idx]
+                })) : undefined
+              }))
+            }
+          }
+        })
+
+        console.log('Order created:', order.id, order.orderNumber)
+
+        // Update pending payment with order info
+        await prisma.pendingPayment.update({
+          where: { id: pendingPaymentId },
+          data: {
+            orderId: order.id,
+            orderNumber: order.orderNumber
+          }
+        })
+
+        // Create payment record for revenue tracking
+        await prisma.payment.create({
+          data: {
+            restaurantId: pendingPayment.restaurantId,
+            orderId: order.id,
+            stripePaymentId: paymentIntent.id,
+            amount: pendingPayment.total,
+            currency: paymentIntent.currency,
+            status: 'SUCCESS',
+            type: 'ORDER',
+            description: `Bestellung ${order.orderNumber}${pendingPayment.tableNumber ? ` - Tisch ${pendingPayment.tableNumber}` : ''}`
+          }
+        })
+
+        console.log('Payment record created for order:', order.orderNumber)
         break
       }
 
