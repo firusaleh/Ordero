@@ -123,7 +123,7 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
   const [showCustomTip, setShowCustomTip] = useState<boolean>(false)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
   const [orderNumber, setOrderNumber] = useState('')
-  const [createdOrderId, setCreatedOrderId] = useState<string>('')
+  const [pendingPaymentId, setPendingPaymentId] = useState<string>('')
 
   // Use restaurant's primary color or fallback to orange
   const primaryColor = restaurant.primaryColor || '#FF6B35'
@@ -210,6 +210,16 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
 
   const handleOrder = async (tipPercent: number, tipAmount: number, paymentMethod: string) => {
     setCurrentTipAmount(tipAmount)
+
+    // For CARD payments: Don't create order yet, show Stripe checkout
+    // Order will be created by webhook after successful payment
+    if (paymentMethod === 'CARD') {
+      setShowCheckout(false)
+      setShowStripeCheckout(true)
+      return
+    }
+
+    // For CASH payments: Create order immediately
     setIsOrdering(true)
 
     try {
@@ -228,7 +238,6 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         tipPercent
       }
 
-      // Always create order first
       const response = await fetch(`/api/public/${restaurant.slug}/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -254,18 +263,9 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         }))
 
         setOrderNumber(orderNum)
-        setCreatedOrderId(orderId)
-
-        if (paymentMethod === 'CARD') {
-          // For CARD: Order created, now show Stripe checkout
-          setShowCheckout(false)
-          setShowStripeCheckout(true)
-        } else {
-          // For CASH: Show success dialog immediately
-          setCart([])
-          setShowCheckout(false)
-          setShowSuccessDialog(true)
-        }
+        setCart([])
+        setShowCheckout(false)
+        setShowSuccessDialog(true)
       } else {
         throw new Error('Order failed')
       }
@@ -1065,54 +1065,53 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
         </DialogContent>
       </Dialog>
 
-      {/* Stripe Checkout - Only show when we have a valid order ID */}
-      {showStripeCheckout && createdOrderId && (
+      {/* Stripe Checkout - Pass cart data, order created after payment */}
+      {showStripeCheckout && (
         <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
           <DialogContent className="max-w-md rounded-3xl">
             <DialogTitle className="sr-only">Stripe Zahlung</DialogTitle>
             <DialogDescription className="sr-only">Sichere Zahlung mit Stripe</DialogDescription>
             <StripeCheckout
               restaurantId={restaurant.id}
-              orderId={createdOrderId}
+              tableId={table?.id}
               tableNumber={tableNumber}
               amount={getCartTotal() + (getCartTotal() * 0.19) + currentTipAmount}
               tip={currentTipAmount}
               currency={currency}
-              onSuccess={(paymentIntentId) => {
+              cartData={{
+                items: cart.map(item => ({
+                  menuItemId: item.menuItem.id,
+                  name: item.menuItem.name,
+                  quantity: item.quantity,
+                  unitPrice: item.variant?.price || item.menuItem.price,
+                  variantId: item.variant?.id,
+                  variantName: item.variant?.name,
+                  extraIds: item.extras.map(e => e.id),
+                  extraNames: item.extras.map(e => e.name),
+                  extraPrices: item.extras.map(e => e.price),
+                  notes: item.notes
+                })),
+                subtotal: getCartTotal(),
+                tax: getCartTotal() * 0.19,
+                tip: currentTipAmount
+              }}
+              onSuccess={async (pendingPaymentId: string, orderNumber: string) => {
+                // Save to order history
+                const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
+                const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+                storedOrderIds.push(pendingPaymentId)
+                localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
+
+                setOrderNumber(orderNumber)
                 setCart([])
                 setShowStripeCheckout(false)
                 setShowSuccessDialog(true)
               }}
-              onError={async (error) => {
+              onError={(error) => {
                 toast.error(`Error: ${error}`)
-                // Cancel the order if payment fails
-                if (createdOrderId) {
-                  try {
-                    await fetch(`/api/orders/${createdOrderId}/cancel`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ reason: 'Payment failed' })
-                    })
-                  } catch (e) {
-                    console.error('Failed to cancel order:', e)
-                  }
-                }
               }}
-              onCancel={async () => {
+              onCancel={() => {
                 setShowStripeCheckout(false)
-                // Cancel the order if user cancels payment
-                if (createdOrderId) {
-                  try {
-                    await fetch(`/api/orders/${createdOrderId}/cancel`, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ reason: 'User cancelled payment' })
-                    })
-                  } catch (e) {
-                    console.error('Failed to cancel order:', e)
-                  }
-                }
-                setCreatedOrderId('')
               }}
             />
           </DialogContent>

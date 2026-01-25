@@ -31,33 +31,55 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   : null
 
+interface CartItem {
+  menuItemId: string
+  name: string
+  quantity: number
+  unitPrice: number
+  variantId?: string
+  variantName?: string
+  extraIds: string[]
+  extraNames: string[]
+  extraPrices: number[]
+  notes?: string
+}
+
+interface CartData {
+  items: CartItem[]
+  subtotal: number
+  tax: number
+  tip: number
+}
+
 interface StripeCheckoutProps {
   amount: number
   currency: string
-  orderId: string
   restaurantId: string
+  tableId?: string
   tableNumber?: number
   tip: number
-  onSuccess: (paymentIntentId: string) => void
+  cartData: CartData
+  onSuccess: (pendingPaymentId: string, orderNumber: string) => void
   onError: (error: string) => void
   onCancel: () => void
 }
 
 interface CheckoutFormProps extends StripeCheckoutProps {
   clientSecret: string
+  pendingPaymentId: string
 }
 
 type PaymentMethod = 'apple_pay' | 'google_pay' | 'card'
 
 // Hauptkomponente für Checkout
-function CheckoutForm({ 
-  amount, 
-  currency, 
-  orderId, 
-  restaurantId, 
-  tip, 
+function CheckoutForm({
+  amount,
+  currency,
+  restaurantId,
+  tip,
   clientSecret,
-  onSuccess, 
+  pendingPaymentId,
+  onSuccess,
   onError,
   onCancel
 }: CheckoutFormProps) {
@@ -128,27 +150,40 @@ function CheckoutForm({
 
       if (paymentIntent?.status === 'succeeded') {
         try {
-          // WICHTIG: Verwende stripe-connect Route für Bestätigung!
-          const confirmResponse = await fetch('/api/stripe-connect/create-payment', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              paymentIntentId: paymentIntent.id
-            })
-          })
+          // Poll for order creation (webhook creates the order)
+          let orderNumber = ''
+          let attempts = 0
+          const maxAttempts = 30 // 30 seconds max
 
-          const confirmResult = await confirmResponse.json()
-          
-          if (confirmResult.success) {
-            toast.success('Zahlung erfolgreich!')
-            onSuccess(paymentIntent.id)
-          } else {
-            throw new Error(confirmResult.error || 'Zahlungsbestätigung fehlgeschlagen')
+          while (attempts < maxAttempts) {
+            const statusResponse = await fetch(`/api/payments/${pendingPaymentId}/status`)
+            const statusResult = await statusResponse.json()
+
+            if (statusResult.status === 'completed' && statusResult.orderNumber) {
+              orderNumber = statusResult.orderNumber
+              break
+            }
+
+            if (statusResult.status === 'failed') {
+              throw new Error('Order creation failed')
+            }
+
+            // Wait 1 second before next poll
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            attempts++
           }
+
+          if (!orderNumber) {
+            throw new Error('Timeout waiting for order confirmation')
+          }
+
+          toast.success('Zahlung erfolgreich!')
+          onSuccess(pendingPaymentId, orderNumber)
         } catch (confirmError) {
           console.error('Payment confirmation error:', confirmError)
-          toast.error('Zahlung erfolgreich, aber Bestätigung fehlgeschlagen.')
-          onError('Zahlungsbestätigung fehlgeschlagen')
+          toast.error('Zahlung erfolgreich, aber Bestellbestätigung verzögert.')
+          // Still call success but with empty order number - order will be created by webhook
+          onSuccess(pendingPaymentId, '')
         }
       }
     } catch (error) {
@@ -301,11 +336,9 @@ function CheckoutForm({
 export default function StripeCheckout(props: StripeCheckoutProps) {
   const { t } = useGuestLanguage()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [paymentProvider, setPaymentProvider] = useState<'stripe' | 'paytabs'>('stripe')
-  const [fallbackMessage, setFallbackMessage] = useState<string | null>(null)
-  const [shouldUsePayTabs, setShouldUsePayTabs] = useState(false)
 
   if (!stripePromise) {
     return (
@@ -322,38 +355,30 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
 
   useEffect(() => {
     const createPaymentIntent = async () => {
-      // Validate orderId before creating payment intent
-      if (!props.orderId || props.orderId.length !== 24) {
-        console.error('Invalid orderId:', props.orderId)
-        setError('Bestellung konnte nicht verarbeitet werden. Bitte versuchen Sie es erneut.')
-        setIsLoading(false)
-        return
-      }
-
       try {
-        // WICHTIG: Verwende stripe-connect Route für korrekte Geldverteilung!
+        // Create pending payment and get payment intent
         const response = await fetch('/api/stripe-connect/create-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            orderId: props.orderId,
-            amount: Math.round((props.amount + props.tip) * 100), // Konvertiere zu Cents
-            currency: props.currency.toLowerCase(),
             restaurantId: props.restaurantId,
-            tableNumber: props.tableNumber
+            tableId: props.tableId,
+            tableNumber: props.tableNumber,
+            amount: Math.round(props.amount * 100), // Convert to cents
+            currency: props.currency.toLowerCase(),
+            cartData: props.cartData
           })
         })
 
         const result = await response.json()
         console.log('Payment intent result:', result)
-        
-        if (result.clientSecret) {
+
+        if (result.clientSecret && result.pendingPaymentId) {
           setClientSecret(result.clientSecret)
-          setPaymentProvider('stripe')
-          console.log('Payment Intent created with platform fee:', {
-            total: result.amount,
-            platformFee: result.platformFee,
-            restaurantAmount: result.restaurantAmount
+          setPendingPaymentId(result.pendingPaymentId)
+          console.log('Payment Intent created:', {
+            pendingPaymentId: result.pendingPaymentId,
+            total: result.amount
           })
         } else {
           throw new Error(result.error || 'Payment intent could not be created')
@@ -367,12 +392,7 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
     }
 
     createPaymentIntent()
-  }, [props.orderId, props.amount, props.currency, props.restaurantId, props.tip])
-
-  // If PayTabs should be used, render PayTabs component
-  if (shouldUsePayTabs) {
-    return <PayTabsCheckout {...props} />
-  }
+  }, [props.restaurantId, props.amount, props.currency, props.cartData])
 
   if (isLoading) {
     return (
@@ -383,7 +403,7 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
     )
   }
 
-  if (error || !clientSecret) {
+  if (error || !clientSecret || !pendingPaymentId) {
     return (
       <div className="max-w-md mx-auto p-4">
         <Alert variant="destructive">
@@ -418,7 +438,11 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
 
   return (
     <Elements stripe={stripePromise} options={stripeOptions}>
-      <CheckoutForm {...props} clientSecret={clientSecret} />
+      <CheckoutForm
+        {...props}
+        clientSecret={clientSecret}
+        pendingPaymentId={pendingPaymentId}
+      />
     </Elements>
   )
 }

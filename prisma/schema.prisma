@@ -118,7 +118,8 @@ model Restaurant {
   invoices    Invoice[]
   reservations Reservation[]
   preOrders   PreOrder[]
-  
+  pendingPayments PendingPayment[]
+
   // Stripe Platform (für Abonnements)
   stripeCustomerId       String?
   stripeSubscriptionId   String?
@@ -645,18 +646,55 @@ model Payment {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   restaurantId  String   @db.ObjectId
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  
+
   amount        Float
   currency      String   @default("EUR")
   status        String   @default("PENDING") // PENDING, SUCCESS, FAILED, REFUNDED
   type          String   // ORDER, SUBSCRIPTION, SETUP_FEE
-  
+
   // Stripe
   stripePaymentId String?
   stripeInvoiceId String?
-  
+
   description   String?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Temporary storage for cart data before payment is confirmed
+model PendingPayment {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  restaurantId    String   @db.ObjectId
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  // Table info
+  tableId         String?  @db.ObjectId
+  tableNumber     Int?
+
+  // Order data (stored as JSON)
+  items           Json     // Cart items: [{menuItemId, quantity, variantId, extraIds, notes, unitPrice}]
+
+  // Amounts
+  subtotal        Float
+  tax             Float
+  serviceFee      Float    @default(0)
+  tip             Float    @default(0)
+  total           Float
+
+  // Guest info
+  guestName       String?
+  guestEmail      String?
+  guestPhone      String?
+
+  // Payment tracking
+  paymentIntentId String?
+
+  // After order is created
+  orderId         String?  @db.ObjectId
+  orderNumber     String?
+
+  // Timestamps
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime // Auto-cleanup after 1 hour
 }

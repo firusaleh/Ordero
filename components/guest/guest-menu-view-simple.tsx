@@ -336,8 +336,13 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
     }
   }
 
-  const handleStripeSuccess = (paymentIntentId: string) => {
-    // Bestellung wurde bereits im Backend bestätigt, nur UI aufräumen
+  const handleStripeSuccess = async (pendingPaymentId: string, orderNumber: string) => {
+    // Save to order history
+    const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
+    const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+    storedOrderIds.push(pendingPaymentId)
+    localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
+
     toast.success(t('guest.orderConfirmed'))
     setCart([])
     setIsCartOpen(false)
@@ -904,18 +909,36 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
           
           {cart.length > 0 && (() => {
             const { subtotal, tax } = calculateTax()
-            const baseAmount = subtotal + tax
-            
+            const baseAmount = subtotal + tax + currentTipAmount
+
             // Verwende die Währung aus den Restaurant-Einstellungen oder fallback auf EUR
             const currency = restaurant.settings?.currency || 'EUR'
-            
+
             return (
               <StripeCheckout
                 amount={baseAmount}
                 currency={currency}
-                orderId={`temp-${Date.now()}`} // Wird durch echte Order ID ersetzt
                 restaurantId={restaurant.id}
+                tableId={table?.id}
+                tableNumber={tableNumber}
                 tip={currentTipAmount}
+                cartData={{
+                  items: cart.map(item => ({
+                    menuItemId: item.menuItem.id,
+                    name: item.menuItem.name,
+                    quantity: item.quantity,
+                    unitPrice: item.variant?.price || item.menuItem.price,
+                    variantId: item.variant?.id,
+                    variantName: item.variant?.name,
+                    extraIds: item.extras.map(e => e.id),
+                    extraNames: item.extras.map(e => e.name),
+                    extraPrices: item.extras.map(e => e.price),
+                    notes: item.notes
+                  })),
+                  subtotal: getCartTotal(),
+                  tax: tax,
+                  tip: currentTipAmount
+                }}
                 onSuccess={handleStripeSuccess}
                 onError={handleStripeError}
                 onCancel={handleStripeCancel}

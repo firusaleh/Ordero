@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import CheckoutWithTip from './checkout-with-tip'
 import StripeCheckout from './stripe-checkout-new'
 import { Label } from '@/components/ui/label'
@@ -806,20 +806,47 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
         </DialogContent>
       </Dialog>
 
-      {/* Stripe Checkout Dialog */}
+      {/* Stripe Checkout Dialog - Pass cart data, order created after payment */}
       {showStripeCheckout && (
         <Dialog open={showStripeCheckout} onOpenChange={setShowStripeCheckout}>
           <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogTitle className="sr-only">Stripe Zahlung</DialogTitle>
+            <DialogDescription className="sr-only">Sichere Zahlung mit Stripe</DialogDescription>
             <StripeCheckout
               restaurantId={restaurant.id}
-              orderId={`order-${Date.now()}`}
+              tableId={table?.id}
+              tableNumber={tableNumber}
               amount={getCartTotal() + (getCartTotal() * 0.19) + currentTipAmount}
               tip={currentTipAmount}
               currency={currency}
-              onSuccess={(paymentIntentId) => {
+              cartData={{
+                items: cart.map(item => ({
+                  menuItemId: item.menuItem.id,
+                  name: item.menuItem.name,
+                  quantity: item.quantity,
+                  unitPrice: item.variant?.price || item.menuItem.price,
+                  variantId: item.variant?.id,
+                  variantName: item.variant?.name,
+                  extraIds: item.extras.map(e => e.id),
+                  extraNames: item.extras.map(e => e.name),
+                  extraPrices: item.extras.map(e => e.price),
+                  notes: item.notes
+                })),
+                subtotal: getCartTotal(),
+                tax: getCartTotal() * 0.19,
+                tip: currentTipAmount
+              }}
+              onSuccess={async (pendingPaymentId: string, orderNumber: string) => {
+                // Save to order history
+                const sessionKey = `orders-${restaurant.slug}-table-${tableNumber}`
+                const storedOrderIds = JSON.parse(localStorage.getItem(sessionKey) || '[]')
+                storedOrderIds.push(pendingPaymentId)
+                localStorage.setItem(sessionKey, JSON.stringify(storedOrderIds))
+
+                setOrderNumber(orderNumber)
                 setCart([])
                 setShowStripeCheckout(false)
-                toast.success('Zahlung erfolgreich! 🎉')
+                setShowSuccessDialog(true)
               }}
               onError={(error) => {
                 toast.error(`Fehler: ${error}`)
