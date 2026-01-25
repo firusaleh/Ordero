@@ -402,11 +402,35 @@ function CheckoutFormContent({
                 resolve({})
               }}
               onConfirm={async () => {
+                if (!stripe || !elements) {
+                  onError('Stripe nicht geladen')
+                  return
+                }
+
                 setIsProcessing(true)
                 setErrorMessage(null)
+
                 try {
-                  // Poll for order completion - payment is handled by Stripe
-                  await pollForOrderCompletion()
+                  // Confirm the payment with Stripe
+                  const { error, paymentIntent } = await stripe.confirmPayment({
+                    elements,
+                    confirmParams: {
+                      return_url: `${window.location.origin}/payment/success`,
+                    },
+                    redirect: 'if_required'
+                  })
+
+                  if (error) {
+                    console.error('Express checkout payment error:', error)
+                    setErrorMessage(error.message || 'Zahlung fehlgeschlagen')
+                    onError(error.message || 'Zahlung fehlgeschlagen')
+                    return
+                  }
+
+                  if (paymentIntent?.status === 'succeeded') {
+                    // Poll for order completion
+                    await pollForOrderCompletion()
+                  }
                 } catch (err) {
                   console.error('Express checkout error:', err)
                   setErrorMessage('Zahlung fehlgeschlagen')
