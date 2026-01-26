@@ -6,154 +6,88 @@ import { useToast } from '@/hooks/use-toast'
 interface NotificationSoundOptions {
   enabled?: boolean
   volume?: number
-  soundUrl?: string
 }
 
-const DEFAULT_SOUND_URL = '/sounds/notification.mp3'
-
 export function useNotificationSound(options: NotificationSoundOptions = {}) {
-  const { enabled = true, volume = 0.5, soundUrl = DEFAULT_SOUND_URL } = options
-  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const { enabled = true, volume = 0.5 } = options
+  const audioContextRef = useRef<AudioContext | null>(null)
   const [isEnabled, setIsEnabled] = useState(enabled)
   const [currentVolume, setCurrentVolume] = useState(volume)
-  const [audioReady, setAudioReady] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
-    // Erstelle Audio-Element
-    if (typeof window !== 'undefined') {
-      const audio = new Audio()
-      
-      // Set up event listeners
-      audio.addEventListener('canplaythrough', () => {
-        setAudioReady(true)
-      })
-      
-      audio.addEventListener('error', (e) => {
-        console.error('Audio loading error:', e)
-        setAudioReady(false)
-        
-        // Fallback zu Web Audio API Ton
-        if (!audioRef.current) {
-          createFallbackSound()
+    // Erstelle AudioContext nur einmal
+    if (typeof window !== 'undefined' && !audioContextRef.current) {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+        if (AudioContextClass) {
+          audioContextRef.current = new AudioContextClass()
         }
-      })
-      
-      // Setze Audio-Eigenschaften
-      audio.volume = currentVolume
-      audio.preload = 'auto'
-      
-      // Versuche verschiedene Formate
-      audio.src = soundUrl
-      
-      audioRef.current = audio
-      
-      // Versuche Audio zu laden
-      audio.load()
+      } catch (error) {
+        console.error('Failed to create AudioContext:', error)
+      }
     }
 
     // Cleanup
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current.removeEventListener('canplaythrough', () => {})
-        audioRef.current.removeEventListener('error', () => {})
-        audioRef.current = null
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        try {
+          audioContextRef.current.close()
+        } catch (e) {
+          console.error('Error closing AudioContext:', e)
+        }
+        audioContextRef.current = null
       }
     }
-  }, [soundUrl, currentVolume])
-  
-  // Fallback mit Web Audio API
-  const createFallbackSound = () => {
-    if (typeof window === 'undefined') return
-    
+  }, [])
+
+  const playSound = async () => {
+    if (!isEnabled || !audioContextRef.current) {
+      console.log('Sound disabled or no AudioContext')
+      return
+    }
+
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-      const context = new AudioContext()
+      const context = audioContextRef.current
       
-      // Erstelle einen einfachen Beep-Ton als Fallback
+      // Resume context if suspended (for Chrome autoplay policy)
+      if (context.state === 'suspended') {
+        await context.resume()
+      }
+
+      const currentTime = context.currentTime
+      
+      // Create oscillator for beep sound
       const oscillator = context.createOscillator()
       const gainNode = context.createGain()
       
+      // Configure the sound
       oscillator.connect(gainNode)
       gainNode.connect(context.destination)
       
-      oscillator.frequency.value = 800 // Hz
-      oscillator.type = 'sine'
+      // Set frequency for a pleasant notification sound
+      oscillator.frequency.setValueAtTime(800, currentTime)
+      oscillator.frequency.exponentialRampToValueAtTime(600, currentTime + 0.1)
       
-      gainNode.gain.setValueAtTime(currentVolume, context.currentTime)
-      gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5)
+      // Set volume envelope
+      gainNode.gain.setValueAtTime(0, currentTime)
+      gainNode.gain.linearRampToValueAtTime(currentVolume * 0.3, currentTime + 0.01)
+      gainNode.gain.linearRampToValueAtTime(currentVolume * 0.3, currentTime + 0.1)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.3)
       
-      // Speichere als Fallback-Funktion
-      const playBeep = () => {
-        const osc = context.createOscillator()
-        const gain = context.createGain()
-        
-        osc.connect(gain)
-        gain.connect(context.destination)
-        
-        osc.frequency.value = 800
-        osc.type = 'sine'
-        
-        gain.gain.setValueAtTime(currentVolume * 0.3, context.currentTime)
-        gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3)
-        
-        osc.start(context.currentTime)
-        osc.stop(context.currentTime + 0.3)
-      }
+      // Play the sound
+      oscillator.start(currentTime)
+      oscillator.stop(currentTime + 0.3)
       
-      // Erstelle ein Pseudo-Audio-Element für den Fallback
-      audioRef.current = {
-        play: () => {
-          playBeep()
-          return Promise.resolve()
-        },
-        pause: () => {},
-        load: () => {},
-        volume: currentVolume,
-        currentTime: 0
-      } as HTMLAudioElement
-      
-      setAudioReady(true)
-    } catch (error) {
-      console.error('Fallback sound creation failed:', error)
-    }
-  }
-
-  const playSound = async () => {
-    if (!isEnabled || !audioRef.current) return
-
-    try {
-      // Reset audio to beginning
-      audioRef.current.currentTime = 0
-      
-      // Play sound
-      await audioRef.current.play()
     } catch (error) {
       console.error('Error playing notification sound:', error)
       
-      // Versuche Fallback-Sound bei Fehler
-      if (error instanceof Error) {
-        if (error.name === 'NotSupportedError' || error.name === 'NotAllowedError') {
-          // Versuche Fallback-Ton zu erstellen und abzuspielen
-          createFallbackSound()
-          
-          if (audioRef.current) {
-            try {
-              await audioRef.current.play()
-            } catch (fallbackError) {
-              console.error('Fallback sound also failed:', fallbackError)
-              
-              if (error.name === 'NotAllowedError') {
-                toast({
-                  title: 'Sound-Berechtigung erforderlich',
-                  description: 'Bitte klicken Sie irgendwo auf die Seite, um Sound-Benachrichtigungen zu aktivieren',
-                  variant: 'default'
-                })
-              }
-            }
-          }
-        }
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        toast({
+          title: 'Sound-Berechtigung erforderlich',
+          description: 'Bitte klicken Sie irgendwo auf die Seite, um Sound-Benachrichtigungen zu aktivieren',
+          variant: 'default'
+        })
       }
     }
   }
@@ -170,10 +104,6 @@ export function useNotificationSound(options: NotificationSoundOptions = {}) {
   const setVolume = (newVolume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, newVolume))
     setCurrentVolume(clampedVolume)
-    
-    if (audioRef.current) {
-      audioRef.current.volume = clampedVolume
-    }
     
     // Speichere Einstellung im LocalStorage
     if (typeof window !== 'undefined') {
@@ -192,7 +122,10 @@ export function useNotificationSound(options: NotificationSoundOptions = {}) {
       }
       
       if (savedVolume !== null) {
-        setCurrentVolume(Number(savedVolume))
+        const vol = Number(savedVolume)
+        if (!isNaN(vol)) {
+          setCurrentVolume(vol)
+        }
       }
     }
   }, [])
@@ -202,25 +135,28 @@ export function useNotificationSound(options: NotificationSoundOptions = {}) {
     const wasEnabled = isEnabled
     setIsEnabled(true)
     
-    try {
-      // Wenn Audio nicht bereit ist, versuche Fallback
-      if (!audioReady && !audioRef.current) {
-        createFallbackSound()
-      }
-      
-      await playSound()
-    } catch (error) {
-      console.error('Test sound failed:', error)
-      // Versuche Fallback
-      createFallbackSound()
-      if (audioRef.current) {
-        try {
-          await audioRef.current.play()
-        } catch (e) {
-          console.error('Fallback test sound also failed:', e)
+    // Ensure AudioContext is created and resumed for test
+    if (!audioContextRef.current) {
+      try {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext
+        if (AudioContextClass) {
+          audioContextRef.current = new AudioContextClass()
         }
+      } catch (error) {
+        console.error('Failed to create AudioContext for test:', error)
+        return
       }
     }
+    
+    if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+      try {
+        await audioContextRef.current.resume()
+      } catch (e) {
+        console.error('Failed to resume AudioContext:', e)
+      }
+    }
+    
+    await playSound()
     
     // Restore previous state after a short delay
     setTimeout(() => {
