@@ -94,6 +94,9 @@ model Restaurant {
   email       String?
   website     String?
   
+  // Sprache
+  language    String   @default("de") // de, en, ar
+  
   // Aussehen
   logo        String?
   banner      String?

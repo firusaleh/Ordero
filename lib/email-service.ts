@@ -29,37 +29,47 @@ interface NewRegistrationEmailOptions {
 
 export async function sendOrderEmails({ order, restaurant, customerEmail }: EmailOptions) {
   try {
-    console.log('Email notifications would be sent here:', {
-      restaurantEmail: restaurant.email,
-      customerEmail,
-      orderNumber: order.orderNumber
-    })
+    // Importiere Templates und SendGrid
+    const { getNewOrderTemplate } = await import('./email-templates')
+    const { sendEmail } = await import('./email-sendgrid')
     
-    // TODO: Implement actual email sending
-    // Example with Resend:
-    /*
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const lang = (restaurant.language || 'de') as any
     
-    // Send to restaurant
+    // Bereite Bestelldaten auf
+    const orderData = {
+      restaurantName: restaurant.name,
+      orderNumber: order.orderNumber,
+      tableNumber: order.tableNumber || order.table?.number,
+      items: order.items || [],
+      total: order.total || 0,
+      customerName: order.guestName || order.customerName,
+      customerPhone: order.guestPhone || order.customerPhone,
+      notes: order.notes
+    }
+    
+    const template = getNewOrderTemplate(lang, orderData)
+    
+    // Sende an Restaurant
     if (restaurant.email) {
-      await resend.emails.send({
-        from: 'orders@ordero.com',
+      await sendEmail({
         to: restaurant.email,
-        subject: `Neue Bestellung ${order.orderNumber}`,
-        html: generateOrderEmailHTML(order)
+        subject: template.subject,
+        html: template.html,
+        text: template.text
       })
+      console.log(`Order email sent in ${lang} to restaurant:`, restaurant.email)
     }
     
-    // Send to customer
+    // Sende an Kunde (in gleicher Sprache wie Restaurant)
     if (customerEmail) {
-      await resend.emails.send({
-        from: 'noreply@ordero.com',
+      await sendEmail({
         to: customerEmail,
-        subject: `Ihre Bestellung ${order.orderNumber}`,
-        html: generateCustomerEmailHTML(order)
+        subject: template.subject,
+        html: template.html,
+        text: template.text
       })
+      console.log(`Order email sent in ${lang} to customer:`, customerEmail)
     }
-    */
     
     return true
   } catch (error) {
@@ -71,32 +81,29 @@ export async function sendOrderEmails({ order, restaurant, customerEmail }: Emai
 // Send approval email to restaurant owner
 export async function sendApprovalEmail({ to, restaurantName, ownerName }: ApprovalEmailOptions) {
   try {
-    console.log('Approval email would be sent here:', {
-      to,
-      restaurantName,
-      ownerName
+    // Importiere Templates und Hilfsfunktionen
+    const { getApprovalTemplate, getRestaurantLanguage } = await import('./email-templates')
+    const { sendEmail } = await import('./email-sendgrid')
+    const { prisma } = await import('./prisma')
+    
+    // Hole Restaurant-Sprache
+    const restaurant = await prisma.restaurant.findFirst({
+      where: { name: restaurantName },
+      select: { language: true, id: true }
     })
     
-    // TODO: Implement actual email sending
-    /*
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const lang = (restaurant?.language || 'de') as any
+    const template = getApprovalTemplate(lang, { restaurantName, ownerName })
     
-    await resend.emails.send({
-      from: 'Oriido <noreply@oriido.com>',
+    // Sende E-Mail
+    await sendEmail({
       to,
-      subject: `${restaurantName} wurde freigegeben!`,
-      html: `
-        <h2>Herzlichen Glückwunsch, ${ownerName}!</h2>
-        <p>Ihr Restaurant "${restaurantName}" wurde erfolgreich freigegeben.</p>
-        <p>Sie können sich jetzt anmelden und mit der Verwaltung Ihres Restaurants beginnen:</p>
-        <a href="https://oriido.com/login" style="display: inline-block; padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">Jetzt anmelden</a>
-        <p>Ihre 30-tägige kostenlose Testphase beginnt heute.</p>
-        <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung.</p>
-        <p>Mit freundlichen Grüßen,<br>Ihr Oriido Team</p>
-      `
+      subject: template.subject,
+      html: template.html,
+      text: template.text
     })
-    */
     
+    console.log(`Approval email sent in ${lang} to:`, to)
     return true
   } catch (error) {
     console.error('Error sending approval email:', error)
