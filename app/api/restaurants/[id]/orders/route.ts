@@ -125,6 +125,7 @@ export async function GET(
       })),
       subtotal: order.subtotal,
       tax: order.tax,
+      tip: order.tip || 0,
       total: order.total,
       notes: order.notes,
       createdAt: order.createdAt,

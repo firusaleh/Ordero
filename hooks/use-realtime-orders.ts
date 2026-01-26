@@ -18,6 +18,10 @@ export interface RealtimeOrder {
     price: number
   }>
   total: number
+  tip?: number
+  notes?: string
+  paymentStatus?: "PENDING" | "PAID" | "FAILED" | "REFUNDED"
+  paymentMethod?: string
   createdAt: Date
   updatedAt: Date
 }
