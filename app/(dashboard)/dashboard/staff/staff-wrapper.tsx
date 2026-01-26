@@ -44,7 +44,7 @@ export default async function StaffWrapper() {
       createdAt: restaurant.createdAt
     },
     // Mitarbeiter hinzufügen
-    ...restaurant.staff.map(member => ({
+    ...restaurant.staff.map((member: any) => ({
       id: member.id,
       name: member.user.name || member.user.email || 'Mitarbeiter',
       email: member.user.email || '',
