@@ -164,16 +164,21 @@ function getReservationNotificationTitle(status: string): string {
 }
 
 function getReservationNotificationMessage(reservation: any): string {
-  const date = new Date(reservation.date).toLocaleDateString('de-DE', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
-  const time = reservation.time
-  const guests = reservation.partySize
-  const table = reservation.table?.number ? `Tisch ${reservation.table.number}` : ''
+  // Verwende die korrekten Feldnamen aus dem Prisma Schema
+  const date = reservation.reservationDate 
+    ? new Date(reservation.reservationDate).toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    : 'Datum unbekannt'
   
-  return `${date} um ${time} - ${guests} Gäste ${table}`
+  const time = reservation.reservationTime || 'Zeit unbekannt'
+  const guests = reservation.numberOfGuests || 0
+  const customerName = reservation.customerName || 'Gast'
+  const table = reservation.table?.number ? ` - Tisch ${reservation.table.number}` : ''
+  
+  return `${customerName} - ${date} um ${time} - ${guests} ${guests === 1 ? 'Gast' : 'Gäste'}${table}`
 }
 
 // Helper-Funktionen für Vorbestellungen
@@ -190,9 +195,29 @@ function getPreOrderNotificationTitle(status: string): string {
 }
 
 function getPreOrderNotificationMessage(preOrder: any): string {
-  const pickupTime = preOrder.pickupTime
-  const total = preOrder.total?.toFixed(2) || '0.00'
-  const customerName = preOrder.customerName || 'Kunde'
+  // Formatiere Pickup-Zeit
+  const pickupDateTime = preOrder.pickupTime 
+    ? new Date(preOrder.pickupTime)
+    : null
+    
+  const pickupDate = pickupDateTime
+    ? pickupDateTime.toLocaleDateString('de-DE', {
+        day: '2-digit',
+        month: '2-digit'
+      })
+    : 'Datum unbekannt'
+    
+  const pickupTime = pickupDateTime
+    ? pickupDateTime.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : 'Zeit unbekannt'
   
-  return `${customerName} - Abholung: ${pickupTime} - ${total} €`
+  // Berechne Total aus subtotal + tax (da es kein total Feld gibt)
+  const total = ((preOrder.subtotal || 0) + (preOrder.tax || 0)).toFixed(2)
+  const customerName = preOrder.customerName || 'Kunde'
+  const orderType = preOrder.orderType === 'PICKUP' ? 'Abholung' : 'Vor Ort'
+  
+  return `${customerName} - ${orderType}: ${pickupDate} um ${pickupTime} - ${total} €`
 }
