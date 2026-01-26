@@ -190,10 +190,20 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         // API gibt { category: ... } zurück
         const newCategory = savedCategory.category
         if (newCategory) {
-          setCategories([...categories, { ...newCategory, menuItems: [] }])
+          // Stelle sicher, dass alle erforderlichen Felder vorhanden sind
+          const categoryToAdd = {
+            id: newCategory.id,
+            name: newCategory.name || categoryForm.name,
+            description: newCategory.description || categoryForm.description || null,
+            icon: newCategory.icon || categoryForm.icon || 'ChefHat',
+            color: newCategory.color || categoryForm.color || '#3b82f6',
+            isActive: newCategory.isActive !== undefined ? newCategory.isActive : true,
+            menuItems: []
+          }
+          setCategories([...categories, categoryToAdd])
           toast.success(t('menu.categoryCreated'))
           // Setze die neue Kategorie als ausgewählt
-          setSelectedCategory(newCategory.id)
+          setSelectedCategory(categoryToAdd.id)
         } else {
           console.error('Unerwartete Response:', savedCategory)
           toast.error('Fehler beim Erstellen der Kategorie')
@@ -529,7 +539,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
               </CardHeader>
               <CardContent className="space-y-2">
                 {categories.map((category) => {
-                  const IconComponent = iconComponents[category.icon || 'ChefHat']
+                  if (!category) return null
+                  
+                  const IconComponent = iconComponents[category?.icon || 'ChefHat'] || iconComponents['ChefHat']
                   const isSelected = selectedCategory === category.id
                   
                   return (
@@ -544,19 +556,19 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                       <div className="flex items-center gap-3">
                         <div 
                           className="w-10 h-10 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: (category.color || '#3b82f6') + '20' }}
+                          style={{ backgroundColor: (category?.color || '#3b82f6') + '20' }}
                         >
                           {IconComponent && (
                             <IconComponent 
                               className="h-5 w-5" 
-                              style={{ color: category.color || '#3b82f6' }}
+                              style={{ color: category?.color || '#3b82f6' }}
                             />
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">{translateCategoryName(category.name)}</p>
+                          <p className="font-medium">{translateCategoryName(category?.name || '')}</p>
                           <p className="text-sm text-gray-500">
-                            {category.menuItems.length} {t('menu.itemsInCategory')}
+                            {category?.menuItems?.length || 0} {t('menu.itemsInCategory')}
                           </p>
                         </div>
                       </div>
