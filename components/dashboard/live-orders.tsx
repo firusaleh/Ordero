@@ -134,6 +134,8 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
 
   // Status-Update-Buttons
   const StatusActions = ({ order }: { order: RealtimeOrder }) => {
+    const [isUpdating, setIsUpdating] = useState(false)
+    
     const nextStatus = {
       PENDING: "CONFIRMED",
       CONFIRMED: "PREPARING",
@@ -145,12 +147,27 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
       return null
     }
 
+    const handleStatusUpdate = async (status: string) => {
+      setIsUpdating(true)
+      await updateOrderStatus(order.id, status)
+      setIsUpdating(false)
+    }
+
+    const handleCancel = async () => {
+      if (confirm(t('orders.actions.cancelConfirm'))) {
+        setIsUpdating(true)
+        await cancelOrder(order.id, t('orders.actions.cancelledByStaff'))
+        setIsUpdating(false)
+      }
+    }
+
     return (
       <div className="flex gap-2">
         {nextStatus && (
           <Button
             size="sm"
-            onClick={() => updateOrderStatus(order.id, nextStatus)}
+            disabled={isUpdating}
+            onClick={() => handleStatusUpdate(nextStatus)}
           >
             {nextStatus === "CONFIRMED" && t('orders.actions.confirm')}
             {nextStatus === "PREPARING" && t('orders.actions.startPreparing')}
@@ -161,11 +178,8 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
         <Button
           size="sm"
           variant="destructive"
-          onClick={() => {
-            if (confirm(t('orders.actions.cancelConfirm'))) {
-              cancelOrder(order.id, t('orders.actions.cancelledByStaff'))
-            }
-          }}
+          disabled={isUpdating}
+          onClick={handleCancel}
         >
           {t('orders.actions.cancel')}
         </Button>

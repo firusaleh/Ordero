@@ -62,11 +62,18 @@ export function useRealtimeOrders({
     if (!restaurantId) return
 
     loadOrders()
+    
+    // Polling als Fallback - alle 5 Sekunden wenn Pusher nicht funktioniert
+    let pollInterval: NodeJS.Timeout | null = null
 
     // Überprüfe ob Pusher verfügbar ist
     if (!subscribe || !unsubscribe) {
-      console.log("Pusher Provider nicht verfügbar - subscribe/unsubscribe functions fehlen")
-      return
+      console.log("Pusher Provider nicht verfügbar - verwende Polling")
+      // Starte Polling als Fallback
+      pollInterval = setInterval(loadOrders, 5000)
+      return () => {
+        if (pollInterval) clearInterval(pollInterval)
+      }
     }
 
     console.log("Versuche zu subscriben zu Restaurant:", restaurantId)
@@ -75,8 +82,12 @@ export function useRealtimeOrders({
 
     if (!channel) {
       console.log("Channel konnte nicht erstellt werden für:", channelName)
-      console.log("Real-time Updates nicht verfügbar - Pusher nicht konfiguriert")
-      return
+      console.log("Real-time Updates nicht verfügbar - verwende Polling")
+      // Starte Polling als Fallback
+      pollInterval = setInterval(loadOrders, 5000)
+      return () => {
+        if (pollInterval) clearInterval(pollInterval)
+      }
     }
 
     setIsListening(true)
@@ -144,14 +155,22 @@ export function useRealtimeOrders({
 
     // Cleanup
     return () => {
+      if (pollInterval) clearInterval(pollInterval)
       channel.unbind_all()
       unsubscribe(channelName)
       setIsListening(false)
     }
   }, [restaurantId, subscribe, unsubscribe, onNewOrder, onOrderUpdate, onOrderCancelled, showNotifications, loadOrders])
 
-  // Funktion zum Aktualisieren des Bestellstatus
+  // Funktion zum Aktualisieren des Bestellstatus mit optimistischem Update
   const updateOrderStatus = async (orderId: string, status: string) => {
+    // Optimistisches Update - sofort in UI anzeigen
+    setOrders(prev => prev.map(order => 
+      order.id === orderId 
+        ? { ...order, status: status as any, updatedAt: new Date() }
+        : order
+    ))
+    
     try {
       const response = await fetch(`/api/orders/${orderId}/status`, {
         method: "PATCH",
@@ -163,15 +182,26 @@ export function useRealtimeOrders({
         throw new Error("Fehler beim Aktualisieren")
       }
       
-      // Update wird über Pusher Event empfangen
+      // Erfolg - Pusher wird zusätzlich updaten für andere Clients
+      toast.success("Status aktualisiert")
     } catch (error) {
       console.error("Fehler beim Statusupdate:", error)
       toast.error("Fehler beim Aktualisieren des Status")
+      
+      // Bei Fehler: Rollback des optimistischen Updates
+      loadOrders()
     }
   }
 
-  // Funktion zum Stornieren einer Bestellung
+  // Funktion zum Stornieren einer Bestellung mit optimistischem Update
   const cancelOrder = async (orderId: string, reason?: string) => {
+    // Optimistisches Update - sofort in UI anzeigen
+    setOrders(prev => prev.map(order => 
+      order.id === orderId 
+        ? { ...order, status: "CANCELLED" as const, updatedAt: new Date() }
+        : order
+    ))
+    
     try {
       const response = await fetch(`/api/orders/${orderId}/cancel`, {
         method: "POST",
@@ -183,10 +213,14 @@ export function useRealtimeOrders({
         throw new Error("Fehler beim Stornieren")
       }
       
-      // Update wird über Pusher Event empfangen
+      // Erfolg - Pusher wird zusätzlich updaten für andere Clients
+      toast.success("Bestellung storniert")
     } catch (error) {
       console.error("Fehler beim Stornieren:", error)
       toast.error("Fehler beim Stornieren der Bestellung")
+      
+      // Bei Fehler: Rollback des optimistischen Updates
+      loadOrders()
     }
   }
 
