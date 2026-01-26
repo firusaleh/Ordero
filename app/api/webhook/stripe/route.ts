@@ -6,13 +6,27 @@ import Stripe from 'stripe'
 // Webhook muss raw body erhalten
 export const runtime = 'nodejs'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia' as any,
-})
+// Initialize Stripe only if key is available
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+const isValidKey = stripeSecretKey &&
+  stripeSecretKey !== 'sk_test_...' &&
+  stripeSecretKey.startsWith('sk_')
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const stripe = isValidKey ? new Stripe(stripeSecretKey, {
+  apiVersion: '2024-11-20.acacia' as any,
+}) : null
+
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ''
 
 export async function POST(req: NextRequest) {
+  if (!stripe) {
+    console.error('Stripe not configured')
+    return NextResponse.json(
+      { error: 'Stripe nicht konfiguriert' },
+      { status: 503 }
+    )
+  }
+
   const body = await req.text()
   const headersList = await headers()
   const signature = headersList.get('stripe-signature')
@@ -22,6 +36,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: 'Keine Stripe-Signatur' },
       { status: 400 }
+    )
+  }
+
+  if (!webhookSecret) {
+    console.error('Webhook secret not configured')
+    return NextResponse.json(
+      { error: 'Webhook secret nicht konfiguriert' },
+      { status: 503 }
     )
   }
 
