@@ -20,9 +20,10 @@ interface Notification {
   type: 'order' | 'payment' | 'alert' | 'info'
   title: string
   message: string
-  timestamp: Date
+  timestamp: string
   read: boolean
   icon?: any
+  restaurantName?: string
 }
 
 export default function NotificationsDropdown() {
@@ -36,10 +37,29 @@ export default function NotificationsDropdown() {
     setMounted(true)
   }, [])
 
-  // Echte Benachrichtigungen werden aus der Datenbank geladen
+  // Lade Benachrichtigungen aus der Datenbank
   useEffect(() => {
-    // TODO: Fetch real notifications from database
-    setNotifications([])
+    const fetchNotifications = async () => {
+      try {
+        const response = await fetch('/api/notifications')
+        if (response.ok) {
+          const data = await response.json()
+          const formattedNotifications = data.notifications.map((n: any) => ({
+            ...n,
+            timestamp: new Date(n.timestamp),
+            icon: getIconForType(n.type)
+          }))
+          setNotifications(formattedNotifications)
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Benachrichtigungen:', error)
+      }
+    }
+
+    fetchNotifications()
+    // Aktualisiere alle 30 Sekunden
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
   }, [language])
 
   useEffect(() => {
@@ -66,9 +86,20 @@ export default function NotificationsDropdown() {
     setNotifications([])
   }
 
-  const getTimeAgo = (date: Date) => {
+  const getIconForType = (type: string) => {
+    switch (type) {
+      case 'order': return ShoppingCart
+      case 'payment': return CheckCircle
+      case 'alert': return AlertCircle
+      case 'info': return Clock
+      default: return Bell
+    }
+  }
+
+  const getTimeAgo = (date: Date | string) => {
+    const timestamp = typeof date === 'string' ? new Date(date) : date
     const now = new Date()
-    const diff = now.getTime() - date.getTime()
+    const diff = now.getTime() - timestamp.getTime()
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
     const days = Math.floor(diff / 86400000)
@@ -180,6 +211,11 @@ export default function NotificationsDropdown() {
                         <p className="text-sm text-gray-600 mt-1">
                           {notification.message}
                         </p>
+                        {notification.restaurantName && (
+                          <p className="text-xs text-gray-600 mt-1">
+                            {notification.restaurantName}
+                          </p>
+                        )}
                         <p className="text-xs text-gray-500 mt-1">
                           {getTimeAgo(notification.timestamp)}
                         </p>
