@@ -1,398 +1,307 @@
+import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
-import { webhookRateLimiter, checkRateLimit } from '@/lib/rate-limit'
-import { pusherServer, getRestaurantChannel } from '@/lib/pusher'
+import Stripe from 'stripe'
 
-// Prüfe ob Stripe konfiguriert ist
+// Webhook muss raw body erhalten
+export const runtime = 'nodejs'
+
+// Initialize Stripe only if key is available
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const isValidKey = stripeSecretKey &&
   stripeSecretKey !== 'sk_test_...' &&
   stripeSecretKey.startsWith('sk_')
 
-if (!isValidKey) {
-  console.error('STRIPE_SECRET_KEY ist nicht konfiguriert oder ungültig')
-}
+const stripe = isValidKey ? new Stripe(stripeSecretKey, {
+  apiVersion: '2024-11-20.acacia' as any,
+}) : null
 
-const stripe = isValidKey ? new Stripe(stripeSecretKey!, {
-  apiVersion: '2024-11-20.acacia' as any
-}) : null as any
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || ''
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
-export async function POST(req: Request) {
-  // Rate Limiting für Webhooks (identifiziere über Stripe Signature)
-  const headersList = await headers()
-  const signature = headersList.get('stripe-signature')!
-  const rateLimitResult = await checkRateLimit(webhookRateLimiter, signature || 'unknown')
-
-  if (!rateLimitResult.success) {
+export async function POST(req: NextRequest) {
+  if (!stripe) {
+    console.error('Stripe not configured')
     return NextResponse.json(
-      { error: 'Too many webhook requests' },
-      { status: 429 }
+      { error: 'Stripe nicht konfiguriert' },
+      { status: 503 }
     )
   }
 
   const body = await req.text()
+  const headersList = await headers()
+  const signature = headersList.get('stripe-signature')
+
+  if (!signature) {
+    console.error('No Stripe signature found')
+    return NextResponse.json(
+      { error: 'Keine Stripe-Signatur' },
+      { status: 400 }
+    )
+  }
+
+  if (!webhookSecret) {
+    console.error('Webhook secret not configured')
+    return NextResponse.json(
+      { error: 'Webhook secret nicht konfiguriert' },
+      { status: 503 }
+    )
+  }
 
   let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-  } catch (err: any) {
-    console.error(`Webhook Error: ${err.message}`)
+  } catch (err) {
+    console.error('Webhook Signatur-Fehler:', err)
     return NextResponse.json(
-      { error: `Webhook Error: ${err.message}` },
+      { error: 'Webhook Signatur ungültig' },
       { status: 400 }
     )
   }
 
+  console.log('Webhook received:', event.type)
+
   try {
     switch (event.type) {
-      case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent)
-        break
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.log('Payment Intent Succeeded:', paymentIntent.id)
 
-      case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session)
-        break
+        // Get pendingPaymentId from metadata
+        const pendingPaymentId = paymentIntent.metadata?.pendingPaymentId
 
-      case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice)
+        if (!pendingPaymentId) {
+          console.log('No pendingPaymentId in metadata, skipping order creation')
+          break
+        }
+
+        // Find the pending payment
+        const pendingPayment = await prisma.pendingPayment.findUnique({
+          where: { id: pendingPaymentId }
+        })
+
+        if (!pendingPayment) {
+          console.error('PendingPayment not found:', pendingPaymentId)
+          break
+        }
+
+        // Check if order already exists (avoid duplicates)
+        if (pendingPayment.orderId) {
+          console.log('Order already created for this payment:', pendingPayment.orderId)
+          break
+        }
+
+        // Generate order number
+        const orderCount = await prisma.order.count({
+          where: { restaurantId: pendingPayment.restaurantId }
+        })
+        const orderNumber = `ORD-${String(orderCount + 1).padStart(5, '0')}`
+
+        // Create the order
+        const order = await prisma.order.create({
+          data: {
+            orderNumber,
+            restaurantId: pendingPayment.restaurantId,
+            tableId: pendingPayment.tableId,
+            status: 'PENDING',
+            paymentStatus: 'PAID',
+            paymentMethod: 'CARD',
+            subtotal: pendingPayment.subtotal,
+            tax: pendingPayment.tax,
+            tip: pendingPayment.tip,
+            total: pendingPayment.total,
+            items: {
+              create: (pendingPayment.items as any[]).map((item: any) => ({
+                menuItemId: item.menuItemId,
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                totalPrice: item.quantity * item.unitPrice,
+                notes: item.notes || null,
+                selectedVariant: item.variantName ? {
+                  id: item.variantId,
+                  name: item.variantName
+                } : undefined,
+                selectedExtras: item.extraNames?.length > 0 ? item.extraNames.map((name: string, idx: number) => ({
+                  id: item.extraIds[idx],
+                  name: name,
+                  price: item.extraPrices[idx]
+                })) : undefined
+              }))
+            }
+          }
+        })
+
+        console.log('Order created:', order.id, order.orderNumber)
+
+        // Update pending payment with order info
+        await prisma.pendingPayment.update({
+          where: { id: pendingPaymentId },
+          data: {
+            orderId: order.id,
+            orderNumber: order.orderNumber
+          }
+        })
+
+        // Create payment record for revenue tracking
+        await prisma.payment.create({
+          data: {
+            restaurantId: pendingPayment.restaurantId,
+            stripePaymentId: paymentIntent.id,
+            amount: pendingPayment.total,
+            currency: paymentIntent.currency,
+            status: 'SUCCESS',
+            type: 'ORDER',
+            description: `Bestellung ${order.orderNumber}${pendingPayment.tableNumber ? ` - Tisch ${pendingPayment.tableNumber}` : ''}`
+          }
+        })
+
+        console.log('Payment record created for order:', order.orderNumber)
         break
+      }
+
+      case 'payment_intent.payment_failed': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.log('Payment Intent Failed:', paymentIntent.id)
+        // Payment failed - the pending payment will expire naturally
+        break
+      }
+
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session
+
+        // Update Restaurant mit Subscription-Daten
+        if (session.metadata?.restaurantId) {
+          await prisma.restaurant.update({
+            where: { id: session.metadata.restaurantId },
+            data: {
+              stripeSubscriptionId: session.subscription as string,
+              subscriptionStatus: 'ACTIVE',
+              subscriptionPlan: session.metadata.plan || 'STANDARD',
+              subscriptionCurrentPeriodEnd: session.expires_at
+                ? new Date(session.expires_at * 1000)
+                : undefined,
+            }
+          })
+        }
+
+        // Update User mit Customer ID falls noch nicht vorhanden
+        if (session.metadata?.userId && session.customer) {
+          await prisma.user.update({
+            where: { id: session.metadata.userId },
+            data: { stripeCustomerId: session.customer as string }
+          })
+        }
+        break
+      }
 
       case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-        await handleSubscriptionChange(event.data.object as Stripe.Subscription)
-        break
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription
 
-      case 'customer.subscription.deleted':
-        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription)
+        // Finde Restaurant anhand der Subscription ID
+        const restaurant = await prisma.restaurant.findFirst({
+          where: { stripeSubscriptionId: subscription.id }
+        })
+
+        if (restaurant) {
+          await prisma.restaurant.update({
+            where: { id: restaurant.id },
+            data: {
+              subscriptionStatus: mapStripeStatus(subscription.status),
+              subscriptionCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+            }
+          })
+        }
         break
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription
+
+        // Setze Subscription auf FREE wenn gelöscht
+        const restaurant = await prisma.restaurant.findFirst({
+          where: { stripeSubscriptionId: subscription.id }
+        })
+
+        if (restaurant) {
+          await prisma.restaurant.update({
+            where: { id: restaurant.id },
+            data: {
+              subscriptionStatus: 'CANCELLED',
+              subscriptionPlan: 'FREE',
+              subscriptionCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+            }
+          })
+        }
+        break
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice
+
+        // Speichere erfolgreiche Zahlung
+        if ((invoice as any).subscription && (invoice as any).metadata?.restaurantId) {
+          await prisma.payment.create({
+            data: {
+              restaurantId: (invoice as any).metadata.restaurantId,
+              stripePaymentId: (invoice as any).payment_intent as string,
+              amount: (invoice as any).amount_paid / 100, // Cent zu Euro
+              currency: (invoice as any).currency,
+              status: 'SUCCESS',
+              type: 'SUBSCRIPTION',
+              description: `Abonnement-Zahlung für ${(invoice as any).period_start ? new Date((invoice as any).period_start * 1000).toLocaleDateString('de-DE') : 'unbekannt'}`,
+            }
+          })
+        }
+        break
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+
+        // Speichere fehlgeschlagene Zahlung
+        if ((invoice as any).subscription && (invoice as any).metadata?.restaurantId) {
+          await prisma.payment.create({
+            data: {
+              restaurantId: (invoice as any).metadata.restaurantId,
+              stripePaymentId: (invoice as any).payment_intent as string,
+              amount: (invoice as any).amount_due / 100,
+              currency: (invoice as any).currency,
+              status: 'FAILED',
+              type: 'SUBSCRIPTION',
+              description: 'Fehlgeschlagene Abonnement-Zahlung',
+            }
+          })
+        }
+        break
+      }
 
       default:
-        console.log(`Unhandled event type ${event.type}`)
+        console.log(`Unbehandelter Event-Typ: ${event.type}`)
     }
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Error processing webhook:', error)
+    console.error('Webhook Handler Fehler:', error)
     return NextResponse.json(
-      { error: 'Webhook handler failed' },
+      { error: 'Webhook Verarbeitung fehlgeschlagen' },
       { status: 500 }
     )
   }
 }
 
-async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  const { pendingPaymentId, orderId, restaurantId, tableNumber } = paymentIntent.metadata || {}
-
-  // NEW FLOW: Create order from PendingPayment
-  if (pendingPaymentId) {
-    await createOrderFromPendingPayment(pendingPaymentId, paymentIntent)
-    return
+function mapStripeStatus(stripeStatus: Stripe.Subscription.Status): string {
+  const statusMap: Record<Stripe.Subscription.Status, string> = {
+    active: 'ACTIVE',
+    canceled: 'CANCELLED',
+    incomplete: 'INCOMPLETE',
+    incomplete_expired: 'EXPIRED',
+    past_due: 'PAST_DUE',
+    paused: 'PAUSED',
+    trialing: 'TRIALING',
+    unpaid: 'UNPAID',
   }
 
-  // LEGACY FLOW: Update existing order (backwards compatibility)
-  if (!orderId) {
-    console.error('No pendingPaymentId or orderId in payment metadata')
-    return
-  }
-
-  // Check if orderId is a valid MongoDB ObjectId
-  const isObjectId = /^[0-9a-fA-F]{24}$/.test(orderId)
-  if (!isObjectId) {
-    console.error(`Invalid orderId format: ${orderId}. Expected MongoDB ObjectId.`)
-    return
-  }
-
-  // Find order first to ensure it exists
-  const order = await prisma.order.findUnique({
-    where: { id: orderId }
-  })
-
-  if (!order) {
-    console.error(`Order not found: ${orderId}`)
-    return
-  }
-
-  // Update order status to PAID
-  await prisma.order.update({
-    where: { id: orderId },
-    data: {
-      paymentStatus: 'PAID',
-      paymentMethod: 'CARD',
-      paymentIntentId: paymentIntent.id,
-      paidAt: new Date(),
-      status: 'CONFIRMED'
-    }
-  })
-
-  // Create invoice
-  await createInvoice(orderId)
-
-  console.log(`Order ${orderId} marked as paid (Table: ${tableNumber || 'N/A'})`)
-}
-
-async function createOrderFromPendingPayment(pendingPaymentId: string, paymentIntent: Stripe.PaymentIntent) {
-  console.log(`Creating order from PendingPayment: ${pendingPaymentId}`)
-
-  // Find the PendingPayment record
-  const pendingPayment = await prisma.pendingPayment.findUnique({
-    where: { id: pendingPaymentId },
-    include: { restaurant: true }
-  })
-
-  if (!pendingPayment) {
-    console.error(`PendingPayment not found: ${pendingPaymentId}`)
-    return
-  }
-
-  // Check if order was already created (idempotency)
-  if (pendingPayment.orderId) {
-    console.log(`Order already created for PendingPayment: ${pendingPaymentId}, orderId: ${pendingPayment.orderId}`)
-    return
-  }
-
-  // Generate order number
-  const orderNumber = generateOrderNumber()
-
-  // Parse cart items from JSON
-  const cartItems = pendingPayment.items as any[]
-
-  // Create the order
-  const order = await prisma.order.create({
-    data: {
-      restaurantId: pendingPayment.restaurantId,
-      tableId: pendingPayment.tableId,
-      tableNumber: pendingPayment.tableNumber,
-      orderNumber,
-      type: pendingPayment.tableNumber ? 'DINE_IN' : 'TAKEAWAY',
-      status: 'CONFIRMED',
-      paymentStatus: 'PAID',
-      paymentMethod: 'CARD',
-      paymentIntentId: paymentIntent.id,
-      subtotal: pendingPayment.subtotal,
-      tax: pendingPayment.tax,
-      tip: pendingPayment.tip,
-      total: pendingPayment.total,
-      paidAt: new Date(),
-      confirmedAt: new Date(),
-      guestName: pendingPayment.guestName,
-      guestEmail: pendingPayment.guestEmail,
-      guestPhone: pendingPayment.guestPhone,
-      items: {
-        create: cartItems.map(item => ({
-          menuItemId: item.menuItemId,
-          name: item.name,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.unitPrice * item.quantity + (item.extraPrices?.reduce((a: number, b: number) => a + b, 0) || 0) * item.quantity,
-          variantId: item.variantId || null,
-          variantName: item.variantName || null,
-          extras: item.extraNames || [],
-          notes: item.notes || null
-        }))
-      }
-    },
-    include: {
-      items: true
-    }
-  })
-
-  // Update PendingPayment with orderId and orderNumber
-  await prisma.pendingPayment.update({
-    where: { id: pendingPaymentId },
-    data: {
-      orderId: order.id,
-      orderNumber: order.orderNumber
-    }
-  })
-
-  // Create invoice
-  await createInvoice(order.id)
-
-  // Create payment record for revenue tracking
-  await prisma.payment.create({
-    data: {
-      restaurantId: pendingPayment.restaurantId,
-      amount: pendingPayment.total,
-      currency: paymentIntent.currency.toUpperCase(),
-      status: 'SUCCESS',
-      type: 'ORDER',
-      stripePaymentId: paymentIntent.id,
-      description: `Zahlung für Bestellung #${orderNumber}`
-    }
-  })
-
-  // Send Pusher notification to restaurant
-  try {
-    await pusherServer.trigger(
-      getRestaurantChannel(pendingPayment.restaurantId),
-      'NEW_ORDER',
-      {
-        orderId: order.id,
-        orderNumber: order.orderNumber,
-        tableNumber: order.tableNumber,
-        total: order.total,
-        itemCount: order.items.length,
-        paymentStatus: 'PAID'
-      }
-    )
-  } catch (pusherError) {
-    console.error('Pusher notification failed:', pusherError)
-    // Don't fail the webhook for Pusher errors
-  }
-
-  console.log(`Order created successfully: ${order.id}, orderNumber: ${orderNumber}, table: ${pendingPayment.tableNumber || 'N/A'}`)
-}
-
-async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
-  const { orderId, subscriptionType, restaurantId } = session.metadata || {}
-
-  if (subscriptionType) {
-    // Handle subscription payment
-    await prisma.restaurant.update({
-      where: { id: restaurantId },
-      data: {
-        subscriptionStatus: 'ACTIVE',
-        subscriptionPlan: subscriptionType as any,
-        stripeCustomerId: session.customer as string,
-        stripeSubscriptionId: session.subscription as string
-      }
-    })
-  } else if (orderId) {
-    // Handle one-time order payment
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        paymentStatus: 'PAID',
-        paymentMethod: 'CARD',
-        checkoutSessionId: session.id,
-        paidAt: new Date()
-      }
-    })
-
-    await createInvoice(orderId)
-  }
-}
-
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
-  const { restaurantId } = invoice.metadata || {}
-
-  if (restaurantId) {
-    // Update subscription payment record
-    await prisma.payment.create({
-      data: {
-        restaurantId,
-        amount: invoice.amount_paid / 100,
-        currency: invoice.currency,
-        status: 'SUCCESS',
-        type: 'SUBSCRIPTION',
-        stripeInvoiceId: invoice.id,
-        description: `Subscription payment for ${new Date(invoice.period_start * 1000).toLocaleDateString()}`
-      }
-    })
-  }
-}
-
-async function handleSubscriptionChange(subscription: Stripe.Subscription) {
-  const customerId = subscription.customer as string
-
-  const restaurant = await prisma.restaurant.findFirst({
-    where: { stripeCustomerId: customerId }
-  })
-
-  if (restaurant) {
-    await prisma.restaurant.update({
-      where: { id: restaurant.id },
-      data: {
-        subscriptionStatus: subscription.status === 'active' ? 'ACTIVE' : 'INACTIVE',
-        stripeSubscriptionId: subscription.id,
-        subscriptionCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
-      }
-    })
-  }
-}
-
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  const customerId = subscription.customer as string
-
-  const restaurant = await prisma.restaurant.findFirst({
-    where: { stripeCustomerId: customerId }
-  })
-
-  if (restaurant) {
-    await prisma.restaurant.update({
-      where: { id: restaurant.id },
-      data: {
-        subscriptionStatus: 'CANCELLED',
-        subscriptionCurrentPeriodEnd: new Date()
-      }
-    })
-  }
-}
-
-async function createInvoice(orderId: string) {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: {
-      items: true,
-      restaurant: {
-        include: {
-          settings: true
-        }
-      }
-    }
-  })
-
-  if (!order) return
-
-  // Create invoice record
-  const invoice = await prisma.invoice.create({
-    data: {
-      orderId,
-      restaurantId: order.restaurantId,
-      invoiceNumber: generateInvoiceNumber(),
-      subtotal: order.subtotal,
-      tax: order.tax || 0,
-      tip: order.tip || 0,
-      total: order.total,
-      status: 'PAID',
-      paidAt: new Date(),
-      dueDate: new Date(),
-      items: order.items.map(item => ({
-        name: item.name,
-        quantity: item.quantity,
-        price: item.unitPrice,
-        total: item.totalPrice,
-        tax: 0
-      }))
-    }
-  })
-
-  // Send invoice email if customer email exists
-  if (order.guestEmail) {
-    // TODO: Send invoice email via Resend
-  }
-
-  return invoice
-}
-
-function generateInvoiceNumber(): string {
-  const date = new Date()
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-  return `INV-${year}${month}-${random}`
-}
-
-function generateOrderNumber(): string {
-  const date = new Date()
-  const year = date.getFullYear().toString().slice(-2)
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-  return `${year}${month}${day}-${random}`
+  return statusMap[stripeStatus] || 'UNKNOWN'
 }
