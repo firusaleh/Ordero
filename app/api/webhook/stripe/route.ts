@@ -141,15 +141,7 @@ export async function POST(req: NextRequest) {
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
         console.log('Payment Intent Failed:', paymentIntent.id)
-
-        const pendingPaymentId = paymentIntent.metadata?.pendingPaymentId
-        if (pendingPaymentId) {
-          // Mark pending payment as failed
-          await prisma.pendingPayment.update({
-            where: { id: pendingPaymentId },
-            data: { status: 'FAILED' }
-          }).catch(e => console.error('Failed to update pending payment:', e))
-        }
+        // Payment failed - the pending payment will expire naturally
         break
       }
 
