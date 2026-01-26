@@ -129,30 +129,45 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
       completed: (() => {
         try {
           const hours = restaurant.settings?.openingHours
-          if (!hours) return false
+          
+          // Debug logging
+          console.log('[Opening Hours Debug] Raw hours:', hours)
+          console.log('[Opening Hours Debug] Type:', typeof hours)
+          
+          if (!hours) {
+            console.log('[Opening Hours Debug] No hours found')
+            return false
+          }
+          
           const parsed = typeof hours === 'string' ? JSON.parse(hours) : hours
+          console.log('[Opening Hours Debug] Parsed:', parsed)
           
           // Prüfe ob es ein Objekt mit Wochentagen ist
           if (typeof parsed === 'object' && !Array.isArray(parsed)) {
             // Prüfe ob mindestens ein Tag geöffnet ist und Zeitfenster hat
-            return Object.values(parsed).some((day: any) => 
+            const result = Object.values(parsed).some((day: any) => 
               day?.isOpen === true && 
               day?.timeSlots && 
               Array.isArray(day.timeSlots) && 
               day.timeSlots.length > 0 &&
               day.timeSlots.some((slot: any) => slot?.open && slot?.close)
             )
+            console.log('[Opening Hours Debug] Validation result:', result)
+            return result
           }
           
           // Fallback für Array-Format (altes Format)
           if (Array.isArray(parsed)) {
+            console.log('[Opening Hours Debug] Array format detected')
             return parsed.some((day: any) => 
               day.isOpen === true && day.openTime && day.closeTime
             )
           }
           
+          console.log('[Opening Hours Debug] Unknown format')
           return false
-        } catch {
+        } catch (e) {
+          console.error('[Opening Hours Debug] Error:', e)
           return false
         }
       })(),
