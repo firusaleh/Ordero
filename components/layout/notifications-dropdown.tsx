@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Check, X, ShoppingCart, AlertCircle, CheckCircle, Clock, Package } from 'lucide-react'
+import { Bell, Check, X, ShoppingCart, AlertCircle, CheckCircle, Clock, Package, Calendar, PhoneCall } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import { useLanguage } from '@/contexts/language-context'
 
 interface Notification {
   id: string
-  type: 'order' | 'payment' | 'alert' | 'info'
+  type: 'order' | 'payment' | 'alert' | 'info' | 'reservation' | 'preorder'
   title: string
   message: string
   timestamp: string
@@ -92,6 +92,8 @@ export default function NotificationsDropdown() {
       case 'payment': return CheckCircle
       case 'alert': return AlertCircle
       case 'info': return Clock
+      case 'reservation': return Calendar
+      case 'preorder': return PhoneCall
       default: return Bell
     }
   }
@@ -128,6 +130,8 @@ export default function NotificationsDropdown() {
       case 'payment': return 'text-green-600 bg-green-100'
       case 'alert': return 'text-orange-600 bg-orange-100'
       case 'info': return 'text-gray-600 bg-gray-100'
+      case 'reservation': return 'text-purple-600 bg-purple-100'
+      case 'preorder': return 'text-indigo-600 bg-indigo-100'
       default: return 'text-gray-600 bg-gray-100'
     }
   }

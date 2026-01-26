@@ -26,7 +26,7 @@ export async function GET() {
 
     const restaurantIds = restaurants.map(r => r.id)
 
-    // Hole die letzten 20 Bestellungen als Benachrichtigungen
+    // Hole die letzten 20 Bestellungen
     const orders = await prisma.order.findMany({
       where: {
         restaurantId: { in: restaurantIds },
@@ -35,7 +35,7 @@ export async function GET() {
         }
       },
       orderBy: { createdAt: 'desc' },
-      take: 20,
+      take: 10,
       include: {
         restaurant: {
           select: { name: true }
@@ -46,17 +46,81 @@ export async function GET() {
       }
     })
 
-    // Konvertiere Bestellungen zu Benachrichtigungen
-    const notifications = orders.map(order => ({
+    // Hole die letzten Reservierungen
+    const reservations = await prisma.reservation.findMany({
+      where: {
+        restaurantId: { in: restaurantIds },
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Letzte 24 Stunden
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: {
+        restaurant: {
+          select: { name: true }
+        },
+        table: {
+          select: { number: true }
+        }
+      }
+    })
+
+    // Hole die letzten Vorbestellungen
+    const preOrders = await prisma.preOrder.findMany({
+      where: {
+        restaurantId: { in: restaurantIds },
+        createdAt: {
+          gte: new Date(Date.now() - 24 * 60 * 60 * 1000) // Letzte 24 Stunden
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      include: {
+        restaurant: {
+          select: { name: true }
+        }
+      }
+    })
+
+    // Konvertiere alle zu Benachrichtigungen
+    const orderNotifications = orders.map(order => ({
       id: order.id,
-      type: order.status === 'CANCELLED' ? 'alert' : 
-            order.status === 'COMPLETED' ? 'payment' : 'order',
-      title: getNotificationTitle(order.status),
-      message: getNotificationMessage(order),
+      type: 'order' as const,
+      title: getOrderNotificationTitle(order.status),
+      message: getOrderNotificationMessage(order),
       timestamp: order.createdAt.toISOString(),
-      read: false, // In einer echten App würde man das tracken
+      read: false,
       restaurantName: order.restaurant?.name || 'Restaurant'
     }))
+
+    const reservationNotifications = reservations.map(reservation => ({
+      id: reservation.id,
+      type: 'reservation' as const,
+      title: getReservationNotificationTitle(reservation.status),
+      message: getReservationNotificationMessage(reservation),
+      timestamp: reservation.createdAt.toISOString(),
+      read: false,
+      restaurantName: reservation.restaurant?.name || 'Restaurant'
+    }))
+
+    const preOrderNotifications = preOrders.map(preOrder => ({
+      id: preOrder.id,
+      type: 'preorder' as const,
+      title: getPreOrderNotificationTitle(preOrder.status),
+      message: getPreOrderNotificationMessage(preOrder),
+      timestamp: preOrder.createdAt.toISOString(),
+      read: false,
+      restaurantName: preOrder.restaurant?.name || 'Restaurant'
+    }))
+
+    // Kombiniere und sortiere alle Benachrichtigungen nach Zeit
+    const notifications = [
+      ...orderNotifications,
+      ...reservationNotifications,
+      ...preOrderNotifications
+    ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .slice(0, 20) // Maximal 20 Benachrichtigungen
 
     return NextResponse.json({ notifications })
   } catch (error) {
@@ -65,20 +129,20 @@ export async function GET() {
   }
 }
 
-function getNotificationTitle(status: string): string {
+// Helper-Funktionen für Bestellungen
+function getOrderNotificationTitle(status: string): string {
   switch (status) {
-    case 'PENDING': return 'Neue Bestellung'
-    case 'CONFIRMED': return 'Bestellung bestätigt'
-    case 'PREPARING': return 'Bestellung in Zubereitung'
-    case 'READY': return 'Bestellung fertig'
-    case 'DELIVERED': return 'Bestellung ausgeliefert'
-    case 'COMPLETED': return 'Bestellung abgeschlossen'
-    case 'CANCELLED': return 'Bestellung storniert'
-    default: return 'Bestellungs-Update'
+    case 'PENDING': return '🛍️ Neue Bestellung'
+    case 'CONFIRMED': return '✅ Bestellung bestätigt'
+    case 'PREPARING': return '👨‍🍳 In Zubereitung'
+    case 'READY': return '✨ Bestellung fertig'
+    case 'DELIVERED': return '✓ Ausgeliefert'
+    case 'CANCELLED': return '❌ Storniert'
+    default: return '📦 Bestellungs-Update'
   }
 }
 
-function getNotificationMessage(order: any): string {
+function getOrderNotificationMessage(order: any): string {
   const tableInfo = order.table?.number 
     ? `Tisch ${order.table.number}` 
     : order.type === 'TAKEAWAY' ? 'Abholung' : 'Lieferung'
@@ -86,4 +150,49 @@ function getNotificationMessage(order: any): string {
   const total = order.total?.toFixed(2) || '0.00'
   
   return `${tableInfo} - ${total} €`
+}
+
+// Helper-Funktionen für Reservierungen
+function getReservationNotificationTitle(status: string): string {
+  switch (status) {
+    case 'PENDING': return '📅 Neue Reservierung'
+    case 'CONFIRMED': return '✅ Reservierung bestätigt'
+    case 'CANCELLED': return '❌ Reservierung storniert'
+    case 'NO_SHOW': return '⚠️ Nicht erschienen'
+    default: return '📅 Reservierungs-Update'
+  }
+}
+
+function getReservationNotificationMessage(reservation: any): string {
+  const date = new Date(reservation.date).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+  const time = reservation.time
+  const guests = reservation.partySize
+  const table = reservation.table?.number ? `Tisch ${reservation.table.number}` : ''
+  
+  return `${date} um ${time} - ${guests} Gäste ${table}`
+}
+
+// Helper-Funktionen für Vorbestellungen
+function getPreOrderNotificationTitle(status: string): string {
+  switch (status) {
+    case 'PENDING': return '📱 Neue Vorbestellung'
+    case 'CONFIRMED': return '✅ Vorbestellung bestätigt'
+    case 'PREPARING': return '👨‍🍳 Wird vorbereitet'
+    case 'READY': return '✨ Abholbereit'
+    case 'COMPLETED': return '✓ Abgeholt'
+    case 'CANCELLED': return '❌ Storniert'
+    default: return '📱 Vorbestellungs-Update'
+  }
+}
+
+function getPreOrderNotificationMessage(preOrder: any): string {
+  const pickupTime = preOrder.pickupTime
+  const total = preOrder.total?.toFixed(2) || '0.00'
+  const customerName = preOrder.customerName || 'Kunde'
+  
+  return `${customerName} - Abholung: ${pickupTime} - ${total} €`
 }
