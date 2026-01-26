@@ -1,5 +1,5 @@
-import StaffTranslated from '@/components/dashboard/staff-translated'
+import StaffWrapper from './staff-wrapper'
 
 export default function StaffPage() {
-  return <StaffTranslated />
+  return <StaffWrapper />
 }
