@@ -10,8 +10,7 @@ export async function GET(
 
     const restaurant = await prisma.restaurant.findUnique({
       where: { 
-        slug: restaurantSlug,
-        status: 'ACTIVE'
+        slug: restaurantSlug
       },
       include: {
         settings: true,
@@ -32,7 +31,13 @@ export async function GET(
       )
     }
 
-    return NextResponse.json({ restaurant })
+    // Return restaurant data including status
+    return NextResponse.json({ 
+      restaurant: {
+        ...restaurant,
+        isOffline: restaurant.status !== 'ACTIVE'
+      }
+    })
   } catch (error) {
     console.error('Fehler beim Laden des Restaurants:', error)
     return NextResponse.json(

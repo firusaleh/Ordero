@@ -9,6 +9,7 @@ import { MapPin, Phone, Globe, Clock, QrCode, ArrowRight, Calendar, ShoppingBag 
 import Loading from '@/components/ui/loading'
 import { GuestLanguageProvider, useGuestLanguage } from '@/contexts/guest-language-context'
 import LanguageSwitcher from '@/components/guest/language-switcher'
+import RestaurantOffline from '@/components/guest/restaurant-offline'
 
 interface Restaurant {
   id: string
@@ -21,6 +22,7 @@ interface Restaurant {
   postalCode?: string | null
   phone?: string | null
   website?: string | null
+  isOffline?: boolean
   settings?: {
     openingHours?: string | null
   } | null
@@ -92,6 +94,11 @@ function RestaurantPageContent({
 
   if (!restaurant) {
     notFound()
+  }
+
+  // Show offline page if restaurant is not active
+  if (restaurant.isOffline) {
+    return <RestaurantOffline restaurant={restaurant} />
   }
 
   return (

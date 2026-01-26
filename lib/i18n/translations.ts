@@ -672,6 +672,29 @@ export const translations = {
         title: 'الطاولة غير موجودة',
         description: 'الطاولة {{number}} غير موجودة أو غير نشطة.',
         backToRestaurant: 'العودة إلى صفحة المطعم'
+      },
+      back: 'رجوع',
+      days: {
+        monday: 'الإثنين',
+        tuesday: 'الثلاثاء',
+        wednesday: 'الأربعاء',
+        thursday: 'الخميس',
+        friday: 'الجمعة',
+        saturday: 'السبت',
+        sunday: 'الأحد'
+      },
+      offline: {
+        status: 'غير متصل حالياً',
+        message: 'نحن غير متاحين حالياً للطلبات عبر الإنترنت. يرجى المحاولة مرة أخرى لاحقاً أو الاتصال بنا مباشرة.',
+        openingHours: 'ساعات العمل',
+        closed: 'مغلق',
+        contactUs: 'اتصل بنا',
+        callUs: 'اتصل بنا',
+        visitUs: 'قم بزيارتنا',
+        reservationHint: 'يمكنك أيضاً الاتصال بنا مباشرة لإجراء حجز أو طرح الأسئلة.',
+        callNow: 'اتصل الآن',
+        backHome: 'الصفحة الرئيسية',
+        checkBackLater: 'يرجى العودة لاحقاً أو الاتصال بنا مباشرة للحصول على مزيد من المعلومات.'
       }
     },
     // Common
@@ -1749,6 +1772,29 @@ export const translations = {
         title: 'Tisch nicht gefunden',
         description: 'Tisch {{number}} existiert nicht oder ist nicht aktiv.',
         backToRestaurant: 'Zurück zur Restaurant-Seite'
+      },
+      back: 'Zurück',
+      days: {
+        monday: 'Montag',
+        tuesday: 'Dienstag',
+        wednesday: 'Mittwoch',
+        thursday: 'Donnerstag',
+        friday: 'Freitag',
+        saturday: 'Samstag',
+        sunday: 'Sonntag'
+      },
+      offline: {
+        status: 'Momentan offline',
+        message: 'Wir sind gerade nicht für Online-Bestellungen verfügbar. Bitte versuchen Sie es später erneut oder kontaktieren Sie uns direkt.',
+        openingHours: 'Unsere Öffnungszeiten',
+        closed: 'Geschlossen',
+        contactUs: 'Kontaktieren Sie uns',
+        callUs: 'Rufen Sie uns an',
+        visitUs: 'Besuchen Sie uns',
+        reservationHint: 'Sie können uns auch direkt anrufen, um eine Reservierung vorzunehmen oder Fragen zu stellen.',
+        callNow: 'Jetzt anrufen',
+        backHome: 'Zur Startseite',
+        checkBackLater: 'Bitte schauen Sie später wieder vorbei oder kontaktieren Sie uns direkt für weitere Informationen.'
       }
     },
     // Common
