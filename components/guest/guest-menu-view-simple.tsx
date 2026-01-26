@@ -88,8 +88,11 @@ interface CartItem {
 
 interface GuestMenuViewProps {
   restaurant: Restaurant
-  table: any
-  tableNumber: number
+  table?: any
+  tableNumber?: number
+  onCartUpdate?: (cart: CartItem[]) => void
+  onCheckout?: () => void
+  isPreOrder?: boolean
 }
 
 const cuisineEmojis: { [key: string]: string } = {
@@ -108,7 +111,14 @@ const cuisineEmojis: { [key: string]: string } = {
   'other': '🍴'
 }
 
-export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: GuestMenuViewProps) {
+export default function GuestMenuViewSimple({ 
+  restaurant, 
+  table, 
+  tableNumber,
+  onCartUpdate,
+  onCheckout: onCheckoutProp,
+  isPreOrder = false 
+}: GuestMenuViewProps) {
   const { t, language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
@@ -126,6 +136,13 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
   const [selectedTipOption, setSelectedTipOption] = useState<string>('0')
   const [currentTipAmount, setCurrentTipAmount] = useState<number>(0)
 
+  // Notify parent when cart changes (for pre-order)
+  useEffect(() => {
+    if (onCartUpdate) {
+      onCartUpdate(cart)
+    }
+  }, [cart, onCartUpdate])
+  
   // Debug logging
   useEffect(() => {
     console.log('Restaurant Data:', {
@@ -685,10 +702,16 @@ export default function GuestMenuViewSimple({ restaurant, table, tableNumber }: 
                 <Button 
                   className="w-full" 
                   size="lg"
-                  onClick={() => setShowCheckout(true)}
+                  onClick={() => {
+                    if (isPreOrder && onCheckoutProp) {
+                      onCheckoutProp()
+                    } else {
+                      setShowCheckout(true)
+                    }
+                  }}
                   style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
                 >
-                  {t('checkout.proceedToCheckout')}
+                  {isPreOrder ? t('guest.preorder.proceed') : t('checkout.proceedToCheckout')}
                 </Button>
               </div>
             </SheetFooter>

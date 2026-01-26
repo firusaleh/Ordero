@@ -3,10 +3,6 @@ import { prisma } from '@/lib/prisma'
 import PreOrderMenuView from '@/components/guest/preorder-menu-view'
 import { GuestLanguageProvider } from '@/contexts/guest-language-context'
 
-interface PreOrderPageProps {
-  params: Promise<{ restaurantSlug: string }>
-}
-
 async function getRestaurantMenu(slug: string) {
   const restaurant = await prisma.restaurant.findUnique({
     where: { 
@@ -43,10 +39,24 @@ async function getRestaurantMenu(slug: string) {
     restaurant.settings = settings
   }
   
+  // Debug logging für Restaurant-Daten
+  console.log('Restaurant loaded for preorder page:', {
+    name: restaurant.name,
+    country: restaurant.country,
+    settings: restaurant.settings,
+    slug: restaurant.slug
+  })
+
   return restaurant
 }
 
-export default async function PreOrderPage({ params }: PreOrderPageProps) {
+export default async function PreOrderPageNew({ 
+  params 
+}: { 
+  params: Promise<{ 
+    restaurantSlug: string
+  }>
+}) {
   const { restaurantSlug } = await params
   const restaurant = await getRestaurantMenu(restaurantSlug)
 
