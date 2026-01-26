@@ -118,7 +118,35 @@ export async function DELETE(
       return NextResponse.json({ error: 'Artikel gehört nicht zu diesem Restaurant' }, { status: 403 })
     }
 
-    // Lösche Menü-Artikel
+    // WICHTIG: Wir können den Artikel nicht löschen, wenn er in Bestellungen verwendet wird
+    // Prüfe ob der Artikel in Bestellungen verwendet wird
+    const orderItemsCount = await prisma.orderItem.count({
+      where: { menuItemId: itemId }
+    })
+    
+    if (orderItemsCount > 0) {
+      console.log('[DELETE MenuItem] Artikel wird in Bestellungen verwendet, deaktiviere stattdessen')
+      
+      // Deaktiviere den Artikel statt ihn zu löschen
+      await prisma.menuItem.update({
+        where: { id: itemId },
+        data: {
+          isActive: false,
+          isAvailable: false,
+          name: `[GELÖSCHT] ${menuItem.name}` // Markiere als gelöscht
+        }
+      })
+      
+      console.log('[DELETE MenuItem] Artikel deaktiviert statt gelöscht:', itemId)
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Artikel wurde deaktiviert (wird in Bestellungen verwendet)',
+        deactivated: true
+      })
+    }
+    
+    // Keine Bestellungen vorhanden - sicher zu löschen
     await prisma.menuItem.delete({
       where: { id: itemId }
     })

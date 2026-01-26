@@ -295,15 +295,30 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         throw new Error(data.error || t('menu.errorDeleting') || 'Fehler beim Löschen')
       }
 
-      // Aktualisiere lokalen State
-      setCategories(prevCategories => 
-        prevCategories.map(cat => ({
-          ...cat,
-          menuItems: cat.menuItems.filter(item => item.id !== itemId)
-        }))
-      )
-      
-      toast.success(t('menu.itemDeleted') || 'Artikel erfolgreich gelöscht')
+      // Prüfe ob Artikel deaktiviert oder gelöscht wurde
+      if (data.deactivated) {
+        // Artikel wurde nur deaktiviert (wird in Bestellungen verwendet)
+        setCategories(prevCategories => 
+          prevCategories.map(cat => ({
+            ...cat,
+            menuItems: cat.menuItems.map(item => 
+              item.id === itemId 
+                ? { ...item, isActive: false, isAvailable: false, name: `[GELÖSCHT] ${item.name}` }
+                : item
+            )
+          }))
+        )
+        toast.info('Artikel wurde deaktiviert, da er in Bestellungen verwendet wird')
+      } else {
+        // Artikel wurde komplett gelöscht
+        setCategories(prevCategories => 
+          prevCategories.map(cat => ({
+            ...cat,
+            menuItems: cat.menuItems.filter(item => item.id !== itemId)
+          }))
+        )
+        toast.success(t('menu.itemDeleted') || 'Artikel erfolgreich gelöscht')
+      }
     } catch (error) {
       console.error('Fehler beim Löschen:', error)
       toast.error(
