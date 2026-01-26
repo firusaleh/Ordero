@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { authRateLimiter, checkRateLimit, getIpAddress } from '@/lib/rate-limit'
 import { sendWelcomeEmail } from '@/lib/email-sendgrid'
+import { sendNewRegistrationEmail } from '@/lib/email-service'
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -94,15 +95,14 @@ export async function POST(request: NextRequest) {
       const trialEndsAt = new Date()
       trialEndsAt.setDate(trialEndsAt.getDate() + 14)
       
-      // Erstelle Restaurant
+      // Erstelle Restaurant mit Status PENDING (muss vom Admin freigegeben werden)
       const restaurant = await tx.restaurant.create({
         data: {
           name: validatedData.restaurantName,
           slug: finalSlug,
           ownerId: user.id,
-          status: 'ACTIVE',
-          plan: 'TRIAL',
-          trialEndsAt,
+          status: 'PENDING', // Restaurant startet als PENDING und muss freigegeben werden
+          plan: 'FREE',
           email: validatedData.email,
           phone: validatedData.phone,
           country: validatedData.country || 'DE',
@@ -119,7 +119,21 @@ export async function POST(request: NextRequest) {
       return { user, restaurant }
     })
     
-    // Sende Willkommens-E-Mail
+    // Sende E-Mail an Admin über neue Registrierung
+    try {
+      await sendNewRegistrationEmail({
+        adminEmail: 'admin@oriido.com', // TODO: Replace with actual admin email
+        restaurantName: validatedData.restaurantName,
+        ownerName: validatedData.name,
+        ownerEmail: validatedData.email
+      })
+      console.log('✅ Admin notification sent for new registration')
+    } catch (emailError: any) {
+      console.error('❌ Failed to send admin notification:', emailError.message)
+      // Continue even if email fails
+    }
+    
+    // Sende Willkommens-E-Mail an Restaurant-Besitzer
     try {
       const emailResult = await sendWelcomeEmail({
         email: validatedData.email,
@@ -141,7 +155,8 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      message: 'Registrierung erfolgreich',
+      message: 'Registrierung erfolgreich! Ihr Restaurant wartet auf Freigabe durch den Administrator. Sie erhalten eine E-Mail, sobald Ihr Restaurant freigegeben wurde.',
+      requiresApproval: true,
       data: {
         email: result.user.email,
         restaurantSlug: result.restaurant.slug,

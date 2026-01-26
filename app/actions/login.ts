@@ -18,6 +18,13 @@ export async function handleLogin(email: string, password: string) {
   } catch (error) {
     console.error('Login error:', error)
     
+    // Check for custom restaurant pending approval error
+    if (error instanceof Error && error.message === 'RESTAURANT_PENDING_APPROVAL') {
+      return { 
+        error: 'Ihr Restaurant wartet auf Freigabe durch den Administrator. Sie erhalten eine E-Mail, sobald Ihr Restaurant freigegeben wurde.' 
+      }
+    }
+    
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':

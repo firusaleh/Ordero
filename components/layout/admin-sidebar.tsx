@@ -10,13 +10,15 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Shield
+  Shield,
+  CheckSquare
 } from 'lucide-react'
 import { handleSignOut } from '@/app/actions/auth'
 
 const navigation = [
   { name: 'Übersicht', href: '/admin', icon: Home },
   { name: 'Restaurants', href: '/admin/restaurants', icon: Store },
+  { name: 'Freigaben', href: '/admin/approvals', icon: CheckSquare },
   { name: 'Rechnungen', href: '/admin/invoices', icon: FileText },
   { name: 'Statistiken', href: '/admin/stats', icon: BarChart3 },
   { name: 'Einstellungen', href: '/admin/settings', icon: Settings },

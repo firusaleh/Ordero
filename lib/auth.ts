@@ -24,6 +24,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await prisma.user.findUnique({
           where: { 
             email: credentials.email as string
+          },
+          include: {
+            ownedRestaurants: {
+              select: {
+                id: true,
+                status: true,
+                name: true
+              }
+            }
           }
         })
         
@@ -40,6 +49,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!isValid) {
           console.log('Invalid password for user:', credentials.email)
           return null // Rückgabe von null löst CredentialsSignin aus
+        }
+        
+        // Check if restaurant owner with pending restaurant
+        if (user.role === "RESTAURANT_OWNER" && user.ownedRestaurants.length > 0) {
+          const pendingRestaurant = user.ownedRestaurants.find(r => r.status === "PENDING")
+          if (pendingRestaurant) {
+            console.log('Restaurant pending approval:', pendingRestaurant.name)
+            throw new Error("RESTAURANT_PENDING_APPROVAL")
+          }
         }
         
         console.log('Login successful for:', user.email)

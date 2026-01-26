@@ -29,6 +29,7 @@ model User {
   
   // Relationen
   ownedRestaurants Restaurant[] @relation("RestaurantOwner")
+  approvedRestaurants Restaurant[] @relation("ApprovedRestaurants")
   staffAt          RestaurantStaff[]
   
   // Timestamps
@@ -99,9 +100,12 @@ model Restaurant {
   primaryColor String? @default("#3b82f6")
   
   // Status & Plan
-  status      String   @default("ACTIVE") // PENDING, ACTIVE, SUSPENDED, CANCELLED
+  status      String   @default("PENDING") // PENDING, ACTIVE, SUSPENDED, CANCELLED
   plan        String   @default("FREE")  // FREE, STANDARD, PREMIUM
   trialEndsAt DateTime?
+  approvedAt  DateTime?
+  approvedById String?  @db.ObjectId
+  approvedBy  User?    @relation("ApprovedRestaurants", fields: [approvedById], references: [id])
   
   // Owner
   ownerId     String   @db.ObjectId
