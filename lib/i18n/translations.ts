@@ -1435,6 +1435,7 @@ export const translations = {
       tax: 'Steuer',
       serviceFee: 'Servicegebühr',
       customerNotes: 'Kundennotizen',
+      notes: 'Anmerkungen',
       created: 'Erstellt',
       updated: 'Aktualisiert',
       noPreorders: 'Keine Vorbestellungen',
