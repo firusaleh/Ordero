@@ -331,9 +331,9 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                     </div>
                     
                     {/* Zusätzliche Details */}
-                    {(order.tip > 0 || order.notes) && (
+                    {((order.tip && order.tip > 0) || order.notes) && (
                       <div className="mt-2 pt-2 border-t text-sm">
-                        {order.tip > 0 && (
+                        {order.tip && order.tip > 0 && (
                           <div className="flex justify-between text-green-600">
                             <span>{t('orders.tip') || 'Trinkgeld'}:</span>
                             <span>+{formatPrice(order.tip)}</span>
