@@ -55,13 +55,8 @@ export async function POST(req: NextRequest) {
     }
     
     // Autorisiere den Channel
-    const authResponse = pusherServer.authorizeChannel(socket_id, channel_name, {
-      user_id: session.user.id,
-      user_info: {
-        name: session.user.name || session.user.email,
-        role: session.user.role
-      }
-    })
+    // For private channels, we use authenticate instead of authorizeChannel
+    const authResponse = pusherServer.authenticate(socket_id, channel_name)
     
     return NextResponse.json(authResponse)
   } catch (error) {
