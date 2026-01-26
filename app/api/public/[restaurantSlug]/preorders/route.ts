@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-// Email-Service ist verfügbar in email-service.ts
 
 // Schema für neue Vorbestellung
 const createPreOrderSchema = z.object({
@@ -31,25 +30,10 @@ export async function GET(
 ) {
   try {
     const { restaurantSlug } = await params
+    
     // Restaurant mit Menü finden
     const restaurant = await prisma.restaurant.findUnique({
-      where: { slug: restaurantSlug },
-      include: {
-        settings: true,
-        categories: {
-          where: { isActive: true },
-          include: {
-            menuItems: {
-              where: { 
-                isActive: true,
-                isAvailable: true 
-              },
-              orderBy: { sortOrder: 'asc' }
-            }
-          },
-          orderBy: { sortOrder: 'asc' }
-        }
-      }
+      where: { slug: restaurantSlug }
     })
 
     if (!restaurant) {
@@ -59,23 +43,63 @@ export async function GET(
       )
     }
 
+    // Settings separat laden
+    const settings = await prisma.restaurantSettings.findUnique({
+      where: { restaurantId: restaurant.id }
+    })
+
+    // Kategorien und MenuItems laden
+    const categories = await prisma.category.findMany({
+      where: { 
+        restaurantId: restaurant.id,
+        isActive: true 
+      },
+      include: {
+        menuItems: {
+          where: { 
+            isActive: true,
+            isAvailable: true 
+          },
+          orderBy: { sortOrder: 'asc' }
+        }
+      },
+      orderBy: { sortOrder: 'asc' }
+    })
+
     // Prüfe ob Vorbestellungen erlaubt sind
     const currentTime = new Date()
     const maxPreOrderTime = new Date()
     maxPreOrderTime.setHours(maxPreOrderTime.getHours() + 24) // Max 24 Stunden im Voraus
+
+    // Konvertiere menuItems für bessere Kompatibilität
+    const categoriesWithPrices = categories.map(category => ({
+      ...category,
+      menuItems: category.menuItems.map(item => ({
+        ...item,
+        price: Number(item.price) || 0, // Stelle sicher, dass price eine Zahl ist
+        variants: item.variants ? (item.variants as any[]).map((v: any) => ({
+          ...v,
+          price: Number(v.price) || 0
+        })) : [],
+        extras: item.extras || []
+      }))
+    }))
 
     return NextResponse.json({
       restaurant: {
         id: restaurant.id,
         name: restaurant.name,
         description: restaurant.description,
+        logo: restaurant.logo,
+        banner: restaurant.banner,
+        primaryColor: restaurant.primaryColor,
         settings: {
-          currency: restaurant.settings?.currency || 'EUR',
-          serviceFee: restaurant.settings?.serviceFeePercent || 0,
-          taxRate: restaurant.settings?.taxRate || 19
+          currency: settings?.currency || 'EUR',
+          serviceFee: settings?.serviceFeePercent || 0,
+          taxRate: settings?.taxRate || 19
         }
       },
-      categories: restaurant.categories,
+      categories: categoriesWithPrices,
       availableTimeSlots: {
         min: new Date(currentTime.getTime() + 20 * 60000).toISOString(), // Min 20 Minuten voraus
         max: maxPreOrderTime.toISOString()
@@ -85,7 +109,7 @@ export async function GET(
   } catch (error) {
     console.error('Fehler beim Abrufen des Menüs:', error)
     return NextResponse.json(
-      { error: 'Interner Serverfehler' },
+      { error: 'Interner Serverfehler', details: error },
       { status: 500 }
     )
   }
@@ -105,15 +129,7 @@ export async function POST(
 
     // Restaurant finden
     const restaurant = await prisma.restaurant.findUnique({
-      where: { slug: restaurantSlug },
-      include: { 
-        settings: true,
-        owner: {
-          select: {
-            email: true
-          }
-        }
-      }
+      where: { slug: restaurantSlug }
     })
 
     if (!restaurant) {
@@ -122,6 +138,11 @@ export async function POST(
         { status: 404 }
       )
     }
+
+    // Settings laden
+    const settings = await prisma.restaurantSettings.findUnique({
+      where: { restaurantId: restaurant.id }
+    })
 
     // Validiere Pickup-Zeit (min 20 Minuten, max 24 Stunden)
     const pickupTime = new Date(validatedData.pickupTime)
@@ -156,23 +177,26 @@ export async function POST(
 
     // Berechne Preise
     let subtotal = 0
-    const preOrderItems = validatedData.items.map(item => {
+    const orderItems = validatedData.items.map(item => {
       const menuItem = menuItems.find(mi => mi.id === item.menuItemId)!
       
-      let itemPrice = menuItem.price
+      let itemPrice = Number(menuItem.price) || 0
       
       // Variante hinzufügen
-      if (item.variant) {
-        const variant = menuItem.variants?.find(v => v.name === item.variant)
+      if (item.variant && menuItem.variants) {
+        const variants = menuItem.variants as any[]
+        const variant = variants.find(v => v.name === item.variant)
         if (variant) {
-          itemPrice = variant.price
+          itemPrice = Number(variant.price) || 0
         }
       }
       
       // Extras hinzufügen
       let extrasTotal = 0
+      const extras = []
       if (item.extras && item.extras.length > 0) {
-        extrasTotal = item.extras.reduce((sum, extra) => sum + extra.price, 0)
+        extrasTotal = item.extras.reduce((sum, extra) => sum + (Number(extra.price) || 0), 0)
+        extras.push(...item.extras)
       }
       
       const totalPrice = (itemPrice + extrasTotal) * item.quantity
@@ -185,17 +209,17 @@ export async function POST(
         unitPrice: itemPrice,
         totalPrice,
         variant: item.variant,
-        variantPrice: item.variant ? itemPrice : undefined,
-        extras: item.extras || [],
+        variantPrice: item.variant ? itemPrice : null,
+        extras: extras,
         notes: item.notes
       }
     })
 
     // Berechne Steuern und Gebühren
-    const taxRate = restaurant.settings?.taxRate || 19
+    const taxRate = settings?.taxRate || 19
     const tax = subtotal * (taxRate / 100)
-    const serviceFee = restaurant.settings?.serviceFeePercent 
-      ? subtotal * (restaurant.settings.serviceFeePercent / 100)
+    const serviceFee = settings?.serviceFeePercent 
+      ? subtotal * (settings.serviceFeePercent / 100)
       : 0
     const total = subtotal + tax + serviceFee
 
@@ -229,7 +253,7 @@ export async function POST(
     })
     
     // Erstelle OrderItems
-    for (const item of preOrderItems) {
+    for (const item of orderItems) {
       await prisma.orderItem.create({
         data: {
           orderId: preOrder.id,
@@ -278,7 +302,7 @@ export async function POST(
 
     console.error('Fehler beim Erstellen der Vorbestellung:', error)
     return NextResponse.json(
-      { error: 'Interner Serverfehler' },
+      { error: 'Interner Serverfehler', details: error },
       { status: 500 }
     )
   }
