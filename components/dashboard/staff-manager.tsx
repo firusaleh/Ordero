@@ -368,7 +368,9 @@ export default function StaffManager({
                       <div className="flex items-center gap-2">
                         {member.name}
                         {member.isOwner && (
-                          <Crown className="w-4 h-4 text-yellow-500" title="Besitzer" />
+                          <span title="Besitzer">
+                            <Crown className="w-4 h-4 text-yellow-500" />
+                          </span>
                         )}
                       </div>
                     </TableCell>
