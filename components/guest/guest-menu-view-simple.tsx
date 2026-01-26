@@ -385,7 +385,7 @@ export default function GuestMenuViewSimple({
               </h1>
               <div className="flex items-center gap-1 mt-0.5">
                 <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                  {cuisineEmojis[restaurant.cuisine || 'other']} {getLocalizedTableName(tableNumber, language)}
+                  {cuisineEmojis[restaurant.cuisine || 'other']} {getLocalizedTableName(tableNumber || 0, language)}
                 </Badge>
               </div>
             </div>
