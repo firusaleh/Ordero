@@ -38,12 +38,18 @@ export async function POST(
     // Generiere Bestellnummer
     const orderNumber = `PRE-${Date.now()}`
 
-    // Erstelle Vorbestellung
+    // Erstelle Vorbestellung mit Pickup-Zeit im Notes Feld
+    const orderNotes = [
+      data.notes || '',
+      `PICKUP_TIME: ${pickupDateTime.toISOString()}`,
+      'PREORDER: true'
+    ].filter(Boolean).join('\n---\n')
+    
     const order = await prisma.order.create({
       data: {
         restaurantId: id,
         orderNumber,
-        type: 'PREORDER',
+        type: 'PREORDER' as any,
         status: 'PENDING',
         items: data.items as any,
         subtotal: data.subtotal,
@@ -53,14 +59,8 @@ export async function POST(
         guestName: data.customerName,
         guestPhone: data.customerPhone,
         guestEmail: data.customerEmail || null,
-        notes: data.notes || null,
-        // Speichere Pickup Zeit in einem Custom Field oder notes
-        paymentStatus: 'PENDING',
-        // Für Vorbestellungen kann das pickupDateTime im notes Feld gespeichert werden
-        metadata: {
-          pickupDateTime: pickupDateTime.toISOString(),
-          preorder: true
-        } as any
+        notes: orderNotes,
+        paymentStatus: 'PENDING'
       }
     })
 
