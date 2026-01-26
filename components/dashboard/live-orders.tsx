@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Bell, Clock, CheckCircle, XCircle, Truck, ChefHat, Volume2, VolumeX } from "lucide-react"
+import { Bell, Clock, CheckCircle, XCircle, Truck, ChefHat, Volume2, VolumeX, CreditCard, Banknote, DollarSign, Smartphone } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { de, ar, enUS } from "date-fns/locale"
 import { useNotificationSound } from "@/lib/hooks/use-notification-sound"
@@ -18,6 +18,41 @@ import { useRestaurantCurrency } from "@/hooks/use-restaurant-currency"
 
 interface LiveOrdersProps {
   restaurantId: string
+}
+
+// Helper Funktionen für Zahlungsmethoden
+function getPaymentIcon(method: string) {
+  switch (method?.toUpperCase()) {
+    case 'CARD':
+    case 'CREDIT_CARD':
+      return <CreditCard className="w-3 h-3 mr-1" />
+    case 'CASH':
+      return <Banknote className="w-3 h-3 mr-1" />
+    case 'PAYPAL':
+    case 'STRIPE':
+    case 'ONLINE':
+      return <Smartphone className="w-3 h-3 mr-1" />
+    default:
+      return <DollarSign className="w-3 h-3 mr-1" />
+  }
+}
+
+function getPaymentLabel(method: string, t: any) {
+  switch (method?.toUpperCase()) {
+    case 'CARD':
+    case 'CREDIT_CARD':
+      return t('orders.paymentMethod.card') || 'Karte'
+    case 'CASH':
+      return t('orders.paymentMethod.cash') || 'Bar'
+    case 'PAYPAL':
+      return 'PayPal'
+    case 'STRIPE':
+      return 'Stripe'
+    case 'ONLINE':
+      return t('orders.paymentMethod.online') || 'Online'
+    default:
+      return method || t('orders.paymentMethod.unknown') || 'Unbekannt'
+  }
 }
 
 export function LiveOrders({ restaurantId }: LiveOrdersProps) {
@@ -258,6 +293,27 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                       <p className="text-xs text-gray-500">
                         #{order.id.slice(-6).toUpperCase()}
                       </p>
+                      {/* Zahlungsstatus */}
+                      <div className="mt-2 space-y-1">
+                        {order.paymentStatus === 'PAID' ? (
+                          <Badge className="bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            {t('orders.paid') || 'Bezahlt'}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-orange-600 border-orange-600">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {t('orders.unpaid') || 'Unbezahlt'}
+                          </Badge>
+                        )}
+                        {/* Zahlungsart */}
+                        {order.paymentMethod && (
+                          <Badge variant="secondary" className="text-xs">
+                            {getPaymentIcon(order.paymentMethod)}
+                            {getPaymentLabel(order.paymentMethod, t)}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -273,6 +329,23 @@ export function LiveOrders({ restaurantId }: LiveOrdersProps) {
                         </div>
                       ))}
                     </div>
+                    
+                    {/* Zusätzliche Details */}
+                    {(order.tip > 0 || order.notes) && (
+                      <div className="mt-2 pt-2 border-t text-sm">
+                        {order.tip > 0 && (
+                          <div className="flex justify-between text-green-600">
+                            <span>{t('orders.tip') || 'Trinkgeld'}:</span>
+                            <span>+{formatPrice(order.tip)}</span>
+                          </div>
+                        )}
+                        {order.notes && (
+                          <div className="mt-1 p-2 bg-amber-50 rounded text-xs text-amber-800">
+                            <strong>{t('orders.notes') || 'Notiz'}:</strong> {order.notes}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Aktionen */}
