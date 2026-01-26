@@ -205,7 +205,17 @@ export const translations = {
       items: 'العناصر',
       time: 'الوقت',
       noOrders: 'لا توجد طلبات',
-      noOrdersDesc: 'لا توجد طلبات بعد. سيتم عرض الطلبات الجديدة هنا تلقائياً.'
+      noOrdersDesc: 'لا توجد طلبات بعد. سيتم عرض الطلبات الجديدة هنا تلقائياً.',
+      paid: 'مدفوع',
+      unpaid: 'غير مدفوع',
+      tip: 'بقشيش',
+      notes: 'ملاحظة',
+      paymentMethod: {
+        card: 'بطاقة',
+        cash: 'نقد',
+        online: 'أونلاين',
+        unknown: 'غير معروف'
+      }
     },
     // Reservations
     reservations: {
@@ -1304,7 +1314,17 @@ export const translations = {
       items: 'Artikel',
       time: 'Zeit',
       noOrders: 'Keine Bestellungen',
-      noOrdersDesc: 'Noch keine Bestellungen. Neue Bestellungen werden hier automatisch angezeigt.'
+      noOrdersDesc: 'Noch keine Bestellungen. Neue Bestellungen werden hier automatisch angezeigt.',
+      paid: 'Bezahlt',
+      unpaid: 'Unbezahlt',
+      tip: 'Trinkgeld',
+      notes: 'Notiz',
+      paymentMethod: {
+        card: 'Karte',
+        cash: 'Bar',
+        online: 'Online',
+        unknown: 'Unbekannt'
+      }
     },
     // Reservations
     reservations: {
@@ -2364,7 +2384,17 @@ export const translations = {
       takeaway: 'Takeaway',
       unknownTable: 'Unknown Table',
       newOrder: 'New Order',
-      newOrderDesc: 'New order from {{table}}'
+      newOrderDesc: 'New order from {{table}}',
+      paid: 'Paid',
+      unpaid: 'Unpaid',
+      tip: 'Tip',
+      notes: 'Note',
+      paymentMethod: {
+        card: 'Card',
+        cash: 'Cash',
+        online: 'Online',
+        unknown: 'Unknown'
+      }
     },
     // Settings
     settings: {
