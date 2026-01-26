@@ -103,15 +103,31 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
     try {
       // Berechne Gesamtsumme
       const subtotal = cart.reduce((sum, item) => {
-        const itemPrice = item.unitPrice * item.quantity
-        const extrasPrice = item.extraPrices?.reduce((a: number, b: number) => a + b, 0) || 0
-        return sum + itemPrice + (extrasPrice * item.quantity)
+        const price = item.variant?.price || item.menuItem?.price || 0
+        const extrasPrice = item.extras?.reduce((extraSum: number, extra: any) => extraSum + (extra.price || 0), 0) || 0
+        return sum + ((price + extrasPrice) * item.quantity)
       }, 0)
+
+      // Formatiere Items für API
+      const formattedItems = cart.map(item => ({
+        id: item.menuItem?.id,
+        menuItemId: item.menuItem?.id,
+        name: item.menuItem?.name || 'Artikel',
+        quantity: item.quantity,
+        price: item.variant?.price || item.menuItem?.price || 0,
+        variant: item.variant?.name || null,
+        variantPrice: item.variant?.price || null,
+        extras: item.extras?.map((extra: any) => ({
+          name: extra.name,
+          price: extra.price || 0
+        })) || [],
+        notes: item.notes || null
+      }))
 
       const orderData = {
         restaurantId: restaurant.id,
         type: 'PREORDER',
-        items: cart,
+        items: formattedItems,
         subtotal,
         tax: 0, // Kann später berechnet werden
         tip: 0,
@@ -297,20 +313,27 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
                 {language === 'de' ? 'Ihre Bestellung' : 'Your Order'}
               </h4>
               <div className="text-sm space-y-1 max-h-32 overflow-y-auto">
-                {cart.map((item, index) => (
-                  <div key={index} className="flex justify-between">
-                    <span>{item.quantity}x {item.name}</span>
-                    <span>{(item.unitPrice * item.quantity).toFixed(2)} €</span>
-                  </div>
-                ))}
+                {cart.map((item, index) => {
+                  const price = item.variant?.price || item.menuItem?.price || 0
+                  const extrasPrice = item.extras?.reduce((sum: number, extra: any) => sum + (extra.price || 0), 0) || 0
+                  const totalPrice = (price + extrasPrice) * item.quantity
+                  
+                  return (
+                    <div key={index} className="flex justify-between">
+                      <span>{item.quantity}x {item.menuItem?.name || 'Artikel'}</span>
+                      <span>{totalPrice.toFixed(2)} €</span>
+                    </div>
+                  )
+                })}
               </div>
               <div className="border-t mt-2 pt-2 font-semibold flex justify-between">
                 <span>{language === 'de' ? 'Gesamt' : 'Total'}</span>
                 <span>
                   {cart.reduce((sum, item) => {
-                    const itemPrice = item.unitPrice * item.quantity
-                    const extrasPrice = (item.extraPrices?.reduce((a: number, b: number) => a + b, 0) || 0) * item.quantity
-                    return sum + itemPrice + extrasPrice
+                    const price = item.variant?.price || item.menuItem?.price || 0
+                    const extrasPrice = item.extras?.reduce((extraSum: number, extra: any) => extraSum + (extra.price || 0), 0) || 0
+                    const totalPrice = (price + extrasPrice) * item.quantity
+                    return sum + totalPrice
                   }, 0).toFixed(2)} €
                 </span>
               </div>
