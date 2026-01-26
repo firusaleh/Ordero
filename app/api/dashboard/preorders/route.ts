@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
         }
       },
       include: {
-        orderItems: {
+        items: {
           include: {
             menuItem: {
               select: {
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         paymentMethod: order.paymentMethod || 'CASH',
         paymentStatus: order.paymentStatus || 'PENDING',
         notes: cleanNotes || '',
-        items: order.orderItems.map(item => ({
+        items: order.items.map(item => ({
           id: item.id,
           name: item.name || item.menuItem?.name || 'Artikel',
           quantity: item.quantity,
