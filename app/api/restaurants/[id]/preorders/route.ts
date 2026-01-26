@@ -49,40 +49,48 @@ export async function POST(
       data: {
         restaurantId: id,
         orderNumber,
-        type: 'PREORDER' as any,
+        type: 'TAKEAWAY', // Verwende TAKEAWAY für Vorbestellungen
         status: 'PENDING',
-        items: data.items as any,
-        subtotal: data.subtotal,
+        subtotal: data.subtotal || 0,
         tax: data.tax || 0,
         tip: data.tip || 0,
-        total: data.total,
+        serviceFee: 0,
+        total: data.total || 0,
         guestName: data.customerName,
         guestPhone: data.customerPhone,
         guestEmail: data.customerEmail || null,
         notes: orderNotes,
-        paymentStatus: 'PENDING'
+        paymentStatus: 'PENDING',
+        paymentMethod: data.paymentMethod || 'CASH'
       }
     })
 
     // Erstelle OrderItems für bessere Datenbankstruktur
     if (data.items && data.items.length > 0) {
-      const orderItems = data.items.map((item: any) => ({
-        orderId: order.id,
-        menuItemId: item.menuItemId,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        totalPrice: item.unitPrice * item.quantity,
-        variantId: item.variantId || null,
-        variantName: item.variantName || null,
-        extraIds: item.extraIds || [],
-        extraNames: item.extraNames || [],
-        extraPrices: item.extraPrices || [],
-        notes: item.notes || null
-      }))
-
-      await prisma.orderItem.createMany({
-        data: orderItems
-      })
+      for (const item of data.items) {
+        // Bereite extras Array vor (als embedded document)
+        const extras = item.extras && item.extras.length > 0
+          ? item.extras.map((extra: any) => ({
+              name: extra.name,
+              price: extra.price || 0
+            }))
+          : []
+        
+        const orderItem = await prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            menuItemId: item.id || item.menuItemId,
+            name: item.name || 'Artikel',
+            quantity: item.quantity || 1,
+            unitPrice: item.price || item.unitPrice || 0,
+            totalPrice: (item.price || item.unitPrice || 0) * (item.quantity || 1),
+            variant: item.variant || null,
+            variantPrice: item.variantPrice || null,
+            notes: item.notes || null,
+            extras: extras // Extras als embedded document
+          }
+        })
+      }
     }
 
     // Optional: Sende Benachrichtigung an Restaurant
@@ -98,8 +106,19 @@ export async function POST(
 
   } catch (error) {
     console.error('Fehler beim Erstellen der Vorbestellung:', error)
+    
+    // Gib detailliertere Fehlermeldung zurück
+    let errorMessage = 'Fehler beim Erstellen der Vorbestellung'
+    if (error instanceof Error) {
+      errorMessage = error.message
+      console.error('Detailed error:', error.stack)
+    }
+    
     return NextResponse.json(
-      { error: 'Fehler beim Erstellen der Vorbestellung' },
+      { 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? error : undefined
+      },
       { status: 500 }
     )
   }
@@ -114,11 +133,14 @@ export async function GET(
     const { id } = await context.params
     
     // Hole alle Vorbestellungen für das Restaurant
-    // In MongoDB sind items als embedded documents gespeichert
+    // Identifiziere Vorbestellungen über die Notes
     const preorders = await prisma.order.findMany({
       where: {
         restaurantId: id,
-        type: 'PREORDER',
+        type: 'TAKEAWAY',
+        notes: {
+          contains: 'PREORDER: true'
+        },
         createdAt: {
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Letzte 7 Tage
         }
