@@ -89,7 +89,7 @@ export async function POST(
         data: {
           email,
           name: name || email.split('@')[0],
-          hashedPassword: await bcrypt.hash(tempPassword, 10),
+          password: await bcrypt.hash(tempPassword, 10),
           emailVerified: null
         }
       })
@@ -99,7 +99,7 @@ export async function POST(
     }
 
     // Prüfe ob der Nutzer bereits Mitarbeiter ist
-    const existingStaff = await prisma.staff.findFirst({
+    const existingStaff = await prisma.restaurantStaff.findFirst({
       where: {
         userId: user.id,
         restaurantId: id
@@ -114,7 +114,7 @@ export async function POST(
     }
 
     // Füge den Nutzer als Mitarbeiter hinzu
-    const staff = await prisma.staff.create({
+    const staff = await prisma.restaurantStaff.create({
       data: {
         userId: user.id,
         restaurantId: id,

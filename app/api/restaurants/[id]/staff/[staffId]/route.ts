@@ -28,7 +28,7 @@ export async function PATCH(
     }
 
     // Aktualisiere die Rolle
-    const staff = await prisma.staff.update({
+    const staff = await prisma.restaurantStaff.update({
       where: { id: staffId },
       data: { role: role.toUpperCase() }
     })
@@ -71,7 +71,7 @@ export async function DELETE(
     }
 
     // Entferne den Mitarbeiter
-    await prisma.staff.delete({
+    await prisma.restaurantStaff.delete({
       where: { id: staffId }
     })
 

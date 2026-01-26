@@ -26,7 +26,7 @@ export default async function StaffWrapper() {
       },
       owner: true
     }
-  })
+  }) as any
 
   if (!restaurant) {
     redirect('/dashboard/restaurant-setup')
