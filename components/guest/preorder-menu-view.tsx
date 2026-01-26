@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import GuestMenuViewSimple from './guest-menu-view-simple'
-import { Calendar, Clock, User, Phone, Mail, MessageSquare } from 'lucide-react'
+import { Calendar, Clock, User, Phone, Mail, MessageSquare, Package, Store, CreditCard, Banknote } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -36,7 +36,9 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
     email: '',
     pickupDate: '',
     pickupTime: '',
-    notes: ''
+    notes: '',
+    orderType: 'PICKUP' as 'PICKUP' | 'DINE_IN',
+    paymentMethod: 'CASH' as 'CASH' | 'CARD' | 'ONLINE'
   })
 
   // Minimum Zeit für Vorbestellung (z.B. 2 Stunden von jetzt)
@@ -126,7 +128,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
 
       const orderData = {
         restaurantId: restaurant.id,
-        type: 'PREORDER',
+        type: preOrderData.orderType, // PICKUP oder DINE_IN
         items: formattedItems,
         subtotal,
         tax: 0, // Kann später berechnet werden
@@ -136,7 +138,8 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
         customerPhone: preOrderData.phone,
         customerEmail: preOrderData.email || null,
         pickupDateTime: `${preOrderData.pickupDate}T${preOrderData.pickupTime}:00`,
-        notes: preOrderData.notes || null
+        notes: preOrderData.notes || null,
+        paymentMethod: preOrderData.paymentMethod
       }
 
       const response = await fetch(`/api/restaurants/${restaurant.id}/preorders`, {
@@ -151,7 +154,47 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
 
       const result = await response.json()
 
-      // Erfolg
+      // Bei Online-Zahlung, erstelle Payment Intent und leite weiter
+      if (preOrderData.paymentMethod === 'ONLINE' && result.orderId) {
+        try {
+          const paymentResponse = await fetch('/api/stripe-connect/create-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              restaurantId: restaurant.id,
+              orderId: result.orderId,
+              amount: Math.round(subtotal * 100), // Stripe verwendet Cents
+              currency: 'eur',
+              isPreOrder: true,
+              metadata: {
+                orderNumber: result.orderNumber,
+                orderType: preOrderData.orderType,
+                pickupTime: `${preOrderData.pickupDate}T${preOrderData.pickupTime}:00`
+              }
+            })
+          })
+
+          if (paymentResponse.ok) {
+            const paymentData = await paymentResponse.json()
+            if (paymentData.clientSecret) {
+              // Speichere Order ID für später
+              localStorage.setItem('preOrderId', result.orderId)
+              // Leite zur Zahlung weiter
+              window.location.href = `/payment?clientSecret=${paymentData.clientSecret}&orderId=${result.orderId}`
+              return
+            }
+          }
+        } catch (error) {
+          console.error('Fehler beim Erstellen der Zahlung:', error)
+          toast.error(
+            language === 'de' 
+              ? 'Zahlung konnte nicht erstellt werden. Bitte zahlen Sie bei Abholung.'
+              : 'Payment could not be created. Please pay on pickup.'
+          )
+        }
+      }
+
+      // Erfolg (für Bar/Karte Zahlung)
       toast.success(
         language === 'de' 
           ? `Vorbestellung erfolgreich! Bestellnummer: ${result.orderNumber}`
@@ -166,7 +209,9 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
         email: '',
         pickupDate: '',
         pickupTime: '',
-        notes: ''
+        notes: '',
+        orderType: 'PICKUP',
+        paymentMethod: 'CASH'
       })
       setShowPreOrderDialog(false)
 
@@ -212,6 +257,33 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
           </DialogHeader>
 
           <div className="space-y-4 py-4">
+            {/* Bestelltyp */}
+            <div>
+              <Label>
+                {language === 'de' ? 'Bestelltyp *' : 'Order Type *'}
+              </Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                <Button
+                  type="button"
+                  variant={preOrderData.orderType === 'PICKUP' ? 'default' : 'outline'}
+                  onClick={() => setPreOrderData({...preOrderData, orderType: 'PICKUP'})}
+                  className="justify-start"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  {language === 'de' ? 'Abholung' : 'Pickup'}
+                </Button>
+                <Button
+                  type="button"
+                  variant={preOrderData.orderType === 'DINE_IN' ? 'default' : 'outline'}
+                  onClick={() => setPreOrderData({...preOrderData, orderType: 'DINE_IN'})}
+                  className="justify-start"
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  {language === 'de' ? 'Vor Ort essen' : 'Dine In'}
+                </Button>
+              </div>
+            </div>
+
             {/* Name */}
             <div>
               <Label htmlFor="name">
@@ -258,11 +330,14 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
               />
             </div>
 
-            {/* Abholdatum */}
+            {/* Datum */}
             <div>
               <Label htmlFor="date">
                 <Calendar className="w-4 h-4 inline mr-2" />
-                {language === 'de' ? 'Abholdatum *' : 'Pickup Date *'}
+                {preOrderData.orderType === 'PICKUP' 
+                  ? (language === 'de' ? 'Abholdatum *' : 'Pickup Date *')
+                  : (language === 'de' ? 'Datum *' : 'Date *')
+                }
               </Label>
               <Input
                 id="date"
@@ -274,11 +349,14 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
               />
             </div>
 
-            {/* Abholzeit */}
+            {/* Zeit */}
             <div>
               <Label htmlFor="time">
                 <Clock className="w-4 h-4 inline mr-2" />
-                {language === 'de' ? 'Abholzeit *' : 'Pickup Time *'}
+                {preOrderData.orderType === 'PICKUP'
+                  ? (language === 'de' ? 'Abholzeit *' : 'Pickup Time *')
+                  : (language === 'de' ? 'Uhrzeit *' : 'Time *')
+                }
               </Label>
               <Input
                 id="time"
@@ -305,6 +383,49 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
                   : 'Special requests or notes...'}
                 rows={3}
               />
+            </div>
+
+            {/* Zahlungsmethode */}
+            <div>
+              <Label>
+                {language === 'de' ? 'Zahlungsmethode *' : 'Payment Method *'}
+              </Label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <Button
+                  type="button"
+                  variant={preOrderData.paymentMethod === 'CASH' ? 'default' : 'outline'}
+                  onClick={() => setPreOrderData({...preOrderData, paymentMethod: 'CASH'})}
+                  className="justify-start text-xs"
+                >
+                  <Banknote className="w-4 h-4 mr-1" />
+                  {language === 'de' ? 'Bar' : 'Cash'}
+                </Button>
+                <Button
+                  type="button"
+                  variant={preOrderData.paymentMethod === 'CARD' ? 'default' : 'outline'}
+                  onClick={() => setPreOrderData({...preOrderData, paymentMethod: 'CARD'})}
+                  className="justify-start text-xs"
+                >
+                  <CreditCard className="w-4 h-4 mr-1" />
+                  {language === 'de' ? 'Karte' : 'Card'}
+                </Button>
+                <Button
+                  type="button"
+                  variant={preOrderData.paymentMethod === 'ONLINE' ? 'default' : 'outline'}
+                  onClick={() => setPreOrderData({...preOrderData, paymentMethod: 'ONLINE'})}
+                  className="justify-start text-xs"
+                >
+                  🌐
+                  {language === 'de' ? 'Online' : 'Online'}
+                </Button>
+              </div>
+              {preOrderData.paymentMethod === 'ONLINE' && (
+                <p className="text-xs text-gray-600 mt-2">
+                  {language === 'de' 
+                    ? 'Sie werden nach der Bestellung zur Zahlung weitergeleitet'
+                    : 'You will be redirected to payment after ordering'}
+                </p>
+              )}
             </div>
 
             {/* Bestellübersicht */}
