@@ -174,7 +174,10 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         body: JSON.stringify(categoryForm)
       })
 
-      if (!response.ok) throw new Error(t('menu.errorSaving'))
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || t('menu.errorSaving'))
+      }
 
       const savedCategory = await response.json()
       
@@ -184,14 +187,24 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         ))
         toast.success(t('menu.categoryUpdated'))
       } else {
-        setCategories([...categories, savedCategory.data])
-        toast.success(t('menu.categoryCreated'))
+        // API gibt { category: ... } zurück
+        const newCategory = savedCategory.category
+        if (newCategory) {
+          setCategories([...categories, { ...newCategory, menuItems: [] }])
+          toast.success(t('menu.categoryCreated'))
+          // Setze die neue Kategorie als ausgewählt
+          setSelectedCategory(newCategory.id)
+        } else {
+          console.error('Unerwartete Response:', savedCategory)
+          toast.error('Fehler beim Erstellen der Kategorie')
+        }
       }
       
       setShowCategoryDialog(false)
       resetCategoryForm()
-    } catch (error) {
-      toast.error(t('menu.errorSavingCategory'))
+    } catch (error: any) {
+      console.error('Fehler beim Speichern der Kategorie:', error)
+      toast.error(error.message || t('menu.errorSavingCategory'))
     }
   }
 
