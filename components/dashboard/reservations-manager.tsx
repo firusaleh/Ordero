@@ -774,6 +774,22 @@ export function ReservationsManager({ restaurantId }: ReservationsManagerProps) 
                             </div>
                           </div>
                           
+                          {/* Payment Info */}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Badge variant={preorder.paymentStatus === 'PAID' ? 'default' : 'outline'}>
+                              {preorder.paymentMethod === 'CASH' ? `💵 ${t('orders.paymentMethod.cash')}` : 
+                               preorder.paymentMethod === 'CARD' ? `💳 ${t('orders.paymentMethod.card')}` : 
+                               preorder.paymentMethod === 'ONLINE' ? `🌐 ${t('orders.paymentMethod.online')}` : 
+                               preorder.paymentMethod}
+                            </Badge>
+                            {preorder.paymentStatus === 'PAID' && (
+                              <Badge variant="default" className="bg-green-600">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                {t('orders.paid')}
+                              </Badge>
+                            )}
+                          </div>
+                          
                           {/* Order items preview */}
                           <div className="mt-2 p-2 bg-gray-50 rounded text-sm">
                             <div className="space-y-1">
