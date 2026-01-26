@@ -50,9 +50,24 @@ export default function DashboardContent({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-        <p className="text-gray-600">{t('dashboard.welcome')}, {userName || userEmail}</p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold">{restaurant.name}</h1>
+          <p className="text-gray-600">{t('dashboard.welcome')}, {userName || userEmail}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {restaurant.status === 'ACTIVE' ? (
+            <Badge className="bg-green-100 text-green-800">
+              <span className="inline-block w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+              Online
+            </Badge>
+          ) : (
+            <Badge variant="secondary">
+              <span className="inline-block w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+              Offline
+            </Badge>
+          )}
+        </div>
       </div>
 
       {/* Setup Banner - Wichtigster Banner */}

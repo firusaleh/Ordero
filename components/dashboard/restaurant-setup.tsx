@@ -27,7 +27,8 @@ import {
   QrCode,
   Bell,
   Shield,
-  Rocket
+  Rocket,
+  Power
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -253,10 +254,25 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
 
       if (response.ok) {
         toast.success(t('setup.success.goLive'))
-        router.push('/dashboard')
+        router.refresh()
       }
     } catch (error) {
       toast.error(t('setup.errors.activationFailed'))
+    }
+  }
+
+  const handleGoOffline = async () => {
+    try {
+      const response = await fetch(`/api/restaurants/${restaurant.id}/go-offline`, {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        toast.success('Restaurant wurde offline genommen')
+        router.refresh()
+      }
+    } catch (error) {
+      toast.error('Fehler beim Offline-Nehmen')
     }
   }
 
@@ -271,15 +287,38 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
           </p>
         </div>
         
-        <Button
-          size="lg"
-          disabled={setupProgress < 100}
-          onClick={handleGoLive}
-          className={setupProgress === 100 ? 'bg-green-600 hover:bg-green-700' : ''}
-        >
-          <Rocket className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
-          {setupProgress === 100 ? t('setup.goLive') : t('setup.completeSetup')}
-        </Button>
+        {restaurant.status === 'ACTIVE' ? (
+          <div className="flex gap-2 items-center">
+            <Badge className="bg-green-100 text-green-800">
+              Online
+            </Badge>
+            <Button
+              size="lg"
+              variant="destructive"
+              onClick={handleGoOffline}
+            >
+              <Power className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+              Offline nehmen
+            </Button>
+          </div>
+        ) : (
+          <div className="flex gap-2 items-center">
+            {restaurant.status === 'INACTIVE' && (
+              <Badge variant="secondary">
+                Offline
+              </Badge>
+            )}
+            <Button
+              size="lg"
+              disabled={setupProgress < 100}
+              onClick={handleGoLive}
+              className={setupProgress === 100 ? 'bg-green-600 hover:bg-green-700' : ''}
+            >
+              <Rocket className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
+              {setupProgress === 100 ? t('setup.goLive') : t('setup.completeSetup')}
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Gesamt-Fortschritt */}
