@@ -3,6 +3,38 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { sendReservationConfirmation, sendNewReservationNotification } from '@/lib/email-sendgrid'
 
+// Generiere einen 6-stelligen numerischen Reservierungscode
+async function generateUniqueReservationCode(restaurantId: string): Promise<string> {
+  let attempts = 0
+  const maxAttempts = 10
+  
+  while (attempts < maxAttempts) {
+    // Generiere eine Zahl zwischen 100000 und 999999
+    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    
+    // Prüfe ob der Code bereits existiert (nur für dieses Restaurant)
+    const existing = await prisma.reservation.findFirst({
+      where: {
+        restaurantId,
+        confirmationToken: code,
+        // Nur aktive Reservierungen (nicht stornierte oder alte)
+        status: {
+          in: ['PENDING', 'CONFIRMED']
+        }
+      }
+    })
+    
+    if (!existing) {
+      return code
+    }
+    
+    attempts++
+  }
+  
+  // Fallback: Verwende Timestamp-basiertem Code wenn keine eindeutige Nummer gefunden wurde
+  return Date.now().toString().slice(-6)
+}
+
 // Schema für neue Reservierung
 const createReservationSchema = z.object({
   customerName: z.string().min(2, 'Name ist erforderlich'),
@@ -170,7 +202,7 @@ export async function POST(
         specialRequests: validatedData.specialRequests,
         tableId: validatedData.tableId,
         status: 'PENDING',
-        confirmationToken: Math.random().toString(36).substring(2, 15)
+        confirmationToken: await generateUniqueReservationCode(restaurant.id)
       }
     })
 
