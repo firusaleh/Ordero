@@ -274,14 +274,18 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
     }
   }
 
-  const handleDeleteItem = async (itemId: string) => {
-    if (!confirm(t('menu.confirmDeleteItem') || 'Möchten Sie diesen Artikel wirklich löschen?')) {
+  const handleDeleteItem = async (itemId: string, forceDelete: boolean = false) => {
+    if (!forceDelete && !confirm(t('menu.confirmDeleteItem') || 'Möchten Sie diesen Artikel wirklich löschen?')) {
       return
     }
     
     try {
-      console.log('Lösche Artikel:', itemId)
-      const response = await fetch(`/api/restaurants/${restaurantId}/items/${itemId}`, {
+      console.log('Lösche Artikel:', itemId, 'Force:', forceDelete)
+      const url = forceDelete 
+        ? `/api/restaurants/${restaurantId}/items/${itemId}?force=true`
+        : `/api/restaurants/${restaurantId}/items/${itemId}`
+        
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -291,34 +295,33 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
       const data = await response.json()
       console.log('Lösch-Response:', response.status, data)
       
-      if (!response.ok) {
+      if (!response.ok && !data.requiresConfirmation) {
         throw new Error(data.error || t('menu.errorDeleting') || 'Fehler beim Löschen')
       }
 
-      // Prüfe ob Artikel deaktiviert oder gelöscht wurde
-      if (data.deactivated) {
-        // Artikel wurde nur deaktiviert (wird in Bestellungen verwendet)
-        setCategories(prevCategories => 
-          prevCategories.map(cat => ({
-            ...cat,
-            menuItems: cat.menuItems.map(item => 
-              item.id === itemId 
-                ? { ...item, isActive: false, isAvailable: false, name: `[GELÖSCHT] ${item.name}` }
-                : item
-            )
-          }))
+      // Prüfe ob Bestätigung erforderlich ist
+      if (data.requiresConfirmation && data.hasOrders) {
+        // Zeige Warnung und frage nach Bestätigung für Force-Delete
+        const confirmForceDelete = confirm(
+          `${data.message}\n\nWARNUNG: Dadurch werden auch alle ${data.orderCount} Bestellpositionen mit diesem Artikel gelöscht!\n\nWirklich fortfahren?`
         )
-        toast.info('Artikel wurde deaktiviert, da er in Bestellungen verwendet wird')
-      } else {
-        // Artikel wurde komplett gelöscht
-        setCategories(prevCategories => 
-          prevCategories.map(cat => ({
-            ...cat,
-            menuItems: cat.menuItems.filter(item => item.id !== itemId)
-          }))
-        )
-        toast.success(t('menu.itemDeleted') || 'Artikel erfolgreich gelöscht')
+        
+        if (confirmForceDelete) {
+          // Rufe die Funktion erneut mit forceDelete=true auf
+          handleDeleteItem(itemId, true)
+        }
+        return
       }
+
+      // Artikel wurde erfolgreich gelöscht
+      setCategories(prevCategories => 
+        prevCategories.map(cat => ({
+          ...cat,
+          menuItems: cat.menuItems.filter(item => item.id !== itemId)
+        }))
+      )
+      toast.success(t('menu.itemDeleted') || 'Artikel erfolgreich gelöscht')
+      
     } catch (error) {
       console.error('Fehler beim Löschen:', error)
       toast.error(

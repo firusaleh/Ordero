@@ -84,7 +84,11 @@ export async function DELETE(
 
     const { id, itemId } = await context.params
     
-    console.log('[DELETE MenuItem] Request:', { restaurantId: id, itemId })
+    // Prüfe ob Force-Delete angefordert wurde
+    const url = new URL(req.url)
+    const forceDelete = url.searchParams.get('force') === 'true'
+    
+    console.log('[DELETE MenuItem] Request:', { restaurantId: id, itemId, forceDelete })
 
     // Überprüfe Berechtigung
     const restaurant = await prisma.restaurant.findFirst({
@@ -118,32 +122,33 @@ export async function DELETE(
       return NextResponse.json({ error: 'Artikel gehört nicht zu diesem Restaurant' }, { status: 403 })
     }
 
-    // WICHTIG: Wir können den Artikel nicht löschen, wenn er in Bestellungen verwendet wird
     // Prüfe ob der Artikel in Bestellungen verwendet wird
     const orderItemsCount = await prisma.orderItem.count({
       where: { menuItemId: itemId }
     })
     
-    if (orderItemsCount > 0) {
-      console.log('[DELETE MenuItem] Artikel wird in Bestellungen verwendet, deaktiviere stattdessen')
+    if (orderItemsCount > 0 && !forceDelete) {
+      console.log('[DELETE MenuItem] Artikel wird in Bestellungen verwendet')
       
-      // Deaktiviere den Artikel statt ihn zu löschen
-      await prisma.menuItem.update({
-        where: { id: itemId },
-        data: {
-          isActive: false,
-          isAvailable: false,
-          name: `[GELÖSCHT] ${menuItem.name}` // Markiere als gelöscht
-        }
-      })
-      
-      console.log('[DELETE MenuItem] Artikel deaktiviert statt gelöscht:', itemId)
-      
+      // Sende Info zurück, dass Artikel in Bestellungen verwendet wird
       return NextResponse.json({ 
-        success: true, 
-        message: 'Artikel wurde deaktiviert (wird in Bestellungen verwendet)',
-        deactivated: true
+        success: false,
+        hasOrders: true,
+        orderCount: orderItemsCount,
+        message: `Artikel wird in ${orderItemsCount} Bestellung(en) verwendet. Möchten Sie ihn trotzdem löschen?`,
+        requiresConfirmation: true
       })
+    }
+    
+    if (orderItemsCount > 0 && forceDelete) {
+      console.log('[DELETE MenuItem] Force-Delete: Lösche Artikel trotz Bestellungen')
+      
+      // Lösche zuerst alle OrderItems die diesen Artikel referenzieren
+      await prisma.orderItem.deleteMany({
+        where: { menuItemId: itemId }
+      })
+      
+      console.log(`[DELETE MenuItem] ${orderItemsCount} OrderItems gelöscht`)
     }
     
     // Keine Bestellungen vorhanden - sicher zu löschen
