@@ -114,6 +114,7 @@ export async function GET(
     const { id } = await context.params
     
     // Hole alle Vorbestellungen für das Restaurant
+    // In MongoDB sind items als embedded documents gespeichert
     const preorders = await prisma.order.findMany({
       where: {
         restaurantId: id,
@@ -122,19 +123,28 @@ export async function GET(
           gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Letzte 7 Tage
         }
       },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        orderItems: {
+      orderBy: { createdAt: 'desc' }
+    })
+    
+    // Lade zusätzlich die OrderItems wenn vorhanden
+    const preordersWithItems = await Promise.all(
+      preorders.map(async (order) => {
+        const orderItems = await prisma.orderItem.findMany({
+          where: { orderId: order.id },
           include: {
             menuItem: true
           }
+        })
+        return {
+          ...order,
+          orderItems
         }
-      }
-    })
+      })
+    )
 
     return NextResponse.json({
       success: true,
-      preorders
+      preorders: preordersWithItems
     })
 
   } catch (error) {
