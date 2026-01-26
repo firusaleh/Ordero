@@ -193,7 +193,8 @@ export const guestTranslations = {
         title: 'Vorbestellen',
         subtitle: 'Bestellen Sie vor und sparen Sie Zeit',
         button: 'Vorbestellen',
-        buttonDesc: 'Bestellen Sie vor und sparen Sie Zeit'
+        buttonDesc: 'Bestellen Sie vor und sparen Sie Zeit',
+        proceed: 'Vorbestellung fortsetzen'
       },
       actions: {
         reserve: 'Tisch reservieren',
@@ -549,7 +550,8 @@ export const guestTranslations = {
         title: 'Pre-order',
         subtitle: 'Order ahead and save time',
         button: 'Pre-order',
-        buttonDesc: 'Order ahead and save time'
+        buttonDesc: 'Order ahead and save time',
+        proceed: 'Proceed with pre-order'
       },
       actions: {
         reserve: 'Reserve Table',
@@ -905,7 +907,8 @@ export const guestTranslations = {
         title: 'طلب مسبق',
         subtitle: 'اطلب مسبقاً ووفر الوقت',
         button: 'طلب مسبق',
-        buttonDesc: 'اطلب مسبقاً ووفر الوقت'
+        buttonDesc: 'اطلب مسبقاً ووفر الوقت',
+        proceed: 'متابعة الطلب المسبق'
       },
       actions: {
         reserve: 'حجز طاولة',
