@@ -131,10 +131,27 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
           const hours = restaurant.settings?.openingHours
           if (!hours) return false
           const parsed = typeof hours === 'string' ? JSON.parse(hours) : hours
-          // Prüfe ob mindestens ein Tag Öffnungszeiten hat
-          return Array.isArray(parsed) && parsed.some((day: any) => 
-            day.isOpen === true && day.openTime && day.closeTime
-          )
+          
+          // Prüfe ob es ein Objekt mit Wochentagen ist
+          if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+            // Prüfe ob mindestens ein Tag geöffnet ist und Zeitfenster hat
+            return Object.values(parsed).some((day: any) => 
+              day?.isOpen === true && 
+              day?.timeSlots && 
+              Array.isArray(day.timeSlots) && 
+              day.timeSlots.length > 0 &&
+              day.timeSlots.some((slot: any) => slot?.open && slot?.close)
+            )
+          }
+          
+          // Fallback für Array-Format (altes Format)
+          if (Array.isArray(parsed)) {
+            return parsed.some((day: any) => 
+              day.isOpen === true && day.openTime && day.closeTime
+            )
+          }
+          
+          return false
         } catch {
           return false
         }
