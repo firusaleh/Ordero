@@ -108,10 +108,10 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
     } else {
       // Neuer Artikel
       const basePrice = variant 
-        ? menuItem.variants.find((v: any) => v.name === variant)?.price || menuItem.price
-        : menuItem.price
+        ? menuItem.variants?.find((v: any) => v.name === variant)?.price || menuItem.price || 0
+        : menuItem.price || 0
       
-      const extrasPrice = extras.reduce((sum, extra) => sum + extra.price, 0)
+      const extrasPrice = extras.reduce((sum, extra) => sum + (extra.price || 0), 0)
       const totalPrice = basePrice + extrasPrice
 
       setCart([...cart, {
@@ -185,10 +185,10 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
 
       if (response.ok) {
         setSuccess(true)
-        setOrderId(data.preOrder.id)
+        setOrderId(data.preOrder?.id || data.orderId || 'ORDER')
         
         // Wenn Online-Zahlung, leite zu Stripe weiter
-        if (formData.paymentMethod === 'ONLINE' && data.preOrder.paymentUrl) {
+        if (formData.paymentMethod === 'ONLINE' && data.preOrder?.paymentUrl) {
           window.location.href = data.preOrder.paymentUrl
         }
       } else {
@@ -284,7 +284,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                                 <p className="text-sm text-gray-600 mt-1">{item.description}</p>
                               )}
                               <div className="flex items-center gap-2 mt-2">
-                                <span className="text-lg font-bold">€{item.price.toFixed(2)}</span>
+                                <span className="text-lg font-bold">€{(item.price || 0).toFixed(2)}</span>
                                 {item.tags?.includes('vegan') && (
                                   <Badge variant="secondary" className="text-xs">{t('guest.preorderForm.tags.vegan')}</Badge>
                                 )}
@@ -313,7 +313,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                                     variant="outline"
                                     onClick={() => addToCart(item, variant.name)}
                                   >
-                                    {variant.name} - €{variant.price.toFixed(2)}
+                                    {variant.name} - €{(variant.price || 0).toFixed(2)}
                                   </Button>
                                 ))}
                               </div>
@@ -371,7 +371,7 @@ export default function PreOrderForm({ restaurantSlug, language = 'de' }: PreOrd
                           <Plus className="h-3 w-3" />
                         </Button>
                         <span className="ml-2 font-medium">
-                          €{(item.totalPrice * item.quantity).toFixed(2)}
+                          €{((item.totalPrice || 0) * (item.quantity || 1)).toFixed(2)}
                         </span>
                       </div>
                     </div>

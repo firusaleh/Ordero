@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { sendPreOrderConfirmation, sendNewPreOrderNotification } from '@/lib/email-sendgrid'
+// Email-Service ist verfügbar in email-service.ts
 
 // Schema für neue Vorbestellung
 const createPreOrderSchema = z.object({
@@ -199,69 +199,55 @@ export async function POST(
       : 0
     const total = subtotal + tax + serviceFee
 
-    // Erstelle Vorbestellung
-    const preOrder = await prisma.preOrder.create({
+    // Generiere Bestellnummer
+    const orderNumber = `PRE-${Date.now()}`
+    
+    // Erstelle Bestellung als Vorbestellung (TAKEAWAY Typ)
+    const orderNotes = [
+      validatedData.notes || '',
+      `PICKUP_TIME: ${pickupTime.toISOString()}`,
+      'PREORDER: true'
+    ].filter(Boolean).join('\n---\n')
+    
+    const preOrder = await prisma.order.create({
       data: {
         restaurantId: restaurant.id,
-        customerName: validatedData.customerName,
-        customerEmail: validatedData.customerEmail,
-        customerPhone: validatedData.customerPhone,
-        pickupTime,
-        orderType: validatedData.orderType,
+        orderNumber,
+        type: 'TAKEAWAY', // Verwende TAKEAWAY für Vorbestellungen
         status: 'PENDING',
         subtotal,
         tax,
         serviceFee,
         total,
-        paymentMethod: validatedData.paymentMethod,
-        paymentStatus: validatedData.paymentMethod === 'ONLINE' ? 'PENDING' : 'PENDING',
-        notes: validatedData.notes,
-        items: {
-          create: preOrderItems
-        }
-      },
-      include: {
-        items: true
+        guestName: validatedData.customerName,
+        guestPhone: validatedData.customerPhone,
+        guestEmail: validatedData.customerEmail,
+        notes: orderNotes,
+        paymentStatus: validatedData.paymentMethod === 'ONLINE' ? 'PENDING' : 'UNPAID',
+        paymentMethod: validatedData.paymentMethod || 'CASH'
       }
     })
-
-    // Sende Bestätigungs-E-Mail
-    try {
-      await sendPreOrderConfirmation({
-        email: validatedData.customerEmail,
-        name: validatedData.customerName,
-        restaurantName: restaurant.name,
-        pickupTime: pickupTime.toISOString(),
-        orderType: validatedData.orderType,
-        items: preOrderItems,
-        total,
-        orderId: preOrder.id
+    
+    // Erstelle OrderItems
+    for (const item of preOrderItems) {
+      await prisma.orderItem.create({
+        data: {
+          orderId: preOrder.id,
+          menuItemId: item.menuItemId,
+          name: item.name,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          variant: item.variant,
+          variantPrice: item.variantPrice,
+          notes: item.notes,
+          extras: item.extras // Als embedded document
+        }
       })
-    } catch (emailError) {
-      console.error('E-Mail-Versand fehlgeschlagen:', emailError)
-      // Fahre fort, auch wenn E-Mail fehlschlägt
     }
 
-    // Sende Benachrichtigung an Restaurant
-    try {
-      if (restaurant.owner?.email) {
-        await sendNewPreOrderNotification({
-          email: restaurant.owner.email,
-          preOrderId: preOrder.id,
-          customerName: validatedData.customerName,
-          customerEmail: validatedData.customerEmail,
-          customerPhone: validatedData.customerPhone,
-          pickupTime: pickupTime.toISOString(),
-          orderType: validatedData.orderType,
-          items: preOrderItems,
-          total,
-          notes: validatedData.notes
-        })
-      }
-    } catch (emailError) {
-      console.error('Restaurant-Benachrichtigung fehlgeschlagen:', emailError)
-      // Fahre fort, auch wenn E-Mail fehlschlägt
-    }
+    // Sende E-Mail-Benachrichtigung an Restaurant (optional)
+    // TODO: Implementiere E-Mail-Benachrichtigung mit email-service.ts
 
     // Wenn Online-Zahlung gewählt wurde, erstelle Payment Intent
     let paymentUrl = null
@@ -276,7 +262,8 @@ export async function POST(
         id: preOrder.id,
         status: preOrder.status,
         total: preOrder.total,
-        pickupTime: preOrder.pickupTime,
+        pickupTime: pickupTime,
+        orderNumber: preOrder.orderNumber,
         paymentUrl
       }
     })
