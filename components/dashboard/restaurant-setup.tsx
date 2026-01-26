@@ -126,7 +126,19 @@ export default function RestaurantSetup({ restaurant }: RestaurantSetupProps) {
       description: t('setup.operation.hours.description'),
       icon: Clock,
       href: '/dashboard/settings',
-      completed: Boolean(restaurant.settings?.openingHours),
+      completed: (() => {
+        try {
+          const hours = restaurant.settings?.openingHours
+          if (!hours) return false
+          const parsed = typeof hours === 'string' ? JSON.parse(hours) : hours
+          // Prüfe ob mindestens ein Tag Öffnungszeiten hat
+          return Array.isArray(parsed) && parsed.some((day: any) => 
+            day.isOpen === true && day.openTime && day.closeTime
+          )
+        } catch {
+          return false
+        }
+      })(),
       required: false,
       category: 'operation'
     },
