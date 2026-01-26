@@ -275,24 +275,42 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
   }
 
   const handleDeleteItem = async (itemId: string) => {
-    if (!confirm(t('menu.confirmDeleteItem'))) {
+    if (!confirm(t('menu.confirmDeleteItem') || 'Möchten Sie diesen Artikel wirklich löschen?')) {
       return
     }
     
     try {
+      console.log('Lösche Artikel:', itemId)
       const response = await fetch(`/api/restaurants/${restaurantId}/items/${itemId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       })
 
-      if (!response.ok) throw new Error(t('menu.errorDeleting'))
+      const data = await response.json()
+      console.log('Lösch-Response:', response.status, data)
+      
+      if (!response.ok) {
+        throw new Error(data.error || t('menu.errorDeleting') || 'Fehler beim Löschen')
+      }
 
-      setCategories(categories.map(cat => ({
-        ...cat,
-        menuItems: cat.menuItems.filter(item => item.id !== itemId)
-      })))
-      toast.success(t('menu.itemDeleted'))
+      // Aktualisiere lokalen State
+      setCategories(prevCategories => 
+        prevCategories.map(cat => ({
+          ...cat,
+          menuItems: cat.menuItems.filter(item => item.id !== itemId)
+        }))
+      )
+      
+      toast.success(t('menu.itemDeleted') || 'Artikel erfolgreich gelöscht')
     } catch (error) {
-      toast.error(t('menu.errorDeletingItem'))
+      console.error('Fehler beim Löschen:', error)
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : (t('menu.errorDeletingItem') || 'Fehler beim Löschen des Artikels')
+      )
     }
   }
 

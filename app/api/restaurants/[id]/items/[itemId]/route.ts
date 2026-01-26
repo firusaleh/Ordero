@@ -83,6 +83,8 @@ export async function DELETE(
     }
 
     const { id, itemId } = await context.params
+    
+    console.log('[DELETE MenuItem] Request:', { restaurantId: id, itemId })
 
     // Überprüfe Berechtigung
     const restaurant = await prisma.restaurant.findFirst({
@@ -96,22 +98,53 @@ export async function DELETE(
     })
 
     if (!restaurant) {
+      console.error('[DELETE MenuItem] Keine Berechtigung für Restaurant:', id)
       return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
+    }
+
+    // Prüfe ob Artikel existiert
+    const menuItem = await prisma.menuItem.findUnique({
+      where: { id: itemId }
+    })
+    
+    if (!menuItem) {
+      console.error('[DELETE MenuItem] Artikel nicht gefunden:', itemId)
+      return NextResponse.json({ error: 'Artikel nicht gefunden' }, { status: 404 })
+    }
+    
+    // Prüfe ob Artikel zum Restaurant gehört
+    if (menuItem.restaurantId !== id) {
+      console.error('[DELETE MenuItem] Artikel gehört nicht zum Restaurant')
+      return NextResponse.json({ error: 'Artikel gehört nicht zu diesem Restaurant' }, { status: 403 })
     }
 
     // Lösche Menü-Artikel
     await prisma.menuItem.delete({
       where: { id: itemId }
     })
+    
+    console.log('[DELETE MenuItem] Artikel erfolgreich gelöscht:', itemId)
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Artikel gelöscht' 
+      message: 'Artikel erfolgreich gelöscht' 
     })
-  } catch (error) {
-    console.error('Fehler beim Löschen des Menü-Artikels:', error)
+  } catch (error: any) {
+    console.error('[DELETE MenuItem] Fehler:', error)
+    
+    // Spezifische Fehlerbehandlung
+    if (error?.code === 'P2025') {
+      return NextResponse.json(
+        { error: 'Artikel nicht gefunden oder bereits gelöscht' },
+        { status: 404 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Fehler beim Löschen des Artikels' },
+      { 
+        error: 'Fehler beim Löschen des Artikels',
+        details: error?.message || 'Unbekannter Fehler'
+      },
       { status: 500 }
     )
   }
