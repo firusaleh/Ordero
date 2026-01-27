@@ -25,22 +25,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Restaurant nicht gefunden oder keine Berechtigung" }, { status: 403 })
     }
     
-    // Nur für Jordanien erlaubt
-    if (restaurant.country !== 'JO' || plan !== 'JO_PAY_PER_ORDER') {
+    // Validiere Plan basierend auf Land
+    let updateData: any = {
+      subscriptionStatus: 'ACTIVE',
+      updatedAt: new Date()
+    }
+    
+    if (restaurant.country === 'JO' && plan === 'JO_PAY_PER_ORDER') {
+      updateData = {
+        ...updateData,
+        subscriptionPlan: 'JO_PAY_PER_ORDER',
+        billingEnabled: true,
+        payPerOrderEnabled: true,
+        payPerOrderRate: 0.10, // 0.10 JD pro Bestellung
+      }
+    } else if (restaurant.country === 'DE' && plan === 'DE_PAY_PER_ORDER') {
+      updateData = {
+        ...updateData,
+        subscriptionPlan: 'DE_PAY_PER_ORDER',
+        billingEnabled: true,
+        payPerOrderEnabled: true,
+        payPerOrderRate: 0.35, // 0.35 € pro Bestellung
+      }
+    } else if (restaurant.country === 'DE' && (plan === 'DE_MONTHLY' || plan === 'DE_YEARLY')) {
+      updateData = {
+        ...updateData,
+        subscriptionPlan: plan,
+        billingEnabled: true,
+        payPerOrderEnabled: false, // Bei Flatrate keine Pay-per-Order Gebühren
+        payPerOrderRate: null,
+      }
+    } else {
       return NextResponse.json({ error: "Dieser Plan ist für Ihr Land nicht verfügbar" }, { status: 400 })
     }
     
     // Aktiviere den Plan
     const updatedRestaurant = await prisma.restaurant.update({
       where: { id: restaurantId },
-      data: {
-        subscriptionPlan: 'JO_PAY_PER_ORDER',
-        subscriptionStatus: 'ACTIVE',
-        billingEnabled: true,
-        payPerOrderEnabled: true,
-        payPerOrderRate: 0.10, // 0.10 JD pro Bestellung
-        updatedAt: new Date()
-      }
+      data: updateData
     })
     
     return NextResponse.json({

@@ -185,8 +185,8 @@ export async function POST(
       status: order.status
     })
 
-    // Automatische Abrechnung für Jordanien Pay-per-Order
-    if (restaurant.country === 'JO' && restaurant.payPerOrderEnabled && restaurant.payPerOrderRate) {
+    // Automatische Abrechnung für Pay-per-Order (nur wenn aktiviert)
+    if (restaurant.payPerOrderEnabled && restaurant.payPerOrderRate) {
       try {
         // Erhöhe den monatlichen Bestellzähler
         await prisma.restaurant.update({
@@ -200,11 +200,21 @@ export async function POST(
         
         // TODO: Hier könnte später die tatsächliche Abrechnung implementiert werden
         // z.B. über einen Payment Provider oder eine Billing-Tabelle
-        console.log(`[BILLING] Bestellung ${orderNumber} für Restaurant ${restaurant.name} (JO) - Gebühr: ${restaurant.payPerOrderRate} JD`)
+        const currency = restaurant.country === 'JO' ? 'JD' : '€'
+        const planType = restaurant.subscriptionPlan
+        console.log(`[BILLING] Bestellung ${orderNumber} für Restaurant ${restaurant.name} (${restaurant.country}) - Plan: ${planType} - Gebühr: ${restaurant.payPerOrderRate} ${currency}`)
+        
+        // Bei DE_MONTHLY oder DE_YEARLY fallen KEINE Gebühren pro Bestellung an
+        if (restaurant.country === 'DE' && (restaurant.subscriptionPlan === 'DE_MONTHLY' || restaurant.subscriptionPlan === 'DE_YEARLY')) {
+          console.log(`[BILLING] Restaurant hat Flatrate (${restaurant.subscriptionPlan}) - keine Gebühr pro Bestellung`)
+        }
       } catch (billingError) {
         // Billing-Fehler sollten die Bestellung nicht verhindern
         console.error('Fehler bei der automatischen Abrechnung:', billingError)
       }
+    } else if (restaurant.country === 'DE' && (restaurant.subscriptionPlan === 'DE_MONTHLY' || restaurant.subscriptionPlan === 'DE_YEARLY')) {
+      // Flatrate - keine Gebühren pro Bestellung, nur monatliche/jährliche Gebühr
+      console.log(`[BILLING] Restaurant ${restaurant.name} hat Flatrate-Plan (${restaurant.subscriptionPlan}) - keine Gebühr für Bestellung ${orderNumber}`)
     }
 
     // WICHTIG: Prüfe ob Restaurant Stripe Connect hat für spätere Zahlungen

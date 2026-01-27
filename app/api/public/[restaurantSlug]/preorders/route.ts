@@ -270,6 +270,31 @@ export async function POST(
       })
     }
 
+    // Automatische Abrechnung für Pay-per-Order (nur wenn aktiviert)
+    if (restaurant.payPerOrderEnabled && restaurant.payPerOrderRate) {
+      try {
+        // Erhöhe den monatlichen Bestellzähler
+        await prisma.restaurant.update({
+          where: { id: restaurant.id },
+          data: {
+            monthlyOrderCount: {
+              increment: 1
+            }
+          }
+        })
+        
+        const currency = restaurant.country === 'JO' ? 'JD' : '€'
+        const planType = restaurant.subscriptionPlan
+        console.log(`[BILLING] Vorbestellung ${preOrder.orderNumber} für Restaurant ${restaurant.name} (${restaurant.country}) - Plan: ${planType} - Gebühr: ${restaurant.payPerOrderRate} ${currency}`)
+      } catch (billingError) {
+        // Billing-Fehler sollten die Vorbestellung nicht verhindern
+        console.error('Fehler bei der automatischen Abrechnung:', billingError)
+      }
+    } else if (restaurant.country === 'DE' && (restaurant.subscriptionPlan === 'DE_MONTHLY' || restaurant.subscriptionPlan === 'DE_YEARLY')) {
+      // Flatrate - keine Gebühren pro Bestellung, nur monatliche/jährliche Gebühr
+      console.log(`[BILLING] Restaurant ${restaurant.name} hat Flatrate-Plan (${restaurant.subscriptionPlan}) - keine Gebühr für Vorbestellung ${preOrder.orderNumber}`)
+    }
+
     // Sende E-Mail-Benachrichtigung an Restaurant (optional)
     // TODO: Implementiere E-Mail-Benachrichtigung mit email-service.ts
 
