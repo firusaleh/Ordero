@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { usePusher } from "@/components/providers/pusher-provider"
 import { toast } from "sonner"
-import { useGuestLanguage } from "@/contexts/guest-language-context"
+import { useLanguage } from "@/contexts/language-context"
 
 export interface RealtimeOrder {
   id: string
@@ -42,7 +42,7 @@ export function useRealtimeOrders({
   onOrderCancelled,
   showNotifications = true
 }: UseRealtimeOrdersOptions) {
-  const { t } = useGuestLanguage()
+  const { t } = useLanguage()
   const { subscribe, unsubscribe } = usePusher()
   const [orders, setOrders] = useState<RealtimeOrder[]>([])
   const [isListening, setIsListening] = useState(false)
