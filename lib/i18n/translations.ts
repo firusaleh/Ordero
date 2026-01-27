@@ -2496,6 +2496,73 @@ export const translations = {
         description: 'Find answers in the documentation or contact support'
       }
     },
+    // Guest Pages
+    guest: {
+      reservation: {
+        title: 'Reserve Table',
+        subtitle: 'Secure your spot in advance',
+        button: 'Reserve Table',
+        buttonDesc: 'Secure your spot in advance'
+      },
+      preorder: {
+        title: 'Pre-order',
+        subtitle: 'Order ahead and save time',
+        button: 'Pre-order',
+        buttonDesc: 'Order ahead and save time'
+      },
+      actions: {
+        reserve: 'Reserve Table',
+        preorder: 'Pre-order'
+      },
+      restaurantPage: {
+        restaurantInfo: 'Restaurant Information',
+        address: 'Address',
+        phone: 'Phone',
+        website: 'Website',
+        openingHours: 'Opening Hours',
+        seeDetails: 'See details below',
+        orderOnline: 'Order Online',
+        scanQR: 'Scan the QR code at your table or enter the table number',
+        scanTableQR: 'Scan the QR code at your table',
+        or: 'or',
+        enterTableNumber: 'Enter your table number:',
+        tableNumber: 'Table Number',
+        continue: 'Continue',
+        categories: 'Categories',
+        dishes: 'Dishes',
+        tables: 'Tables',
+        items: 'items',
+        cuisine: 'Cuisine'
+      },
+      tableNotFound: {
+        title: 'Table Not Found',
+        description: 'Table {{number}} does not exist or is not active.',
+        backToRestaurant: 'Back to Restaurant Page'
+      },
+      back: 'Back',
+      days: {
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+        sunday: 'Sunday'
+      },
+      offline: {
+        status: 'Currently Offline',
+        message: 'We are currently not available for online orders. Please try again later or contact us directly.',
+        openingHours: 'Our Opening Hours',
+        closed: 'Closed',
+        contactUs: 'Contact Us',
+        callUs: 'Call Us',
+        visitUs: 'Visit Us',
+        reservationHint: 'You can also call us directly to make a reservation or ask questions.',
+        callNow: 'Call Now',
+        backHome: 'Back to Home',
+        checkBackLater: 'Please check back later or contact us directly for more information.'
+      }
+    },
     // Common
     common: {
       documentation: 'Documentation',
