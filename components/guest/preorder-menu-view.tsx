@@ -162,7 +162,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
       
     } catch (error) {
       console.error('Error creating preorder:', error)
-      toast.error(t('preorder.createError') || 'Fehler beim Erstellen der Vorbestellung')
+      toast.error(t('guest.preorder.createError') || 'Fehler beim Erstellen der Vorbestellung')
     } finally {
       setIsProcessingCash(false)
     }
@@ -225,18 +225,18 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
             <DialogTitle>
               <span className="flex items-center gap-2">
                 <Package className="h-5 w-5" />
-                {t('preorder.title') || 'Vorbestellung'}
+                {t('guest.preorder.title') || 'Vorbestellung'}
               </span>
             </DialogTitle>
             <DialogDescription>
-              {t('preorder.selectPickupTime') || 'Bitte wählen Sie Ihre gewünschte Abholzeit'}
+              {t('guest.preorder.selectPickupTime') || 'Bitte wählen Sie Ihre gewünschte Abholzeit'}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
             {/* Order Type */}
             <div>
-              <Label>{t('preorder.orderType') || 'Bestellart'}</Label>
+              <Label>{t('guest.preorder.orderType') || 'Bestellart'}</Label>
               <RadioGroup
                 value={preOrderData.orderType}
                 onValueChange={(value) => setPreOrderData({ ...preOrderData, orderType: value as 'PICKUP' | 'DINE_IN' })}
@@ -245,14 +245,14 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
                   <RadioGroupItem value="PICKUP" id="pickup" />
                   <Label htmlFor="pickup" className="flex items-center gap-2 cursor-pointer">
                     <Package className="h-4 w-4" />
-                    {t('preorder.pickup') || 'Abholung'}
+                    {t('guest.preorder.pickup') || 'Abholung'}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="DINE_IN" id="dine-in" />
                   <Label htmlFor="dine-in" className="flex items-center gap-2 cursor-pointer">
                     <Store className="h-4 w-4" />
-                    {t('preorder.dineIn') || 'Vor Ort essen'}
+                    {t('guest.preorder.dineIn') || 'Vor Ort essen'}
                   </Label>
                 </div>
               </RadioGroup>
@@ -262,13 +262,13 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
             <div>
               <Label htmlFor="name">
                 <User className="inline-block h-4 w-4 mr-2" />
-                {t('preorder.name') || 'Name'} *
+                {t('guest.preorder.name') || 'Name'} *
               </Label>
               <Input
                 id="name"
                 value={preOrderData.name}
                 onChange={(e) => setPreOrderData({ ...preOrderData, name: e.target.value })}
-                placeholder={t('preorder.namePlaceholder') || 'Ihr Name'}
+                placeholder={t('guest.preorder.namePlaceholder') || 'Ihr Name'}
                 required
               />
             </div>
@@ -277,14 +277,14 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
             <div>
               <Label htmlFor="phone">
                 <Phone className="inline-block h-4 w-4 mr-2" />
-                {t('preorder.phone') || 'Telefonnummer'} *
+                {t('guest.preorder.phone') || 'Telefonnummer'} *
               </Label>
               <Input
                 id="phone"
                 type="tel"
                 value={preOrderData.phone}
                 onChange={(e) => setPreOrderData({ ...preOrderData, phone: e.target.value })}
-                placeholder={t('preorder.phonePlaceholder') || '+49 123 456789'}
+                placeholder={t('guest.preorder.phonePlaceholder') || '+49 123 456789'}
                 required
               />
             </div>
@@ -293,14 +293,14 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
             <div>
               <Label htmlFor="email">
                 <Mail className="inline-block h-4 w-4 mr-2" />
-                {t('preorder.email') || 'E-Mail'}
+                {t('guest.preorder.email') || 'E-Mail'}
               </Label>
               <Input
                 id="email"
                 type="email"
                 value={preOrderData.email}
                 onChange={(e) => setPreOrderData({ ...preOrderData, email: e.target.value })}
-                placeholder={t('preorder.emailPlaceholder') || 'ihre.email@beispiel.de'}
+                placeholder={t('guest.preorder.emailPlaceholder') || 'ihre.email@beispiel.de'}
               />
             </div>
 
@@ -309,8 +309,8 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
               <Label htmlFor="pickupDate">
                 <Calendar className="inline-block h-4 w-4 mr-2" />
                 {preOrderData.orderType === 'PICKUP' 
-                  ? (t('preorder.pickupDate') || 'Abholdatum')
-                  : (t('preorder.reservationDate') || 'Reservierungsdatum')
+                  ? (t('guest.preorder.pickupDate') || 'Abholdatum')
+                  : (t('guest.preorder.reservationDate') || 'Reservierungsdatum')
                 } *
               </Label>
               <Input
@@ -328,8 +328,8 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
               <Label htmlFor="pickupTime">
                 <Clock className="inline-block h-4 w-4 mr-2" />
                 {preOrderData.orderType === 'PICKUP'
-                  ? (t('preorder.pickupTime') || 'Abholzeit')
-                  : (t('preorder.reservationTime') || 'Reservierungszeit')
+                  ? (t('guest.preorder.pickupTime') || 'Abholzeit')
+                  : (t('guest.preorder.reservationTime') || 'Reservierungszeit')
                 } *
               </Label>
               <Input
@@ -341,7 +341,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
                 required
               />
               <p className="text-xs text-gray-500 mt-1">
-                {t('preorder.minAdvanceTime') || 'Mindestens 2 Stunden im Voraus'}
+                {t('guest.preorder.minAdvanceTime') || 'Mindestens 2 Stunden im Voraus'}
               </p>
             </div>
 
@@ -349,13 +349,13 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
             <div>
               <Label htmlFor="notes">
                 <MessageSquare className="inline-block h-4 w-4 mr-2" />
-                {t('preorder.notes') || 'Anmerkungen'}
+                {t('guest.preorder.notes') || 'Anmerkungen'}
               </Label>
               <Textarea
                 id="notes"
                 value={preOrderData.notes}
                 onChange={(e) => setPreOrderData({ ...preOrderData, notes: e.target.value })}
-                placeholder={t('preorder.notesPlaceholder') || 'Besondere Wünsche oder Anmerkungen...'}
+                placeholder={t('guest.preorder.notesPlaceholder') || 'Besondere Wünsche oder Anmerkungen...'}
                 rows={3}
               />
             </div>
@@ -373,7 +373,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
                 disabled={isSubmitting}
                 style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
               >
-                {t('preorder.proceedToPayment') || 'Weiter zur Zahlung'}
+                {t('guest.preorder.proceedToPayment') || 'Weiter zur Zahlung'}
               </Button>
             </div>
           </div>
