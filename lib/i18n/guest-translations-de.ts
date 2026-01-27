@@ -172,11 +172,30 @@ export const guestTranslationsDe = {
       buttonDesc: 'Sichern Sie sich Ihren Platz im Voraus'
     },
     preorder: {
-      title: 'Vorbestellen',
+      title: 'Vorbestellung',
       subtitle: 'Bestellen Sie vor und sparen Sie Zeit',
       button: 'Vorbestellen',
       buttonDesc: 'Bestellen Sie vor und sparen Sie Zeit',
-      proceed: 'Vorbestellung fortsetzen'
+      proceed: 'Vorbestellung fortsetzen',
+      orderType: 'Bestellart',
+      pickup: 'Abholung',
+      dineIn: 'Vor Ort essen',
+      name: 'Name',
+      phone: 'Telefonnummer',
+      email: 'E-Mail',
+      pickupDate: 'Abholdatum',
+      pickupTime: 'Abholzeit',
+      notes: 'Anmerkungen',
+      selectPickupTime: 'Bitte wählen Sie Ihre gewünschte Abholzeit',
+      proceedToPayment: 'Weiter zur Zahlung',
+      namePlaceholder: 'Ihr Name',
+      phonePlaceholder: '+49 123 456789',
+      emailPlaceholder: 'ihre.email@beispiel.de',
+      notesPlaceholder: 'Besondere Wünsche oder Anmerkungen...',
+      minAdvanceTime: 'Mindestens 2 Stunden im Voraus',
+      reservationDate: 'Reservierungsdatum',
+      reservationTime: 'Reservierungszeit',
+      createError: 'Fehler beim Erstellen der Vorbestellung'
     },
     actions: {
       reserve: 'Tisch reservieren',
@@ -347,6 +366,7 @@ export const guestTranslationsDe = {
     paymentRedirect: 'Sie werden nach der Bestellung zur Zahlung weitergeleitet',
     cancel: 'Abbrechen'
   },
+  
   
   menuItem: {
     customizeAdd: 'Anpassen & Hinzufügen',

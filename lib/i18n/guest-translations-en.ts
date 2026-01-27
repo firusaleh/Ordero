@@ -206,7 +206,26 @@ export const guestTranslationsEn = {
     advanceNotice: 'Please order at least 2 hours in advance',
     confirmPreorder: 'Confirm Pre-order',
     preorderConfirmed: 'Pre-order Confirmed',
-    willBeReady: 'Your order will be ready at'
+    willBeReady: 'Your order will be ready at',
+    orderType: 'Order Type',
+    pickup: 'Pickup',
+    dineIn: 'Dine In',
+    name: 'Name',
+    phone: 'Phone Number',
+    email: 'Email',
+    pickupDate: 'Pickup Date',
+    pickupTime: 'Pickup Time',
+    notes: 'Notes',
+    selectPickupTime: 'Please select your desired pickup time',
+    proceedToPayment: 'Proceed to Payment',
+    namePlaceholder: 'Your name',
+    phonePlaceholder: '+1 234 567890',
+    emailPlaceholder: 'your.email@example.com',
+    notesPlaceholder: 'Special requests or notes...',
+    minAdvanceTime: 'At least 2 hours in advance',
+    reservationDate: 'Reservation Date',
+    reservationTime: 'Reservation Time',
+    createError: 'Error creating pre-order'
   },
   
   // Order History

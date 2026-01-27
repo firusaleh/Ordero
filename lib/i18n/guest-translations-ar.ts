@@ -206,7 +206,26 @@ export const guestTranslationsAr = {
     advanceNotice: 'يرجى الطلب قبل ساعتين على الأقل',
     confirmPreorder: 'تأكيد الطلب المسبق',
     preorderConfirmed: 'تم تأكيد الطلب المسبق',
-    willBeReady: 'سيكون طلبك جاهزاً في'
+    willBeReady: 'سيكون طلبك جاهزاً في',
+    orderType: 'نوع الطلب',
+    pickup: 'استلام',
+    dineIn: 'تناول في المطعم',
+    name: 'الاسم',
+    phone: 'رقم الهاتف',
+    email: 'البريد الإلكتروني',
+    pickupDate: 'تاريخ الاستلام',
+    pickupTime: 'وقت الاستلام',
+    notes: 'ملاحظات',
+    selectPickupTime: 'يرجى اختيار الوقت المطلوب للاستلام',
+    proceedToPayment: 'المتابعة للدفع',
+    namePlaceholder: 'اسمك',
+    phonePlaceholder: '+966 12 345 6789',
+    emailPlaceholder: 'your.email@example.com',
+    notesPlaceholder: 'طلبات خاصة أو ملاحظات...',
+    minAdvanceTime: 'قبل ساعتين على الأقل',
+    reservationDate: 'تاريخ الحجز',
+    reservationTime: 'وقت الحجز',
+    createError: 'خطأ في إنشاء الطلب المسبق'
   },
   
   // Order History
