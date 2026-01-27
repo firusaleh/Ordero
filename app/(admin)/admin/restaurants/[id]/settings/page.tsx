@@ -6,7 +6,7 @@ import AdminRestaurantSettings from '@/components/admin/restaurant-settings'
 
 interface PageProps {
   params: Promise<{
-    restaurantId: string
+    id: string
   }>
 }
 
@@ -49,7 +49,7 @@ export default async function AdminRestaurantSettingsPage({ params }: PageProps)
   }
 
   const resolvedParams = await params
-  const restaurant = await getRestaurant(resolvedParams.restaurantId)
+  const restaurant = await getRestaurant(resolvedParams.id)
 
   if (!restaurant) {
     notFound()
