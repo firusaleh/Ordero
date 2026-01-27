@@ -216,7 +216,8 @@ export async function POST(
         time: validatedData.reservationTime,
         guests: validatedData.numberOfGuests,
         confirmationCode: reservation.confirmationToken || '',
-        notes: validatedData.notes
+        notes: validatedData.notes,
+        specialRequests: validatedData.specialRequests
       })
     } catch (emailError) {
       console.error('E-Mail-Versand fehlgeschlagen:', emailError)
@@ -235,7 +236,8 @@ export async function POST(
           numberOfGuests: validatedData.numberOfGuests,
           date: validatedData.reservationDate,
           time: validatedData.reservationTime,
-          notes: validatedData.notes
+          notes: validatedData.notes,
+          specialRequests: validatedData.specialRequests
         })
       }
     } catch (emailError) {

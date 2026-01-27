@@ -344,7 +344,8 @@ export async function sendReservationConfirmation({
   time,
   guests,
   confirmationCode,
-  notes
+  notes,
+  specialRequests
 }: {
   email: string
   name: string
@@ -354,6 +355,7 @@ export async function sendReservationConfirmation({
   guests: number
   confirmationCode: string
   notes?: string
+  specialRequests?: string
 }) {
   const html = `
     <html>
@@ -407,9 +409,16 @@ export async function sendReservationConfirmation({
                     </table>
                   </div>
                   
+                  ${specialRequests ? `
+                  <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0;">
+                    <strong style="color: #92400e;">🍽️ Besondere Wünsche:</strong>
+                    <p style="color: #92400e; margin: 5px 0 0 0;">${specialRequests}</p>
+                  </div>
+                  ` : ''}
+                  
                   ${notes ? `
                   <div style="background-color: #fffbeb; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                    <strong style="color: #92400e;">Ihre Anmerkungen:</strong>
+                    <strong style="color: #92400e;">📝 Anmerkungen:</strong>
                     <p style="color: #92400e; margin: 5px 0 0 0;">${notes}</p>
                   </div>
                   ` : ''}
@@ -449,6 +458,7 @@ Uhrzeit: ${time}
 Personen: ${guests}
 Bestätigungscode: ${confirmationCode}
 
+${specialRequests ? `Besondere Wünsche: ${specialRequests}` : ''}
 ${notes ? `Anmerkungen: ${notes}` : ''}
 
 Bitte bringen Sie Ihren Bestätigungscode zum Termin mit.
@@ -619,7 +629,8 @@ export async function sendNewReservationNotification({
   numberOfGuests,
   date,
   time,
-  notes
+  notes,
+  specialRequests
 }: {
   email: string
   reservationId: string
@@ -630,6 +641,7 @@ export async function sendNewReservationNotification({
   date: string
   time: string
   notes?: string
+  specialRequests?: string
 }) {
   const html = `
     <!DOCTYPE html>
@@ -658,9 +670,16 @@ export async function sendNewReservationNotification({
               <p style="margin: 5px 0;"><strong>Anzahl Gäste:</strong> ${numberOfGuests}</p>
             </div>
             
+            ${specialRequests ? `
+            <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0;">
+              <strong>🍽️ Besondere Wünsche:</strong><br>
+              ${specialRequests}
+            </div>
+            ` : ''}
+            
             ${notes ? `
             <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-              <strong>Anmerkungen des Gastes:</strong><br>
+              <strong>📝 Anmerkungen:</strong><br>
               ${notes}
             </div>
             ` : ''}
@@ -684,6 +703,7 @@ Datum: ${date}
 Uhrzeit: ${time}
 Anzahl Gäste: ${numberOfGuests}
 
+${specialRequests ? `Besondere Wünsche: ${specialRequests}` : ''}
 ${notes ? `Anmerkungen: ${notes}` : ''}
   `.trim()
   

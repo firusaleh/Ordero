@@ -80,19 +80,19 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
 
   const validateForm = () => {
     if (!preOrderData.name.trim()) {
-      toast.error(language === 'de' ? 'Bitte geben Sie Ihren Namen ein' : 'Please enter your name')
+      toast.error(t('preorderValidation.nameRequired') || (language === 'de' ? 'Bitte geben Sie Ihren Namen ein' : 'Please enter your name'))
       return false
     }
     if (!preOrderData.phone.trim()) {
-      toast.error(language === 'de' ? 'Bitte geben Sie Ihre Telefonnummer ein' : 'Please enter your phone number')
+      toast.error(t('preorderValidation.phoneRequired') || (language === 'de' ? 'Bitte geben Sie Ihre Telefonnummer ein' : 'Please enter your phone number'))
       return false
     }
     if (!preOrderData.pickupDate) {
-      toast.error(language === 'de' ? 'Bitte wählen Sie ein Abholdatum' : 'Please select a pickup date')
+      toast.error(t('preorderValidation.dateRequired') || (language === 'de' ? 'Bitte wählen Sie ein Abholdatum' : 'Please select a pickup date'))
       return false
     }
     if (!preOrderData.pickupTime) {
-      toast.error(language === 'de' ? 'Bitte wählen Sie eine Abholzeit' : 'Please select a pickup time')
+      toast.error(t('preorderValidation.timeRequired') || (language === 'de' ? 'Bitte wählen Sie eine Abholzeit' : 'Please select a pickup time'))
       return false
     }
     return true
@@ -149,7 +149,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
       })
 
       if (!response.ok) {
-        throw new Error('Fehler beim Erstellen der Vorbestellung')
+        throw new Error(t('preorderValidation.createError') || 'Fehler beim Erstellen der Vorbestellung')
       }
 
       const result = await response.json()
@@ -188,7 +188,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
           console.error('Fehler beim Erstellen der Zahlung:', error)
           toast.error(
             language === 'de' 
-              ? 'Zahlung konnte nicht erstellt werden. Bitte zahlen Sie bei Abholung.'
+              ? (t('preorderValidation.paymentCreateFailed') || 'Zahlung konnte nicht erstellt werden. Bitte zahlen Sie bei Abholung.')
               : 'Payment could not be created. Please pay on pickup.'
           )
         }
@@ -224,7 +224,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
       console.error('Fehler bei Vorbestellung:', error)
       toast.error(
         language === 'de' 
-          ? 'Fehler beim Erstellen der Vorbestellung'
+          ? (t('preorderValidation.createError') || 'Fehler beim Erstellen der Vorbestellung')
           : 'Error creating pre-order'
       )
     } finally {
@@ -251,7 +251,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
             </DialogTitle>
             <DialogDescription>
               {language === 'de' 
-                ? 'Bitte geben Sie Ihre Kontaktdaten und Abholzeit ein'
+                ? (t('preorderValidation.contactInfo') || 'Bitte geben Sie Ihre Kontaktdaten und Abholzeit ein')
                 : 'Please enter your contact details and pickup time'}
             </DialogDescription>
           </DialogHeader>
@@ -422,7 +422,7 @@ export default function PreOrderMenuView({ restaurant }: PreOrderMenuViewProps) 
               {preOrderData.paymentMethod === 'ONLINE' && (
                 <p className="text-xs text-gray-600 mt-2">
                   {language === 'de' 
-                    ? 'Sie werden nach der Bestellung zur Zahlung weitergeleitet'
+                    ? (t('preorderValidation.paymentRedirect') || 'Sie werden nach der Bestellung zur Zahlung weitergeleitet')
                     : 'You will be redirected to payment after ordering'}
                 </p>
               )}

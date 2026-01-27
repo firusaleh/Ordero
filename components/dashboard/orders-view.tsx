@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -60,21 +61,23 @@ interface OrdersViewProps {
   restaurantId: string
 }
 
-const statusConfig = {
-  PENDING: { label: 'Ausstehend', color: 'bg-yellow-500', icon: AlertCircle },
-  CONFIRMED: { label: 'Bestätigt', color: 'bg-blue-500', icon: CheckCircle },
-  PREPARING: { label: 'In Zubereitung', color: 'bg-orange-500', icon: ChefHat },
-  READY: { label: 'Fertig', color: 'bg-green-500', icon: Package },
-  DELIVERED: { label: 'Serviert', color: 'bg-gray-500', icon: Truck },
-  CANCELLED: { label: 'Storniert', color: 'bg-red-500', icon: XCircle },
-  PAID: { label: 'Bezahlt', color: 'bg-purple-500', icon: DollarSign },
-}
 
 export default function OrdersView({ initialOrders, restaurantId }: OrdersViewProps) {
+  const { t } = useLanguage()
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [filter, setFilter] = useState('all')
   const [isUpdating, setIsUpdating] = useState<string | null>(null)
   const { formatPrice } = useRestaurantCurrency()
+
+  const statusConfig = {
+    PENDING: { label: t('orders.status.pending'), color: 'bg-yellow-500', icon: AlertCircle },
+    CONFIRMED: { label: t('orders.status.confirmed'), color: 'bg-blue-500', icon: CheckCircle },
+    PREPARING: { label: t('orders.status.preparing'), color: 'bg-orange-500', icon: ChefHat },
+    READY: { label: t('orders.status.ready'), color: 'bg-green-500', icon: Package },
+    DELIVERED: { label: t('orders.status.delivered'), color: 'bg-gray-500', icon: Truck },
+    CANCELLED: { label: t('orders.status.cancelled'), color: 'bg-red-500', icon: XCircle },
+    PAID: { label: t('orders.status.paid') || 'Bezahlt', color: 'bg-purple-500', icon: DollarSign },
+  }
 
   // Simuliere Realtime Updates (in Produktion würde hier Supabase Realtime verwendet)
   useEffect(() => {
@@ -96,7 +99,7 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
       })
 
       if (!response.ok) {
-        throw new Error('Fehler beim Aktualisieren')
+        throw new Error(t('toast.statusUpdateError'))
       }
 
       // Update local state
@@ -106,14 +109,14 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
           : order
       ))
 
-      toast.success('Status aktualisiert')
+      toast.success(t('toast.statusUpdated'))
       
       // Sound abspielen
       if (newStatus === 'READY') {
         playNotificationSound()
       }
     } catch (error) {
-      toast.error('Fehler beim Aktualisieren des Status')
+      toast.error(t('toast.statusUpdateError'))
     } finally {
       setIsUpdating(null)
     }
@@ -145,15 +148,15 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Bestellungen</h1>
-          <p className="text-gray-600">Verwalten Sie eingehende Bestellungen</p>
+          <h1 className="text-3xl font-bold">{t('orders.title')}</h1>
+          <p className="text-gray-600">{t('orders.subtitle')}</p>
         </div>
         <Card>
           <CardContent className="py-12">
             <EmptyState
               icon={Package}
-              title="Noch keine Bestellungen"
-              description="Sobald Gäste über Ihre QR-Codes bestellen, erscheinen die Bestellungen hier."
+              title={t('orders.noOrders') || 'Noch keine Bestellungen'}
+              description={t('orders.noOrdersDesc') || 'Sobald Gäste über Ihre QR-Codes bestellen, erscheinen die Bestellungen hier.'}
             />
           </CardContent>
         </Card>
@@ -165,8 +168,8 @@ export default function OrdersView({ initialOrders, restaurantId }: OrdersViewPr
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Bestellungen</h1>
-          <p className="text-gray-600">Verwalten Sie eingehende Bestellungen</p>
+          <h1 className="text-3xl font-bold">{t('orders.title')}</h1>
+          <p className="text-gray-600">{t('orders.subtitle')}</p>
         </div>
         <Button variant="outline" size="icon">
           <RefreshCw className="h-4 w-4" />

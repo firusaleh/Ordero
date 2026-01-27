@@ -1131,6 +1131,38 @@ export const translations = {
       errorUpdating: 'خطأ في التحديث',
       errorChangingPassword: 'خطأ في تغيير كلمة المرور',
       errorUploadingPicture: 'خطأ في رفع الصورة'
+    },
+    // Toast Messages
+    toast: {
+      settingsSaved: 'تم حفظ الإعدادات',
+      saveError: 'خطأ في الحفظ',
+      generalSettingsSaved: 'تم حفظ الإعدادات العامة',
+      posDisconnected: 'تم قطع اتصال نقطة البيع',
+      posDisconnectError: 'خطأ في قطع الاتصال',
+      statusUpdated: 'تم تحديث الحالة',
+      statusUpdateError: 'خطأ في تحديث الحالة',
+      profileUpdated: 'تم تحديث الملف الشخصي بنجاح',
+      profileUpdateError: 'خطأ في الحفظ',
+      passwordChanged: 'تم تغيير كلمة المرور بنجاح',
+      passwordChangeError: 'كلمة المرور الحالية خاطئة',
+      passwordMismatch: 'كلمات المرور لا تتطابق',
+      passwordTooShort: 'يجب أن تكون كلمة المرور 8 أحرف على الأقل',
+      passwordChangeErrorGeneral: 'خطأ في تغيير كلمة المرور'
+    },
+    // Sound Settings
+    soundSettings: {
+      title: 'إشعارات صوتية',
+      description: 'احصل على إشعارات صوتية عند وصول طلبات جديدة',
+      volume: 'مستوى الصوت',
+      testSound: 'اختبار الصوت',
+      hints: 'ملاحظات:',
+      browserPermission: 'يجب على المتصفحات السماح بتشغيل الصوت',
+      deviceNotMuted: 'تأكد من أن جهازك غير مكتوم الصوت',
+      userInteraction: 'قد يتطلب الصوت الأول تفاعلاً من المستخدم',
+      notificationTypes: 'أنواع الإشعارات',
+      newOrders: 'طلبات جديدة',
+      cancelledOrders: 'طلبات ملغية',
+      lowStock: 'مخزون منخفض'
     }
   },
   de: {
@@ -2231,6 +2263,38 @@ export const translations = {
       errorUpdating: 'Fehler beim Aktualisieren',
       errorChangingPassword: 'Fehler beim Passwort ändern',
       errorUploadingPicture: 'Fehler beim Bild hochladen'
+    },
+    // Toast Messages
+    toast: {
+      settingsSaved: 'Einstellungen gespeichert',
+      saveError: 'Fehler beim Speichern',
+      generalSettingsSaved: 'Allgemeine Einstellungen gespeichert',
+      posDisconnected: 'POS-Verbindung getrennt',
+      posDisconnectError: 'Fehler beim Trennen der Verbindung',
+      statusUpdated: 'Status aktualisiert',
+      statusUpdateError: 'Fehler beim Aktualisieren des Status',
+      profileUpdated: 'Profil erfolgreich aktualisiert',
+      profileUpdateError: 'Fehler beim Speichern',
+      passwordChanged: 'Passwort erfolgreich geändert',
+      passwordChangeError: 'Falsches aktuelles Passwort',
+      passwordMismatch: 'Passwörter stimmen nicht überein',
+      passwordTooShort: 'Passwort muss mindestens 8 Zeichen lang sein',
+      passwordChangeErrorGeneral: 'Fehler beim Ändern des Passworts'
+    },
+    // Sound Settings
+    soundSettings: {
+      title: 'Sound-Benachrichtigungen',
+      description: 'Erhalten Sie akustische Benachrichtigungen bei neuen Bestellungen',
+      volume: 'Lautstärke',
+      testSound: 'Sound testen',
+      hints: 'Hinweise:',
+      browserPermission: 'Browser müssen Sound-Wiedergabe erlauben',
+      deviceNotMuted: 'Stelle sicher, dass dein Gerät nicht stummgeschaltet ist',
+      userInteraction: 'Der erste Sound erfordert möglicherweise eine Benutzerinteraktion',
+      notificationTypes: 'Benachrichtigungstypen',
+      newOrders: 'Neue Bestellungen',
+      cancelledOrders: 'Stornierte Bestellungen',
+      lowStock: 'Niedrige Lagerbestände'
     }
   },
   en: {
@@ -2565,8 +2629,46 @@ export const translations = {
     },
     // Common
     common: {
+      save: 'Save',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      add: 'Add',
+      edit: 'Edit',
+      create: 'Create',
       documentation: 'Documentation',
       support: 'Support'
+    },
+    // Toast Messages
+    toast: {
+      settingsSaved: 'Settings saved',
+      saveError: 'Error saving',
+      generalSettingsSaved: 'General settings saved',
+      posDisconnected: 'POS connection disconnected',
+      posDisconnectError: 'Error disconnecting',
+      statusUpdated: 'Status updated',
+      statusUpdateError: 'Error updating status',
+      profileUpdated: 'Profile successfully updated',
+      profileUpdateError: 'Error saving',
+      passwordChanged: 'Password successfully changed',
+      passwordChangeError: 'Wrong current password',
+      passwordMismatch: 'Passwords do not match',
+      passwordTooShort: 'Password must be at least 8 characters long',
+      passwordChangeErrorGeneral: 'Error changing password'
+    },
+    // Sound Settings
+    soundSettings: {
+      title: 'Sound Notifications',
+      description: 'Receive audio notifications for new orders',
+      volume: 'Volume',
+      testSound: 'Test Sound',
+      hints: 'Notes:',
+      browserPermission: 'Browsers must allow sound playback',
+      deviceNotMuted: 'Make sure your device is not muted',
+      userInteraction: 'The first sound may require user interaction',
+      notificationTypes: 'Notification Types',
+      newOrders: 'New Orders',
+      cancelledOrders: 'Cancelled Orders',
+      lowStock: 'Low Stock'
     }
   }
 };

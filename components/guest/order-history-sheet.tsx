@@ -64,7 +64,7 @@ export default function OrderHistorySheet({
   currency = 'EUR',
   primaryColor = '#FF6B35'
 }: OrderHistorySheetProps) {
-  const { language } = useGuestLanguage()
+  const { t, language } = useGuestLanguage()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
@@ -178,19 +178,19 @@ export default function OrderHistorySheet({
   const getStatusText = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'Ausstehend'
+        return t('orderStatus.pending') || 'Ausstehend'
       case 'CONFIRMED':
-        return 'Bestätigt'
+        return t('orderStatus.confirmed') || 'Bestätigt'
       case 'PREPARING':
-        return 'In Zubereitung'
+        return t('orderStatus.preparing') || 'In Zubereitung'
       case 'READY':
-        return 'Fertig'
+        return t('orderStatus.ready') || 'Fertig'
       case 'DELIVERED':
-        return 'Geliefert'
+        return t('orderStatus.delivered') || 'Geliefert'
       case 'PAID':
-        return 'Bezahlt'
+        return t('orderStatus.paid') || 'Bezahlt'
       case 'CANCELLED':
-        return 'Storniert'
+        return t('orderStatus.cancelled') || 'Storniert'
       default:
         return status
     }
@@ -223,7 +223,7 @@ export default function OrderHistorySheet({
       <SheetContent className="w-[90vw] sm:w-[450px] p-0">
         <SheetHeader className="p-6 pb-4">
           <SheetTitle className="flex items-center justify-between">
-            <span>Meine Bestellungen</span>
+            <span>{t('orderHistory.title') || 'Meine Bestellungen'}</span>
             <Button
               variant="ghost"
               size="icon"
@@ -241,9 +241,9 @@ export default function OrderHistorySheet({
             {orders.length === 0 ? (
               <div className="text-center py-12">
                 <Receipt className="h-12 w-12 mx-auto text-gray-300 mb-3" />
-                <p className="text-gray-500">Noch keine Bestellungen</p>
+                <p className="text-gray-500">{t('orderHistory.empty') || 'Noch keine Bestellungen'}</p>
                 <p className="text-sm text-gray-400 mt-1">
-                  Ihre Bestellungen werden hier angezeigt
+                  {t('orderHistory.description') || 'Ihre Bestellungen werden hier angezeigt'}
                 </p>
               </div>
             ) : (
@@ -296,7 +296,7 @@ export default function OrderHistorySheet({
                     {/* Order Total */}
                     <Separator />
                     <div className="flex justify-between items-center pt-1">
-                      <span className="font-semibold">Gesamt</span>
+                      <span className="font-semibold">{t('common.total') || 'Gesamt'}</span>
                       <span className="font-semibold text-lg" style={{ color: primaryColor }}>
                         {formatPrice(order.total)}
                       </span>
@@ -304,9 +304,9 @@ export default function OrderHistorySheet({
 
                     {/* Payment Status */}
                     <div className="flex justify-between items-center text-sm">
-                      <span className="text-gray-500">Zahlung</span>
+                      <span className="text-gray-500">{t('payment.status') || 'Zahlung'}</span>
                       <Badge variant={order.paymentStatus === 'PAID' ? 'default' : 'outline'}>
-                        {order.paymentStatus === 'PAID' ? 'Bezahlt' : 'Ausstehend'}
+                        {order.paymentStatus === 'PAID' ? (t('orderStatus.paid') || 'Bezahlt') : (t('orderStatus.pending') || 'Ausstehend')}
                       </Badge>
                     </div>
                   </div>
@@ -320,13 +320,13 @@ export default function OrderHistorySheet({
         {orders.length > 0 && (
           <div className="border-t p-6 space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-semibold">Gesamtbetrag</span>
+              <span className="text-lg font-semibold">{t('payment.totalAmount') || 'Gesamtbetrag'}</span>
               <span className="text-2xl font-bold" style={{ color: primaryColor }}>
                 {formatPrice(totalAmount)}
               </span>
             </div>
             <p className="text-xs text-gray-500 text-center">
-              {getLocalizedTableName(tableNumber, language)} • {orders.length} {orders.length === 1 ? 'Bestellung' : 'Bestellungen'}
+              {getLocalizedTableName(tableNumber, language)} • {orders.length} {orders.length === 1 ? (t('orderHistory.order') || 'Bestellung') : (t('orderHistory.orders') || 'Bestellungen')}
             </p>
           </div>
         )}

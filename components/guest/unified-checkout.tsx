@@ -117,7 +117,7 @@ function CheckoutForm({
   const total = baseAmount + tipAmount
 
   const tipOptions = [
-    { value: 0, label: t('checkout.noTip') || 'Kein Trinkgeld', icon: '😐' },
+    { value: 0, label: t('errors.noTip') || t('payment.noTip') || 'Kein Trinkgeld', icon: '😐' },
     { value: 5, label: '5%', icon: '🙂' },
     { value: 10, label: '10%', icon: '😊' },
     { value: 15, label: '15%', icon: '😃' },
@@ -161,16 +161,16 @@ function CheckoutForm({
       })
 
       if (error) {
-        setErrorMessage(error.message || 'Zahlung fehlgeschlagen')
-        onError(error.message || 'Zahlung fehlgeschlagen')
+        setErrorMessage(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
+        onError(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
       } else {
         // Payment succeeded - poll for order number
         await pollForOrderCompletion()
       }
     } catch (err) {
       console.error('Express checkout error:', err)
-      setErrorMessage('Ein unerwarteter Fehler ist aufgetreten')
-      onError('Unerwarteter Fehler')
+      setErrorMessage(t('errors.unexpectedError') || 'Ein unerwarteter Fehler ist aufgetreten')
+      onError(t('errors.unexpectedError') || 'Unerwarteter Fehler')
     } finally {
       setIsProcessing(false)
     }
@@ -216,7 +216,7 @@ function CheckoutForm({
   // Handle Card payment submit
   const handleCardSubmit = async () => {
     if (!stripe || !elements) {
-      setErrorMessage('Stripe wurde noch nicht geladen.')
+      setErrorMessage(t('errors.stripeNotLoaded') || 'Stripe wurde noch nicht geladen.')
       return
     }
 
@@ -241,8 +241,8 @@ function CheckoutForm({
 
       if (error) {
         console.error('Stripe payment error:', error)
-        setErrorMessage(error.message || 'Zahlung fehlgeschlagen')
-        onError(error.message || 'Zahlung fehlgeschlagen')
+        setErrorMessage(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
+        onError(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
         return
       }
 
@@ -251,8 +251,8 @@ function CheckoutForm({
       }
     } catch (error) {
       console.error('Payment processing error:', error)
-      setErrorMessage('Ein unerwarteter Fehler ist aufgetreten')
-      onError('Unerwarteter Fehler')
+      setErrorMessage(t('errors.unexpectedError') || 'Ein unerwarteter Fehler ist aufgetreten')
+      onError(t('errors.unexpectedError') || 'Unerwarteter Fehler')
     } finally {
       setIsProcessing(false)
     }
@@ -280,14 +280,14 @@ function CheckoutForm({
     },
     {
       id: 'card' as PaymentMethod,
-      name: t('guest.card') || 'Kreditkarte',
+      name: t('payment.creditCard') || 'Kreditkarte',
       icon: <CreditCard className="h-5 w-5" />,
       bgColor: 'bg-white border border-gray-300 text-gray-900',
       available: true
     },
     {
       id: 'cash' as PaymentMethod,
-      name: t('guest.cash') || 'Bar',
+      name: t('payment.cash') || 'Bar',
       icon: <Banknote className="h-5 w-5" />,
       bgColor: 'bg-white border border-gray-300 text-gray-900',
       available: true
@@ -475,7 +475,7 @@ function CheckoutForm({
             {isProcessingCash ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                {t('checkout.processing') || 'Verarbeitung...'}
+                {t('checkout.processing') || t('stripe.preparing') || 'Verarbeitung...'}
               </>
             ) : (
               <>
@@ -493,7 +493,7 @@ function CheckoutForm({
             {isProcessing ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                {t('checkout.processing') || 'Verarbeitung...'}
+                {t('checkout.processing') || t('stripe.preparing') || 'Verarbeitung...'}
               </>
             ) : (
               <>
@@ -527,7 +527,7 @@ function CheckoutForm({
             {isProcessing && (
               <div className="flex items-center justify-center mt-2">
                 <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                <span>{t('checkout.processing') || 'Verarbeitung...'}</span>
+                <span>{t('checkout.processing') || t('stripe.preparing') || 'Verarbeitung...'}</span>
               </div>
             )}
           </div>
@@ -546,7 +546,7 @@ function CheckoutForm({
           disabled={isProcessing || isProcessingCash}
           className="w-full h-10 text-gray-600"
         >
-          {t('common.cancel') || 'Abbrechen'}
+          {t('errors.cancelled') || t('buttons.cancel') || 'Abbrechen'}
         </Button>
       </div>
 
@@ -593,11 +593,11 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {t('checkout.onlinePaymentUnavailable') || 'Online-Zahlung nicht verfügbar. Bitte wählen Sie Barzahlung.'}
+            {t('errors.notAvailable') || 'Online-Zahlung nicht verfügbar. Bitte wählen Sie Barzahlung.'}
           </AlertDescription>
         </Alert>
         <Button onClick={onCancel} variant="outline" className="w-full mt-4">
-          {t('common.back') || 'Zurück'}
+          {t('errors.back') || t('buttons.back') || 'Zurück'}
         </Button>
       </div>
     )
@@ -636,11 +636,11 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
           setClientSecret(result.clientSecret)
           setPendingPaymentId(result.pendingPaymentId)
         } else {
-          throw new Error(result.error || 'Payment konnte nicht initialisiert werden')
+          throw new Error(result.error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
         }
       } catch (err) {
         console.error('Create payment intent failed:', err)
-        setError(err instanceof Error ? err.message : 'Payment konnte nicht initialisiert werden')
+        setError(err instanceof Error ? err.message : t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
       } finally {
         setIsLoading(false)
       }
@@ -653,7 +653,7 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
     return (
       <div className="p-8 text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-orange-500" />
-        <p className="text-gray-600">{t('checkout.preparingPayment') || 'Zahlung wird vorbereitet...'}</p>
+        <p className="text-gray-600">{t('stripe.preparing') || 'Zahlung wird vorbereitet...'}</p>
       </div>
     )
   }
@@ -664,11 +664,11 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error || t('checkout.initializationFailed') || 'Payment konnte nicht initialisiert werden'}
+            {error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden'}
           </AlertDescription>
         </Alert>
         <Button onClick={onCancel} variant="outline" className="w-full mt-4">
-          {t('common.back') || 'Zurück'}
+          {t('errors.back') || t('buttons.back') || 'Zurück'}
         </Button>
       </div>
     )

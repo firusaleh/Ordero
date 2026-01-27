@@ -66,12 +66,12 @@ export default function PayTabsCheckout({
           setRedirectUrl(result.redirectUrl)
           setTransactionRef(result.transactionRef)
         } else {
-          throw new Error(result.error || 'PayTabs-Zahlung konnte nicht initialisiert werden')
+          throw new Error(result.error || t('paytabs.initFailed'))
         }
       } catch (err) {
         console.error('PayTabs initialization failed:', err)
-        setError(err instanceof Error ? err.message : 'Zahlung konnte nicht initialisiert werden')
-        onError(err instanceof Error ? err.message : 'Zahlung fehlgeschlagen')
+        setError(err instanceof Error ? err.message : t('paytabs.generalInitFailed'))
+        onError(err instanceof Error ? err.message : t('errors.general'))
       } finally {
         setIsLoading(false)
       }
@@ -99,7 +99,7 @@ export default function PayTabsCheckout({
     return (
       <div className="max-w-md mx-auto p-8 text-center">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-        <p className="text-gray-600">Zahlungsseite wird vorbereitet...</p>
+        <p className="text-gray-600">{t('paytabs.preparing')}</p>
       </div>
     )
   }
@@ -112,7 +112,7 @@ export default function PayTabsCheckout({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
         <Button onClick={onCancel} variant="outline" className="w-full mt-4">
-          Zurück
+          {t('paytabs.back')}
         </Button>
       </div>
     )
@@ -122,7 +122,7 @@ export default function PayTabsCheckout({
     <div className="max-w-md mx-auto space-y-6 p-4">
       {/* Payment Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-semibold">Zahlung</h2>
+        <h2 className="text-2xl font-semibold">{t('paytabs.paymentTitle')}</h2>
         <div className="text-4xl font-bold text-orange-500">
           {currency} {totalAmount.toFixed(2)}
         </div>
@@ -147,14 +147,14 @@ export default function PayTabsCheckout({
           </div>
 
           <div className="text-sm text-gray-600 space-y-2">
-            <p>✓ Sichere Zahlungsabwicklung über PayTabs</p>
-            <p>✓ Unterstützt lokale Zahlungsmethoden</p>
-            <p>✓ PCI DSS Level 1 zertifiziert</p>
+            <p>{t('paytabs.secureProcessing')}</p>
+            <p>{t('paytabs.localMethods')}</p>
+            <p>{t('paytabs.pciCertified')}</p>
           </div>
 
           <Alert className="bg-blue-50 border-blue-200">
             <AlertDescription className="text-sm">
-              Sie werden zur sicheren PayTabs-Zahlungsseite weitergeleitet, um Ihre Zahlung abzuschließen.
+              {t('paytabs.redirectNotice')}
             </AlertDescription>
           </Alert>
         </div>
@@ -162,7 +162,7 @@ export default function PayTabsCheckout({
 
       {/* Payment Methods Info */}
       <div className="bg-white rounded-xl p-4 border border-gray-200">
-        <h3 className="font-medium text-gray-900 mb-3">Verfügbare Zahlungsmethoden:</h3>
+        <h3 className="font-medium text-gray-900 mb-3">{t('paytabs.availableMethods')}</h3>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-gray-500" />
@@ -170,7 +170,7 @@ export default function PayTabsCheckout({
           </div>
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-gray-500" />
-            <span>Mada (Saudi-Arabien)</span>
+            <span>{t('paytabs.mada')}</span>
           </div>
           <div className="flex items-center gap-2">
             <CreditCard className="h-4 w-4 text-gray-500" />
@@ -190,7 +190,7 @@ export default function PayTabsCheckout({
           disabled={!redirectUrl}
           className="w-full h-14 text-lg font-semibold bg-orange-500 hover:bg-orange-600 text-white rounded-2xl group"
         >
-          Jetzt zahlen
+          {t('paytabs.payNow')}
           <ExternalLink className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
         </Button>
 
@@ -199,13 +199,13 @@ export default function PayTabsCheckout({
           onClick={onCancel}
           className="w-full h-12 text-gray-600"
         >
-          Abbrechen
+          {t('paytabs.cancel')}
         </Button>
       </div>
 
       {/* Security Info */}
       <div className="text-center text-xs text-gray-500 pt-4">
-        🔒 Sichere Zahlung über PayTabs | PCI DSS Level 1
+        {t('paytabs.secureFooter')}
       </div>
     </div>
   )

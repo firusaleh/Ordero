@@ -62,7 +62,7 @@ function CheckoutForm({
     event.preventDefault()
 
     if (!stripe || !elements) {
-      setErrorMessage('Stripe wurde noch nicht geladen. Bitte versuchen Sie es erneut.')
+      setErrorMessage(t('stripe.loading'))
       return
     }
 
@@ -94,22 +94,22 @@ function CheckoutForm({
         let userErrorMessage = 'Zahlung fehlgeschlagen'
         switch (error.code) {
           case 'card_declined':
-            userErrorMessage = 'Ihre Karte wurde abgelehnt. Bitte versuchen Sie eine andere Zahlungsmethode.'
+            userErrorMessage = t('stripe.cardDeclined')
             break
           case 'insufficient_funds':
             userErrorMessage = 'Nicht genügend Guthaben auf der Karte verfügbar.'
             break
           case 'expired_card':
-            userErrorMessage = 'Ihre Karte ist abgelaufen. Bitte verwenden Sie eine andere Karte.'
+            userErrorMessage = t('stripe.cardExpired')
             break
           case 'incorrect_cvc':
-            userErrorMessage = 'Die Kartenprüfnummer (CVC) ist ungültig.'
+            userErrorMessage = t('stripe.cvcInvalid')
             break
           case 'processing_error':
-            userErrorMessage = 'Ein Verarbeitungsfehler ist aufgetreten. Bitte versuchen Sie es erneut.'
+            userErrorMessage = t('stripe.processingError')
             break
           default:
-            userErrorMessage = error.message || 'Ein unbekannter Fehler ist aufgetreten.'
+            userErrorMessage = error.message || t('stripe.unknownError')
         }
         
         setErrorMessage(userErrorMessage)
@@ -146,14 +146,14 @@ function CheckoutForm({
         }
       } else {
         setPaymentStatus('failed')
-        setErrorMessage('Zahlung konnte nicht abgeschlossen werden')
-        onError('Zahlung nicht abgeschlossen')
+        setErrorMessage(t('stripe.paymentFailed'))
+        onError(t('stripe.paymentFailed'))
       }
     } catch (error) {
       console.error('Payment processing error:', error)
       setPaymentStatus('failed')
-      setErrorMessage('Ein unerwarteter Fehler ist aufgetreten')
-      onError('Unerwarteter Fehler')
+      setErrorMessage(t('stripe.unexpectedError'))
+      onError(t('stripe.unexpectedError'))
     } finally {
       setIsProcessing(false)
     }
@@ -175,7 +175,7 @@ function CheckoutForm({
   const getStatusText = () => {
     switch (paymentStatus) {
       case 'processing':
-        return t('payment.processing') || 'Zahlung wird verarbeitet...'
+        return t('stripe.processing')
       case 'succeeded':
         return t('payment.succeeded') || 'Zahlung erfolgreich!'
       case 'failed':
@@ -192,7 +192,7 @@ function CheckoutForm({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="h-5 w-5" />
-            {t('payment.securePayment') || 'Sichere Zahlung'}
+            {t('payment.securePayment')}
             <Badge variant="outline" className="ml-auto">
               <Smartphone className="h-3 w-3 mr-1" />
               Apple Pay & Google Pay
@@ -201,17 +201,17 @@ function CheckoutForm({
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span>{t('common.subtotal') || 'Zwischensumme'}</span>
+            <span>{t('common.subtotal')}</span>
             <span>€{amount.toFixed(2)}</span>
           </div>
           {tip > 0 && (
             <div className="flex justify-between text-sm font-medium text-green-600">
-              <span>{t('checkout.tip') || 'Trinkgeld'}</span>
+              <span>{t('checkout.tip')}</span>
               <span>€{tip.toFixed(2)}</span>
             </div>
           )}
           <div className="border-t pt-2 flex justify-between font-bold text-lg">
-            <span>{t('common.total') || 'Gesamt'}</span>
+            <span>{t('common.total')}</span>
             <span>€{totalAmount.toFixed(2)}</span>
           </div>
         </CardContent>
@@ -220,7 +220,7 @@ function CheckoutForm({
       {/* Stripe Payment Element */}
       <Card>
         <CardHeader>
-          <CardTitle>{t('payment.paymentDetails') || 'Zahlungsdetails'}</CardTitle>
+          <CardTitle>{t('payment.paymentDetails')}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -259,7 +259,7 @@ function CheckoutForm({
                 disabled={isProcessing}
                 className="flex-1"
               >
-                {t('common.cancel') || 'Abbrechen'}
+                {t('common.cancel')}
               </Button>
               
               <Button
@@ -277,9 +277,9 @@ function CheckoutForm({
 
       {/* Sicherheitshinweis */}
       <div className="text-xs text-center text-gray-500 space-y-1">
-        <p>🔒 {t('payment.secureInfo') || 'Ihre Zahlungsdaten werden sicher über Stripe verarbeitet'}</p>
-        <p>💳 {t('payment.supportedCards') || 'Unterstützt werden Visa, Mastercard, American Express und weitere'}</p>
-        <p>📱 {t('payment.mobileWallets') || 'Apple Pay und Google Pay werden automatisch angezeigt, wenn verfügbar'}</p>
+        <p>🔒 {t('payment.secureInfo')}</p>
+        <p>💳 {t('payment.supportedCards')}</p>
+        <p>📱 {t('stripe.autoDisplay')}</p>
       </div>
     </div>
   )
@@ -300,7 +300,7 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Online-Zahlung ist momentan nicht verfügbar. Bitte wählen Sie Barzahlung.
+              {t('stripe.notAvailable')}
               {process.env.NODE_ENV === 'development' && (
                 <div className="mt-2 text-xs">
                   Dev: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY fehlt in .env.local
@@ -340,11 +340,11 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
             restaurantAmount: result.restaurantAmount
           })
         } else {
-          throw new Error(result.error || 'Zahlungs-Intent konnte nicht erstellt werden')
+          throw new Error(result.error || t('stripe.paymentIntentFailed'))
         }
       } catch (err) {
         console.error('Create payment intent failed:', err)
-        setError(err instanceof Error ? err.message : 'Zahlung konnte nicht initialisiert werden')
+        setError(err instanceof Error ? err.message : t('stripe.initFailed'))
       } finally {
         setIsLoading(false)
       }
@@ -358,7 +358,7 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
       <Card>
         <CardContent className="p-8 text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">{t('payment.initializing') || 'Zahlung wird vorbereitet...'}</p>
+          <p className="text-gray-600">{t('stripe.preparing')}</p>
         </CardContent>
       </Card>
     )
@@ -371,12 +371,12 @@ export default function StripeCheckout(props: StripeCheckoutProps) {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {error || 'Zahlung konnte nicht initialisiert werden'}
+              {error || t('stripe.initFailed')}
             </AlertDescription>
           </Alert>
           <div className="mt-4">
             <Button onClick={props.onCancel} variant="outline" className="w-full">
-              {t('common.back') || 'Zurück'}
+              {t('common.back')}
             </Button>
           </div>
         </CardContent>

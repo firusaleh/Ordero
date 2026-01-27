@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Info, Plus, Minus } from 'lucide-react'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface MenuItemVariant {
   id: string
@@ -58,6 +59,7 @@ export default function MenuItemDetail({
   onAdd,
   primaryColor
 }: MenuItemDetailProps) {
+  const { t } = useGuestLanguage()
   const [selectedVariant, setSelectedVariant] = useState<MenuItemVariant | undefined>(
     item.variants.length > 0 ? item.variants[0] : undefined
   )
@@ -108,7 +110,7 @@ export default function MenuItemDetail({
             <div className="flex items-center gap-2">
               <Info className="h-4 w-4 text-gray-400" />
               <span className="text-sm text-gray-500">
-                Allergene: {item.allergens.join(', ')}
+                {t('item.allergens') || 'Allergene'}: {item.allergens.join(', ')}
               </span>
             </div>
           )}
@@ -126,7 +128,7 @@ export default function MenuItemDetail({
           {/* Varianten */}
           {item.variants.length > 0 && (
             <div className="space-y-3">
-              <Label>Größe wählen</Label>
+              <Label>{t('item.selectSize') || 'Größe wählen'}</Label>
               <RadioGroup
                 value={selectedVariant?.id}
                 onValueChange={(value) => {
@@ -154,7 +156,7 @@ export default function MenuItemDetail({
           {/* Extras */}
           {item.extras.length > 0 && (
             <div className="space-y-3">
-              <Label>Extras hinzufügen</Label>
+              <Label>{t('item.addExtras') || 'Extras hinzufügen'}</Label>
               <div className="space-y-2">
                 {item.extras.map(extra => (
                   <div key={extra.id} className="flex items-center justify-between">
@@ -179,7 +181,7 @@ export default function MenuItemDetail({
 
           {/* Notizen */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Besondere Wünsche</Label>
+            <Label htmlFor="notes">{t('item.specialRequests') || 'Besondere Wünsche'}</Label>
             <Textarea
               id="notes"
               placeholder="z.B. ohne Zwiebeln, extra scharf..."
@@ -191,7 +193,7 @@ export default function MenuItemDetail({
 
           {/* Menge */}
           <div className="flex items-center justify-between">
-            <Label>Menge</Label>
+            <Label>{t('item.quantity') || 'Menge'}</Label>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
@@ -220,7 +222,7 @@ export default function MenuItemDetail({
             onClick={handleAddToCart}
             style={{ backgroundColor: primaryColor || '#3b82f6' }}
           >
-            Zum Warenkorb hinzufügen • €{calculatePrice().toFixed(2)}
+            {t('menuItem.addToCart') || 'Zum Warenkorb hinzufügen'} • €{calculatePrice().toFixed(2)}
           </Button>
         </DialogFooter>
       </DialogContent>

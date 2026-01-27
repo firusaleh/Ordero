@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  
   // Disable static file serving from public for HTML files
   async rewrites() {
     return {

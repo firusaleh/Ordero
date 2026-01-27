@@ -140,7 +140,7 @@ function CheckoutFormContent({
   // Handle Card payment
   const handleCardPayment = async () => {
     if (!stripe || !elements) {
-      setErrorMessage('Stripe wurde noch nicht geladen.')
+      setErrorMessage(t('errors.stripeNotLoaded') || 'Stripe wurde noch nicht geladen.')
       return
     }
 
@@ -163,8 +163,8 @@ function CheckoutFormContent({
 
       if (error) {
         console.error('Stripe payment error:', error)
-        setErrorMessage(error.message || 'Zahlung fehlgeschlagen')
-        onError(error.message || 'Zahlung fehlgeschlagen')
+        setErrorMessage(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
+        onError(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
         return
       }
 
@@ -173,7 +173,7 @@ function CheckoutFormContent({
       }
     } catch (error) {
       console.error('Payment processing error:', error)
-      setErrorMessage('Ein unerwarteter Fehler ist aufgetreten')
+      setErrorMessage(t('errors.unexpectedError') || 'Ein unerwarteter Fehler ist aufgetreten')
       onError('Unerwarteter Fehler')
     } finally {
       setIsProcessing(false)
@@ -422,8 +422,8 @@ function CheckoutFormContent({
 
                   if (error) {
                     console.error('Express checkout payment error:', error)
-                    setErrorMessage(error.message || 'Zahlung fehlgeschlagen')
-                    onError(error.message || 'Zahlung fehlgeschlagen')
+                    setErrorMessage(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
+                    onError(error.message || t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
                     return
                   }
 
@@ -433,8 +433,8 @@ function CheckoutFormContent({
                   }
                 } catch (err) {
                   console.error('Express checkout error:', err)
-                  setErrorMessage('Zahlung fehlgeschlagen')
-                  onError('Zahlung fehlgeschlagen')
+                  setErrorMessage(t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
+                  onError(t('errors.paymentFailed') || 'Zahlung fehlgeschlagen')
                 } finally {
                   setIsProcessing(false)
                 }
@@ -593,7 +593,7 @@ function CheckoutFormContent({
         {/* Security note */}
         {selectedPaymentMethod === 'CARD' && (
           <p className="text-xs text-center text-gray-500 mt-4">
-            🔒 {t('checkout.securePayment') || 'Sichere Zahlung mit Stripe'}
+            🔒 {t('errors.securePaymentVia') || 'Sichere Zahlung über'} Stripe
           </p>
         )}
       </div>
@@ -668,11 +668,11 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
           setClientSecret(result.clientSecret)
           setPendingPaymentId(result.pendingPaymentId)
         } else {
-          throw new Error(result.error || 'Payment konnte nicht initialisiert werden')
+          throw new Error(result.error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
         }
       } catch (err) {
         console.error('Create payment intent failed:', err)
-        setError(err instanceof Error ? err.message : 'Payment konnte nicht initialisiert werden')
+        setError(err instanceof Error ? err.message : t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
       } finally {
         setIsLoading(false)
       }
@@ -696,7 +696,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
         <Alert variant="destructive" className="mb-4">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            {error || t('checkout.initializationFailed') || 'Payment konnte nicht initialisiert werden'}
+            {error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden'}
           </AlertDescription>
         </Alert>
         {/* Allow cash payment as fallback */}

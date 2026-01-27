@@ -1,5 +1,6 @@
 'use client'
 
+import { useLanguage } from '@/contexts/language-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
@@ -13,6 +14,7 @@ interface SoundSettingsProps {
 }
 
 export function SoundSettings({ restaurantId }: SoundSettingsProps) {
+  const { t } = useLanguage()
   const { isEnabled, volume, toggleSound, setVolume, testSound } = useNotificationSound()
 
   return (
@@ -20,17 +22,17 @@ export function SoundSettings({ restaurantId }: SoundSettingsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           {isEnabled ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
-          Sound-Benachrichtigungen
+          {t('soundSettings.title')}
         </CardTitle>
         <CardDescription>
-          Erhalten Sie akustische Benachrichtigungen bei neuen Bestellungen
+          {t('soundSettings.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Sound aktivieren/deaktivieren */}
         <div className="flex items-center justify-between">
           <Label htmlFor="sound-enabled" className="flex items-center gap-2">
-            Sound-Benachrichtigungen
+            {t('soundSettings.title')}
             {isEnabled ? (
               <Volume2 className="h-4 w-4 text-green-600" />
             ) : (
@@ -49,7 +51,7 @@ export function SoundSettings({ restaurantId }: SoundSettingsProps) {
           <>
             <div className="space-y-2">
               <Label htmlFor="volume" className="flex items-center justify-between">
-                <span>Lautstärke</span>
+                <span>{t('soundSettings.volume')}</span>
                 <span className="text-sm text-gray-500">{Math.round(volume * 100)}%</span>
               </Label>
               <div className="flex items-center gap-3">
@@ -77,19 +79,19 @@ export function SoundSettings({ restaurantId }: SoundSettingsProps) {
                 className="w-full"
               >
                 <TestTube className="h-4 w-4 mr-2" />
-                Sound testen
+                {t('soundSettings.testSound')}
               </Button>
             </div>
 
             {/* Hinweise */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <h4 className="text-sm font-medium text-blue-900 mb-1">
-                Hinweise:
+                {t('soundSettings.hints')}
               </h4>
               <ul className="text-xs text-blue-700 space-y-1">
-                <li>• Browser müssen Sound-Wiedergabe erlauben</li>
-                <li>• Stelle sicher, dass dein Gerät nicht stummgeschaltet ist</li>
-                <li>• Der erste Sound erfordert möglicherweise eine Benutzerinteraktion</li>
+                <li>• {t('soundSettings.browserPermission')}</li>
+                <li>• {t('soundSettings.deviceNotMuted')}</li>
+                <li>• {t('soundSettings.userInteraction')}</li>
               </ul>
             </div>
           </>
@@ -97,23 +99,23 @@ export function SoundSettings({ restaurantId }: SoundSettingsProps) {
 
         {/* Weitere Sound-Optionen */}
         <div className="border-t pt-4">
-          <h3 className="text-sm font-medium mb-3">Benachrichtigungstypen</h3>
+          <h3 className="text-sm font-medium mb-3">{t('soundSettings.notificationTypes')}</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label htmlFor="new-order" className="text-sm font-normal">
-                Neue Bestellungen
+                {t('soundSettings.newOrders')}
               </Label>
               <Switch id="new-order" defaultChecked />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="order-cancel" className="text-sm font-normal">
-                Stornierte Bestellungen
+                {t('soundSettings.cancelledOrders')}
               </Label>
               <Switch id="order-cancel" defaultChecked />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="low-stock" className="text-sm font-normal">
-                Niedrige Lagerbestände
+                {t('soundSettings.lowStock')}
               </Label>
               <Switch id="low-stock" />
             </div>

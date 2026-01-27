@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useGuestLanguage } from '@/contexts/guest-language-context'
 
 interface OrderSuccessDialogProps {
   open: boolean
@@ -20,6 +21,7 @@ export default function OrderSuccessDialog({
   estimatedTime = '15-20 Minuten',
   primaryColor = '#2EC4B6'
 }: OrderSuccessDialogProps) {
+  const { t } = useGuestLanguage()
   useEffect(() => {
     if (open) {
       // Auto-close after 5 seconds
@@ -65,19 +67,19 @@ export default function OrderSuccessDialog({
           </div>
 
           {/* Title & Subtitle */}
-          <h2 className="text-2xl font-bold mb-2">Bestellung erfolgreich!</h2>
-          <p className="text-white/90 mb-8">Ihre Bestellung wird gerade zubereitet</p>
+          <h2 className="text-2xl font-bold mb-2">{t('order.successTitle') || 'Bestellung erfolgreich!'}</h2>
+          <p className="text-white/90 mb-8">{t('orderStatus.readyNotification') || 'Ihre Bestellung wird gerade zubereitet'}</p>
 
           {/* Order Card */}
           <div className="bg-white/15 backdrop-blur-sm rounded-2xl p-6 w-full max-w-xs">
             <div className="text-xs uppercase tracking-wider text-white/70 mb-2">
-              Bestellnummer
+              {t('order.orderNumber') || 'Bestellnummer'}
             </div>
             <div className="text-3xl font-bold tracking-wider mb-4">
               {orderNumber}
             </div>
             <div className="pt-4 border-t border-white/20">
-              <div className="text-xs text-white/60 mb-1">Geschätzte Zeit</div>
+              <div className="text-xs text-white/60 mb-1">{t('order.estimatedTime') || 'Geschätzte Zeit'}</div>
               <div className="text-lg font-semibold">{estimatedTime}</div>
             </div>
           </div>

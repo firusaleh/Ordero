@@ -422,14 +422,14 @@ export default function GuestMenuViewSimple({
               className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-blue-300 hover:border-blue-400 rounded-lg p-4 transition-all shadow-sm hover:shadow-lg"
             >
               <Calendar className="h-6 w-6 text-blue-600" />
-              <span className="text-base font-semibold text-blue-900">Tisch reservieren</span>
+              <span className="text-base font-semibold text-blue-900">{t('reservation.reserveTable') || 'Tisch reservieren'}</span>
             </a>
             <a 
               href={`/${restaurant.slug}/preorder`}
               className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border-2 border-green-300 hover:border-green-400 rounded-lg p-4 transition-all shadow-sm hover:shadow-lg"
             >
               <ShoppingBag className="h-6 w-6 text-green-600" />
-              <span className="text-base font-semibold text-green-900">Vorbestellen</span>
+              <span className="text-base font-semibold text-green-900">{t('preorder.title') || 'Vorbestellen'}</span>
             </a>
           </div>
         </div>
@@ -543,7 +543,7 @@ export default function GuestMenuViewSimple({
                           </Badge>
                           {item.variants && item.variants.length > 0 && (
                             <Badge className="bg-blue-500/90 text-white backdrop-blur-sm shadow-md">
-                              {item.variants.length} Größen
+                              {item.variants.length} {t('item.sizes') || 'Größen'}
                             </Badge>
                           )}
                         </div>
@@ -561,7 +561,7 @@ export default function GuestMenuViewSimple({
                           <h3 className="font-semibold text-base text-gray-900 line-clamp-2">{item.name}</h3>
                           {item.variants && item.variants.length > 0 && (
                             <p className="text-xs text-gray-500 mt-1">
-                              ab {formatPrice(Math.min(...item.variants.map(v => v.price)))}
+                              {t('item.from') || 'ab'} {formatPrice(Math.min(...item.variants.map(v => v.price)))}
                             </p>
                           )}
                         </div>
@@ -644,7 +644,7 @@ export default function GuestMenuViewSimple({
                         )}
                         <p className="text-sm text-gray-600 mt-1">
                           {formatPrice((item.variant?.price || item.menuItem.price) + 
-                            item.extras.reduce((sum, e) => sum + e.price, 0))} pro Stück
+                            item.extras.reduce((sum, e) => sum + e.price, 0))} {t('item.perPiece') || 'pro Stück'}
                         </p>
                       </div>
                       <Button
@@ -862,8 +862,8 @@ export default function GuestMenuViewSimple({
       {/* Unified Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
-          <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode</DialogDescription>
+          <DialogTitle className="sr-only">{t('checkout.paymentOptions') || 'Zahlungsoptionen'}</DialogTitle>
+          <DialogDescription className="sr-only">{t('checkout.selectPaymentMethod') || 'Wählen Sie Ihre Zahlungsmethode'}</DialogDescription>
           {cart.length > 0 && (() => {
             const { subtotal, tax } = calculateTax()
 

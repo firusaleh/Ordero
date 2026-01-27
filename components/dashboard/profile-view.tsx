@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -14,6 +15,7 @@ interface ProfileViewProps {
 }
 
 export default function ProfileView({ user }: ProfileViewProps) {
+  const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -36,24 +38,24 @@ export default function ProfileView({ user }: ProfileViewProps) {
       })
 
       if (response.ok) {
-        toast.success('Profil erfolgreich aktualisiert')
+        toast.success(t('toast.profileUpdated'))
         setIsEditing(false)
       } else {
-        toast.error('Fehler beim Speichern')
+        toast.error(t('toast.profileUpdateError'))
       }
     } catch (error) {
-      toast.error('Fehler beim Speichern')
+      toast.error(t('toast.profileUpdateError'))
     }
   }
 
   const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Passwörter stimmen nicht überein')
+      toast.error(t('toast.passwordMismatch'))
       return
     }
 
     if (passwordData.newPassword.length < 8) {
-      toast.error('Passwort muss mindestens 8 Zeichen lang sein')
+      toast.error(t('toast.passwordTooShort'))
       return
     }
 
@@ -68,7 +70,7 @@ export default function ProfileView({ user }: ProfileViewProps) {
       })
 
       if (response.ok) {
-        toast.success('Passwort erfolgreich geändert')
+        toast.success(t('toast.passwordChanged'))
         setIsChangingPassword(false)
         setPasswordData({
           currentPassword: '',
@@ -76,10 +78,10 @@ export default function ProfileView({ user }: ProfileViewProps) {
           confirmPassword: ''
         })
       } else {
-        toast.error('Falsches aktuelles Passwort')
+        toast.error(t('toast.passwordChangeError'))
       }
     } catch (error) {
-      toast.error('Fehler beim Ändern des Passworts')
+      toast.error(t('toast.passwordChangeErrorGeneral'))
     }
   }
 
@@ -95,8 +97,8 @@ export default function ProfileView({ user }: ProfileViewProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Mein Profil</h1>
-        <p className="text-gray-600">Verwalten Sie Ihre persönlichen Informationen</p>
+        <h1 className="text-3xl font-bold">{t('profile.title') || 'Mein Profil'}</h1>
+        <p className="text-gray-600">{t('profile.subtitle') || 'Verwalten Sie Ihre persönlichen Informationen'}</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -110,7 +112,7 @@ export default function ProfileView({ user }: ProfileViewProps) {
                 </AvatarFallback>
               </Avatar>
             </div>
-            <CardTitle>{user.name || 'Kein Name'}</CardTitle>
+            <CardTitle>{user.name || t('profile.noName') || 'Kein Name'}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">

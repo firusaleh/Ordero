@@ -103,7 +103,16 @@ export const guestTranslations = {
       expressCheckout: 'Schnellzahlung',
       expressLoading: 'Apple Pay / Google Pay wird geladen...',
       expressUnavailable: 'Apple Pay / Google Pay nicht verfügbar auf diesem Gerät',
-      or: 'oder'
+      or: 'oder',
+      securePayment: 'Sichere Zahlung',
+      paymentDetails: 'Zahlungsdetails',
+      processing: 'Zahlung wird verarbeitet...',
+      succeeded: 'Zahlung erfolgreich!',
+      failed: 'Zahlung fehlgeschlagen',
+      initializing: 'Zahlung wird vorbereitet...',
+      secureInfo: 'Ihre Zahlungsdaten werden sicher über Stripe verarbeitet',
+      supportedCards: 'Unterstützt werden Visa, Mastercard, American Express und weitere',
+      mobileWallets: 'Apple Pay und Google Pay werden automatisch angezeigt, wenn verfügbar'
     },
 
     // Toast messages
@@ -379,6 +388,102 @@ export const guestTranslations = {
       completed: 'Abgeschlossen',
       cancelled: 'Storniert'
     }
+    },
+    // Payment provider specific
+    stripe: {
+      loading: 'Stripe wird geladen. Bitte versuchen Sie es erneut.',
+      cardDeclined: 'Ihre Karte wurde abgelehnt. Bitte versuchen Sie eine andere Zahlungsmethode.',
+      cardExpired: 'Ihre Karte ist abgelaufen. Bitte verwenden Sie eine andere Karte.',
+      cvcInvalid: 'Die Kartenprüfnummer (CVC) ist ungültig.',
+      processingError: 'Ein Verarbeitungsfehler ist aufgetreten. Bitte versuchen Sie es erneut.',
+      unknownError: 'Ein unbekannter Fehler ist aufgetreten.',
+      paymentFailed: 'Zahlung konnte nicht abgeschlossen werden',
+      unexpectedError: 'Ein unerwarteter Fehler ist aufgetreten',
+      paymentIntentFailed: 'Zahlungs-Intent konnte nicht erstellt werden',
+      initFailed: 'Zahlung konnte nicht initialisiert werden',
+      processing: 'Zahlung wird verarbeitet...',
+      preparing: 'Zahlung wird vorbereitet...',
+      notAvailable: 'Online-Zahlung ist momentan nicht verfügbar. Bitte wählen Sie Barzahlung.',
+      autoDisplay: 'Apple Pay und Google Pay werden automatisch angezeigt, wenn verfügbar'
+    },
+    paytabs: {
+      initFailed: 'PayTabs-Zahlung konnte nicht initialisiert werden',
+      generalInitFailed: 'Zahlung konnte nicht initialisiert werden',
+      preparing: 'Zahlungsseite wird vorbereitet...',
+      back: 'Zurück',
+      paymentTitle: 'Zahlung',
+      secureProcessing: '✓ Sichere Zahlungsabwicklung über PayTabs',
+      localMethods: '✓ Unterstützt lokale Zahlungsmethoden',
+      pciCertified: '✓ PCI DSS Level 1 zertifiziert',
+      redirectNotice: 'Sie werden zur sicheren PayTabs-Zahlungsseite weitergeleitet, um Ihre Zahlung abzuschließen.',
+      availableMethods: 'Verfügbare Zahlungsmethoden:',
+      mada: 'Mada (Saudi-Arabien)',
+      payNow: 'Jetzt zahlen',
+      cancel: 'Abbrechen',
+      secureFooter: '🔒 Sichere Zahlung über PayTabs | PCI DSS Level 1'
+    },
+    errors: {
+      general: 'Ein Fehler ist aufgetreten',
+      tryAgain: 'Bitte versuchen Sie es erneut.',
+      orderError: 'Fehler bei der Bestellung. Bitte versuchen Sie es erneut.',
+      menuLoadError: 'Fehler beim Laden des Menüs',
+      paymentInitError: 'Payment konnte nicht initialisiert werden',
+      stripeNotLoaded: 'Stripe wurde noch nicht geladen.',
+      unexpectedError: 'Ein unerwarteter Fehler ist aufgetreten',
+      noTip: 'Kein Trinkgeld',
+      cancelled: 'Abbrechen',
+      back: 'Zurück',
+      notAvailable: 'Online-Zahlung nicht verfügbar. Bitte wählen Sie Barzahlung.',
+      securePaymentVia: 'Sichere Zahlung über'
+    },
+    orderHistory: {
+      title: 'Meine Bestellungen',
+      empty: 'Noch keine Bestellungen'
+    },
+    orderStatus: {
+      preparing: 'Bestellung wird vorbereitet',
+      notification: 'Sie werden benachrichtigt, wenn Ihre Bestellung fertig ist',
+      readyNotification: 'Ihre Bestellung wird gerade zubereitet',
+      sending: 'Bestellung wird gesendet...',
+      new: 'Neue Bestellung!',
+      beingPrepared: 'wird zubereitet',
+      cancelled: 'storniert',
+      cancelledTitle: 'Bestellung storniert',
+      noReason: 'Keine Begründung angegeben',
+      statusUpdateError: 'Fehler beim Aktualisieren des Status',
+      cancelError: 'Fehler beim Stornieren der Bestellung'
+    },
+    preorderValidation: {
+      nameRequired: 'Bitte geben Sie Ihren Namen ein',
+      phoneRequired: 'Bitte geben Sie Ihre Telefonnummer ein',
+      dateRequired: 'Bitte wählen Sie ein Abholdatum',
+      timeRequired: 'Bitte wählen Sie eine Abholzeit',
+      paymentCreateFailed: 'Zahlung konnte nicht erstellt werden. Bitte zahlen Sie bei Abholung.',
+      createError: 'Fehler beim Erstellen der Vorbestellung',
+      contactInfo: 'Bitte geben Sie Ihre Kontaktdaten und Abholzeit ein',
+      pickupTimeLabel: 'Abholzeit *',
+      paymentRedirect: 'Sie werden nach der Bestellung zur Zahlung weitergeleitet',
+      cancel: 'Abbrechen'
+    },
+    menuItem: {
+      customizeAdd: 'Anpassen & Hinzufügen',
+      addToCart: 'In den Warenkorb',
+      addToCartWithPrice: 'Zum Warenkorb hinzufügen',
+      wasAdded: 'wurde hinzugefügt',
+      wasAddedExclamation: 'wurde hinzugefügt!',
+      addedToCart: 'zum Warenkorb hinzugefügt',
+      emptySelection: 'Noch keine Auswahl'
+    },
+    buttons: {
+      back: 'Zurück',
+      cancel: 'Abbrechen',
+      continue: 'Weiter',
+      save: 'Speichern',
+      delete: 'Löschen',
+      add: 'Hinzufügen',
+      payNow: 'Jetzt zahlen',
+      placeOrder: 'Bestellen'
+    }
   },
   en: {
     // Header
@@ -483,7 +588,16 @@ export const guestTranslations = {
       expressCheckout: 'Express Checkout',
       expressLoading: 'Loading Apple Pay / Google Pay...',
       expressUnavailable: 'Apple Pay / Google Pay not available on this device',
-      or: 'or'
+      or: 'or',
+      securePayment: 'Secure Payment',
+      paymentDetails: 'Payment Details',
+      processing: 'Processing payment...',
+      succeeded: 'Payment successful!',
+      failed: 'Payment failed',
+      initializing: 'Preparing payment...',
+      secureInfo: 'Your payment data is securely processed via Stripe',
+      supportedCards: 'Visa, Mastercard, American Express and more are supported',
+      mobileWallets: 'Apple Pay and Google Pay will display automatically when available'
     },
 
     // Toast messages
@@ -758,6 +872,101 @@ export const guestTranslations = {
       delivered: 'Delivered',
       completed: 'Completed',
       cancelled: 'Cancelled'
+    },
+    // Payment provider specific
+    stripe: {
+      loading: 'Stripe is still loading. Please try again.',
+      cardDeclined: 'Your card was declined. Please try another payment method.',
+      cardExpired: 'Your card has expired. Please use another card.',
+      cvcInvalid: 'The card security code (CVC) is invalid.',
+      processingError: 'A processing error occurred. Please try again.',
+      unknownError: 'An unknown error occurred.',
+      paymentFailed: 'Payment could not be completed',
+      unexpectedError: 'An unexpected error occurred',
+      paymentIntentFailed: 'Payment intent could not be created',
+      initFailed: 'Payment could not be initialized',
+      processing: 'Processing payment...',
+      preparing: 'Preparing payment...',
+      notAvailable: 'Online payment is currently not available. Please select cash payment.',
+      autoDisplay: 'Apple Pay and Google Pay will display automatically when available'
+    },
+    paytabs: {
+      initFailed: 'PayTabs payment could not be initialized',
+      generalInitFailed: 'Payment could not be initialized',
+      preparing: 'Preparing payment page...',
+      back: 'Back',
+      paymentTitle: 'Payment',
+      secureProcessing: '✓ Secure payment processing via PayTabs',
+      localMethods: '✓ Supports local payment methods',
+      pciCertified: '✓ PCI DSS Level 1 certified',
+      redirectNotice: 'You will be redirected to the secure PayTabs payment page to complete your payment.',
+      availableMethods: 'Available payment methods:',
+      mada: 'Mada (Saudi Arabia)',
+      payNow: 'Pay now',
+      cancel: 'Cancel',
+      secureFooter: '🔒 Secure payment via PayTabs | PCI DSS Level 1'
+    },
+    errors: {
+      general: 'An error occurred',
+      tryAgain: 'Please try again.',
+      orderError: 'Order error. Please try again.',
+      menuLoadError: 'Error loading menu',
+      paymentInitError: 'Payment could not be initialized',
+      stripeNotLoaded: 'Stripe has not loaded yet.',
+      unexpectedError: 'An unexpected error occurred',
+      noTip: 'No tip',
+      cancelled: 'Cancel',
+      back: 'Back',
+      notAvailable: 'Online payment not available. Please select cash payment.',
+      securePaymentVia: 'Secure payment via'
+    },
+    orderHistory: {
+      title: 'My Orders',
+      empty: 'No orders yet'
+    },
+    orderStatus: {
+      preparing: 'Order is being prepared',
+      notification: 'You will be notified when your order is ready',
+      readyNotification: 'Your order is being prepared',
+      sending: 'Sending order...',
+      new: 'New order!',
+      beingPrepared: 'being prepared',
+      cancelled: 'cancelled',
+      cancelledTitle: 'Order cancelled',
+      noReason: 'No reason provided',
+      statusUpdateError: 'Error updating status',
+      cancelError: 'Error cancelling order'
+    },
+    preorderValidation: {
+      nameRequired: 'Please enter your name',
+      phoneRequired: 'Please enter your phone number',
+      dateRequired: 'Please select a pickup date',
+      timeRequired: 'Please select a pickup time',
+      paymentCreateFailed: 'Payment could not be created. Please pay on pickup.',
+      createError: 'Error creating preorder',
+      contactInfo: 'Please enter your contact details and pickup time',
+      pickupTimeLabel: 'Pickup time *',
+      paymentRedirect: 'You will be redirected to payment after placing the order',
+      cancel: 'Cancel'
+    },
+    menuItem: {
+      customizeAdd: 'Customize & Add',
+      addToCart: 'Add to cart',
+      addToCartWithPrice: 'Add to cart',
+      wasAdded: 'was added',
+      wasAddedExclamation: 'was added!',
+      addedToCart: 'added to cart',
+      emptySelection: 'No selection yet'
+    },
+    buttons: {
+      back: 'Back',
+      cancel: 'Cancel',
+      continue: 'Continue',
+      save: 'Save',
+      delete: 'Delete',
+      add: 'Add',
+      payNow: 'Pay now',
+      placeOrder: 'Place order'
     }
   },
   ar: {
@@ -863,7 +1072,16 @@ export const guestTranslations = {
       expressCheckout: 'الدفع السريع',
       expressLoading: 'جاري تحميل Apple Pay / Google Pay...',
       expressUnavailable: 'Apple Pay / Google Pay غير متاح على هذا الجهاز',
-      or: 'أو'
+      or: 'أو',
+      securePayment: 'دفع آمن',
+      paymentDetails: 'تفاصيل الدفع',
+      processing: 'جاري معالجة الدفع...',
+      succeeded: 'تم الدفع بنجاح!',
+      failed: 'فشل الدفع',
+      initializing: 'جاري تحضير الدفع...',
+      secureInfo: 'بياناتك المالية محمية وتتم معالجتها بأمان عبر Stripe',
+      supportedCards: 'نقبل Visa وMastercard وAmerican Express وغيرها',
+      mobileWallets: 'سيتم عرض Apple Pay و Google Pay تلقائياً عند توفرهما'
     },
 
     // Toast messages
@@ -1138,6 +1356,101 @@ export const guestTranslations = {
       delivered: 'تم التسليم',
       completed: 'مكتمل',
       cancelled: 'ملغى'
+    },
+    // Payment provider specific
+    stripe: {
+      loading: 'لا يزال Stripe يتم تحميله. يرجى المحاولة مرة أخرى.',
+      cardDeclined: 'تم رفض بطاقتك. يرجى تجربة طريقة دفع أخرى.',
+      cardExpired: 'انتهت صلاحية بطاقتك. يرجى استخدام بطاقة أخرى.',
+      cvcInvalid: 'رمز أمان البطاقة (CVC) غير صالح.',
+      processingError: 'حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.',
+      unknownError: 'حدث خطأ غير معروف.',
+      paymentFailed: 'لا يمكن إكمال الدفع',
+      unexpectedError: 'حدث خطأ غير متوقع',
+      paymentIntentFailed: 'لا يمكن إنشاء نية الدفع',
+      initFailed: 'لا يمكن تهيئة الدفع',
+      processing: 'جاري معالجة الدفع...',
+      preparing: 'جاري تحضير الدفع...',
+      notAvailable: 'الدفع عبر الإنترنت غير متاح حالياً. يرجى اختيار الدفع نقداً.',
+      autoDisplay: 'سيتم عرض Apple Pay و Google Pay تلقائياً عند توفرهما'
+    },
+    paytabs: {
+      initFailed: 'لا يمكن تهيئة دفع PayTabs',
+      generalInitFailed: 'لا يمكن تهيئة الدفع',
+      preparing: 'جاري تحضير صفحة الدفع...',
+      back: 'رجوع',
+      paymentTitle: 'الدفع',
+      secureProcessing: '✓ معالجة دفع آمنة عبر PayTabs',
+      localMethods: '✓ يدعم طرق الدفع المحلية',
+      pciCertified: '✓ معتمد PCI DSS المستوى 1',
+      redirectNotice: 'سيتم إعادة توجيهك إلى صفحة دفع PayTabs الآمنة لإكمال عملية الدفع.',
+      availableMethods: 'طرق الدفع المتاحة:',
+      mada: 'مدى (المملكة العربية السعودية)',
+      payNow: 'ادفع الآن',
+      cancel: 'إلغاء',
+      secureFooter: '🔒 دفع آمن عبر PayTabs | PCI DSS المستوى 1'
+    },
+    errors: {
+      general: 'حدث خطأ',
+      tryAgain: 'يرجى المحاولة مرة أخرى.',
+      orderError: 'خطأ في الطلب. يرجى المحاولة مرة أخرى.',
+      menuLoadError: 'خطأ في تحميل القائمة',
+      paymentInitError: 'لا يمكن تهيئة الدفع',
+      stripeNotLoaded: 'لم يتم تحميل Stripe بعد.',
+      unexpectedError: 'حدث خطأ غير متوقع',
+      noTip: 'بدون بقشيش',
+      cancelled: 'إلغاء',
+      back: 'رجوع',
+      notAvailable: 'الدفع عبر الإنترنت غير متاح. يرجى اختيار الدفع نقداً.',
+      securePaymentVia: 'دفع آمن عبر'
+    },
+    orderHistory: {
+      title: 'طلباتي',
+      empty: 'لا توجد طلبات بعد'
+    },
+    orderStatus: {
+      preparing: 'جاري تحضير الطلب',
+      notification: 'سيتم إشعارك عندما يكون طلبك جاهزاً',
+      readyNotification: 'يتم تحضير طلبك',
+      sending: 'جاري إرسال الطلب...',
+      new: 'طلب جديد!',
+      beingPrepared: 'قيد التحضير',
+      cancelled: 'ملغى',
+      cancelledTitle: 'تم إلغاء الطلب',
+      noReason: 'لم يتم تقديم سبب',
+      statusUpdateError: 'خطأ في تحديث الحالة',
+      cancelError: 'خطأ في إلغاء الطلب'
+    },
+    preorderValidation: {
+      nameRequired: 'يرجى إدخال اسمك',
+      phoneRequired: 'يرجى إدخال رقم هاتفك',
+      dateRequired: 'يرجى اختيار تاريخ الاستلام',
+      timeRequired: 'يرجى اختيار وقت الاستلام',
+      paymentCreateFailed: 'لا يمكن إنشاء الدفع. يرجى الدفع عند الاستلام.',
+      createError: 'خطأ في إنشاء الطلب المسبق',
+      contactInfo: 'يرجى إدخال بيانات الاتصال ووقت الاستلام',
+      pickupTimeLabel: 'وقت الاستلام *',
+      paymentRedirect: 'سيتم إعادة توجيهك إلى الدفع بعد تقديم الطلب',
+      cancel: 'إلغاء'
+    },
+    menuItem: {
+      customizeAdd: 'تخصيص وإضافة',
+      addToCart: 'إضافة إلى السلة',
+      addToCartWithPrice: 'إضافة إلى السلة',
+      wasAdded: 'تمت الإضافة',
+      wasAddedExclamation: 'تمت الإضافة!',
+      addedToCart: 'أضيف إلى السلة',
+      emptySelection: 'لا يوجد اختيار بعد'
+    },
+    buttons: {
+      back: 'رجوع',
+      cancel: 'إلغاء',
+      continue: 'متابعة',
+      save: 'حفظ',
+      delete: 'حذف',
+      add: 'إضافة',
+      payNow: 'ادفع الآن',
+      placeOrder: 'تقديم الطلب'
     }
   }
 }

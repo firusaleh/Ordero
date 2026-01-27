@@ -175,7 +175,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
     toast.success(
       <div className="flex items-center gap-2">
         <span className="text-2xl">🎉</span>
-        <span>{item.name} wurde hinzugefügt!</span>
+        <span>{item.name} {t('menuItem.wasAdded') || 'wurde hinzugefügt'}!</span>
       </div>,
       {
         duration: 2000,
@@ -567,7 +567,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                 {/* Extras */}
                 {selectedItem.extras.length > 0 && (
                   <div>
-                    <Label className="text-sm font-semibold mb-2 block">Extras hinzufügen</Label>
+                    <Label className="text-sm font-semibold mb-2 block">{t('item.addExtras') || 'Extras hinzufügen'}</Label>
                     <div className="space-y-2">
                       {selectedItem.extras.map((extra) => (
                         <div
@@ -673,7 +673,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
                   <div className="flex items-center justify-between w-full">
                     <span className="flex items-center gap-2">
                       <ShoppingCart className="h-5 w-5" />
-                      In den Warenkorb
+                      {t('menuItem.addToCart') || 'In den Warenkorb'}
                     </span>
                     <span className="text-lg font-bold">
                       {formatPrice((selectedVariant?.price || selectedItem.price) * itemQuantity)}
@@ -692,7 +692,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
           <SheetHeader className="pb-4 border-b border-gray-200">
             <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-600 to-purple-700 bg-clip-text text-transparent flex items-center gap-2">
               <ShoppingCart className="h-6 w-6 text-pink-500" />
-              Ihr Warenkorb
+              {t('cart.title') || 'Ihr Warenkorb'}
             </SheetTitle>
           </SheetHeader>
 
@@ -775,7 +775,7 @@ export default function GuestMenuViewBeautiful({ restaurant, table, tableNumber 
             <SheetFooter className="border-t pt-4 bg-white">
               <div className="w-full space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Gesamt</span>
+                  <span className="text-lg font-semibold">{t('common.total') || 'Gesamt'}</span>
                   <span className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-600 to-purple-700 bg-clip-text text-transparent animate-pulse">
                     {formatPrice(getCartTotal())}
                   </span>

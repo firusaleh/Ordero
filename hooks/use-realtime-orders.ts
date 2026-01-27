@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react"
 import { usePusher } from "@/components/providers/pusher-provider"
 import { toast } from "sonner"
+import { useGuestLanguage } from "@/contexts/guest-language-context"
 
 export interface RealtimeOrder {
   id: string
@@ -41,6 +42,7 @@ export function useRealtimeOrders({
   onOrderCancelled,
   showNotifications = true
 }: UseRealtimeOrdersOptions) {
+  const { t } = useGuestLanguage()
   const { subscribe, unsubscribe } = usePusher()
   const [orders, setOrders] = useState<RealtimeOrder[]>([])
   const [isListening, setIsListening] = useState(false)
@@ -99,7 +101,7 @@ export function useRealtimeOrders({
       setOrders(prev => [data, ...prev])
       
       if (showNotifications) {
-        toast.success("Neue Bestellung!", {
+        toast.success(t('orderStatus.new') || "Neue Bestellung!", {
           description: `Tisch ${data.tableNumber} - ${data.items} Artikel - €${data.total}`
         })
       }
@@ -119,11 +121,11 @@ export function useRealtimeOrders({
       
       if (showNotifications) {
         const statusText = {
-          CONFIRMED: "bestätigt",
-          PREPARING: "wird zubereitet",
-          READY: "fertig",
-          DELIVERED: "geliefert",
-          CANCELLED: "storniert"
+          CONFIRMED: t('orderStatus.confirmed') || "bestätigt",
+          PREPARING: t('orderStatus.beingPrepared') || "wird zubereitet",
+          READY: t('orderStatus.ready') || "fertig",
+          DELIVERED: t('orderStatus.delivered') || "geliefert",
+          CANCELLED: t('orderStatus.cancelled') || "storniert"
         }[data.status as keyof { CONFIRMED: string; PREPARING: string; READY: string; DELIVERED: string; CANCELLED: string }] || data.status
         
         toast.info(`Bestellung ${statusText}`, {
@@ -145,8 +147,8 @@ export function useRealtimeOrders({
       ))
       
       if (showNotifications) {
-        toast.error("Bestellung storniert", {
-          description: data.reason || "Keine Begründung angegeben"
+        toast.error(t('orderStatus.cancelledTitle') || "Bestellung storniert", {
+          description: data.reason || t('orderStatus.noReason') || "Keine Begründung angegeben"
         })
       }
       
@@ -186,7 +188,7 @@ export function useRealtimeOrders({
       toast.success("Status aktualisiert")
     } catch (error) {
       console.error("Fehler beim Statusupdate:", error)
-      toast.error("Fehler beim Aktualisieren des Status")
+      toast.error(t('orderStatus.statusUpdateError') || "Fehler beim Aktualisieren des Status")
       
       // Bei Fehler: Rollback des optimistischen Updates
       loadOrders()
@@ -217,7 +219,7 @@ export function useRealtimeOrders({
       toast.success("Bestellung storniert")
     } catch (error) {
       console.error("Fehler beim Stornieren:", error)
-      toast.error("Fehler beim Stornieren der Bestellung")
+      toast.error(t('orderStatus.cancelError') || "Fehler beim Stornieren der Bestellung")
       
       // Bei Fehler: Rollback des optimistischen Updates
       loadOrders()

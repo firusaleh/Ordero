@@ -148,7 +148,7 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
       }])
     }
 
-    toast.success(`${item.name} zum Warenkorb hinzugefügt`)
+    toast.success(`${item.name} ${t('menuItem.addedToCart') || 'zum Warenkorb hinzugefügt'}`)
     setSelectedItem(null)
   }
 
@@ -279,14 +279,14 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
               </SheetTrigger>
               <SheetContent className="w-full sm:max-w-md">
                 <SheetHeader>
-                  <SheetTitle>Warenkorb</SheetTitle>
+                  <SheetTitle>{t('cart.title') || 'Warenkorb'}</SheetTitle>
                 </SheetHeader>
                 
                 <div className="mt-6 flex-1 overflow-y-auto">
                   {cart.length === 0 ? (
                     <div className="text-center py-8">
                       <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500">Ihr Warenkorb ist leer</p>
+                      <p className="text-gray-500">{t('cart.empty') || 'Ihr Warenkorb ist leer'}</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -351,7 +351,7 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
                   <SheetFooter className="mt-6">
                     <div className="w-full space-y-4">
                       <div className="flex justify-between items-center py-3 border-t">
-                        <span className="text-lg font-semibold">Gesamt</span>
+                        <span className="text-lg font-semibold">{t('common.total') || 'Gesamt'}</span>
                         <span className="text-lg font-semibold">
                           €{getCartTotal().toFixed(2)}
                         </span>
@@ -526,7 +526,7 @@ export default function GuestMenuView({ restaurant, table, tableNumber }: GuestM
             style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
           >
             <ShoppingCart className="mr-2 h-5 w-5" />
-            Warenkorb ({getCartItemCount()}) • €{getCartTotal().toFixed(2)}
+            {t('cart.title') || 'Warenkorb'} ({getCartItemCount()}) • €{getCartTotal().toFixed(2)}
           </Button>
         </div>
       )}

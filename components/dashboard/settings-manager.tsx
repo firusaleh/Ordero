@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLanguage } from '@/contexts/language-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -79,6 +80,7 @@ interface SettingsManagerProps {
 
 export default function SettingsManager({ restaurant: initialRestaurant, settings: initialSettings }: SettingsManagerProps) {
   const router = useRouter()
+  const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('general')
   
@@ -145,12 +147,12 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Fehler beim Speichern')
+        throw new Error(errorData.error || t('toast.saveError'))
       }
 
-      toast.success('Allgemeine Einstellungen gespeichert')
+      toast.success(t('toast.generalSettingsSaved'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Fehler beim Speichern')
+      toast.error(error instanceof Error ? error.message : t('toast.saveError'))
     } finally {
       setIsLoading(false)
     }
@@ -172,19 +174,19 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || 'Fehler beim Speichern')
+        throw new Error(errorData.error || t('toast.saveError'))
       }
 
-      toast.success('Einstellungen gespeichert')
+      toast.success(t('toast.settingsSaved'))
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Fehler beim Speichern')
+      toast.error(error instanceof Error ? error.message : t('toast.saveError'))
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleDisconnectPOS = async () => {
-    if (!confirm('Möchten Sie die POS-Verbindung wirklich trennen?')) {
+    if (!confirm(t('settings.pos.disconnectConfirm') || 'Möchten Sie die POS-Verbindung wirklich trennen?')) {
       return
     }
     
@@ -195,32 +197,32 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
         method: 'POST'
       })
 
-      if (!response.ok) throw new Error('Fehler beim Trennen')
+      if (!response.ok) throw new Error(t('toast.posDisconnectError'))
 
-      toast.success('POS-Verbindung getrennt')
+      toast.success(t('toast.posDisconnected'))
       router.refresh()
     } catch (error) {
-      toast.error('Fehler beim Trennen der Verbindung')
+      toast.error(t('toast.posDisconnectError'))
     } finally {
       setIsLoading(false)
     }
   }
 
   const dayNames: { [key: string]: string } = {
-    mo: 'Montag',
-    di: 'Dienstag',
-    mi: 'Mittwoch',
-    do: 'Donnerstag',
-    fr: 'Freitag',
-    sa: 'Samstag',
-    so: 'Sonntag'
+    mo: t('common.days.monday') || 'Montag',
+    di: t('common.days.tuesday') || 'Dienstag',
+    mi: t('common.days.wednesday') || 'Mittwoch',
+    do: t('common.days.thursday') || 'Donnerstag',
+    fr: t('common.days.friday') || 'Freitag',
+    sa: t('common.days.saturday') || 'Samstag',
+    so: t('common.days.sunday') || 'Sonntag'
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Einstellungen</h1>
-        <p className="text-gray-600">Verwalten Sie Ihre Restaurant-Einstellungen</p>
+        <h1 className="text-3xl font-bold">{t('settings.title')}</h1>
+        <p className="text-gray-600">{t('settings.subtitle')}</p>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6 p-1 bg-gray-100 rounded-lg">
@@ -229,56 +231,56 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
           onClick={() => setActiveTab('general')}
           size="sm"
         >
-          Allgemein
+          {t('settings.tabs.general') || 'Allgemein'}
         </Button>
         <Button
           variant={activeTab === 'ordering' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('ordering')}
           size="sm"
         >
-          Bestellung
+          {t('settings.tabs.ordering') || 'Bestellung'}
         </Button>
         <Button
           variant={activeTab === 'hours' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('hours')}
           size="sm"
         >
-          Öffnungszeiten
+          {t('common.openingHours')}
         </Button>
         <Button
           variant={activeTab === 'pos' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('pos')}
           size="sm"
         >
-          POS
+          {t('settings.tabs.pos') || 'POS'}
         </Button>
         <Button
           variant={activeTab === 'billing' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('billing')}
           size="sm"
         >
-          Abrechnung
+          {t('settings.tabs.billing') || 'Abrechnung'}
         </Button>
         <Button
           variant={activeTab === 'design' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('design')}
           size="sm"
         >
-          Design
+          {t('settings.tabs.design') || 'Design'}
         </Button>
         <Button
           variant={activeTab === 'language' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('language')}
           size="sm"
         >
-          Sprache
+          {t('settings.tabs.language') || 'Sprache'}
         </Button>
         <Button
           variant={activeTab === 'security' ? 'default' : 'ghost'}
           onClick={() => setActiveTab('security')}
           size="sm"
         >
-          Sicherheit
+          {t('settings.tabs.security') || 'Sicherheit'}
         </Button>
       </div>
 
@@ -287,15 +289,15 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
         {activeTab === 'general' && (
           <Card>
             <CardHeader>
-              <CardTitle>Restaurant-Informationen</CardTitle>
+              <CardTitle>{t('settings.general.title') || 'Restaurant-Informationen'}</CardTitle>
               <CardDescription>
-                Grundlegende Informationen über Ihr Restaurant
+                {t('settings.general.description') || 'Grundlegende Informationen über Ihr Restaurant'}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <Label htmlFor="name">Restaurant Name</Label>
+                  <Label htmlFor="name">{t('settings.general.restaurantName') || 'Restaurant Name'}</Label>
                   <Input
                     id="name"
                     value={restaurant.name}
@@ -303,24 +305,24 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
                   />
                 </div>
                 <div>
-                  <Label htmlFor="cuisine">Küche</Label>
+                  <Label htmlFor="cuisine">{t('common.cuisine')}</Label>
                   <Input
                     id="cuisine"
                     value={restaurant.cuisine}
                     onChange={(e) => setRestaurant({ ...restaurant, cuisine: e.target.value })}
-                    placeholder="z.B. Italienisch"
+                    placeholder={t('common.placeholder.cuisine') || 'z.B. Italienisch'}
                   />
                 </div>
               </div>
               
               <div>
-                <Label htmlFor="description">Beschreibung</Label>
+                <Label htmlFor="description">{t('common.description')}</Label>
                 <Textarea
                   id="description"
                   value={restaurant.description}
                   onChange={(e) => setRestaurant({ ...restaurant, description: e.target.value })}
                   rows={3}
-                  placeholder="Beschreiben Sie Ihr Restaurant..."
+                  placeholder={t('common.placeholder.description') || 'Beschreiben Sie Ihr Restaurant...'}
                 />
               </div>
 
@@ -328,11 +330,11 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
 
               <h3 className="font-medium flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Adresse
+                {t('common.address')}
               </h3>
               
               <div>
-                <Label htmlFor="street">Straße und Hausnummer</Label>
+                <Label htmlFor="street">{t('common.streetAndNumber')}</Label>
                 <Input
                   id="street"
                   value={restaurant.street}
@@ -342,7 +344,7 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
               
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <Label htmlFor="postalCode">Postleitzahl</Label>
+                  <Label htmlFor="postalCode">{t('common.postalCode')}</Label>
                   <Input
                     id="postalCode"
                     value={restaurant.postalCode}
@@ -350,7 +352,7 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
                   />
                 </div>
                 <div>
-                  <Label htmlFor="city">Stadt</Label>
+                  <Label htmlFor="city">{t('common.city')}</Label>
                   <Input
                     id="city"
                     value={restaurant.city}
@@ -363,12 +365,12 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
 
               <h3 className="font-medium flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                Kontakt
+                {t('common.contactInformation')}
               </h3>
               
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <Label htmlFor="phone">Telefon</Label>
+                  <Label htmlFor="phone">{t('common.phoneNumber')}</Label>
                   <Input
                     id="phone"
                     value={restaurant.phone}
@@ -376,7 +378,7 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">E-Mail</Label>
+                  <Label htmlFor="email">{t('common.emailAddress')}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -387,7 +389,7 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
               </div>
               
               <div>
-                <Label htmlFor="website">Website</Label>
+                <Label htmlFor="website">{t('common.website')}</Label>
                 <Input
                   id="website"
                   type="url"
@@ -401,11 +403,11 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
 
               <h3 className="font-medium flex items-center gap-2">
                 <Palette className="h-4 w-4" />
-                Branding
+                {t('settings.design.branding') || 'Branding'}
               </h3>
               
               <div>
-                <Label htmlFor="primaryColor">Primärfarbe</Label>
+                <Label htmlFor="primaryColor">{t('settings.design.primaryColor')}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="primaryColor"
@@ -427,12 +429,12 @@ export default function SettingsManager({ restaurant: initialRestaurant, setting
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Speichern...
+                    {t('common.saving')}...
                   </>
                 ) : (
                   <>
                     <Save className="mr-2 h-4 w-4" />
-                    Speichern
+                    {t('common.save')}
                   </>
                 )}
               </Button>

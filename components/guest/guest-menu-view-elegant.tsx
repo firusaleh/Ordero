@@ -170,7 +170,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
     toast.success(
       <div className="flex items-center gap-2">
         <Check className="h-4 w-4" />
-        <span>{item.name} wurde hinzugefügt</span>
+        <span>{item.name} {t('menuItem.wasAdded') || 'wurde hinzugefügt'}</span>
       </div>,
       {
         duration: 2000,
@@ -243,10 +243,10 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         setShowCheckout(false)
         setShowSuccessDialog(true)
       } else {
-        throw new Error('Bestellung fehlgeschlagen')
+        throw new Error(t('errors.orderError') || 'Bestellung fehlgeschlagen')
       }
     } catch (error) {
-      toast.error('Fehler bei der Bestellung. Bitte versuchen Sie es erneut.')
+      toast.error(`${t('errors.orderError') || 'Fehler bei der Bestellung'}. ${t('errors.tryAgain') || 'Bitte versuchen Sie es erneut.'}`)
     } finally {
       setIsOrdering(false)
     }
@@ -384,12 +384,12 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                         </h3>
                         {isPopular(item) && (
                           <Badge className="bg-orange-100 text-orange-800 text-xs">
-                            Beliebt
+                            {t('menu.popular') || 'Beliebt'}
                           </Badge>
                         )}
                         {isNew(item) && (
                           <Badge className="bg-blue-100 text-blue-800 text-xs">
-                            Neu
+                            {t('menu.new') || 'Neu'}
                           </Badge>
                         )}
                         {item.tags.includes('vegan') && (
@@ -611,7 +611,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                 >
                   <div className="flex items-center justify-between w-full">
                     <span className="flex items-center gap-2">
-                      In den Warenkorb
+                      {t('menuItem.addToCart') || 'In den Warenkorb'}
                     </span>
                     <span className="text-lg font-bold">
                       {formatPrice((selectedVariant?.price || selectedItem.price) * itemQuantity + selectedExtras.reduce((sum, e) => sum + e.price, 0) * itemQuantity)}
@@ -629,7 +629,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         <SheetContent className="w-full sm:max-w-lg flex flex-col h-full bg-white">
           <SheetHeader className="border-b pb-4">
             <SheetTitle className="text-2xl font-bold">
-              Warenkorb
+              {t('cart.title') || 'Warenkorb'}
             </SheetTitle>
           </SheetHeader>
 
@@ -637,8 +637,8 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
             {cart.length === 0 ? (
               <div className="text-center py-12">
                 <ShoppingBag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">{t('cart.empty')}</p>
-                <p className="text-gray-400 text-sm mt-2">Wählen Sie Gerichte aus der Speisekarte</p>
+                <p className="text-gray-500 text-lg">{t('cart.empty') || 'Ihr Warenkorb ist leer'}</p>
+                <p className="text-gray-400 text-sm mt-2">{t('menu.selectDishes') || 'Wählen Sie Gerichte aus der Speisekarte'}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -703,7 +703,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
             <SheetFooter className="border-t pt-4">
               <div className="w-full space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">Gesamt</span>
+                  <span className="text-lg font-semibold">{t('common.total') || 'Gesamt'}</span>
                   <span className="text-2xl font-bold text-gray-900">
                     {formatPrice(getCartTotal())}
                   </span>
@@ -717,7 +717,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
                   size="lg"
                 >
                   <span className="flex items-center gap-2 text-lg">
-                    Zur Kasse
+                    {t('cart.checkout') || 'Zur Kasse'}
                     <ArrowRight className="h-5 w-5" />
                   </span>
                 </Button>
@@ -730,8 +730,8 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
       {/* Unified Checkout Dialog */}
       <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
         <DialogContent className="max-w-md p-0 overflow-hidden rounded-3xl max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="sr-only">Zahlungsoptionen</DialogTitle>
-          <DialogDescription className="sr-only">Wählen Sie Ihre Zahlungsmethode</DialogDescription>
+          <DialogTitle className="sr-only">{t('checkout.paymentOptions') || 'Zahlungsoptionen'}</DialogTitle>
+          <DialogDescription className="sr-only">{t('checkout.selectPaymentMethod') || 'Wählen Sie Ihre Zahlungsmethode'}</DialogDescription>
           <IntegratedCheckout
             restaurantId={restaurant.id}
             tableId={table?.id}

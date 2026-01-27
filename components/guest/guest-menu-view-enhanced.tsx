@@ -199,7 +199,7 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
       }])
     }
 
-    toast.success(`${item.name} zum Warenkorb hinzugefügt`, {
+    toast.success(`${item.name} ${t('menuItem.addedToCart') || 'zum Warenkorb hinzugefügt'}`, {
       icon: '🛒',
     })
     setSelectedItem(null)
@@ -588,7 +588,7 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
                                   }}
                                 >
                                   <Plus className="h-4 w-4 mr-2" />
-                                  In den Warenkorb
+                                  {t('menuItem.addToCart') || 'In den Warenkorb'}
                                 </Button>
                               )}
                             </div>
@@ -607,14 +607,14 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
       <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
         <SheetContent className="w-full sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>Warenkorb</SheetTitle>
+            <SheetTitle>{t('cart.title') || 'Warenkorb'}</SheetTitle>
           </SheetHeader>
           
           <div className="mt-6 flex-1 overflow-y-auto">
             {cart.length === 0 ? (
               <div className="text-center py-8">
                 <ShoppingCart className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">Ihr Warenkorb ist leer</p>
+                <p className="text-gray-500">{t('cart.empty') || 'Ihr Warenkorb ist leer'}</p>
                 <p className="text-sm text-gray-400 mt-2">
                   Fügen Sie leckere Gerichte hinzu!
                 </p>
@@ -695,7 +695,7 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
                     <span className="text-lg">€{getCartTotal().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between items-center mt-2 pt-2 border-t">
-                    <span className="text-xl font-bold">Gesamt</span>
+                    <span className="text-xl font-bold">{t('common.total') || 'Gesamt'}</span>
                     <span className="text-xl font-bold">
                       €{getCartTotal().toFixed(2)}
                     </span>
@@ -759,7 +759,7 @@ export default function GuestMenuViewEnhanced({ restaurant, table, tableNumber }
               style={{ backgroundColor: restaurant.primaryColor || '#3b82f6' }}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
-              Warenkorb ({getCartItemCount()}) • €{getCartTotal().toFixed(2)}
+              {t('cart.title') || 'Warenkorb'} ({getCartItemCount()}) • €{getCartTotal().toFixed(2)}
             </Button>
           </motion.div>
         )}
