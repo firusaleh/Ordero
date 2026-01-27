@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useLanguage } from '@/contexts/language-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -51,6 +52,7 @@ export default function LocalizationSettingsClient({
   restaurantId, 
   initialSettings 
 }: LocalizationSettingsClientProps) {
+  const { t } = useLanguage()
   const [settings, setSettings] = useState(initialSettings)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -71,7 +73,7 @@ export default function LocalizationSettingsClient({
         })
       })
 
-      if (!response.ok) throw new Error('Fehler beim Speichern')
+      if (!response.ok) throw new Error(t('localization.settingsSaveError'))
 
       // Speichere die Sprache in localStorage und lade die Seite neu
       localStorage.setItem('language', settings.language)
@@ -85,14 +87,14 @@ export default function LocalizationSettingsClient({
         document.documentElement.lang = settings.language
       }
 
-      toast.success('Sprach- und Regionseinstellungen gespeichert')
+      toast.success(t('localization.settingsSaved'))
       
       // Lade die Seite neu, um die neue Sprache anzuwenden
       setTimeout(() => {
         window.location.reload()
       }, 1000)
     } catch (error) {
-      toast.error('Einstellungen konnten nicht gespeichert werden')
+      toast.error(t('localization.settingsSaveError'))
     } finally {
       setIsLoading(false)
     }
@@ -101,8 +103,8 @@ export default function LocalizationSettingsClient({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Sprache & Region</h1>
-        <p className="text-gray-600">Konfigurieren Sie Sprache, Währung und Zeitzone</p>
+        <h1 className="text-3xl font-bold">{t('localization.pageTitle')}</h1>
+        <p className="text-gray-600">{t('localization.subtitle')}</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -110,15 +112,15 @@ export default function LocalizationSettingsClient({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Globe className="h-5 w-5" />
-              Sprache
+              {t('localization.languageTitle')}
             </CardTitle>
             <CardDescription>
-              Wählen Sie die Standardsprache für Ihr Restaurant
+              {t('localization.languageDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Sprache</Label>
+              <Label>{t('localization.languageLabel')}</Label>
               <Select
                 value={settings.language}
                 onValueChange={(value) => setSettings({ ...settings, language: value })}
@@ -138,7 +140,7 @@ export default function LocalizationSettingsClient({
                 </SelectContent>
               </Select>
               <p className="text-sm text-gray-500 mt-1">
-                Die Sprache gilt für das Dashboard und E-Mails
+                {t('localization.languageNote')}
               </p>
             </div>
           </CardContent>
@@ -148,15 +150,15 @@ export default function LocalizationSettingsClient({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <DollarSign className="h-5 w-5" />
-              Währung
+              {t('localization.currencyTitle')}
             </CardTitle>
             <CardDescription>
-              Wählen Sie die Standardwährung für Preise
+              {t('localization.currencyDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Währung</Label>
+              <Label>{t('localization.currencyLabel')}</Label>
               <Select
                 value={settings.currency}
                 onValueChange={(value) => setSettings({ ...settings, currency: value })}
@@ -176,7 +178,7 @@ export default function LocalizationSettingsClient({
                 </SelectContent>
               </Select>
               <p className="text-sm text-gray-500 mt-1">
-                Alle Preise werden in dieser Währung angezeigt
+                {t('localization.currencyNote')}
               </p>
             </div>
           </CardContent>
@@ -186,15 +188,15 @@ export default function LocalizationSettingsClient({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Zeitzone
+              {t('localization.timezoneTitle')}
             </CardTitle>
             <CardDescription>
-              Wählen Sie Ihre lokale Zeitzone
+              {t('localization.timezoneDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Zeitzone</Label>
+              <Label>{t('localization.timezoneLabel')}</Label>
               <Select
                 value={settings.timezone}
                 onValueChange={(value) => setSettings({ ...settings, timezone: value })}
@@ -211,7 +213,7 @@ export default function LocalizationSettingsClient({
                 </SelectContent>
               </Select>
               <p className="text-sm text-gray-500 mt-1">
-                Verwendet für Bestellzeiten und Berichte
+                {t('localization.timezoneNote')}
               </p>
             </div>
           </CardContent>
@@ -221,15 +223,15 @@ export default function LocalizationSettingsClient({
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              Datums- und Zeitformat
+              {t('localization.dateTimeTitle')}
             </CardTitle>
             <CardDescription>
-              Wählen Sie das Anzeigeformat für Datum und Zeit
+              {t('localization.dateTimeDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label>Datumsformat</Label>
+              <Label>{t('localization.dateFormatLabel')}</Label>
               <Select
                 value={settings.dateFormat}
                 onValueChange={(value) => setSettings({ ...settings, dateFormat: value })}
@@ -246,7 +248,7 @@ export default function LocalizationSettingsClient({
             </div>
 
             <div>
-              <Label>Zeitformat</Label>
+              <Label>{t('localization.timeFormatLabel')}</Label>
               <Select
                 value={settings.timeFormat}
                 onValueChange={(value) => setSettings({ ...settings, timeFormat: value })}
@@ -255,8 +257,8 @@ export default function LocalizationSettingsClient({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="24h">24 Stunden (14:30)</SelectItem>
-                  <SelectItem value="12h">12 Stunden (2:30 PM)</SelectItem>
+                  <SelectItem value="24h">{t('localization.hour24')} (14:30)</SelectItem>
+                  <SelectItem value="12h">{t('localization.hour12')} (2:30 PM)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -271,11 +273,11 @@ export default function LocalizationSettingsClient({
           disabled={isLoading}
         >
           {isLoading ? (
-            'Speichern...'
+            t('localization.saving')
           ) : (
             <>
               <Save className="h-4 w-4 mr-2" />
-              Einstellungen speichern
+              {t('localization.saveSettings')}
             </>
           )}
         </Button>
