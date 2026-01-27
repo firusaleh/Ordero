@@ -422,14 +422,14 @@ export default function GuestMenuViewSimple({
               className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-blue-300 hover:border-blue-400 rounded-lg p-4 transition-all shadow-sm hover:shadow-lg"
             >
               <Calendar className="h-6 w-6 text-blue-600" />
-              <span className="text-base font-semibold text-blue-900">{t('reservation.reserveTable') || 'Tisch reservieren'}</span>
+              <span className="text-base font-semibold text-blue-900">{t('guest.reservation.title') || 'Tisch reservieren'}</span>
             </a>
             <a 
               href={`/${restaurant.slug}/preorder`}
               className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border-2 border-green-300 hover:border-green-400 rounded-lg p-4 transition-all shadow-sm hover:shadow-lg"
             >
               <ShoppingBag className="h-6 w-6 text-green-600" />
-              <span className="text-base font-semibold text-green-900">{t('preorder.title') || 'Vorbestellen'}</span>
+              <span className="text-base font-semibold text-green-900">{t('guest.preorder.title') || 'Vorbestellen'}</span>
             </a>
           </div>
         </div>
