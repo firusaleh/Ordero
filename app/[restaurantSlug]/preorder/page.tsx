@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import PreOrderMenuView from '@/components/guest/preorder-menu-view'
 import { GuestLanguageProvider } from '@/contexts/guest-language-context'
+import RestaurantOffline from '@/components/guest/restaurant-offline'
 
 interface PreOrderPageProps {
   params: Promise<{ restaurantSlug: string }>
@@ -9,10 +10,7 @@ interface PreOrderPageProps {
 
 async function getRestaurantMenu(slug: string) {
   const restaurant = await prisma.restaurant.findUnique({
-    where: { 
-      slug,
-      status: 'ACTIVE'
-    },
+    where: { slug },
     include: {
       settings: true,
       categories: {
@@ -52,6 +50,15 @@ export default async function PreOrderPage({ params }: PreOrderPageProps) {
 
   if (!restaurant) {
     notFound()
+  }
+
+  // Check if restaurant is offline
+  if (restaurant.status !== 'ACTIVE') {
+    return (
+      <GuestLanguageProvider>
+        <RestaurantOffline restaurant={restaurant} />
+      </GuestLanguageProvider>
+    )
   }
 
   return (
