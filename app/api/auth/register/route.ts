@@ -109,10 +109,16 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      // Erstelle Restaurant-Einstellungen
+      // Erstelle Restaurant-Einstellungen mit Standard-Gebühren
       await tx.restaurantSettings.create({
         data: {
           restaurantId: restaurant.id,
+          serviceFeeEnabled: true,
+          serviceFeeType: 'FIXED',
+          serviceFeeAmount: 0.45,
+          serviceFeePercent: 10,
+          taxRate: 19,
+          includeTax: true
         }
       })
       

@@ -50,10 +50,10 @@ export default function FeesSettingsClient({ restaurant, settings }: FeesSetting
   
   const t = getTranslation
   
-  const [serviceFeeEnabled, setServiceFeeEnabled] = useState(settings?.serviceFeeEnabled || false)
-  const [serviceFeeType, setServiceFeeType] = useState(settings?.serviceFeeType || 'PERCENT')
+  const [serviceFeeEnabled, setServiceFeeEnabled] = useState(settings?.serviceFeeEnabled ?? true)
+  const [serviceFeeType, setServiceFeeType] = useState(settings?.serviceFeeType || 'FIXED')
   const [serviceFeePercent, setServiceFeePercent] = useState(settings?.serviceFeePercent || 10)
-  const [serviceFeeAmount, setServiceFeeAmount] = useState(settings?.serviceFeeAmount || 0)
+  const [serviceFeeAmount, setServiceFeeAmount] = useState(settings?.serviceFeeAmount ?? 0.45)
   const [taxRate, setTaxRate] = useState(settings?.taxRate || 19)
   const [includeTax, setIncludeTax] = useState(settings?.includeTax ?? true)
   

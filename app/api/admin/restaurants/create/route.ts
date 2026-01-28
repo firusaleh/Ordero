@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
       }
       const timezone = timezoneByCountry[validatedData.country] || 'Europe/Berlin'
 
-      // Erstelle Restaurant-Einstellungen mit Standardwerten
+      // Erstelle Restaurant-Einstellungen mit Standardwerten und Gebühren
       await tx.restaurantSettings.create({
         data: {
           restaurantId: restaurant.id,
@@ -136,6 +136,10 @@ export async function POST(request: NextRequest) {
           soundNotifications: true,
           acceptCash: true,
           acceptCard: false,
+          serviceFeeEnabled: true,
+          serviceFeeType: 'FIXED',
+          serviceFeeAmount: 0.45,
+          serviceFeePercent: 10,
           taxRate: 19,
           includeTax: true,
           currency,

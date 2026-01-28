@@ -23,11 +23,17 @@ export default async function FeesSettingsPage() {
     redirect("/dashboard")
   }
   
-  // Ensure settings exist
+  // Ensure settings exist with default values
   if (!restaurant.settings) {
     const settings = await prisma.restaurantSettings.create({
       data: {
-        restaurantId: restaurant.id
+        restaurantId: restaurant.id,
+        serviceFeeEnabled: true,
+        serviceFeeType: 'FIXED',
+        serviceFeeAmount: 0.45,
+        serviceFeePercent: 10,
+        taxRate: 19,
+        includeTax: true
       }
     })
     restaurant.settings = settings
