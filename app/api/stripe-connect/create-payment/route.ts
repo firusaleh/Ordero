@@ -125,7 +125,8 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        statement_descriptor_suffix: cleanRestaurantName || statementSuffix,
+        // Versuche Restaurant Name als Suffix, falls Platform Descriptor "Oriido" ist
+        statement_descriptor_suffix: cleanRestaurantName,
         metadata: {
           pendingPaymentId: pendingPayment.id,
           restaurantId: restaurantId,
@@ -149,7 +150,8 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        statement_descriptor_suffix: cleanRestaurantName || statementSuffix,
+        // Versuche Restaurant Name als Suffix, falls Platform Descriptor "Oriido" ist
+        statement_descriptor_suffix: cleanRestaurantName,
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
         transfer_data: {
           destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
