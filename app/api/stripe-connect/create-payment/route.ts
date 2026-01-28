@@ -80,7 +80,14 @@ export async function POST(req: NextRequest) {
 
     // Create payment description for bank statement
     const tableInfo = tableNumber ? `Tisch ${tableNumber}` : 'Bestellung';
-    const statementSuffix = tableNumber ? `TISCH${tableNumber}` : 'ORDER';
+    const statementSuffix = tableNumber ? `T${tableNumber}` : '';
+    
+    // Clean restaurant name for statement descriptor (max 10 chars for suffix)
+    const cleanRestaurantName = restaurant.name
+      .replace(/[^a-zA-Z0-9\s]/g, '') // Nur Buchstaben, Zahlen, Leerzeichen
+      .replace(/\s+/g, ' ') // Multiple spaces zu einem
+      .trim()
+      .substring(0, 10);
 
     // Calculate totals
     const subtotal = cartData.subtotal;
@@ -118,7 +125,7 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        statement_descriptor_suffix: statementSuffix,
+        statement_descriptor_suffix: cleanRestaurantName || statementSuffix,
         metadata: {
           pendingPaymentId: pendingPayment.id,
           restaurantId: restaurantId,
@@ -142,7 +149,7 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        statement_descriptor_suffix: statementSuffix,
+        statement_descriptor_suffix: cleanRestaurantName || statementSuffix,
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
         transfer_data: {
           destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
