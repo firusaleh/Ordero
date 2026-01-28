@@ -222,11 +222,15 @@ model RestaurantSettings {
   timeFormat        String  @default("24h")
   
   // POS Integration
-  posSystem         String?  // ready2order, orderbird, gastrofix
-  posApiKey         String?
-  posRestaurantId   String?
-  posSyncEnabled    Boolean @default(false)
-  posLastSync       DateTime?
+  posSystem              String?  // ready2order, orderbird, gastrofix
+  posApiKey              String?
+  posRestaurantId        String?
+  posSyncEnabled         Boolean @default(false)
+  posLastSync            DateTime?
+  posConnectionStatus    String?  // connected, disconnected
+  posLastConnectionTest  DateTime?
+  posMenuOutOfSync       Boolean @default(false)
+  posLastMenuChange      DateTime?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -250,11 +254,11 @@ model Category {
   sortOrder    Int      @default(0)
   isActive     Boolean  @default(true)
   
+  // POS Integration
+  posId        String?  // ID im POS-System
+  
   // Relationen
   menuItems    MenuItem[]
-  
-  // POS Mapping
-  posId        String?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -277,6 +281,9 @@ model MenuItem {
   isActive     Boolean  @default(true)
   isAvailable  Boolean  @default(true)
   
+  // POS Integration
+  posId        String?  // ID im POS-System
+  
   // Zusatzinfos
   allergens    String[] // Array von Allergenen
   additives    String[] // Array von Zusatzstoffen
@@ -288,9 +295,6 @@ model MenuItem {
   extras       MenuItemExtra[]
   
   sortOrder    Int      @default(0)
-  
-  // POS Mapping
-  posId        String?
   
   // Relationen
   orderItems   OrderItem[]
@@ -391,6 +395,11 @@ model Order {
   // Kunde
   customerEmail String?
   customerPhone String?
+  
+  // POS Integration
+  posOrderId     String?
+  posSyncStatus  String?  // PENDING, SYNCED, FAILED
+  posSyncedAt    DateTime?
   
   // Zeiten
   confirmedAt  DateTime?

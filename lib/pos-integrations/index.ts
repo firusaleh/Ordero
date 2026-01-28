@@ -1,168 +1,56 @@
 // POS System Integrations
-import { Order, Restaurant, RestaurantSettings } from '@prisma/client'
+import { RestaurantSettings } from '@prisma/client'
+import { POSAdapter } from './types'
+import { Ready2OrderAdapter } from './ready2order'
+import { OrderbirdAdapter } from './orderbird'
 
-interface POSOrder {
-  order: any
-  settings: RestaurantSettings
-}
+export * from './types'
 
-// Base POS Adapter
-abstract class POSAdapter {
-  protected apiKey: string
-  protected restaurantId?: string
-
-  constructor(apiKey: string, restaurantId?: string) {
-    this.apiKey = apiKey
-    this.restaurantId = restaurantId
-  }
-
-  abstract sendOrder(order: any): Promise<boolean>
-  abstract testConnection(): Promise<boolean>
-}
-
-// Ready2Order Adapter
-class Ready2OrderAdapter extends POSAdapter {
-  private baseUrl = 'https://api.ready2order.com/v1'
-
-  async sendOrder(order: any): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/orders`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          restaurant_id: this.restaurantId,
-          order_number: order.orderNumber,
-          table_number: order.tableNumber,
-          items: order.items.map((item: any) => ({
-            name: item.name,
-            quantity: item.quantity,
-            price: item.unitPrice,
-            notes: item.notes
-          })),
-          total: order.total,
-          payment_method: order.paymentMethod
-        })
-      })
-
-      return response.ok
-    } catch (error) {
-      console.error('Ready2Order integration error:', error)
-      return false
-    }
-  }
-
+// Lightspeed POS Adapter (Placeholder)
+class LightspeedAdapter extends POSAdapter {
   async testConnection(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/restaurants/${this.restaurantId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`
-        }
-      })
-      return response.ok
-    } catch {
-      return false
-    }
+    // TODO: Implement Lightspeed API
+    return false
   }
-}
-
-// Orderbird Adapter
-class OrderbirdAdapter extends POSAdapter {
-  private baseUrl = 'https://api.orderbird.com/v2'
-
+  
+  async syncMenu(): Promise<any> {
+    return { success: false, errors: ['Lightspeed integration noch nicht implementiert'] }
+  }
+  
   async sendOrder(order: any): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/orders`, {
-        method: 'POST',
-        headers: {
-          'X-API-Key': this.apiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          external_id: order.id,
-          table: order.tableNumber,
-          items: order.items.map((item: any) => ({
-            product_name: item.name,
-            quantity: item.quantity,
-            unit_price: item.unitPrice * 100, // Orderbird uses cents
-            comment: item.notes
-          })),
-          payment_type: order.paymentMethod === 'CASH' ? 'cash' : 'card'
-        })
-      })
-
-      return response.ok
-    } catch (error) {
-      console.error('Orderbird integration error:', error)
-      return false
-    }
+    return false
   }
-
-  async testConnection(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/account`, {
-        headers: {
-          'X-API-Key': this.apiKey
-        }
-      })
-      return response.ok
-    } catch {
-      return false
-    }
+  
+  async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
+    return false
+  }
+  
+  async syncTables(): Promise<any[]> {
+    return []
   }
 }
 
-// Square POS Adapter
+// Square POS Adapter (Placeholder)
 class SquareAdapter extends POSAdapter {
-  private baseUrl = 'https://connect.squareup.com/v2'
-
-  async sendOrder(order: any): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/orders`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
-          'Square-Version': '2024-01-18'
-        },
-        body: JSON.stringify({
-          order: {
-            location_id: this.restaurantId,
-            reference_id: order.orderNumber,
-            line_items: order.items.map((item: any) => ({
-              name: item.name,
-              quantity: String(item.quantity),
-              base_price_money: {
-                amount: Math.round(item.unitPrice * 100),
-                currency: 'EUR'
-              },
-              note: item.notes
-            }))
-          }
-        })
-      })
-
-      return response.ok
-    } catch (error) {
-      console.error('Square integration error:', error)
-      return false
-    }
-  }
-
   async testConnection(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseUrl}/locations/${this.restaurantId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Square-Version': '2024-01-18'
-        }
-      })
-      return response.ok
-    } catch {
-      return false
-    }
+    // TODO: Implement Square API
+    return false
+  }
+  
+  async syncMenu(): Promise<any> {
+    return { success: false, errors: ['Square integration noch nicht implementiert'] }
+  }
+  
+  async sendOrder(order: any): Promise<boolean> {
+    return false
+  }
+  
+  async updateOrderStatus(orderId: string, status: string): Promise<boolean> {
+    return false
+  }
+  
+  async syncTables(): Promise<any[]> {
+    return []
   }
 }
 
@@ -175,6 +63,8 @@ export function getPOSAdapter(system: string, apiKey: string, restaurantId?: str
       return new OrderbirdAdapter(apiKey, restaurantId)
     case 'square':
       return new SquareAdapter(apiKey, restaurantId)
+    case 'lightspeed':
+      return new LightspeedAdapter(apiKey, restaurantId)
     default:
       console.log(`POS system ${system} not yet implemented`)
       return null

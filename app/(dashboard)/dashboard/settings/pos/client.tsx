@@ -8,13 +8,19 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { 
   Store,
   Save,
   Zap,
   AlertCircle,
-  Check
+  Check,
+  RefreshCw,
+  Clock,
+  Activity,
+  Wifi,
+  WifiOff
 } from 'lucide-react'
 
 interface POSSettings {
@@ -71,7 +77,9 @@ const POS_SYSTEMS = {
 export default function POSSettingsClient({ restaurantId, initialSettings }: POSSettingsClientProps) {
   const [settings, setSettings] = useState<POSSettings>(initialSettings)
   const [isLoading, setIsLoading] = useState(false)
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>(
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [isTesting, setIsTesting] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'testing'>(
     initialSettings.posSystem && initialSettings.posApiKey ? 'connected' : 'disconnected'
   )
 
@@ -108,6 +116,70 @@ export default function POSSettingsClient({ restaurantId, initialSettings }: POS
     }
   }
 
+  const testConnection = async () => {
+    if (!settings.posSystem || !settings.posApiKey) {
+      toast.error('Bitte geben Sie zuerst die API-Zugangsdaten ein')
+      return
+    }
+
+    setIsTesting(true)
+    setConnectionStatus('testing')
+    
+    try {
+      const response = await fetch('/api/pos/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          posSystem: settings.posSystem,
+          posApiKey: settings.posApiKey,
+          posRestaurantId: settings.posRestaurantId
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setConnectionStatus('connected')
+        toast.success(data.message || 'Verbindung erfolgreich!')
+        if (data.restaurantName) {
+          toast.info(`Verbunden mit: ${data.restaurantName}`)
+        }
+      } else {
+        setConnectionStatus('disconnected')
+        toast.error(data.error || 'Verbindung fehlgeschlagen')
+      }
+    } catch (error) {
+      setConnectionStatus('disconnected')
+      toast.error('Verbindungstest fehlgeschlagen')
+    } finally {
+      setIsTesting(false)
+    }
+  }
+
+  const syncMenu = async () => {
+    setIsSyncing(true)
+    
+    try {
+      const response = await fetch('/api/pos/sync-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        toast.success(data.message)
+        setSettings({ ...settings, lastSync: new Date() })
+      } else {
+        toast.error(data.error || 'Menü-Synchronisation fehlgeschlagen')
+      }
+    } catch (error) {
+      toast.error('Fehler bei der Menü-Synchronisation')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -117,9 +189,27 @@ export default function POSSettingsClient({ restaurantId, initialSettings }: POS
 
       {connectionStatus === 'connected' && (
         <Alert className="bg-green-50 border-green-200">
-          <Check className="h-4 w-4 text-green-600" />
+          <Wifi className="h-4 w-4 text-green-600" />
           <AlertDescription className="text-green-800">
             Ihr POS-System ist verbunden
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {connectionStatus === 'disconnected' && settings.posSystem && (
+        <Alert className="bg-red-50 border-red-200">
+          <WifiOff className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800">
+            Keine Verbindung zum POS-System
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {connectionStatus === 'testing' && (
+        <Alert className="bg-blue-50 border-blue-200">
+          <Activity className="h-4 w-4 text-blue-600 animate-pulse" />
+          <AlertDescription className="text-blue-800">
+            Verbindung wird getestet...
           </AlertDescription>
         </Alert>
       )}
@@ -193,6 +283,40 @@ export default function POSSettingsClient({ restaurantId, initialSettings }: POS
                   Nur notwendig bei mehreren Standorten
                 </p>
               </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Automatische Synchronisation</Label>
+                  <p className="text-sm text-gray-500">
+                    Menü und Bestellungen automatisch mit POS synchronisieren
+                  </p>
+                </div>
+                <Switch
+                  checked={settings.syncEnabled}
+                  onCheckedChange={(checked) => setSettings({ ...settings, syncEnabled: checked })}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={testConnection}
+                  disabled={isTesting || !settings.posApiKey}
+                >
+                  {isTesting ? (
+                    <>
+                      <Activity className="h-4 w-4 mr-2 animate-spin" />
+                      Teste...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Verbindung testen
+                    </>
+                  )}
+                </Button>
+              </div>
             </>
           )}
 
@@ -214,18 +338,79 @@ export default function POSSettingsClient({ restaurantId, initialSettings }: POS
         </CardContent>
       </Card>
 
+      {connectionStatus === 'connected' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Menü-Synchronisation</CardTitle>
+            <CardDescription>
+              Synchronisieren Sie Ihr Menü mit dem POS-System
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {settings.lastSync && (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="h-4 w-4" />
+                <span>
+                  Letzte Synchronisation: {new Date(settings.lastSync).toLocaleString('de-DE')}
+                </span>
+              </div>
+            )}
+            
+            <Button
+              onClick={syncMenu}
+              disabled={isSyncing}
+              variant="outline"
+              className="w-full"
+            >
+              {isSyncing ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Synchronisiere...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Menü jetzt synchronisieren
+                </>
+              )}
+            </Button>
+            
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Bei der Synchronisation werden neue Artikel importiert und bestehende aktualisiert. 
+                Ihre manuellen Änderungen bleiben erhalten.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
-          <CardTitle>Hinweis</CardTitle>
+          <CardTitle>Integration Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Die POS-Integration befindet sich noch in der Entwicklung. 
-              Sobald verfügbar, können Sie hier Ihr Menü synchronisieren und Bestellungen direkt an Ihr Kassensystem senden.
-            </AlertDescription>
-          </Alert>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Verbindung</span>
+              <Badge variant={connectionStatus === 'connected' ? 'default' : 'secondary'}>
+                {connectionStatus === 'connected' ? 'Verbunden' : 'Getrennt'}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Automatische Sync</span>
+              <Badge variant={settings.syncEnabled ? 'default' : 'secondary'}>
+                {settings.syncEnabled ? 'Aktiviert' : 'Deaktiviert'}
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">POS-System</span>
+              <Badge variant="outline">
+                {settings.posSystem ? POS_SYSTEMS[settings.posSystem as keyof typeof POS_SYSTEMS].displayName : 'Nicht konfiguriert'}
+              </Badge>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

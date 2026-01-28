@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendNewOrderNotification, sendOrderConfirmation } from '@/lib/email'
 import { orderRateLimiter, checkRateLimit, getIpAddress } from '@/lib/rate-limit'
+import { getPOSAdapter } from '@/lib/pos-integrations'
 
 export async function POST(
   request: Request,
@@ -226,6 +227,61 @@ export async function POST(
         onboardingCompleted: restaurant.stripeOnboardingCompleted,
         info: 'Zahlungen werden direkt an Oriido gehen und müssen manuell übertragen werden'
       })
+    }
+
+    // POS-Integration: Sende Bestellung an Kassensystem
+    if (restaurant.settings?.posSyncEnabled && restaurant.settings?.posSystem && restaurant.settings?.posApiKey) {
+      try {
+        const adapter = getPOSAdapter(
+          restaurant.settings.posSystem,
+          restaurant.settings.posApiKey,
+          restaurant.settings.posRestaurantId || undefined
+        )
+
+        if (adapter) {
+          const posOrder = {
+            id: order.id,
+            orderNumber: order.orderNumber,
+            tableNumber: order.tableNumber || undefined,
+            orderType: order.type,
+            items: order.items.map(item => ({
+              name: item.menuItem.name,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              notes: item.notes || undefined,
+              posId: item.menuItem.posId || undefined,
+              selectedVariants: [], // TODO: Implementiere Varianten
+              selectedExtras: []    // TODO: Implementiere Extras
+            })),
+            total: order.total,
+            tipAmount: order.tip || undefined,
+            paymentMethod: order.paymentMethod || 'CASH',
+            customerName: body.guestName,
+            guestEmail: body.guestEmail,
+            notes: body.notes
+          }
+
+          const posSent = await adapter.sendOrder(posOrder)
+          
+          if (posSent) {
+            console.log(`[POS SYNC] Bestellung ${order.orderNumber} erfolgreich an ${restaurant.settings.posSystem} gesendet`)
+            
+            // Markiere Bestellung als mit POS synchronisiert
+            await prisma.order.update({
+              where: { id: order.id },
+              data: { 
+                posSyncStatus: 'SYNCED',
+                posSyncedAt: new Date()
+              }
+            })
+          } else {
+            console.error(`[POS SYNC] Fehler beim Senden der Bestellung ${order.orderNumber} an ${restaurant.settings.posSystem}`)
+          }
+        }
+      } catch (posError) {
+        console.error('[POS SYNC] Fehler bei POS-Integration:', posError)
+        // POS-Fehler sollten die Bestellung nicht verhindern
+      }
     }
 
     // E-Mail-Benachrichtigungen senden

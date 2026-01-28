@@ -1,34 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-
-// Mock-Daten für Demo-Zwecke
-const DEMO_MENU_ITEMS = [
-  {
-    category: 'Vorspeisen',
-    items: [
-      { name: 'Bruschetta', price: 7.50, description: 'Geröstetes Brot mit Tomaten und Basilikum' },
-      { name: 'Caprese', price: 8.90, description: 'Mozzarella mit Tomaten und Basilikum' },
-      { name: 'Antipasti Misti', price: 12.50, description: 'Gemischte italienische Vorspeisen' }
-    ]
-  },
-  {
-    category: 'Hauptgerichte',
-    items: [
-      { name: 'Pizza Margherita', price: 11.50, description: 'Mit Tomatensauce und Mozzarella' },
-      { name: 'Pizza Salami', price: 13.50, description: 'Mit Tomatensauce, Mozzarella und Salami' },
-      { name: 'Spaghetti Carbonara', price: 12.90, description: 'Mit Speck, Ei und Parmesan' },
-      { name: 'Risotto ai Funghi', price: 14.50, description: 'Risotto mit frischen Pilzen' }
-    ]
-  },
-  {
-    category: 'Desserts',
-    items: [
-      { name: 'Tiramisu', price: 6.50, description: 'Hausgemachtes Tiramisu' },
-      { name: 'Panna Cotta', price: 5.50, description: 'Mit Beerensauce' }
-    ]
-  }
-]
+import { getPOSAdapter } from '@/lib/pos-integrations'
 
 export async function POST(req: NextRequest) {
   try {
@@ -54,7 +27,12 @@ export async function POST(req: NextRequest) {
     // Prüfe ob POS-System konfiguriert ist
     const settings = await prisma.restaurantSettings.findUnique({
       where: { restaurantId: restaurant.id },
-      select: { posSystem: true, posApiKey: true }
+      select: { 
+        posSystem: true, 
+        posApiKey: true, 
+        posRestaurantId: true,
+        posSyncEnabled: true 
+      }
     })
 
     if (!settings?.posSystem || !settings?.posApiKey) {
@@ -64,75 +42,133 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Verwende den POS Adapter
+    const adapter = getPOSAdapter(
+      settings.posSystem,
+      settings.posApiKey,
+      settings.posRestaurantId || undefined
+    )
+
+    if (!adapter) {
+      return NextResponse.json(
+        { error: `POS-System '${settings.posSystem}' wird nicht unterstützt` },
+        { status: 400 }
+      )
+    }
+
+    // Führe Menü-Sync durch
+    const syncResult = await adapter.syncMenu()
+
+    if (!syncResult.success) {
+      return NextResponse.json(
+        { error: 'Menü-Synchronisation fehlgeschlagen', details: syncResult.errors },
+        { status: 500 }
+      )
+    }
+
     let imported = 0
     let updated = 0
 
-    // In einer echten Implementierung würde hier die POS-API aufgerufen
-    // Für Demo-Zwecke importieren wir Mock-Daten
-    
-    for (const categoryData of DEMO_MENU_ITEMS) {
-      // Erstelle oder finde Kategorie
-      let category = await prisma.category.findFirst({
-        where: {
-          restaurantId: restaurant.id,
-          name: categoryData.category
-        }
-      })
-
-      if (!category) {
-        category = await prisma.category.create({
-          data: {
+    // Verarbeite Kategorien
+    if (syncResult.categories) {
+      for (const posCategory of syncResult.categories) {
+        let category = await prisma.category.findFirst({
+          where: {
             restaurantId: restaurant.id,
-            name: categoryData.category,
-            sortOrder: DEMO_MENU_ITEMS.indexOf(categoryData)
+            OR: [
+              { posId: posCategory.id },
+              { name: posCategory.name }
+            ]
           }
         })
-      }
 
-      // Importiere Artikel
-      for (const itemData of categoryData.items) {
+        if (!category) {
+          category = await prisma.category.create({
+            data: {
+              restaurantId: restaurant.id,
+              name: posCategory.name,
+              posId: posCategory.id,
+              sortOrder: posCategory.sortOrder
+            }
+          })
+        } else {
+          await prisma.category.update({
+            where: { id: category.id },
+            data: {
+              posId: posCategory.id,
+              sortOrder: posCategory.sortOrder
+            }
+          })
+        }
+      }
+    }
+
+    // Verarbeite Menü-Items
+    if (syncResult.items) {
+      for (const posItem of syncResult.items) {
+        // Finde Kategorie
+        const category = posItem.categoryId 
+          ? await prisma.category.findFirst({
+              where: {
+                restaurantId: restaurant.id,
+                posId: posItem.categoryId
+              }
+            })
+          : null
+
+        // Prüfe ob Item existiert
         const existingItem = await prisma.menuItem.findFirst({
           where: {
             restaurantId: restaurant.id,
-            name: itemData.name
+            OR: [
+              { posId: posItem.id },
+              { name: posItem.name }
+            ]
           }
         })
+
+        const itemData = {
+          name: posItem.name,
+          description: posItem.description || '',
+          price: posItem.price,
+          categoryId: category?.id,
+          posId: posItem.id,
+          image: posItem.image,
+          isActive: posItem.isActive,
+          isAvailable: posItem.isActive
+        }
 
         if (existingItem) {
           // Aktualisiere existierenden Artikel
           await prisma.menuItem.update({
             where: { id: existingItem.id },
-            data: {
-              price: itemData.price,
-              description: itemData.description,
-              categoryId: category.id,
-              posId: `pos_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-            }
+            data: itemData
           })
           updated++
         } else {
           // Erstelle neuen Artikel
           await prisma.menuItem.create({
             data: {
-              restaurantId: restaurant.id,
-              categoryId: category.id,
-              name: itemData.name,
-              description: itemData.description,
-              price: itemData.price,
-              isActive: true,
-              isAvailable: true,
-              posId: `pos_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+              ...itemData,
+              restaurantId: restaurant.id
             }
           })
           imported++
         }
+
+        // TODO: Verarbeite Varianten und Extras
+        // Dies würde in einer vollständigen Implementierung
+        // die Varianten und Extras in separate Tabellen speichern
       }
     }
 
-    // Speichere Sync-Zeitpunkt (würde normalerweise in separater Tabelle gespeichert)
+    // Speichere Sync-Zeitpunkt
     await prisma.restaurantSettings.update({
       where: { restaurantId: restaurant.id },
-      data: { updatedAt: new Date() }
+      data: { 
+        posLastSync: new Date(),
+        posSyncEnabled: true
+      }
     })
 
     return NextResponse.json({
