@@ -1,0 +1,5 @@
+Deployment Check
+================
+Last Update: 2026-01-28 20:19:00 UTC
+Commit: 4feab73
+Changes: Fixed 0.45€ fee display
