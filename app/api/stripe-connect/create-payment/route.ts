@@ -80,7 +80,11 @@ export async function POST(req: NextRequest) {
 
     // Create payment description for bank statement
     const tableInfo = tableNumber ? `Tisch ${tableNumber}` : 'Bestellung';
-    const statementSuffix = tableNumber ? `TISCH${tableNumber}` : 'ORDER';
+    // Restaurant Name für Statement Descriptor (max 10 Zeichen für Suffix)
+    const cleanRestaurantName = restaurant.name
+      .replace(/[^a-zA-Z0-9\s\-]/g, '') // Nur erlaubte Zeichen
+      .trim()
+      .substring(0, 10); // Max 10 Zeichen für Suffix
 
     // Calculate totals
     const subtotal = cartData.subtotal;
@@ -118,7 +122,7 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        statement_descriptor_suffix: statementSuffix,
+        statement_descriptor: `${cleanRestaurantName} by Oriido`.substring(0, 22),
         metadata: {
           pendingPaymentId: pendingPayment.id,
           restaurantId: restaurantId,
@@ -142,7 +146,8 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        statement_descriptor_suffix: statementSuffix,
+        on_behalf_of: restaurant.stripeAccountId, // Wichtig: Payment wird im Namen des Restaurants gemacht
+        statement_descriptor: `${cleanRestaurantName} by Oriido`.substring(0, 22),
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
         transfer_data: {
           destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
