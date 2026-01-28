@@ -401,6 +401,9 @@ model Order {
   posSyncStatus  String?  // PENDING, SYNCED, FAILED
   posSyncedAt    DateTime?
   
+  // Stornierung
+  cancelReason   String?
+  
   // Zeiten
   confirmedAt  DateTime?
   preparedAt   DateTime?

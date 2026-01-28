@@ -127,33 +127,40 @@ export async function POST(req: NextRequest) {
           }
         })
 
-        const itemData = {
-          name: posItem.name,
-          description: posItem.description || '',
-          price: posItem.price,
-          categoryId: category?.id,
-          posId: posItem.id,
-          image: posItem.image,
-          isActive: posItem.isActive,
-          isAvailable: posItem.isActive
-        }
-
         if (existingItem) {
           // Aktualisiere existierenden Artikel
           await prisma.menuItem.update({
             where: { id: existingItem.id },
-            data: itemData
+            data: {
+              name: posItem.name,
+              description: posItem.description || '',
+              price: posItem.price,
+              categoryId: category?.id,
+              posId: posItem.id,
+              image: posItem.image,
+              isActive: posItem.isActive,
+              isAvailable: posItem.isActive
+            }
           })
           updated++
-        } else {
-          // Erstelle neuen Artikel
+        } else if (category) {
+          // Erstelle neuen Artikel nur wenn Kategorie vorhanden
           await prisma.menuItem.create({
             data: {
-              ...itemData,
-              restaurantId: restaurant.id
+              restaurantId: restaurant.id,
+              categoryId: category.id,
+              name: posItem.name,
+              description: posItem.description || '',
+              price: posItem.price,
+              posId: posItem.id,
+              image: posItem.image || undefined,
+              isActive: posItem.isActive,
+              isAvailable: posItem.isActive
             }
           })
           imported++
+        } else {
+          console.warn(`Artikel ${posItem.name} übersprungen - keine Kategorie gefunden`)
         }
 
         // TODO: Verarbeite Varianten und Extras

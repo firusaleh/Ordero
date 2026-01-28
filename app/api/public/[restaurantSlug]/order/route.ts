@@ -242,7 +242,7 @@ export async function POST(
           const posOrder = {
             id: order.id,
             orderNumber: order.orderNumber,
-            tableNumber: order.tableNumber || undefined,
+            tableNumber: order.tableNumber ? order.tableNumber.toString() : undefined,
             orderType: order.type,
             items: order.items.map(item => ({
               name: item.menuItem.name,
