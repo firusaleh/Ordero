@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { toast } from 'sonner'
 import { useLanguage } from '@/contexts/language-context'
+import { translations } from '@/lib/i18n/translations'
 import { Loader2, Save, Calculator, Percent, DollarSign } from 'lucide-react'
 
 interface FeesSettingsClientProps {
@@ -18,9 +19,36 @@ interface FeesSettingsClientProps {
 }
 
 export default function FeesSettingsClient({ restaurant, settings }: FeesSettingsClientProps) {
-  const { t } = useLanguage()
+  const { language, setLanguage } = useLanguage()
   const router = useRouter()
   const [saving, setSaving] = useState(false)
+  
+  // Use translations directly since t() seems to have issues
+  const getTranslation = (path: string): string => {
+    const keys = path.split('.')
+    let value: any = translations[language]
+    
+    for (const key of keys) {
+      if (value && typeof value === 'object' && key in value) {
+        value = value[key]
+      } else {
+        // Fallback to German
+        value = translations.de
+        for (const k of keys) {
+          if (value && typeof value === 'object' && k in value) {
+            value = value[k]
+          } else {
+            return path
+          }
+        }
+        break
+      }
+    }
+    
+    return typeof value === 'string' ? value : path
+  }
+  
+  const t = getTranslation
   
   const [serviceFeeEnabled, setServiceFeeEnabled] = useState(settings?.serviceFeeEnabled || false)
   const [serviceFeeType, setServiceFeeType] = useState(settings?.serviceFeeType || 'PERCENT')
