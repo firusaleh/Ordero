@@ -49,11 +49,6 @@ export default function PaymentsSettingsClient({
 
   return (
     <div className="space-y-6">
-      {/* DEPLOYMENT TEST - This should appear as a red banner */}
-      <div className="bg-red-500 text-white p-4 rounded-lg font-bold text-center">
-        TEST DEPLOYMENT: Letzte Aktualisierung - 28.01.2026 20:25 - Gebühr: 0,45€ pro Bestellung
-      </div>
-      
       <div className="flex items-center gap-4">
         <Button
           variant="ghost"

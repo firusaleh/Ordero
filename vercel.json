@@ -3,5 +3,21 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "trailingSlash": false,
-  "cleanUrls": true
+  "cleanUrls": true,
+  "functions": {
+    "app/**/*": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/dashboard/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "s-maxage=0, stale-while-revalidate=0"
+        }
+      ]
+    }
+  ]
 }
