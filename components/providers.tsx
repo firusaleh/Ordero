@@ -4,6 +4,7 @@ import { SessionProvider } from 'next-auth/react'
 import { ReactNode } from 'react'
 import { Toaster } from 'sonner'
 import { PusherProvider } from './providers/pusher-provider'
+import { LanguageProvider } from '@/contexts/language-context'
 
 interface ProvidersProps {
   children: ReactNode
@@ -12,9 +13,11 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <SessionProvider>
-      <PusherProvider>
-        {children}
-      </PusherProvider>
+      <LanguageProvider>
+        <PusherProvider>
+          {children}
+        </PusherProvider>
+      </LanguageProvider>
       <Toaster 
         position="top-center"
         toastOptions={{
