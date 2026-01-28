@@ -38,25 +38,35 @@ export class StripeProvider implements PaymentProvider {
       const amountInCents = Math.round(totalAmount * 100)
       
       // Erstelle Statement Descriptor mit Restaurant Name
-      // Stripe limitiert auf 22 Zeichen, nur erlaubte Zeichen (A-Z, a-z, 0-9, space, -, .)
-      let statementDescriptor = 'Oriido Payment'
+      // Stripe limitiert auf 22 Zeichen, nur erlaubte Zeichen (A-Z, a-z, 0-9, space, *, -)
+      // WICHTIG: Asterisk (*) ist erlaubt und nötig für dynamische Descriptors
+      let statementDescriptor = 'Oriido'
+      let statementDescriptorSuffix = undefined
+      
       if (params.restaurantName) {
         // Entferne alle nicht erlaubten Zeichen für Stripe
         const cleanName = params.restaurantName
-          .replace(/[^a-zA-Z0-9\s\-\.]/g, '') // Nur erlaubte Zeichen
+          .replace(/[^a-zA-Z0-9\s\*\-]/g, '') // Nur erlaubte Zeichen
           .trim()
-          .substring(0, 12) // Kürze auf 12 Zeichen für " by Oriido" (10 Zeichen)
+          .substring(0, 10) // Kürze für Platz
         
-        statementDescriptor = `${cleanName} by Oriido`.substring(0, 22)
+        // Verwende statement_descriptor_suffix für den Restaurant Namen
+        statementDescriptor = 'Oriido'
+        statementDescriptorSuffix = cleanName
         
-        console.log('Statement Descriptor:', statementDescriptor, 'from:', params.restaurantName)
+        console.log('=== STRIPE DESCRIPTOR DEBUG ===')
+        console.log('Restaurant Name:', params.restaurantName)
+        console.log('Clean Name:', cleanName)
+        console.log('Statement Descriptor:', statementDescriptor)
+        console.log('Statement Descriptor Suffix:', statementDescriptorSuffix)
+        console.log('===============================')
       }
       
       const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
         amount: amountInCents,
         currency: params.currency.toLowerCase(),
         statement_descriptor: statementDescriptor,
-        statement_descriptor_suffix: params.metadata?.tableNumber ? `T${params.metadata.tableNumber}` : undefined,
+        statement_descriptor_suffix: statementDescriptorSuffix,
         description: `Order ${params.orderId} at ${params.restaurantName || 'Restaurant'}`,
         metadata: {
           orderId: params.orderId,
