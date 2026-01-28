@@ -293,7 +293,19 @@ export const guestTranslationsAr = {
     itemUnavailable: 'هذا العنصر لم يعد متاحاً',
     restaurantClosed: 'المطعم مغلق حالياً',
     orderFailed: 'فشل تقديم الطلب',
-    loadingFailed: 'فشل تحميل البيانات'
+    loadingFailed: 'فشل تحميل البيانات',
+    tryAgain: 'يرجى المحاولة مرة أخرى.',
+    orderError: 'فشل الطلب. يرجى المحاولة مرة أخرى.',
+    menuLoadError: 'فشل تحميل القائمة',
+    paymentInitError: 'تعذر بدء الدفع',
+    stripeNotLoaded: 'لم يتم تحميل Stripe بعد.',
+    unexpectedError: 'حدث خطأ غير متوقع',
+    paymentFailed: 'فشل الدفع',
+    noTip: 'بدون إكرامية',
+    cancelled: 'إلغاء',
+    back: 'رجوع',
+    notAvailable: 'الدفع الإلكتروني غير متاح. يرجى اختيار الدفع نقداً.',
+    securePaymentVia: 'دفع آمن عبر'
   },
   
   // Common actions

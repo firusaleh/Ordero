@@ -293,7 +293,19 @@ export const guestTranslationsEn = {
     itemUnavailable: 'This item is no longer available',
     restaurantClosed: 'Restaurant is currently closed',
     orderFailed: 'Failed to place order',
-    loadingFailed: 'Failed to load data'
+    loadingFailed: 'Failed to load data',
+    tryAgain: 'Please try again.',
+    orderError: 'Order failed. Please try again.',
+    menuLoadError: 'Failed to load menu',
+    paymentInitError: 'Payment could not be initialized',
+    stripeNotLoaded: 'Stripe has not loaded yet.',
+    unexpectedError: 'An unexpected error occurred',
+    paymentFailed: 'Payment failed',
+    noTip: 'No tip',
+    cancelled: 'Cancel',
+    back: 'Back',
+    notAvailable: 'Online payment not available. Please select cash payment.',
+    securePaymentVia: 'Secure payment via'
   },
   
   // Common actions
