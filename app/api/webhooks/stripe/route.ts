@@ -65,31 +65,46 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent
-        console.log('Payment Intent Succeeded:', paymentIntent.id)
+        console.log('=== PAYMENT_INTENT.SUCCEEDED START ===')
+        console.log('Payment Intent ID:', paymentIntent.id)
+        console.log('Metadata:', JSON.stringify(paymentIntent.metadata))
 
         // Get pendingPaymentId from metadata
         const pendingPaymentId = paymentIntent.metadata?.pendingPaymentId
+        console.log('pendingPaymentId:', pendingPaymentId)
 
         if (!pendingPaymentId) {
-          console.log('No pendingPaymentId in metadata, skipping order creation')
+          console.log('SKIP: No pendingPaymentId in metadata')
           break
         }
 
         // Find the pending payment
+        console.log('Finding PendingPayment...')
         const pendingPayment = await prisma.pendingPayment.findUnique({
           where: { id: pendingPaymentId }
         })
+        console.log('PendingPayment found:', pendingPayment ? 'YES' : 'NO')
 
         if (!pendingPayment) {
-          console.error('PendingPayment not found:', pendingPaymentId)
+          console.error('SKIP: PendingPayment not found:', pendingPaymentId)
           break
         }
+
+        console.log('PendingPayment data:', JSON.stringify({
+          id: pendingPayment.id,
+          restaurantId: pendingPayment.restaurantId,
+          orderId: pendingPayment.orderId,
+          total: pendingPayment.total,
+          itemsCount: (pendingPayment.items as any[])?.length
+        }))
 
         // Check if order already exists (avoid duplicates)
         if (pendingPayment.orderId) {
-          console.log('Order already created for this payment:', pendingPayment.orderId)
+          console.log('SKIP: Order already created:', pendingPayment.orderId)
           break
         }
+
+        console.log('Creating order...')
 
         // Generate order number
         const orderCount = await prisma.order.count({
@@ -132,9 +147,10 @@ export async function POST(req: NextRequest) {
           }
         })
 
-        console.log('Order created:', order.id, order.orderNumber)
+        console.log('Order created successfully:', order.id, order.orderNumber)
 
         // Update pending payment with order info
+        console.log('Updating PendingPayment with orderId...')
         await prisma.pendingPayment.update({
           where: { id: pendingPaymentId },
           data: {
@@ -142,8 +158,10 @@ export async function POST(req: NextRequest) {
             orderNumber: order.orderNumber
           }
         })
+        console.log('PendingPayment updated')
 
         // Create payment record for revenue tracking
+        console.log('Creating Payment record...')
         await prisma.payment.create({
           data: {
             restaurantId: pendingPayment.restaurantId,
@@ -156,7 +174,8 @@ export async function POST(req: NextRequest) {
           }
         })
 
-        console.log('Payment record created for order:', order.orderNumber)
+        console.log('=== PAYMENT_INTENT.SUCCEEDED COMPLETE ===')
+        console.log('Order:', order.orderNumber, 'Total:', pendingPayment.total)
         break
       }
 
@@ -281,11 +300,15 @@ export async function POST(req: NextRequest) {
         console.log(`Unbehandelter Event-Typ: ${event.type}`)
     }
 
+    console.log('Webhook processed successfully, returning 200')
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Webhook Handler Fehler:', error)
+    console.error('=== WEBHOOK ERROR ===')
+    console.error('Error:', error)
+    console.error('Error message:', (error as any)?.message)
+    console.error('Error stack:', (error as any)?.stack)
     return NextResponse.json(
-      { error: 'Webhook Verarbeitung fehlgeschlagen' },
+      { error: 'Webhook Verarbeitung fehlgeschlagen', details: (error as any)?.message },
       { status: 500 }
     )
   }
