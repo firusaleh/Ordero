@@ -88,6 +88,13 @@ export async function POST(req: NextRequest) {
       .replace(/\s+/g, ' ') // Multiple spaces zu einem
       .trim()
       .substring(0, 10);
+    
+    console.log('====== PAYMENT DESCRIPTOR DEBUG ======');
+    console.log('Restaurant Name:', restaurant.name);
+    console.log('Clean Name for Descriptor:', cleanRestaurantName);
+    console.log('Table Info:', tableInfo);
+    console.log('Statement Suffix:', statementSuffix);
+    console.log('======================================');
 
     // Calculate totals
     const subtotal = cartData.subtotal;
@@ -125,7 +132,8 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        // Versuche Restaurant Name als Suffix, falls Platform Descriptor "Oriido" ist
+        // WICHTIG: Explizit setzen um Default zu überschreiben
+        statement_descriptor: 'ORIIDO', // Überschreibt "ORIIDO SANDBOX" oder andere defaults
         statement_descriptor_suffix: cleanRestaurantName,
         metadata: {
           pendingPaymentId: pendingPayment.id,
@@ -150,7 +158,8 @@ export async function POST(req: NextRequest) {
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        // Versuche Restaurant Name als Suffix, falls Platform Descriptor "Oriido" ist
+        // WICHTIG: Explizit setzen um Default zu überschreiben
+        statement_descriptor: 'ORIIDO', // Überschreibt "ORIIDO SANDBOX" oder andere defaults
         statement_descriptor_suffix: cleanRestaurantName,
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
         transfer_data: {
@@ -168,6 +177,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Log what was actually created
+    console.log('====== CREATED PAYMENT INTENT ======');
+    console.log('Payment Intent ID:', paymentIntent.id);
+    console.log('Amount:', paymentIntent.amount);
+    console.log('Statement Descriptor:', (paymentIntent as any).statement_descriptor || 'NOT SET');
+    console.log('Statement Descriptor Suffix:', (paymentIntent as any).statement_descriptor_suffix || 'NOT SET');
+    console.log('Connected Account:', restaurant.stripeAccountId || 'NONE (Direct Payment)');
+    console.log('=====================================');
+    
     // Update PendingPayment with paymentIntentId
     await prisma.pendingPayment.update({
       where: { id: pendingPayment.id },
