@@ -1,7 +1,6 @@
 'use client'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { OpeningHoursManager } from '@/components/dashboard/opening-hours'
 import { SoundSettings } from '@/components/dashboard/sound-settings'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -76,15 +75,11 @@ export default function FeaturesSettingsClient({ restaurantId, initialLogo }: Fe
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Erweiterte Funktionen</h1>
-        <p className="text-gray-600">Verwalten Sie Öffnungszeiten, Bilder und Benachrichtigungen</p>
+        <p className="text-gray-600">Verwalten Sie Bilder und Benachrichtigungen</p>
       </div>
 
-      <Tabs defaultValue="hours" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="hours" className="flex items-center gap-2">
-            <Volume2 className="h-4 w-4" />
-            Öffnungszeiten
-          </TabsTrigger>
+      <Tabs defaultValue="images" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="images" className="flex items-center gap-2">
             <ImageIcon className="h-4 w-4" />
             Bilder
@@ -94,10 +89,6 @@ export default function FeaturesSettingsClient({ restaurantId, initialLogo }: Fe
             Benachrichtigungen
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="hours">
-          <OpeningHoursManager restaurantId={restaurantId} />
-        </TabsContent>
 
         <TabsContent value="images" className="space-y-4">
           <Card>
