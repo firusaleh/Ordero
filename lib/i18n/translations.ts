@@ -12,7 +12,7 @@ export const translations = {
       statistics: 'الإحصائيات',
       staff: 'الموظفون',
       billing: 'الفوترة',
-      settings: 'الإعدادات',
+      settingsLabel: 'الإعدادات',
       setup: 'الإعداد'
     },
     // Setup Page
@@ -1318,7 +1318,7 @@ export const translations = {
       statistics: 'Statistiken',
       staff: 'Mitarbeiter',
       billing: 'Abrechnung',
-      settings: 'Einstellungen',
+      settingsLabel: 'Einstellungen',
       setup: 'Einrichtung'
     },
     // Setup Page
@@ -2592,7 +2592,7 @@ export const translations = {
       statistics: 'Statistics',
       staff: 'Staff',
       billing: 'Billing',
-      settings: 'Settings',
+      settingsLabel: 'Settings',
       setup: 'Setup'
     },
     // Dashboard

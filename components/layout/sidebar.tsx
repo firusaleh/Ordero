@@ -33,7 +33,7 @@ export default function Sidebar() {
     { name: t('nav.statistics'), href: '/dashboard/stats', icon: BarChart },
     { name: t('nav.staff'), href: '/dashboard/staff', icon: Users },
     { name: t('nav.billing'), href: '/dashboard/billing', icon: CreditCard },
-    { name: t('nav.settings'), href: '/dashboard/settings', icon: Settings },
+    { name: t('nav.settingsLabel'), href: '/dashboard/settings', icon: Settings },
   ]
 
   return (

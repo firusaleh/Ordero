@@ -55,7 +55,7 @@ export default function DashboardHeader() {
                 {t('common.profile')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
-                {t('nav.settings')}
+                {t('nav.settingsLabel')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
