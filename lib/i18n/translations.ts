@@ -412,7 +412,7 @@ export const translations = {
       },
       features: {
         title: 'المميزات المتقدمة',
-        description: 'ساعات العمل والصور والإشعارات',
+        description: 'إدارة الصور والإشعارات',
         openingHours: 'ساعات العمل',
         notifications: 'الإشعارات',
         emailNotifications: 'إشعارات البريد الإلكتروني',
@@ -1719,7 +1719,7 @@ export const translations = {
       },
       features: {
         title: 'Erweiterte Funktionen',
-        description: 'Öffnungszeiten, Bilder und Benachrichtigungen',
+        description: 'Bilder und Benachrichtigungen verwalten',
         openingHours: 'Öffnungszeiten',
         notifications: 'Benachrichtigungen',
         emailNotifications: 'E-Mail-Benachrichtigungen',
@@ -2809,7 +2809,7 @@ export const translations = {
       },
       features: {
         title: 'Advanced Features',
-        description: 'Opening hours, images and notifications'
+        description: 'Manage images and notifications'
       },
       payments: {
         title: 'Payment Methods',
