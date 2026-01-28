@@ -37,12 +37,20 @@ export class StripeProvider implements PaymentProvider {
       // Stripe erwartet Centbeträge
       const amountInCents = Math.round(totalAmount * 100)
       
+      // Erstelle Statement Descriptor mit Restaurant Name
+      // Stripe limitiert auf 22 Zeichen, entfernt unsupported characters
+      const statementDescriptor = params.restaurantName 
+        ? `${params.restaurantName.substring(0, 15)} Oriido`.replace(/[<>'"]/g, '').substring(0, 22)
+        : 'Oriido Payment'
+      
       const paymentIntentParams: Stripe.PaymentIntentCreateParams = {
         amount: amountInCents,
         currency: params.currency.toLowerCase(),
+        statement_descriptor: statementDescriptor,
         metadata: {
           orderId: params.orderId,
           restaurantId: params.restaurantId,
+          restaurantName: params.restaurantName || '',
           baseAmount: params.amount.toString(),
           tipAmount: (params.tip || 0).toString(),
           ...params.metadata

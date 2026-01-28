@@ -30,6 +30,7 @@ export interface CreatePaymentIntentParams {
   customerId?: string
   metadata?: Record<string, string>
   restaurantId: string
+  restaurantName?: string
   tip?: number
 }
 

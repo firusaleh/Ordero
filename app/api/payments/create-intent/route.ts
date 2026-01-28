@@ -105,6 +105,7 @@ export async function POST(req: NextRequest) {
       currency,
       orderId,
       restaurantId: order.restaurantId,
+      restaurantName: order.restaurant.name,
       tip,
       metadata: {
         customerEmail: customerEmail || order.customerEmail || '',
