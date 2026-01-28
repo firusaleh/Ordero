@@ -159,9 +159,9 @@ export default function PaymentsSettingsClient({
                   <DollarSign className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
-                  <p className="font-medium">97.5% Auszahlung</p>
+                  <p className="font-medium">Transparente Gebühren</p>
                   <p className="text-sm text-muted-foreground">
-                    Sie erhalten 97.5% jeder Zahlung. Nur 2.5% Servicegebühr - deutlich günstiger als die Konkurrenz!
+                    Nur 0,45€ Servicegebühr pro Bestellung - keine versteckten Kosten, keine Prozentsätze!
                   </p>
                 </div>
               </div>

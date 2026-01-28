@@ -126,7 +126,7 @@ export function StripeConnectSettings({ restaurantId, restaurantCountry = 'DE' }
                   <strong>So funktioniert Stripe Connect:</strong>
                   <ul className="mt-2 list-disc list-inside space-y-1 text-sm">
                     <li>Sie erhalten Zahlungen direkt auf Ihr eigenes Stripe-Konto</li>
-                    <li>Oriido erhält automatisch eine kleine Plattformgebühr (2.5%)</li>
+                    <li>Oriido erhält automatisch eine kleine Plattformgebühr (0,45€ pro Bestellung)</li>
                     <li>Tägliche automatische Auszahlungen auf Ihr Bankkonto</li>
                     <li>Vollständige Transparenz über alle Transaktionen</li>
                   </ul>
