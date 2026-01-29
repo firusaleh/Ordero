@@ -79,7 +79,7 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
       if (!response.ok) throw new Error('Upload fehlgeschlagen')
 
       const { url } = await response.json()
-      
+
       if (type === 'logo') {
         setLogoUrl(url) // Save the URL, not base64
         setDesign(prev => ({ ...prev, logo: url }))
@@ -90,6 +90,37 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
 
       toast.success(`${type === 'logo' ? 'Logo' : 'Titelbild'} erfolgreich hochgeladen`)
     } catch (error) {
+      toast.error('Fehler beim Hochladen des Bildes')
+    }
+  }, [restaurantId])
+
+  const handleImageUploadWithToast = useCallback(async (file: File, type: 'logo' | 'cover', loadingToastId: string | number) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('type', type)
+
+    try {
+      const response = await fetch(`/api/restaurants/${restaurantId}/upload`, {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) throw new Error('Upload fehlgeschlagen')
+
+      const { url } = await response.json()
+
+      if (type === 'logo') {
+        setLogoUrl(url)
+        setDesign(prev => ({ ...prev, logo: url }))
+      } else {
+        setBannerUrl(url)
+        setDesign(prev => ({ ...prev, banner: url }))
+      }
+
+      toast.dismiss(loadingToastId)
+      toast.success(`${type === 'logo' ? 'Logo' : 'Titelbild'} erfolgreich hochgeladen`)
+    } catch (error) {
+      toast.dismiss(loadingToastId)
       toast.error('Fehler beim Hochladen des Bildes')
     }
   }, [restaurantId])
@@ -110,15 +141,15 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
       return
     }
 
-    try {
-      // Show loading state
-      toast.loading(`${type === 'logo' ? 'Logo' : 'Titelbild'} wird verarbeitet...`)
+    // Show loading state with ID so we can dismiss it later
+    const loadingToastId = toast.loading(`${type === 'logo' ? 'Logo' : 'Titelbild'} wird verarbeitet...`)
 
+    try {
       // Compress image for preview and upload
       const maxWidth = type === 'logo' ? 500 : 1920
       const maxHeight = type === 'logo' ? 500 : 1080
       const compressedBase64 = await compressImageToBase64(file, maxWidth, maxHeight, 0.8)
-      
+
       // Set preview immediately
       if (type === 'logo') {
         setLogoPreview(compressedBase64)
@@ -131,10 +162,11 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
       const blob = await response.blob()
       const compressedFile = new File([blob], file.name, { type: file.type })
 
-      // Upload the compressed file
-      handleImageUpload(compressedFile, type)
+      // Upload the compressed file and dismiss loading toast
+      await handleImageUploadWithToast(compressedFile, type, loadingToastId)
     } catch (error) {
       console.error('Image processing error:', error)
+      toast.dismiss(loadingToastId)
       toast.error('Fehler beim Verarbeiten des Bildes')
     }
   }

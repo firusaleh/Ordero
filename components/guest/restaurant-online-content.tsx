@@ -19,6 +19,9 @@ interface Restaurant {
   postalCode?: string | null
   phone?: string | null
   website?: string | null
+  logo?: string | null
+  banner?: string | null
+  primaryColor?: string | null
   settings?: {
     openingHours?: string | null
   } | null
@@ -43,22 +46,47 @@ export default function RestaurantOnlineContent({ restaurant }: RestaurantOnline
     }
   }
 
+  const primaryColor = restaurant.primaryColor || '#3b82f6'
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Banner Image */}
+      {restaurant.banner && (
+        <div className="w-full h-48 md:h-64 relative">
+          <img
+            src={restaurant.banner}
+            alt={`${restaurant.name} Banner`}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
-              {restaurant.description && (
-                <p className="text-gray-600">{restaurant.description}</p>
+            <div className="flex items-start gap-4 flex-1">
+              {/* Logo */}
+              {restaurant.logo && (
+                <img
+                  src={restaurant.logo}
+                  alt={`${restaurant.name} Logo`}
+                  className="w-16 h-16 md:w-20 md:h-20 object-contain rounded-lg border bg-white shadow-sm"
+                  style={{ marginTop: restaurant.banner ? '-2rem' : '0' }}
+                />
               )}
-              {restaurant.cuisine && (
-                <p className="text-sm text-gray-500 mt-2">
-                  {t('guest.restaurantPage.cuisine')}: {restaurant.cuisine}
-                </p>
-              )}
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold mb-2" style={{ color: primaryColor }}>{restaurant.name}</h1>
+                {restaurant.description && (
+                  <p className="text-gray-600">{restaurant.description}</p>
+                )}
+                {restaurant.cuisine && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    {t('guest.restaurantPage.cuisine')}: {restaurant.cuisine}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="ml-4">
               <LanguageSwitcher />
