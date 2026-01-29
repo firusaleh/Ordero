@@ -96,6 +96,7 @@ export const guestTranslationsAr = {
     processing: 'جاري المعالجة...',
     selectTable: 'اختر طاولتك',
     selectPayment: 'اختر طريقة الدفع',
+    selectPaymentMethod: 'اختر طريقة الدفع',
     contactInfo: 'معلومات الاتصال',
     name: 'الاسم',
     namePlaceholder: 'اسمك',
@@ -108,6 +109,7 @@ export const guestTranslationsAr = {
     tip: 'البقشيش',
     noTip: 'بدون بقشيش',
     customTip: 'مخصص',
+    customAmount: 'مبلغ مخصص',
     suggestedTip: 'مقترح',
     addTip: 'إضافة بقشيش',
     paymentDetails: 'تفاصيل الدفع',
@@ -130,7 +132,22 @@ export const guestTranslationsAr = {
     backToMenu: 'العودة للقائمة',
     paymentFailed: 'فشل الدفع',
     tryAgain: 'حاول مرة أخرى',
-    cancel: 'إلغاء'
+    cancel: 'إلغاء',
+    // Additional checkout keys
+    proceedToCheckout: 'المتابعة للدفع',
+    paymentOptions: 'خيارات الدفع',
+    payAtCounter: 'الدفع عند الكاونتر',
+    payWithCard: 'بطاقة ائتمان أو خصم',
+    taxes: 'ضريبة القيمة المضافة (19%)',
+    payNow: 'ادفع الآن',
+    paymentSuccess: 'تم الدفع بنجاح!',
+    confirmationDelayed: 'تم الدفع بنجاح، لكن تأكيد الطلب متأخر.',
+    onlinePaymentUnavailable: 'الدفع الإلكتروني غير متاح.',
+    preparingPayment: 'جاري تحضير الدفع...',
+    payAtRestaurant: 'الدفع في المطعم',
+    securePayment: 'دفع آمن عبر Stripe',
+    orderFailed: 'فشل الطلب',
+    orderSuccess: 'تم الطلب بنجاح!'
   },
   
   // Order Success
@@ -259,11 +276,32 @@ export const guestTranslationsAr = {
     paid: 'مدفوع',
     unpaid: 'غير مدفوع'
   },
-  
+
+  // Toast messages
+  toast: {
+    addedToCart: 'تم الإضافة للسلة',
+    itemRemoved: 'تم إزالة العنصر',
+    orderFailed: 'فشل الطلب',
+    tryAgain: 'يرجى المحاولة مرة أخرى',
+    orderSuccess: 'تم تقديم الطلب بنجاح!',
+    paymentSuccess: 'تم الدفع بنجاح!',
+    paymentError: 'خطأ في الدفع',
+    menuLoadError: 'خطأ في تحميل القائمة',
+    emptyCart: 'يرجى إضافة عناصر للسلة',
+    orderError: 'خطأ في الطلب',
+    networkError: 'خطأ في الشبكة. يرجى المحاولة لاحقاً.',
+    paymentConfirmed: 'تم الدفع بنجاح! تم تأكيد طلبك.',
+    paymentButConfirmFailed: 'تم الدفع بنجاح، لكن التأكيد فشل. يرجى الاتصال بالمطعم.',
+    confirmationFailed: 'فشل تأكيد الدفع',
+    splitBillComingSoon: 'ميزة تقسيم الفاتورة قادمة قريباً!',
+    error: 'حدث خطأ'
+  },
+
   // Payment
   payment: {
     processing: 'جاري معالجة الدفع...',
     success: 'تم الدفع بنجاح',
+    succeeded: 'تم الدفع بنجاح!',
     failed: 'فشل الدفع',
     cancelled: 'تم إلغاء الدفع',
     tryAgain: 'يرجى المحاولة مرة أخرى',
@@ -272,7 +310,32 @@ export const guestTranslationsAr = {
     cardDeclined: 'تم رفض البطاقة',
     securePayment: 'دفع آمن',
     poweredByStripe: 'مدعوم من Stripe',
-    poweredByPayTabs: 'مدعوم من PayTabs'
+    poweredByPayTabs: 'مدعوم من PayTabs',
+    // Additional payment keys used in checkout
+    subtotal: 'المجموع الفرعي',
+    serviceFee: 'رسوم الخدمة',
+    totalBeforeTip: 'المجموع قبل البقشيش',
+    tipQuestion: 'هل تريد إضافة بقشيش؟ 💖',
+    noTip: 'بدون بقشيش',
+    roundUp: 'تقريب للأعلى',
+    customAmount: 'مبلغ مخصص',
+    tip: 'البقشيش',
+    total: 'المجموع',
+    selectPaymentMethod: 'اختر طريقة الدفع',
+    expressCheckout: 'الدفع السريع',
+    expressLoading: 'جاري تحميل Apple Pay / Google Pay...',
+    expressUnavailable: 'Apple Pay / Google Pay غير متاح على هذا الجهاز',
+    or: 'أو',
+    creditCard: 'بطاقة ائتمان/خصم',
+    cash: 'نقداً',
+    splitBill: 'تقسيم الفاتورة',
+    placeOrder: 'تأكيد الطلب',
+    payNow: 'ادفع الآن',
+    status: 'الدفع',
+    totalAmount: 'المبلغ الإجمالي',
+    paymentDetails: 'تفاصيل الدفع',
+    secureInfo: 'تتم معالجة بيانات الدفع بشكل آمن عبر Stripe',
+    supportedCards: 'يدعم Visa و Mastercard و American Express والمزيد'
   },
   
   // Errors
@@ -361,7 +424,20 @@ export const guestTranslationsAr = {
     cardDetails: 'تفاصيل البطاقة',
     saveForFuture: 'حفظ للدفعات المستقبلية',
     securePayment: 'دفع آمن مع Stripe',
-    processing: 'جاري معالجة الدفع...'
+    processing: 'جاري معالجة الدفع...',
+    loading: 'جاري تحميل Stripe. يرجى المحاولة مرة أخرى.',
+    cardDeclined: 'تم رفض بطاقتك. يرجى تجربة طريقة دفع أخرى.',
+    cardExpired: 'انتهت صلاحية بطاقتك. يرجى استخدام بطاقة أخرى.',
+    cvcInvalid: 'رمز أمان البطاقة (CVC) غير صالح.',
+    processingError: 'حدث خطأ في المعالجة. يرجى المحاولة مرة أخرى.',
+    unknownError: 'حدث خطأ غير معروف.',
+    paymentFailed: 'تعذر إتمام الدفع',
+    unexpectedError: 'حدث خطأ غير متوقع',
+    paymentIntentFailed: 'تعذر إنشاء طلب الدفع',
+    initFailed: 'تعذر بدء الدفع',
+    preparing: 'جاري تحضير الدفع...',
+    notAvailable: 'الدفع الإلكتروني غير متاح حالياً. يرجى اختيار الدفع نقداً.',
+    autoDisplay: 'يظهر Apple Pay و Google Pay تلقائياً عند التوفر'
   },
   
   // PayTabs specific

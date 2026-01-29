@@ -96,6 +96,7 @@ export const guestTranslationsEn = {
     processing: 'Processing...',
     selectTable: 'Select your table',
     selectPayment: 'Select payment method',
+    selectPaymentMethod: 'Select payment method',
     contactInfo: 'Contact Information',
     name: 'Name',
     namePlaceholder: 'Your name',
@@ -108,6 +109,7 @@ export const guestTranslationsEn = {
     tip: 'Tip',
     noTip: 'No Tip',
     customTip: 'Custom',
+    customAmount: 'Custom Amount',
     suggestedTip: 'Suggested',
     addTip: 'Add Tip',
     paymentDetails: 'Payment Details',
@@ -130,7 +132,22 @@ export const guestTranslationsEn = {
     backToMenu: 'Back to Menu',
     paymentFailed: 'Payment Failed',
     tryAgain: 'Try Again',
-    cancel: 'Cancel'
+    cancel: 'Cancel',
+    // Additional checkout keys
+    proceedToCheckout: 'Proceed to Checkout',
+    paymentOptions: 'Payment Options',
+    payAtCounter: 'Pay at the counter',
+    payWithCard: 'Credit or Debit Card',
+    taxes: 'VAT (19%)',
+    payNow: 'Pay Now',
+    paymentSuccess: 'Payment successful!',
+    confirmationDelayed: 'Payment successful, but order confirmation is delayed.',
+    onlinePaymentUnavailable: 'Online payment not available.',
+    preparingPayment: 'Preparing payment...',
+    payAtRestaurant: 'Payment at restaurant',
+    securePayment: 'Secure payment via Stripe',
+    orderFailed: 'Order failed',
+    orderSuccess: 'Order successful!'
   },
   
   // Order Success
@@ -259,11 +276,32 @@ export const guestTranslationsEn = {
     paid: 'Paid',
     unpaid: 'Unpaid'
   },
-  
+
+  // Toast messages
+  toast: {
+    addedToCart: 'added to cart',
+    itemRemoved: 'Item removed',
+    orderFailed: 'Order failed',
+    tryAgain: 'Please try again',
+    orderSuccess: 'Order placed successfully!',
+    paymentSuccess: 'Payment successful!',
+    paymentError: 'Payment error',
+    menuLoadError: 'Error loading menu',
+    emptyCart: 'Please add items to your cart',
+    orderError: 'Order error',
+    networkError: 'Network error. Please try again later.',
+    paymentConfirmed: 'Payment successful! Your order has been confirmed.',
+    paymentButConfirmFailed: 'Payment successful, but confirmation failed. Please contact the restaurant.',
+    confirmationFailed: 'Payment confirmation failed',
+    splitBillComingSoon: 'Split bill feature coming soon!',
+    error: 'An error occurred'
+  },
+
   // Payment
   payment: {
     processing: 'Processing payment...',
     success: 'Payment successful',
+    succeeded: 'Payment successful!',
     failed: 'Payment failed',
     cancelled: 'Payment cancelled',
     tryAgain: 'Please try again',
@@ -272,7 +310,32 @@ export const guestTranslationsEn = {
     cardDeclined: 'Card declined',
     securePayment: 'Secure payment',
     poweredByStripe: 'Powered by Stripe',
-    poweredByPayTabs: 'Powered by PayTabs'
+    poweredByPayTabs: 'Powered by PayTabs',
+    // Additional payment keys used in checkout
+    subtotal: 'Subtotal',
+    serviceFee: 'Service Fee',
+    totalBeforeTip: 'Total before tip',
+    tipQuestion: 'Would you like to add a tip? 💖',
+    noTip: 'No tip',
+    roundUp: 'Round up',
+    customAmount: 'Custom Amount',
+    tip: 'Tip',
+    total: 'Total',
+    selectPaymentMethod: 'Select payment method',
+    expressCheckout: 'Express checkout',
+    expressLoading: 'Loading Apple Pay / Google Pay...',
+    expressUnavailable: 'Apple Pay / Google Pay not available on this device',
+    or: 'or',
+    creditCard: 'Credit/Debit Card',
+    cash: 'Cash',
+    splitBill: 'Split bill',
+    placeOrder: 'Place Order',
+    payNow: 'Pay Now',
+    status: 'Payment',
+    totalAmount: 'Total Amount',
+    paymentDetails: 'Payment Details',
+    secureInfo: 'Your payment details are securely processed via Stripe',
+    supportedCards: 'Visa, Mastercard, American Express and more are supported'
   },
   
   // Errors
@@ -361,7 +424,20 @@ export const guestTranslationsEn = {
     cardDetails: 'Card Details',
     saveForFuture: 'Save for future payments',
     securePayment: 'Secure payment with Stripe',
-    processing: 'Processing payment...'
+    processing: 'Processing payment...',
+    loading: 'Stripe is loading. Please try again.',
+    cardDeclined: 'Your card was declined. Please try another payment method.',
+    cardExpired: 'Your card has expired. Please use another card.',
+    cvcInvalid: 'The card security code (CVC) is invalid.',
+    processingError: 'A processing error occurred. Please try again.',
+    unknownError: 'An unknown error occurred.',
+    paymentFailed: 'Payment could not be completed',
+    unexpectedError: 'An unexpected error occurred',
+    paymentIntentFailed: 'Payment intent could not be created',
+    initFailed: 'Payment could not be initialized',
+    preparing: 'Preparing payment...',
+    notAvailable: 'Online payment is currently unavailable. Please select cash payment.',
+    autoDisplay: 'Apple Pay and Google Pay are displayed automatically when available'
   },
   
   // PayTabs specific
