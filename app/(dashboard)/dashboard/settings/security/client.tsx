@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Shield, Key, Lock, UserCheck, AlertTriangle, Loader2 } from 'lucide-react'
+import { Shield, Key, Lock, UserCheck, AlertTriangle, Loader2, Eye, EyeOff } from 'lucide-react'
 import { showErrorToast, showSuccessToast, parseApiResponse } from '@/lib/error-handling'
 import { useLanguage } from '@/contexts/language-context'
 
@@ -18,24 +18,56 @@ export default function SecuritySettingsClient() {
   const [loginAttempts, setLoginAttempts] = useState('5')
   const [ipRestriction, setIpRestriction] = useState(false)
   const [saving, setSaving] = useState<string | null>(null)
+  
+  // Passwort-Änderungs-States
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handlePasswordChange = async () => {
+    // Validierung
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showErrorToast(new Error('Bitte füllen Sie alle Felder aus'))
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      showErrorToast(new Error('Die neuen Passwörter stimmen nicht überein'))
+      return
+    }
+
+    if (newPassword.length < 8) {
+      showErrorToast(new Error('Das neue Passwort muss mindestens 8 Zeichen lang sein'))
+      return
+    }
+
     setSaving('password')
     try {
-      // Simuliere API-Call für Demo
-      // In Produktion: const response = await fetch('/api/settings/security/password', {...})
-      await new Promise((resolve, reject) => {
-        setTimeout(() => {
-          // Simuliere zufälligen Fehler für Demo (20% Chance)
-          if (Math.random() < 0.2) {
-            reject(new Error(t('settings.security.password.updateError')))
-          } else {
-            resolve(true)
-          }
-        }, 1000)
+      const response = await fetch('/api/dashboard/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
       })
-      
-      showSuccessToast(t('settings.security.password.updateSuccess'))
+
+      const data = await response.json()
+
+      if (response.ok) {
+        showSuccessToast(t('settings.security.password.updateSuccess'))
+        // Felder zurücksetzen
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        throw new Error(data.error || t('settings.security.password.updateError'))
+      }
     } catch (error) {
       showErrorToast(error, t('settings.security.password.saveError'))
     } finally {
@@ -150,22 +182,70 @@ export default function SecuritySettingsClient() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="passwordExpiry">{t('settings.security.password.expiry')}</Label>
-              <Input
-                id="passwordExpiry"
-                type="number"
-                value={passwordExpiry}
-                onChange={(e) => setPasswordExpiry(e.target.value)}
-                disabled={saving === 'password'}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                {t('settings.security.password.expiryHelp')}
-              </p>
+              <Label htmlFor="currentPassword">Aktuelles Passwort</Label>
+              <div className="relative">
+                <Input
+                  id="currentPassword"
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  disabled={saving === 'password'}
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
-            
-            <div className="flex items-center justify-between">
-              <Label htmlFor="strongPassword">{t('settings.security.password.enforceStrong')}</Label>
-              <Switch id="strongPassword" defaultChecked disabled={saving === 'password'} />
+
+            <div>
+              <Label htmlFor="newPassword">Neues Passwort</Label>
+              <div className="relative">
+                <Input
+                  id="newPassword"
+                  type={showNewPassword ? "text" : "password"}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  disabled={saving === 'password'}
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mt-1">Mindestens 8 Zeichen</p>
+            </div>
+
+            <div>
+              <Label htmlFor="confirmPassword">Neues Passwort bestätigen</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={saving === 'password'}
+                  placeholder="••••••••"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             <Button 
