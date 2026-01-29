@@ -187,6 +187,74 @@ export async function sendOrderStatusUpdate({
   })
 }
 
+// Kontaktformular E-Mail
+export async function sendContactFormEmail({
+  firstName,
+  lastName,
+  email,
+  restaurant,
+  phone,
+  message
+}: {
+  firstName: string
+  lastName: string
+  email: string
+  restaurant?: string
+  phone?: string
+  message: string
+}) {
+  // E-Mail an info@oriido.com
+  const adminEmailResult = await sendEmail({
+    to: 'info@oriido.com',
+    subject: `Neue Kontaktanfrage von ${firstName} ${lastName}`,
+    text: `
+Neue Kontaktanfrage über die Website:
+
+Name: ${firstName} ${lastName}
+E-Mail: ${email}
+${restaurant ? `Restaurant: ${restaurant}` : ''}
+${phone ? `Telefon: ${phone}` : ''}
+
+Nachricht:
+${message}
+
+---
+Diese E-Mail wurde vom Kontaktformular auf www.oriido.com gesendet.
+    `,
+    react: undefined
+  })
+
+  // Bestätigungs-E-Mail an den Absender
+  const confirmationResult = await sendEmail({
+    to: email,
+    subject: 'Vielen Dank für Ihre Kontaktaufnahme',
+    text: `
+Hallo ${firstName},
+
+vielen Dank für Ihre Nachricht! Wir haben Ihre Anfrage erhalten und werden uns innerhalb von 24 Stunden bei Ihnen melden.
+
+Ihre Nachricht:
+${message}
+
+Falls Sie weitere Fragen haben, können Sie uns jederzeit kontaktieren:
+- E-Mail: info@oriido.com
+- Website: www.oriido.com
+
+Mit freundlichen Grüßen,
+Ihr Oriido Team
+
+---
+Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
+    `,
+    react: undefined
+  })
+
+  return {
+    adminEmail: adminEmailResult,
+    confirmationEmail: confirmationResult
+  }
+}
+
 // Batch-E-Mail für mehrere Empfänger
 export async function sendBatchEmails(emails: Array<{
   to: string
