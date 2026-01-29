@@ -160,10 +160,16 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="flex gap-3">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => window.open('https://docs.oriido.com', '_blank')}
+            >
               {t('common.documentation')}
             </Button>
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => window.open('mailto:support@oriido.com', '_blank')}
+            >
               {t('common.support')}
             </Button>
           </div>

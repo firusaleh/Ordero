@@ -276,8 +276,13 @@ export default function AdminSettingsPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setShowCurrentPassword(prev => !prev)
+                      console.log('Toggle current password visibility:', !showCurrentPassword)
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white z-10"
                   >
                     {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -295,8 +300,13 @@ export default function AdminSettingsPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setShowNewPassword(prev => !prev)
+                      console.log('Toggle new password visibility:', !showNewPassword)
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white z-10"
                   >
                     {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -314,8 +324,13 @@ export default function AdminSettingsPage() {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      setShowConfirmPassword(prev => !prev)
+                      console.log('Toggle confirm password visibility:', !showConfirmPassword)
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white z-10"
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
