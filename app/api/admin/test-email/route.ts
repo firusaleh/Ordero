@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
           to: email,
           apiKeyExists: !!process.env.SENDGRID_API_KEY,
           fromEmail: process.env.EMAIL_FROM || 'info@oriido.com',
-          result
+          messageId: result.id,
+          data: result.data
         }
       })
     } else {
@@ -53,7 +54,6 @@ export async function POST(request: NextRequest) {
         success: false,
         message: 'E-Mail konnte nicht gesendet werden',
         error: result.error,
-        details: result.details,
         apiKeyExists: !!process.env.SENDGRID_API_KEY
       }, { status: 500 })
     }
