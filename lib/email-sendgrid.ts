@@ -352,3 +352,307 @@ Diese E-Mail wurde automatisch generiert.
     confirmationEmail: confirmationResult
   }
 }
+
+// Reservierungsbestätigung für Gäste
+export async function sendReservationConfirmation({
+  email,
+  name,
+  restaurantName,
+  date,
+  time,
+  guests,
+  confirmationCode,
+  notes,
+  specialRequests
+}: {
+  email: string
+  name: string
+  restaurantName: string
+  date: Date
+  time: string
+  guests: number
+  confirmationCode: string
+  notes?: string
+  specialRequests?: string
+}) {
+  const formattedDate = new Date(date).toLocaleDateString('de-DE', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  const subject = `Reservierungsbestätigung - ${restaurantName}`
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+            .confirmation-box { background: #f0f9ff; border: 2px solid #3b82f6; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }
+            .confirmation-code { font-size: 32px; font-weight: bold; color: #3b82f6; letter-spacing: 4px; margin: 10px 0; }
+            .details { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e0e0e0; }
+            .detail-row:last-child { border-bottom: none; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Reservierung bestätigt! ✅</h1>
+            </div>
+            
+            <div class="content">
+                <p>Liebe/r ${name},</p>
+                
+                <p>Ihre Reservierung bei <strong>${restaurantName}</strong> wurde erfolgreich bestätigt.</p>
+                
+                <div class="confirmation-box">
+                    <p>Ihr Bestätigungscode:</p>
+                    <div class="confirmation-code">${confirmationCode}</div>
+                    <p style="font-size: 12px; color: #666;">Bitte bewahren Sie diesen Code auf</p>
+                </div>
+                
+                <div class="details">
+                    <h3 style="margin-top: 0;">Reservierungsdetails:</h3>
+                    <div class="detail-row">
+                        <strong>Restaurant:</strong>
+                        <span>${restaurantName}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Datum:</strong>
+                        <span>${formattedDate}</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Uhrzeit:</strong>
+                        <span>${time} Uhr</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong>Anzahl Gäste:</strong>
+                        <span>${guests} ${guests === 1 ? 'Person' : 'Personen'}</span>
+                    </div>
+                    ${notes ? `
+                    <div class="detail-row">
+                        <strong>Anmerkungen:</strong>
+                        <span>${notes}</span>
+                    </div>
+                    ` : ''}
+                    ${specialRequests ? `
+                    <div class="detail-row">
+                        <strong>Besondere Wünsche:</strong>
+                        <span>${specialRequests}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                
+                <p><strong>Wichtige Hinweise:</strong></p>
+                <ul>
+                    <li>Bitte erscheinen Sie pünktlich zu Ihrer Reservierung</li>
+                    <li>Bei Verspätung von mehr als 15 Minuten verfällt Ihre Reservierung möglicherweise</li>
+                    <li>Für Stornierungen oder Änderungen kontaktieren Sie bitte das Restaurant direkt</li>
+                </ul>
+                
+                <p>Wir freuen uns auf Ihren Besuch!</p>
+                
+                <p>Mit freundlichen Grüßen,<br>
+                ${restaurantName}</p>
+            </div>
+            
+            <div class="footer">
+                <p>Diese E-Mail wurde automatisch generiert.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `
+  
+  const text = `
+Reservierungsbestätigung
+
+Liebe/r ${name},
+
+Ihre Reservierung bei ${restaurantName} wurde erfolgreich bestätigt.
+
+Ihr Bestätigungscode: ${confirmationCode}
+
+Reservierungsdetails:
+- Restaurant: ${restaurantName}
+- Datum: ${formattedDate}
+- Uhrzeit: ${time} Uhr
+- Anzahl Gäste: ${guests} ${guests === 1 ? 'Person' : 'Personen'}
+${notes ? `- Anmerkungen: ${notes}` : ''}
+${specialRequests ? `- Besondere Wünsche: ${specialRequests}` : ''}
+
+Wir freuen uns auf Ihren Besuch!
+
+Mit freundlichen Grüßen,
+${restaurantName}
+  `
+  
+  return await sendEmail({ to: email, subject, html, text })
+}
+
+// Benachrichtigung über neue Reservierung für Restaurant
+export async function sendNewReservationNotification({
+  email,
+  reservationId,
+  customerName,
+  customerEmail,
+  customerPhone,
+  numberOfGuests,
+  date,
+  time,
+  notes,
+  specialRequests
+}: {
+  email: string
+  reservationId: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  numberOfGuests: number
+  date: Date
+  time: string
+  notes?: string
+  specialRequests?: string
+}) {
+  const formattedDate = new Date(date).toLocaleDateString('de-DE', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
+  const subject = `🔔 Neue Reservierung - ${customerName}`
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #10b981; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+            .info-box { background: #f0fdf4; border: 1px solid #10b981; padding: 20px; border-radius: 8px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>🔔 Neue Reservierung eingegangen</h2>
+            </div>
+            
+            <div class="content">
+                <div class="info-box">
+                    <h3 style="margin-top: 0;">Reservierungsdetails:</h3>
+                    <p><strong>ID:</strong> ${reservationId}</p>
+                    <p><strong>Name:</strong> ${customerName}</p>
+                    <p><strong>E-Mail:</strong> <a href="mailto:${customerEmail}">${customerEmail}</a></p>
+                    <p><strong>Telefon:</strong> ${customerPhone}</p>
+                    <p><strong>Datum:</strong> ${formattedDate}</p>
+                    <p><strong>Uhrzeit:</strong> ${time} Uhr</p>
+                    <p><strong>Anzahl Gäste:</strong> ${numberOfGuests}</p>
+                    ${notes ? `<p><strong>Anmerkungen:</strong> ${notes}</p>` : ''}
+                    ${specialRequests ? `<p><strong>Besondere Wünsche:</strong> ${specialRequests}</p>` : ''}
+                </div>
+                
+                <p style="margin-top: 30px;">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard/reservations" 
+                       style="background: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Reservierung anzeigen →
+                    </a>
+                </p>
+            </div>
+            
+            <div class="footer">
+                <p>Diese E-Mail wurde automatisch von Oriido generiert.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `
+  
+  const text = `
+Neue Reservierung eingegangen
+
+Reservierungsdetails:
+- ID: ${reservationId}
+- Name: ${customerName}
+- E-Mail: ${customerEmail}
+- Telefon: ${customerPhone}
+- Datum: ${formattedDate}
+- Uhrzeit: ${time} Uhr
+- Anzahl Gäste: ${numberOfGuests}
+${notes ? `- Anmerkungen: ${notes}` : ''}
+${specialRequests ? `- Besondere Wünsche: ${specialRequests}` : ''}
+
+Bitte bestätigen Sie die Reservierung im Dashboard.
+  `
+  
+  return await sendEmail({ to: email, subject, html, text })
+}
+
+// Allgemeine Benachrichtigungs-E-Mail
+export async function sendNotificationEmail({
+  to,
+  subject,
+  message,
+  restaurantName
+}: {
+  to: string
+  subject: string
+  message: string
+  restaurantName?: string
+}) {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>${subject}</h2>
+            </div>
+            
+            <div class="content">
+                <div style="white-space: pre-wrap;">${message}</div>
+                
+                ${restaurantName ? `
+                <p style="margin-top: 30px;">Mit freundlichen Grüßen,<br>
+                ${restaurantName}</p>
+                ` : ''}
+            </div>
+            
+            <div class="footer">
+                <p>Diese E-Mail wurde über Oriido gesendet.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `
+  
+  return await sendEmail({ 
+    to, 
+    subject, 
+    html, 
+    text: message 
+  })
+}
