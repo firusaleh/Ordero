@@ -2332,17 +2332,6 @@
                 </div>
                 <div class="faq-item">
                     <div class="faq-question" onclick="toggleFaq(this)">
-                        <span>Are there hidden costs or commissions?</span>
-                        <span class="faq-icon">+</span>
-                    </div>
-                    <div class="faq-answer">
-                        <div class="faq-answer-content">
-                            No! You only pay the monthly flat rate. There's no setup fee and no commission on orders. The only additional costs are standard payment fees from Stripe (approx. 1.4% + $0.30 per transaction).
-                        </div>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question" onclick="toggleFaq(this)">
                         <span>How do I get started?</span>
                         <span class="faq-icon">+</span>
                     </div>
@@ -2367,7 +2356,7 @@
                     Have questions? Want a personalized demo? Fill out the form and we'll get back to you within 24 hours.
                 </p>
             </div>
-            <form class="contact-form" action="/api/contact" method="POST">
+            <form class="contact-form" id="contactForm" onsubmit="handleContactSubmit(event)">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name *</label>
@@ -2401,11 +2390,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="message">Your Message</label>
-                    <textarea id="message" name="message" placeholder="Tell us about your restaurant and what you're looking for..."></textarea>
+                    <label for="message">Your Message *</label>
+                    <textarea id="message" name="message" placeholder="Tell us about your restaurant and what you're looking for..." required></textarea>
                 </div>
-                <button type="submit" class="form-submit">Send Message →</button>
-                <p class="form-note">We'll respond within 24 hours. No spam, ever.</p>
+                <button type="submit" class="form-submit" id="submitBtn">Send Message →</button>
+                <p class="form-note" id="formNote">We'll respond within 24 hours. No spam, ever.</p>
             </form>
         </div>
     </section>
@@ -2483,6 +2472,78 @@
         function closeMobileMenu() {
             document.getElementById('mobileMenu').classList.remove('active');
             document.body.style.overflow = '';
+        }
+
+        // Contact Form Submission
+        async function handleContactSubmit(event) {
+            event.preventDefault();
+            
+            const form = document.getElementById('contactForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const formNote = document.getElementById('formNote');
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            
+            // Get form data
+            const formData = new FormData(form);
+            const data = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                restaurant: formData.get('restaurant'),
+                message: formData.get('message')
+            };
+            
+            try {
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Success
+                    form.reset();
+                    submitBtn.style.background = '#10b981';
+                    submitBtn.textContent = 'Message Sent ✓';
+                    formNote.textContent = 'Thank you! We\'ll get back to you within 24 hours.';
+                    formNote.style.color = '#10b981';
+                    
+                    // Reset after 5 seconds
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.style.background = '';
+                        submitBtn.textContent = 'Send Message →';
+                        formNote.textContent = 'We\'ll respond within 24 hours. No spam, ever.';
+                        formNote.style.color = '';
+                    }, 5000);
+                } else {
+                    throw new Error(result.error || 'Failed to send message');
+                }
+            } catch (error) {
+                // Error
+                console.error('Error:', error);
+                submitBtn.style.background = '#ef4444';
+                submitBtn.textContent = 'Error - Try Again';
+                formNote.textContent = 'Something went wrong. Please try again or email us directly at info@oriido.com';
+                formNote.style.color = '#ef4444';
+                
+                // Re-enable after 3 seconds
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.style.background = '';
+                    submitBtn.textContent = 'Send Message →';
+                    formNote.textContent = 'We\'ll respond within 24 hours. No spam, ever.';
+                    formNote.style.color = '';
+                }, 3000);
+            }
         }
 
         // FAQ Toggle
