@@ -16,7 +16,10 @@ import {
   Globe,
   Database,
   Save,
-  AlertCircle
+  AlertCircle,
+  Key,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -24,9 +27,64 @@ export default function AdminSettingsPage() {
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [pushNotifications, setPushNotifications] = useState(true)
   const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
 
   const handleSave = () => {
     toast.success('Einstellungen gespeichert!')
+  }
+
+  const handleChangePassword = async () => {
+    // Validierung
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error('Bitte füllen Sie alle Felder aus')
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('Die neuen Passwörter stimmen nicht überein')
+      return
+    }
+
+    if (newPassword.length < 8) {
+      toast.error('Das neue Passwort muss mindestens 8 Zeichen lang sein')
+      return
+    }
+
+    setIsChangingPassword(true)
+
+    try {
+      const response = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Passwort erfolgreich geändert')
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+      } else {
+        toast.error(data.error || 'Fehler beim Ändern des Passworts')
+      }
+    } catch (error) {
+      toast.error('Fehler beim Ändern des Passworts')
+    } finally {
+      setIsChangingPassword(false)
+    }
   }
 
   return (
@@ -198,11 +256,96 @@ export default function AdminSettingsPage() {
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Sicherheitseinstellungen
+                <Key className="h-5 w-5" />
+                Passwort ändern
               </CardTitle>
               <CardDescription className="text-gray-400">
-                Zugriff und Sicherheitskonfiguration
+                Ändern Sie Ihr Admin-Passwort
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-gray-300">Aktuelles Passwort</Label>
+                <div className="relative">
+                  <Input 
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Neues Passwort</Label>
+                <div className="relative">
+                  <Input 
+                    type={showNewPassword ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300">Neues Passwort bestätigen</Label>
+                <div className="relative">
+                  <Input 
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white pr-10"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <Button 
+                onClick={handleChangePassword} 
+                disabled={isChangingPassword}
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                {isChangingPassword ? (
+                  <>Passwort wird geändert...</>
+                ) : (
+                  <>
+                    <Key className="h-4 w-4 mr-2" />
+                    Passwort ändern
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Weitere Sicherheitseinstellungen
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Zusätzliche Sicherheitskonfiguration
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
