@@ -488,7 +488,14 @@ export const guestTranslationsDe = {
     payAtCounter: 'Bezahlen Sie an der Kasse',
     payWithCard: 'Kredit- oder Debitkarte',
     securePayment: 'Sichere Zahlung über Stripe',
-    payAtRestaurant: 'Bezahlung erfolgt im Restaurant'
+    payAtRestaurant: 'Bezahlung erfolgt im Restaurant',
+    // Additional checkout keys
+    selectPaymentMethod: 'Zahlungsmethode wählen',
+    paymentOptions: 'Zahlungsoptionen',
+    paymentSuccess: 'Zahlung erfolgreich!',
+    confirmationDelayed: 'Zahlung erfolgreich, aber Bestellbestätigung verzögert.',
+    onlinePaymentUnavailable: 'Online-Zahlung nicht verfügbar.',
+    preparingPayment: 'Zahlung wird vorbereitet...'
   },
   
   status: {
