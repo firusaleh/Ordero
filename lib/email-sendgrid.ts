@@ -50,914 +50,305 @@ export async function sendEmail({
       },
       replyTo: REPLY_TO,
       subject,
-      text: text || 'Bitte aktivieren Sie HTML um diese E-Mail zu sehen.',
+      text: text || subject,
       html,
       attachments
     }
 
-    const response = await sgMail.send(msg)
-    console.log('✅ Email sent successfully to:', to, 'Subject:', subject)
+    const result = await sgMail.send(msg as any)
+    console.log('✅ E-Mail erfolgreich gesendet an:', to)
     
     return { 
       success: true, 
-      messageId: response[0].headers['x-message-id'],
-      statusCode: response[0].statusCode 
+      id: result[0].headers['x-message-id'] || 'unknown',
+      data: result[0]
     }
   } catch (error: any) {
-    console.error('SendGrid E-Mail-Versand fehlgeschlagen:', error)
+    console.error('❌ E-Mail-Versand fehlgeschlagen:', error)
     
-    // Detaillierte Fehlerbehandlung
+    // Detaillierte Fehlerinformationen
     if (error.response) {
       console.error('SendGrid Error Body:', error.response.body)
     }
     
     return { 
       success: false, 
-      error: error.message || 'E-Mail konnte nicht gesendet werden',
-      details: error.response?.body 
+      error: error.message || 'E-Mail konnte nicht gesendet werden' 
     }
   }
 }
 
-// Willkommens-E-Mail für neue Restaurants
+// Willkommens-E-Mail für neue Restaurants  
 export async function sendWelcomeEmail({
   email,
   name,
   restaurantName,
-  password,
   loginUrl
 }: {
   email: string
   name: string
   restaurantName: string
-  password?: string
   loginUrl?: string
 }) {
-  const finalLoginUrl = loginUrl || `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login`
+  const subject = `Willkommen bei Oriido, ${restaurantName}!`
   
   const html = `
     <!DOCTYPE html>
     <html>
     <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Willkommen bei Oriido</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+            .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white !important; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+            h1 { margin: 0; }
+            .highlight { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        </style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
-        <tr>
-          <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <!-- Header -->
-              <tr>
-                <td style="background-color: #ef4444; padding: 30px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Oriido</h1>
-                </td>
-              </tr>
-              
-              <!-- Content -->
-              <tr>
-                <td style="padding: 40px 30px;">
-                  <h2 style="color: #333; margin: 0 0 20px 0;">Willkommen bei Oriido, ${name}! 🎉</h2>
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 0 0 20px 0;">
-                    Ihr Restaurant <strong>${restaurantName}</strong> wurde erfolgreich in unserem System angelegt.
-                  </p>
-                  
-                  ${password ? `
-                  <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 20px; margin: 20px 0;">
-                    <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">🔐 Ihre Zugangsdaten:</h3>
-                    <p style="margin: 5px 0; color: #856404; font-family: monospace;">
-                      <strong>E-Mail:</strong> ${email}<br>
-                      <strong>Passwort:</strong> ${password}
-                    </p>
-                    <p style="color: #dc3545; font-weight: bold; margin: 15px 0 0 0; font-size: 13px;">
-                      ⚠️ Bitte ändern Sie Ihr Passwort nach der ersten Anmeldung!
-                    </p>
-                  </div>
-                  ` : ''}
-                  
-                  <table cellpadding="0" cellspacing="0" style="margin: 30px auto;">
-                    <tr>
-                      <td align="center" style="background-color: #ef4444; border-radius: 6px;">
-                        <a href="${finalLoginUrl}" style="display: inline-block; padding: 14px 30px; color: #ffffff; text-decoration: none; font-weight: bold; font-size: 16px;">
-                          Jetzt anmelden →
-                        </a>
-                      </td>
-                    </tr>
-                  </table>
-                  
-                  <h3 style="color: #333; margin: 30px 0 15px 0;">Ihre nächsten Schritte:</h3>
-                  <ul style="color: #555; line-height: 1.8; padding-left: 20px;">
-                    <li>Restaurant-Informationen vervollständigen</li>
-                    <li>Speisekarte anlegen</li>
-                    <li>Tische konfigurieren & QR-Codes generieren</li>
-                    <li>Zahlungsmethoden einrichten</li>
-                    <li>Mitarbeiter-Accounts anlegen</li>
-                  </ul>
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-                    Während Ihrer <strong>kostenlosen Testphase (100 Bestellungen)</strong> haben Sie vollen Zugriff auf alle Premium-Funktionen.
-                  </p>
-                </td>
-              </tr>
-              
-              <!-- Footer -->
-              <tr>
-                <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dee2e6;">
-                  <p style="color: #666; margin: 0 0 10px 0; font-size: 14px;">
-                    <strong>Benötigen Sie Hilfe?</strong>
-                  </p>
-                  <p style="color: #666; margin: 0; font-size: 14px; line-height: 1.6;">
-                    📧 E-Mail: <a href="mailto:support@oriido.com" style="color: #ef4444;">support@oriido.com</a><br>
-                    📱 WhatsApp: +49 176 12345678<br>
-                    🌐 Hilfe: <a href="https://www.oriido.com/help" style="color: #ef4444;">www.oriido.com/help</a>
-                  </p>
-                  <hr style="border: none; border-top: 1px solid #dee2e6; margin: 20px 0;">
-                  <p style="color: #999; margin: 0; font-size: 12px;">
-                    © 2024 Oriido. Alle Rechte vorbehalten.<br>
-                    Oriido GmbH, München
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Willkommen bei Oriido! 🎉</h1>
+            </div>
+            
+            <div class="content">
+                <p>Hallo ${name},</p>
+                
+                <p>herzlich willkommen bei Oriido! Ihr Restaurant <strong>${restaurantName}</strong> wurde erfolgreich registriert.</p>
+                
+                <div class="highlight">
+                    <h3>🚀 Die nächsten Schritte:</h3>
+                    <ol>
+                        <li><strong>Menü einrichten:</strong> Fügen Sie Ihre Speisen und Getränke hinzu</li>
+                        <li><strong>QR-Codes generieren:</strong> Erstellen Sie QR-Codes für Ihre Tische</li>
+                        <li><strong>Design anpassen:</strong> Personalisieren Sie das Aussehen Ihrer digitalen Speisekarte</li>
+                        <li><strong>Zahlungen aktivieren:</strong> Verbinden Sie Ihr Stripe-Konto für Online-Zahlungen</li>
+                    </ol>
+                </div>
+                
+                <p>Sie können sich hier in Ihr Dashboard einloggen:</p>
+                <div style="text-align: center;">
+                    <a href="${loginUrl || process.env.NEXT_PUBLIC_APP_URL + '/login'}" class="button">Zum Dashboard →</a>
+                </div>
+                
+                <p><strong>Tipp:</strong> Beginnen Sie mit dem Einrichten Ihres Menüs. Das dauert nur wenige Minuten!</p>
+                
+                <p>Bei Fragen stehen wir Ihnen jederzeit zur Verfügung:</p>
+                <ul>
+                    <li>📧 E-Mail: <a href="mailto:support@oriido.com">support@oriido.com</a></li>
+                    <li>📚 Dokumentation: <a href="https://docs.oriido.com">docs.oriido.com</a></li>
+                </ul>
+                
+                <p>Wir freuen uns, Sie bei Oriido begrüßen zu dürfen!</p>
+                
+                <p>Mit freundlichen Grüßen,<br>
+                Ihr Oriido Team</p>
+            </div>
+            
+            <div class="footer">
+                <p>© ${new Date().getFullYear()} Oriido. Alle Rechte vorbehalten.</p>
+                <p>Diese E-Mail wurde an ${email} gesendet.</p>
+            </div>
+        </div>
     </body>
     </html>
   `
   
   const text = `
-Willkommen bei Oriido, ${name}!
+Willkommen bei Oriido!
 
-Ihr Restaurant ${restaurantName} wurde erfolgreich angelegt.
+Hallo ${name},
 
-${password ? `
-Ihre Zugangsdaten:
-E-Mail: ${email}
-Passwort: ${password}
+herzlich willkommen bei Oriido! Ihr Restaurant ${restaurantName} wurde erfolgreich registriert.
 
-WICHTIG: Bitte ändern Sie Ihr Passwort nach der ersten Anmeldung!
-` : ''}
+Die nächsten Schritte:
+1. Menü einrichten
+2. QR-Codes generieren  
+3. Design anpassen
+4. Zahlungen aktivieren
 
-Jetzt anmelden: ${finalLoginUrl}
+Loggen Sie sich hier ein: ${loginUrl || process.env.NEXT_PUBLIC_APP_URL + '/login'}
 
-Ihre nächsten Schritte:
-- Restaurant-Informationen vervollständigen  
-- Speisekarte anlegen
-- Tische konfigurieren & QR-Codes generieren
-- Zahlungsmethoden einrichten
-- Mitarbeiter-Accounts anlegen
-
-Bei Fragen:
-E-Mail: support@oriido.com
-WhatsApp: +49 176 12345678
+Bei Fragen: support@oriido.com
 
 Mit freundlichen Grüßen,
 Ihr Oriido Team
-  `.trim()
-  
-  return await sendEmail({
-    to: email,
-    subject: `Willkommen bei Oriido - ${restaurantName}`,
-    html,
-    text
-  })
-}
-
-// E-Mail für neue Bestellung (an Restaurant)
-export async function sendNewOrderNotification({
-  email,
-  orderNumber,
-  tableNumber,
-  items,
-  total,
-  customerName,
-  notes
-}: {
-  email: string
-  orderNumber: string
-  tableNumber: number
-  items: Array<{ name: string; quantity: number; price: number }>
-  total: number
-  customerName?: string
-  notes?: string
-}) {
-  const itemsList = items.map(item => 
-    `• ${item.quantity}x ${item.name} - €${(item.price * item.quantity).toFixed(2)}`
-  ).join('\n')
-  
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-      <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; margin: 0 auto;">
-        <tr>
-          <td style="padding: 30px;">
-            <h1 style="color: #ef4444; margin: 0 0 20px 0;">🔔 Neue Bestellung #${orderNumber}</h1>
-            
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
-              <p style="margin: 0 0 10px 0; font-size: 18px;"><strong>Tisch ${tableNumber}</strong></p>
-              ${customerName ? `<p style="margin: 0; color: #666;">Kunde: ${customerName}</p>` : ''}
-            </div>
-            
-            <h3 style="color: #333; margin: 20px 0 10px 0;">Bestellte Artikel:</h3>
-            <div style="background-color: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px;">
-              ${items.map(item => `
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span><strong>${item.quantity}x</strong> ${item.name}</span>
-                  <span style="font-weight: bold;">€${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-              `).join('')}
-            </div>
-            
-            ${notes ? `
-            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-              <strong>Anmerkungen:</strong><br>
-              ${notes}
-            </div>
-            ` : ''}
-            
-            <div style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
-              <p style="font-size: 24px; color: #28a745; margin: 0;">
-                <strong>Gesamt: €${total.toFixed(2)}</strong>
-              </p>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
   `
   
-  const text = `
-Neue Bestellung #${orderNumber}
-
-Tisch: ${tableNumber}
-${customerName ? `Kunde: ${customerName}` : ''}
-
-Bestellte Artikel:
-${itemsList}
-
-${notes ? `Anmerkungen: ${notes}` : ''}
-
-Gesamtsumme: €${total.toFixed(2)}
-  `.trim()
-  
-  return await sendEmail({
-    to: email,
-    subject: `🔔 Neue Bestellung #${orderNumber} - Tisch ${tableNumber}`,
-    html,
-    text
-  })
+  return await sendEmail({ to: email, subject, html, text })
 }
 
-// Batch-E-Mail für mehrere Empfänger
-export async function sendBatchEmails(emails: Array<{
-  to: string
-  subject: string
-  html: string
-  text: string
-}>) {
-  const results = await Promise.allSettled(
-    emails.map(email => sendEmail(email))
-  )
-  
-  const successful = results.filter(r => r.status === 'fulfilled').length
-  const failed = results.filter(r => r.status === 'rejected').length
-  
-  return {
-    successful,
-    failed,
-    total: emails.length,
-    results
-  }
-}
-
-// Reservierung Bestätigung
-export async function sendReservationConfirmation({
+// Kontaktformular E-Mail
+export async function sendContactFormEmail({
+  firstName,
+  lastName,
   email,
-  name,
-  restaurantName,
-  date,
-  time,
-  guests,
-  confirmationCode,
-  notes,
-  specialRequests
+  restaurant,
+  phone,
+  message
 }: {
+  firstName: string
+  lastName: string
   email: string
-  name: string
-  restaurantName: string
-  date: string
-  time: string
-  guests: number
-  confirmationCode: string
-  notes?: string
-  specialRequests?: string
-}) {
-  const html = `
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Reservierung bestätigt</title>
-    </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
-        <tr>
-          <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <tr>
-                <td style="background-color: #16a34a; padding: 30px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎉 Reservierung bestätigt</h1>
-                </td>
-              </tr>
-              
-              <tr>
-                <td style="padding: 40px 30px;">
-                  <h2 style="color: #333; margin: 0 0 20px 0;">Hallo ${name}!</h2>
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 0 0 20px 0;">
-                    Ihre Reservierung bei <strong>${restaurantName}</strong> wurde erfolgreich bestätigt.
-                  </p>
-                  
-                  <div style="background-color: #f0fdf4; border: 1px solid #16a34a; border-radius: 6px; padding: 20px; margin: 20px 0;">
-                    <h3 style="color: #15803d; margin: 0 0 15px 0;">📅 Reservierungsdetails:</h3>
-                    <table style="width: 100%;">
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Restaurant:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${restaurantName}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Datum:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${date}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Uhrzeit:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${time}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Personen:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${guests}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Bestätigungscode:</strong></td>
-                        <td style="padding: 5px 0; color: #374151; font-family: monospace; font-weight: bold;">${confirmationCode}</td>
-                      </tr>
-                    </table>
-                  </div>
-                  
-                  ${specialRequests ? `
-                  <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                    <strong style="color: #92400e;">🍽️ Besondere Wünsche:</strong>
-                    <p style="color: #92400e; margin: 5px 0 0 0;">${specialRequests}</p>
-                  </div>
-                  ` : ''}
-                  
-                  ${notes ? `
-                  <div style="background-color: #fffbeb; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                    <strong style="color: #92400e;">📝 Anmerkungen:</strong>
-                    <p style="color: #92400e; margin: 5px 0 0 0;">${notes}</p>
-                  </div>
-                  ` : ''}
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-                    Bitte notieren Sie sich Ihren Bestätigungscode und bringen Sie ihn zum Termin mit.
-                  </p>
-                </td>
-              </tr>
-              
-              <tr>
-                <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dee2e6;">
-                  <p style="color: #666; margin: 0; font-size: 14px;">
-                    Vielen Dank für Ihre Reservierung!<br>
-                    Wir freuen uns auf Ihren Besuch.
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
-  `
-  
-  const text = `
-Reservierung bestätigt!
-
-Hallo ${name},
-
-Ihre Reservierung bei ${restaurantName} wurde bestätigt:
-
-Restaurant: ${restaurantName}
-Datum: ${date}
-Uhrzeit: ${time}
-Personen: ${guests}
-Bestätigungscode: ${confirmationCode}
-
-${specialRequests ? `Besondere Wünsche: ${specialRequests}` : ''}
-${notes ? `Anmerkungen: ${notes}` : ''}
-
-Bitte bringen Sie Ihren Bestätigungscode zum Termin mit.
-
-Vielen Dank für Ihre Reservierung!
-  `.trim()
-  
-  return await sendEmail({
-    to: email,
-    subject: `✅ Reservierung bestätigt - ${restaurantName}`,
-    html,
-    text
-  })
-}
-
-// Vorbestellung Bestätigung
-export async function sendPreOrderConfirmation({
-  email,
-  name,
-  restaurantName,
-  pickupTime,
-  orderType,
-  items,
-  total,
-  orderId
-}: {
-  email: string
-  name: string
-  restaurantName: string
-  pickupTime: string
-  orderType: string
-  items: Array<{
-    name: string
-    quantity: number
-    unitPrice: number
-    totalPrice: number
-  }>
-  total: number
-  orderId: string
-}) {
-  const itemsList = items.map(item => 
-    `${item.quantity}x ${item.name} - €${item.totalPrice.toFixed(2)}`
-  ).join('\n')
-
-  const html = `
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Vorbestellung bestätigt</title>
-    </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
-        <tr>
-          <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <tr>
-                <td style="background-color: #dc2626; padding: 30px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🍽️ Vorbestellung bestätigt</h1>
-                </td>
-              </tr>
-              
-              <tr>
-                <td style="padding: 40px 30px;">
-                  <h2 style="color: #333; margin: 0 0 20px 0;">Hallo ${name}!</h2>
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 0 0 20px 0;">
-                    Ihre Vorbestellung bei <strong>${restaurantName}</strong> wurde erfolgreich aufgegeben.
-                  </p>
-                  
-                  <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 20px; margin: 20px 0;">
-                    <h3 style="color: #92400e; margin: 0 0 15px 0;">📋 Bestelldetails:</h3>
-                    <table style="width: 100%;">
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Bestellnummer:</strong></td>
-                        <td style="padding: 5px 0; color: #374151; font-family: monospace;">#${orderId.slice(-8).toUpperCase()}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Restaurant:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${restaurantName}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Abholzeit:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${new Date(pickupTime).toLocaleString('de-DE')}</td>
-                      </tr>
-                      <tr>
-                        <td style="padding: 5px 0; color: #374151;"><strong>Art:</strong></td>
-                        <td style="padding: 5px 0; color: #374151;">${orderType === 'PICKUP' ? 'Abholung' : 'Im Restaurant'}</td>
-                      </tr>
-                    </table>
-                  </div>
-                  
-                  <div style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 6px; padding: 20px; margin: 20px 0;">
-                    <h3 style="color: #0c4a6e; margin: 0 0 15px 0;">🛍️ Bestellte Artikel:</h3>
-                    <div style="font-family: monospace; color: #374151; line-height: 1.8;">
-                      ${items.map(item => `
-                        <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e5e7eb; padding: 5px 0;">
-                          <span>${item.quantity}x ${item.name}</span>
-                          <span>€${item.totalPrice.toFixed(2)}</span>
-                        </div>
-                      `).join('')}
-                      <div style="font-weight: bold; margin-top: 10px; padding-top: 10px; border-top: 2px solid #0ea5e9; display: flex; justify-content: space-between;">
-                        <span>Gesamt:</span>
-                        <span>€${total.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-                    Bitte haben Sie Ihre Bestellnummer bereit, wenn Sie Ihre Bestellung abholen.
-                  </p>
-                </td>
-              </tr>
-              
-              <tr>
-                <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dee2e6;">
-                  <p style="color: #666; margin: 0; font-size: 14px;">
-                    Vielen Dank für Ihre Vorbestellung!<br>
-                    Wir bereiten Ihr Essen rechtzeitig vor.
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
-  `
-  
-  const text = `
-Vorbestellung bestätigt!
-
-Hallo ${name},
-
-Ihre Vorbestellung bei ${restaurantName} wurde bestätigt:
-
-Bestellnummer: #${orderId.slice(-8).toUpperCase()}
-Restaurant: ${restaurantName}
-Abholzeit: ${new Date(pickupTime).toLocaleString('de-DE')}
-Art: ${orderType === 'PICKUP' ? 'Abholung' : 'Im Restaurant'}
-
-Bestellte Artikel:
-${itemsList}
-
-Gesamt: €${total.toFixed(2)}
-
-Bitte haben Sie Ihre Bestellnummer bereit.
-
-Vielen Dank für Ihre Vorbestellung!
-  `.trim()
-  
-  return await sendEmail({
-    to: email,
-    subject: `🍽️ Vorbestellung bestätigt - ${restaurantName}`,
-    html,
-    text
-  })
-}
-
-// Neue Reservierung Benachrichtigung (an Restaurant)
-export async function sendNewReservationNotification({
-  email,
-  reservationId,
-  customerName,
-  customerEmail,
-  customerPhone,
-  numberOfGuests,
-  date,
-  time,
-  notes,
-  specialRequests
-}: {
-  email: string
-  reservationId: string
-  customerName: string
-  customerEmail: string
-  customerPhone: string
-  numberOfGuests: number
-  date: string
-  time: string
-  notes?: string
-  specialRequests?: string
-}) {
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-      <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; margin: 0 auto;">
-        <tr>
-          <td style="padding: 30px;">
-            <h1 style="color: #16a34a; margin: 0 0 20px 0;">📅 Neue Reservierung</h1>
-            
-            <div style="background-color: #f0fdf4; padding: 20px; border-radius: 6px; margin: 20px 0;">
-              <p style="margin: 0 0 10px 0; font-size: 18px;"><strong>Reservierungscode: #${reservationId.slice(-8).toUpperCase()}</strong></p>
-            </div>
-            
-            <h3 style="color: #333; margin: 20px 0 10px 0;">Kundeninformationen:</h3>
-            <div style="background-color: #f8f9fa; border-radius: 6px; padding: 15px;">
-              <p style="margin: 5px 0;"><strong>Name:</strong> ${customerName}</p>
-              <p style="margin: 5px 0;"><strong>E-Mail:</strong> ${customerEmail}</p>
-              <p style="margin: 5px 0;"><strong>Telefon:</strong> ${customerPhone}</p>
-            </div>
-            
-            <h3 style="color: #333; margin: 20px 0 10px 0;">Reservierungsdetails:</h3>
-            <div style="background-color: #f8f9fa; border-radius: 6px; padding: 15px;">
-              <p style="margin: 5px 0;"><strong>Datum:</strong> ${date}</p>
-              <p style="margin: 5px 0;"><strong>Uhrzeit:</strong> ${time}</p>
-              <p style="margin: 5px 0;"><strong>Anzahl Gäste:</strong> ${numberOfGuests}</p>
-            </div>
-            
-            ${specialRequests ? `
-            <div style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 15px; margin: 20px 0;">
-              <strong>🍽️ Besondere Wünsche:</strong><br>
-              ${specialRequests}
-            </div>
-            ` : ''}
-            
-            ${notes ? `
-            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-              <strong>📝 Anmerkungen:</strong><br>
-              ${notes}
-            </div>
-            ` : ''}
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
-  `
-  
-  const text = `
-Neue Reservierung #${reservationId.slice(-8).toUpperCase()}
-
-Kundeninformationen:
-Name: ${customerName}
-E-Mail: ${customerEmail}
-Telefon: ${customerPhone}
-
-Reservierungsdetails:
-Datum: ${date}
-Uhrzeit: ${time}
-Anzahl Gäste: ${numberOfGuests}
-
-${specialRequests ? `Besondere Wünsche: ${specialRequests}` : ''}
-${notes ? `Anmerkungen: ${notes}` : ''}
-  `.trim()
-  
-  return await sendEmail({
-    to: email,
-    subject: `📅 Neue Reservierung - ${customerName} (${numberOfGuests} Personen)`,
-    html,
-    text
-  })
-}
-
-// Neue Vorbestellung Benachrichtigung (an Restaurant)
-export async function sendNewPreOrderNotification({
-  email,
-  preOrderId,
-  customerName,
-  customerEmail,
-  customerPhone,
-  pickupTime,
-  orderType,
-  items,
-  total,
-  notes
-}: {
-  email: string
-  preOrderId: string
-  customerName: string
-  customerEmail: string
-  customerPhone: string
-  pickupTime: string
-  orderType: string
-  items: Array<{
-    name: string
-    quantity: number
-    totalPrice: number
-  }>
-  total: number
-  notes?: string
-}) {
-  const html = `
-    <!DOCTYPE html>
-    <html>
-    <body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-      <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; margin: 0 auto;">
-        <tr>
-          <td style="padding: 30px;">
-            <h1 style="color: #dc2626; margin: 0 0 20px 0;">🍽️ Neue Vorbestellung</h1>
-            
-            <div style="background-color: #fef3c7; padding: 20px; border-radius: 6px; margin: 20px 0;">
-              <p style="margin: 0 0 10px 0; font-size: 18px;"><strong>Bestellnummer: #${preOrderId.slice(-8).toUpperCase()}</strong></p>
-              <p style="margin: 0; font-size: 16px;"><strong>Abholzeit:</strong> ${new Date(pickupTime).toLocaleString('de-DE')}</p>
-            </div>
-            
-            <h3 style="color: #333; margin: 20px 0 10px 0;">Kundeninformationen:</h3>
-            <div style="background-color: #f8f9fa; border-radius: 6px; padding: 15px;">
-              <p style="margin: 5px 0;"><strong>Name:</strong> ${customerName}</p>
-              <p style="margin: 5px 0;"><strong>E-Mail:</strong> ${customerEmail}</p>
-              <p style="margin: 5px 0;"><strong>Telefon:</strong> ${customerPhone}</p>
-              <p style="margin: 5px 0;"><strong>Art:</strong> ${orderType === 'PICKUP' ? 'Abholung' : 'Im Restaurant'}</p>
-            </div>
-            
-            <h3 style="color: #333; margin: 20px 0 10px 0;">Bestellte Artikel:</h3>
-            <div style="background-color: #fff; border: 1px solid #dee2e6; border-radius: 6px; padding: 15px;">
-              ${items.map(item => `
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee;">
-                  <span><strong>${item.quantity}x</strong> ${item.name}</span>
-                  <span style="font-weight: bold;">€${item.totalPrice.toFixed(2)}</span>
-                </div>
-              `).join('')}
-            </div>
-            
-            ${notes ? `
-            <div style="background-color: #fff3cd; border: 1px solid #ffc107; border-radius: 6px; padding: 15px; margin: 20px 0;">
-              <strong>Anmerkungen des Gastes:</strong><br>
-              ${notes}
-            </div>
-            ` : ''}
-            
-            <div style="text-align: right; margin-top: 20px; padding-top: 20px; border-top: 2px solid #dee2e6;">
-              <p style="font-size: 24px; color: #28a745; margin: 0;">
-                <strong>Gesamt: €${total.toFixed(2)}</strong>
-              </p>
-            </div>
-          </td>
-        </tr>
-      </table>
-    </body>
-    </html>
-  `
-  
-  const text = `
-Neue Vorbestellung #${preOrderId.slice(-8).toUpperCase()}
-
-Abholzeit: ${new Date(pickupTime).toLocaleString('de-DE')}
-
-Kundeninformationen:
-Name: ${customerName}
-E-Mail: ${customerEmail}
-Telefon: ${customerPhone}
-Art: ${orderType === 'PICKUP' ? 'Abholung' : 'Im Restaurant'}
-
-Bestellte Artikel:
-${items.map(item => `${item.quantity}x ${item.name} - €${item.totalPrice.toFixed(2)}`).join('\n')}
-
-${notes ? `Anmerkungen: ${notes}` : ''}
-
-Gesamtsumme: €${total.toFixed(2)}
-  `.trim()
-  
-  return await sendEmail({
-    to: email,
-    subject: `🍽️ Neue Vorbestellung - ${customerName} (€${total.toFixed(2)})`,
-    html,
-    text
-  })
-}
-
-// Benachrichtigungs-E-Mail
-export async function sendNotificationEmail({
-  to,
-  customerName,
-  restaurantName,
-  subject,
-  message,
-  reservationDetails,
-  preorderDetails
-}: {
-  to: string
-  customerName: string
-  restaurantName: string
-  subject: string
+  restaurant?: string
+  phone?: string
   message: string
-  reservationDetails?: {
-    date: string
-    time: string
-    guests: number
-    confirmationToken: string
-  }
-  preorderDetails?: {
-    id: string
-    pickupTime: string
-    orderType: string
-    total: number
-    items: Array<{
-      name: string
-      quantity: number
-      variant?: string
-    }>
-  }
 }) {
-  const html = `
+  // E-Mail an info@oriido.com
+  const adminSubject = `Neue Kontaktanfrage von ${firstName} ${lastName}`
+  const adminHtml = `
+    <!DOCTYPE html>
     <html>
     <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Nachricht von ${restaurantName}</title>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #FF6B35; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+            .info-box { background: #f5f5f5; padding: 20px; border-radius: 5px; margin: 15px 0; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-      <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px 0;">
-        <tr>
-          <td align="center">
-            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              <tr>
-                <td style="background-color: #3b82f6; padding: 30px; text-align: center;">
-                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">📢 ${restaurantName}</h1>
-                </td>
-              </tr>
-              
-              <tr>
-                <td style="padding: 40px 30px;">
-                  <h2 style="color: #333; margin: 0 0 20px 0;">Hallo ${customerName}!</h2>
-                  
-                  <div style="background-color: #f0f9ff; border: 1px solid #3b82f6; border-radius: 6px; padding: 20px; margin: 20px 0;">
-                    <p style="color: #1e40af; line-height: 1.6; margin: 0; font-size: 16px;">
-                      ${message}
-                    </p>
-                  </div>
-                  
-                  ${reservationDetails ? `
-                  <div style="background-color: #f8f9fa; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                    <h3 style="color: #495057; margin: 0 0 10px 0; font-size: 16px;">📅 Ihre Reservierung:</h3>
-                    <p style="color: #6c757d; margin: 0; font-size: 14px;">
-                      <strong>Datum:</strong> ${new Date(reservationDetails.date).toLocaleDateString('de-DE')}<br>
-                      <strong>Uhrzeit:</strong> ${reservationDetails.time}<br>
-                      <strong>Personen:</strong> ${reservationDetails.guests}<br>
-                      <strong>Code:</strong> ${reservationDetails.confirmationToken}
-                    </p>
-                  </div>
-                  ` : ''}
-                  
-                  ${preorderDetails ? `
-                  <div style="background-color: #f8f9fa; border-radius: 6px; padding: 15px; margin: 20px 0;">
-                    <h3 style="color: #495057; margin: 0 0 10px 0; font-size: 16px;">🍽️ Ihre Vorbestellung:</h3>
-                    <p style="color: #6c757d; margin: 0; font-size: 14px;">
-                      <strong>Bestellnummer:</strong> #${preorderDetails.id.slice(-8).toUpperCase()}<br>
-                      <strong>Abholzeit:</strong> ${new Date(preorderDetails.pickupTime).toLocaleString('de-DE')}<br>
-                      <strong>Gesamt:</strong> €${preorderDetails.total.toFixed(2)}
-                    </p>
-                  </div>
-                  ` : ''}
-                  
-                  <p style="color: #555; line-height: 1.6; margin: 20px 0;">
-                    Vielen Dank und bis bald!
-                  </p>
-                </td>
-              </tr>
-              
-              <tr>
-                <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dee2e6;">
-                  <p style="color: #666; margin: 0; font-size: 14px;">
-                    Diese Nachricht wurde von <strong>${restaurantName}</strong> gesendet.
-                  </p>
-                </td>
-              </tr>
-            </table>
-          </td>
-        </tr>
-      </table>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>📬 Neue Kontaktanfrage</h2>
+            </div>
+            
+            <div class="content">
+                <div class="info-box">
+                    <h3>Kontaktdaten:</h3>
+                    <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                    <p><strong>E-Mail:</strong> <a href="mailto:${email}">${email}</a></p>
+                    ${restaurant ? `<p><strong>Restaurant:</strong> ${restaurant}</p>` : ''}
+                    ${phone ? `<p><strong>Telefon:</strong> ${phone}</p>` : ''}
+                </div>
+                
+                <div class="info-box">
+                    <h3>Nachricht:</h3>
+                    <p style="white-space: pre-wrap;">${message}</p>
+                </div>
+                
+                <p style="margin-top: 30px;">
+                    <a href="mailto:${email}" style="background: #FF6B35; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                        Antworten →
+                    </a>
+                </p>
+            </div>
+            
+            <div class="footer">
+                <p>Diese E-Mail wurde vom Kontaktformular auf www.oriido.com gesendet.</p>
+            </div>
+        </div>
     </body>
     </html>
   `
   
-  const text = `
-${subject}
+  const adminText = `
+Neue Kontaktanfrage über die Website:
 
-Hallo ${customerName},
+Name: ${firstName} ${lastName}
+E-Mail: ${email}
+${restaurant ? `Restaurant: ${restaurant}` : ''}
+${phone ? `Telefon: ${phone}` : ''}
 
+Nachricht:
 ${message}
 
-${reservationDetails ? `
-Ihre Reservierung:
-Datum: ${new Date(reservationDetails.date).toLocaleDateString('de-DE')}
-Uhrzeit: ${reservationDetails.time}
-Personen: ${reservationDetails.guests}
-Code: ${reservationDetails.confirmationToken}
-` : ''}
+---
+Diese E-Mail wurde vom Kontaktformular auf www.oriido.com gesendet.
+  `
 
-${preorderDetails ? `
-Ihre Vorbestellung:
-Bestellnummer: #${preorderDetails.id.slice(-8).toUpperCase()}
-Abholzeit: ${new Date(preorderDetails.pickupTime).toLocaleString('de-DE')}
-Gesamt: €${preorderDetails.total.toFixed(2)}
-` : ''}
+  const adminEmailResult = await sendEmail({
+    to: 'info@oriido.com',
+    subject: adminSubject,
+    html: adminHtml,
+    text: adminText
+  })
 
-Vielen Dank!
+  // Bestätigungs-E-Mail an den Absender
+  const confirmationSubject = 'Vielen Dank für Ihre Kontaktaufnahme'
+  const confirmationHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: #FF6B35; color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
+            .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+            .message-box { background: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #FF6B35; }
+            .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h2>Vielen Dank für Ihre Nachricht! ✉️</h2>
+            </div>
+            
+            <div class="content">
+                <p>Hallo ${firstName},</p>
+                
+                <p>vielen Dank für Ihre Nachricht! Wir haben Ihre Anfrage erhalten und werden uns innerhalb von <strong>24 Stunden</strong> bei Ihnen melden.</p>
+                
+                <div class="message-box">
+                    <h4>Ihre Nachricht:</h4>
+                    <p style="white-space: pre-wrap;">${message}</p>
+                </div>
+                
+                <p>Falls Sie weitere Fragen haben, können Sie uns jederzeit kontaktieren:</p>
+                <ul>
+                    <li>📧 E-Mail: <a href="mailto:info@oriido.com">info@oriido.com</a></li>
+                    <li>🌐 Website: <a href="https://www.oriido.com">www.oriido.com</a></li>
+                </ul>
+                
+                <p>Mit freundlichen Grüßen,<br>
+                Ihr Oriido Team</p>
+            </div>
+            
+            <div class="footer">
+                <p>© ${new Date().getFullYear()} Oriido. Alle Rechte vorbehalten.</p>
+                <p>Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `
+  
+  const confirmationText = `
+Hallo ${firstName},
+
+vielen Dank für Ihre Nachricht! Wir haben Ihre Anfrage erhalten und werden uns innerhalb von 24 Stunden bei Ihnen melden.
+
+Ihre Nachricht:
+${message}
+
+Falls Sie weitere Fragen haben, können Sie uns jederzeit kontaktieren:
+- E-Mail: info@oriido.com
+- Website: www.oriido.com
+
+Mit freundlichen Grüßen,
+Ihr Oriido Team
 
 ---
-Diese Nachricht wurde von ${restaurantName} gesendet.
-  `.trim()
-  
-  return await sendEmail({
-    to,
-    subject,
-    html,
-    text
+Diese E-Mail wurde automatisch generiert.
+  `
+
+  const confirmationResult = await sendEmail({
+    to: email,
+    subject: confirmationSubject,
+    html: confirmationHtml,
+    text: confirmationText
   })
+
+  return {
+    adminEmail: adminEmailResult,
+    confirmationEmail: confirmationResult
+  }
 }
