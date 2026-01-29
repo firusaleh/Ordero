@@ -4,7 +4,19 @@ export const guestTranslationsDe = {
     table: 'Tisch',
     international: 'International'
   },
-  
+
+  // Order (success messages)
+  order: {
+    successTitle: 'Bestellung erfolgreich!',
+    thankYou: 'Vielen Dank für Ihre Bestellung bei',
+    orderNumber: 'Ihre Bestellnummer',
+    newOrder: 'Neue Bestellung aufgeben',
+    estimatedTime: 'Geschätzte Zeit',
+    preparing: 'Ihre Bestellung wird zubereitet',
+    ready: 'Ihre Bestellung ist bereit!',
+    status: 'Bestellstatus'
+  },
+
   // Cart
   cart: {
     title: 'Ihre Bestellung',

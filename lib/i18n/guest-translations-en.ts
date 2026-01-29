@@ -4,7 +4,19 @@ export const guestTranslationsEn = {
     table: 'Table',
     international: 'International'
   },
-  
+
+  // Order (success messages)
+  order: {
+    successTitle: 'Order Successful!',
+    thankYou: 'Thank you for your order at',
+    orderNumber: 'Your order number',
+    newOrder: 'Place new order',
+    estimatedTime: 'Estimated time',
+    preparing: 'Your order is being prepared',
+    ready: 'Your order is ready!',
+    status: 'Order Status'
+  },
+
   // Cart
   cart: {
     title: 'Your Order',
@@ -274,7 +286,8 @@ export const guestTranslationsEn = {
     refunded: 'Refunded',
     delivered: 'Delivered',
     paid: 'Paid',
-    unpaid: 'Unpaid'
+    unpaid: 'Unpaid',
+    readyNotification: 'Your order is being prepared'
   },
 
   // Toast messages

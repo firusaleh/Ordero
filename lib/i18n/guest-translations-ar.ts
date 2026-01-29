@@ -4,7 +4,19 @@ export const guestTranslationsAr = {
     table: 'الطاولة',
     international: 'عالمي'
   },
-  
+
+  // Order (success messages)
+  order: {
+    successTitle: 'تم الطلب بنجاح!',
+    thankYou: 'شكراً لطلبك من',
+    orderNumber: 'رقم طلبك',
+    newOrder: 'تقديم طلب جديد',
+    estimatedTime: 'الوقت المتوقع',
+    preparing: 'جاري تحضير طلبك',
+    ready: 'طلبك جاهز!',
+    status: 'حالة الطلب'
+  },
+
   // Cart
   cart: {
     title: 'طلبك',
@@ -274,7 +286,8 @@ export const guestTranslationsAr = {
     refunded: 'مسترد',
     delivered: 'تم التسليم',
     paid: 'مدفوع',
-    unpaid: 'غير مدفوع'
+    unpaid: 'غير مدفوع',
+    readyNotification: 'جاري تحضير طلبك'
   },
 
   // Toast messages
