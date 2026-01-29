@@ -1214,7 +1214,7 @@ export const translations = {
       features: {
         noMonthlyFee: 'بدون رسوم شهرية',
         perOrderJordan: '0.10 دينار أردني لكل طلب',
-        perOrderGermany: '0.35 يورو لكل طلب',
+        perOrderGermany: '0.45 يورو لكل طلب',
         automaticBilling: 'الفوترة التلقائية',
         monthlyBilling: 'الفوترة الشهرية',
         monthlyInvoice: 'فاتورة شهرية',
@@ -2536,7 +2536,7 @@ export const translations = {
       features: {
         noMonthlyFee: 'Keine monatliche Grundgebühr',
         perOrderJordan: '0,10 JD pro Bestellung',
-        perOrderGermany: '0,35 € pro Bestellung',
+        perOrderGermany: '0,45 € pro Bestellung',
         automaticBilling: 'Automatische Abrechnung',
         monthlyBilling: 'Monatliche Abrechnung',
         monthlyInvoice: 'Monatliche Rechnung',
@@ -3204,7 +3204,7 @@ export const translations = {
       features: {
         noMonthlyFee: 'No monthly fee',
         perOrderJordan: '0.10 JD per order',
-        perOrderGermany: '€0.35 per order',
+        perOrderGermany: '€0.45 per order',
         automaticBilling: 'Automatic billing',
         monthlyBilling: 'Monthly billing',
         monthlyInvoice: 'Monthly invoice',

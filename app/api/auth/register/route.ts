@@ -91,21 +91,21 @@ export async function POST(request: NextRequest) {
         }
       })
       
-      // Berechne Trial-Ende (14 Tage)
-      const trialEndsAt = new Date()
-      trialEndsAt.setDate(trialEndsAt.getDate() + 14)
-      
       // Erstelle Restaurant mit Status PENDING (muss vom Admin freigegeben werden)
+      const country = validatedData.country || 'DE'
       const restaurant = await tx.restaurant.create({
         data: {
           name: validatedData.restaurantName,
           slug: finalSlug,
           ownerId: user.id,
           status: 'PENDING', // Restaurant startet als PENDING und muss freigegeben werden
-          plan: 'FREE',
+          plan: country === 'JO' ? 'JO_PAY_PER_ORDER' : 'DE_PAY_PER_ORDER',
+          subscriptionPlan: country === 'JO' ? 'JO_PAY_PER_ORDER' : 'DE_PAY_PER_ORDER',
+          payPerOrderEnabled: true,
+          payPerOrderRate: country === 'JO' ? 0.10 : 0.45,
           email: validatedData.email,
           phone: validatedData.phone,
-          country: validatedData.country || 'DE',
+          country: country,
         }
       })
       

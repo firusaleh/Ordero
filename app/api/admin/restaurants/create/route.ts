@@ -97,8 +97,10 @@ export async function POST(request: NextRequest) {
           slug,
           ownerId: user.id,
           status: 'PENDING', // Beginnt im PENDING Status für Onboarding
-          plan: 'TRIAL',
-          trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 Tage Trial
+          plan: validatedData.country === 'JO' ? 'JO_PAY_PER_ORDER' : 'DE_PAY_PER_ORDER',
+          subscriptionPlan: validatedData.country === 'JO' ? 'JO_PAY_PER_ORDER' : 'DE_PAY_PER_ORDER',
+          payPerOrderEnabled: true,
+          payPerOrderRate: validatedData.country === 'JO' ? 0.10 : 0.45,
           email: validatedData.ownerEmail,
           phone: validatedData.phone,
           country: validatedData.country,

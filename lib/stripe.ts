@@ -13,73 +13,37 @@ export const stripe = isValidKey
     })
   : null as any
 
-// Subscription Preise
-export const PRICES = {
-  STANDARD: process.env.STRIPE_STANDARD_PRICE_ID || 'price_standard',
-  PREMIUM: process.env.STRIPE_PREMIUM_PRICE_ID || 'price_premium',
-} as const
-
-// Subscription Features
-export const SUBSCRIPTION_FEATURES = {
-  FREE: {
-    name: 'Free',
-    price: 0,
-    features: [
-      '50 Bestellungen pro Monat',
-      '1 Benutzer',
-      'Basis-Statistiken',
-      'E-Mail Support',
-    ],
-    limits: {
-      ordersPerMonth: 50,
-      users: 1,
-      menuItems: 20,
-      tables: 5,
-    },
+// Aktuelle Preismodelle - nur noch länderbasiert
+export const PRICING_MODELS = {
+  // Deutschland
+  DE_PAY_PER_ORDER: {
+    name: 'Pay-per-Order',
+    pricePerOrder: 0.45,
+    setupFee: 250,
+    currency: 'EUR',
   },
-  STANDARD: {
-    name: 'Standard',
-    price: 29,
-    priceId: PRICES.STANDARD,
-    features: [
-      'Unbegrenzte Bestellungen',
-      'Bis zu 5 Benutzer',
-      'Erweiterte Statistiken',
-      'Priority Support',
-      'Kassensystem-Integration',
-      'Eigenes Branding',
-    ],
-    limits: {
-      ordersPerMonth: -1, // unbegrenzt
-      users: 5,
-      menuItems: -1,
-      tables: -1,
-    },
+  DE_MONTHLY: {
+    name: 'Monatlich',
+    monthlyPrice: 279,
+    setupFee: 250,
+    currency: 'EUR',
   },
-  PREMIUM: {
-    name: 'Premium',
-    price: 79,
-    priceId: PRICES.PREMIUM,
-    features: [
-      'Alles aus Standard',
-      'Unbegrenzte Benutzer',
-      'API-Zugang',
-      'Multi-Restaurant Support',
-      'Dedizierter Account Manager',
-      'Custom Features',
-      'White-Label Option',
-    ],
-    limits: {
-      ordersPerMonth: -1,
-      users: -1,
-      menuItems: -1,
-      tables: -1,
-      restaurants: -1,
-    },
+  DE_YEARLY: {
+    name: 'Jährlich',
+    yearlyPrice: 2150,
+    setupFee: 250,
+    currency: 'EUR',
+  },
+  // Jordanien
+  JO_PAY_PER_ORDER: {
+    name: 'Pay-per-Order',
+    pricePerOrder: 0.10,
+    setupFee: 0,
+    currency: 'JOD',
   },
 } as const
 
-export type SubscriptionTier = keyof typeof SUBSCRIPTION_FEATURES
+export type PricingModel = keyof typeof PRICING_MODELS
 
 // Helper Funktionen
 export async function createCheckoutSession({

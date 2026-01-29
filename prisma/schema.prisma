@@ -104,7 +104,7 @@ model Restaurant {
   
   // Status & Plan
   status      String   @default("PENDING") // PENDING, ACTIVE, SUSPENDED, CANCELLED
-  plan        String   @default("FREE")  // FREE, STANDARD, PREMIUM
+  plan        String   @default("DE_PAY_PER_ORDER")  // JO_PAY_PER_ORDER, DE_PAY_PER_ORDER, DE_MONTHLY, DE_YEARLY
   trialEndsAt DateTime?
   approvedAt  DateTime?
   approvedById String?  @db.ObjectId
@@ -132,14 +132,14 @@ model Restaurant {
   stripeSubscriptionId   String?
   stripePriceId         String?
   stripeCurrentPeriodEnd DateTime?
-  subscriptionStatus     String?   @default("FREE") // FREE, ACTIVE, CANCELLED, PAST_DUE
-  subscriptionPlan       String?   @default("FREE") // FREE, STANDARD, PREMIUM, JO_PAY_PER_ORDER, DE_PAY_PER_ORDER, DE_MONTHLY, DE_YEARLY
+  subscriptionStatus     String?   @default("INACTIVE") // INACTIVE, ACTIVE, CANCELLED, PAST_DUE
+  subscriptionPlan       String?   @default("DE_PAY_PER_ORDER") // JO_PAY_PER_ORDER, DE_PAY_PER_ORDER, DE_MONTHLY, DE_YEARLY
   subscriptionCurrentPeriodEnd DateTime?
   
   // Pay-per-Order Billing
   billingEnabled          Boolean @default(false)
   payPerOrderEnabled      Boolean @default(false)
-  payPerOrderRate         Float?  // Rate pro Bestellung (0.10 für JO, 0.35 für DE)
+  payPerOrderRate         Float?  // Rate pro Bestellung (0.10 für JO, 0.45 für DE)
   monthlyOrderCount       Int @default(0) // Zähler für Bestellungen im aktuellen Monat
   lastBillingDate         DateTime? // Letztes Abrechnungsdatum
   

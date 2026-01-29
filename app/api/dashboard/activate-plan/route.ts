@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         subscriptionPlan: 'DE_PAY_PER_ORDER',
         billingEnabled: true,
         payPerOrderEnabled: true,
-        payPerOrderRate: 0.35, // 0.35 € pro Bestellung
+        payPerOrderRate: 0.45, // 0.45 € pro Bestellung
       }
     } else if (restaurant.country === 'DE' && (plan === 'DE_MONTHLY' || plan === 'DE_YEARLY')) {
       updateData = {

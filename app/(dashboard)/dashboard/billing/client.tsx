@@ -33,7 +33,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
   
   // Land aus Restaurant-Daten
   const country = restaurant.country || 'DE'
-  const currentPlan = restaurant.subscriptionPlan || 'FREE'
+  const currentPlan = restaurant.subscriptionPlan || 'DE_PAY_PER_ORDER'
 
   useEffect(() => {
     // Check for success/cancel params from Stripe
@@ -159,7 +159,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
     payPerOrder: {
       id: 'DE_PAY_PER_ORDER',
       name: 'Pay-per-Order',
-      price: '0,35',
+      price: '0,45',
       currency: '€',
       unit: 'pro Bestellung',
       setupFee: '250',
@@ -219,14 +219,14 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
         <TabsList>
           <TabsTrigger value="subscription">{t('billing.subscription')}</TabsTrigger>
           <TabsTrigger value="payment">{t('billing.managePayments')}</TabsTrigger>
-          {currentPlan !== 'FREE' && (
+          {currentPlan && currentPlan !== 'INACTIVE' && (
             <TabsTrigger value="usage">{t('billing.usageStatistics')}</TabsTrigger>
           )}
         </TabsList>
 
         <TabsContent value="subscription" className="space-y-6">
           {/* Current Plan Card */}
-          {currentPlan !== 'FREE' && (
+          {currentPlan && currentPlan !== 'INACTIVE' && (
             <Card>
               <CardHeader>
                 <CardTitle>{t('billing.currentPlan')}</CardTitle>
@@ -260,7 +260,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
           {/* Available Plans based on Country */}
           <div>
             <h2 className="text-xl font-semibold mb-4">
-              {currentPlan === 'FREE' ? t('billing.availablePlans') : t('billing.planOverview')}
+              {!currentPlan || currentPlan === 'INACTIVE' ? t('billing.availablePlans') : t('billing.planOverview')}
             </h2>
             
             {country === 'JO' ? (
@@ -434,7 +434,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
           )}
 
           {/* Pricing Comparison Note für Deutschland */}
-          {country === 'DE' && currentPlan === 'FREE' && (
+          {country === 'DE' && (!currentPlan || currentPlan === 'INACTIVE') && (
             <Card className="bg-blue-50 border-blue-200">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-3">
@@ -465,7 +465,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {currentPlan !== 'FREE' ? (
+              {currentPlan && currentPlan !== 'INACTIVE' ? (
                 <>
                   {country === 'JO' && currentPlan === 'JO_PAY_PER_ORDER' ? (
                     <>
@@ -522,7 +522,7 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
         </TabsContent>
 
         {/* Usage Tab für aktive Pläne */}
-        {currentPlan !== 'FREE' && (
+        {currentPlan && currentPlan !== 'INACTIVE' && (
           <TabsContent value="usage" className="space-y-4">
             <Card>
               <CardHeader>
