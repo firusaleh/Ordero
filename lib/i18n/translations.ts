@@ -516,7 +516,55 @@ export const translations = {
       },
       security: {
         title: 'الأمان',
-        description: 'إعدادات الأمان وكلمة المرور'
+        description: 'إعدادات الأمان وكلمة المرور',
+        password: {
+          title: 'سياسات كلمة المرور',
+          description: 'تكوين متطلبات كلمة المرور وانتهاء الصلاحية',
+          expiry: 'انتهاء صلاحية كلمة المرور (أيام)',
+          expiryHelp: 'يجب تجديد كلمات المرور بعد هذه الفترة',
+          enforceStrong: 'فرض كلمات مرور قوية',
+          save: 'حفظ إعدادات كلمة المرور',
+          updateSuccess: 'تم تحديث سياسات كلمة المرور',
+          updateError: 'خطأ في تحديث سياسات كلمة المرور',
+          saveError: 'خطأ في حفظ الإعدادات'
+        },
+        twoFactor: {
+          title: 'المصادقة الثنائية',
+          description: 'تعزيز الأمان باستخدام المصادقة الثنائية',
+          enable: 'تفعيل المصادقة الثنائية',
+          setup: 'إعداد المصادقة الثنائية',
+          scanQR: 'امسح رمز QR هذا باستخدام تطبيق المصادقة',
+          qrPlaceholder: '[رمز QR]',
+          activated: 'تم تفعيل المصادقة الثنائية',
+          deactivated: 'تم إلغاء تفعيل المصادقة الثنائية',
+          activationError: 'خطأ في تفعيل المصادقة الثنائية',
+          enableError: 'خطأ في تمكين المصادقة الثنائية'
+        },
+        session: {
+          title: 'إدارة الجلسة',
+          description: 'تكوين مهلات الجلسة والإعدادات',
+          timeout: 'مهلة الجلسة (دقائق)',
+          timeoutHelp: 'تسجيل خروج تلقائي بعد عدم النشاط',
+          singleSession: 'جلسة واحدة لكل مستخدم',
+          save: 'حفظ إعدادات الجلسة',
+          timeoutError: 'يجب أن تكون المهلة بين 5 و 1440 دقيقة',
+          saveError: 'خطأ في حفظ إعدادات الجلسة'
+        },
+        access: {
+          title: 'التحكم في الوصول',
+          description: 'إدارة محاولات تسجيل الدخول وقيود IP',
+          maxAttempts: 'الحد الأقصى لمحاولات تسجيل الدخول',
+          maxAttemptsHelp: 'يتم قفل الحساب بعد محاولات فاشلة كثيرة',
+          ipRestriction: 'تفعيل قيود IP',
+          ipRestrictionActive: 'قيود IP نشطة',
+          ipRestrictionHelp: 'عناوين IP المسموح بها فقط يمكنها الوصول',
+          save: 'حفظ التحكم في الوصول',
+          attemptsError: 'يجب أن تكون المحاولات بين 1 و 10',
+          updateSuccess: 'تم تحديث التحكم في الوصول',
+          updateError: 'خطأ في تحديث التحكم في الوصول',
+          saveError: 'خطأ في حفظ الإعدادات'
+        },
+        saveSuccess: 'تم حفظ إعدادات الأمان'
       },
       data: {
         title: 'البيانات',
@@ -622,58 +670,6 @@ export const translations = {
       decimalPlaces: 'المنازل العشرية',
       hour24: '24 ساعة',
       hour12: '12 ساعة'
-    },
-    security: {
-      title: 'الأمان',
-      description: 'إعدادات الأمان وكلمة المرور',
-      password: {
-        title: 'سياسات كلمة المرور',
-        description: 'تكوين متطلبات كلمة المرور وانتهاء الصلاحية',
-        expiry: 'انتهاء صلاحية كلمة المرور (أيام)',
-        expiryHelp: 'يجب تجديد كلمات المرور بعد هذه الفترة',
-        enforceStrong: 'فرض كلمات مرور قوية',
-        save: 'حفظ إعدادات كلمة المرور',
-        updateSuccess: 'تم تحديث سياسات كلمة المرور',
-        updateError: 'خطأ في تحديث سياسات كلمة المرور',
-        saveError: 'خطأ في حفظ الإعدادات'
-      },
-      twoFactor: {
-        title: 'المصادقة الثنائية',
-        description: 'تعزيز الأمان باستخدام المصادقة الثنائية',
-        enable: 'تفعيل المصادقة الثنائية',
-        setup: 'إعداد المصادقة الثنائية',
-        scanQR: 'امسح رمز QR هذا باستخدام تطبيق المصادقة',
-        qrPlaceholder: '[رمز QR]',
-        activated: 'تم تفعيل المصادقة الثنائية',
-        deactivated: 'تم إلغاء تفعيل المصادقة الثنائية',
-        activationError: 'خطأ في تفعيل المصادقة الثنائية',
-        enableError: 'خطأ في تمكين المصادقة الثنائية'
-      },
-      session: {
-        title: 'إدارة الجلسة',
-        description: 'تكوين مهلات الجلسة والإعدادات',
-        timeout: 'مهلة الجلسة (دقائق)',
-        timeoutHelp: 'تسجيل خروج تلقائي بعد عدم النشاط',
-        singleSession: 'جلسة واحدة لكل مستخدم',
-        save: 'حفظ إعدادات الجلسة',
-        timeoutError: 'يجب أن تكون المهلة بين 5 و 1440 دقيقة',
-        saveError: 'خطأ في حفظ إعدادات الجلسة'
-      },
-      access: {
-        title: 'التحكم في الوصول',
-        description: 'إدارة محاولات تسجيل الدخول وقيود IP',
-        maxAttempts: 'الحد الأقصى لمحاولات تسجيل الدخول',
-        maxAttemptsHelp: 'يتم قفل الحساب بعد محاولات فاشلة كثيرة',
-        ipRestriction: 'تفعيل قيود IP',
-        ipRestrictionActive: 'قيود IP نشطة',
-        ipRestrictionHelp: 'عناوين IP المسموح بها فقط يمكنها الوصول',
-        save: 'حفظ التحكم في الوصول',
-        attemptsError: 'يجب أن تكون المحاولات بين 1 و 10',
-        updateSuccess: 'تم تحديث التحكم في الوصول',
-        updateError: 'خطأ في تحديث التحكم في الوصول',
-        saveError: 'خطأ في حفظ الإعدادات'
-      },
-      saveSuccess: 'تم حفظ إعدادات الأمان'
     },
     fees: {
       title: 'الرسوم والضرائب',
@@ -1875,7 +1871,55 @@ export const translations = {
       },
       security: {
         title: 'Sicherheit',
-        description: 'Sicherheits- und Passworteinstellungen'
+        description: 'Sicherheits- und Passworteinstellungen',
+        password: {
+          title: 'Passwort-Richtlinien',
+          description: 'Konfigurieren Sie Passwortanforderungen und Ablaufzeiten',
+          expiry: 'Passwort-Ablaufzeit (Tage)',
+          expiryHelp: 'Passwörter müssen nach dieser Zeit erneuert werden',
+          enforceStrong: 'Starke Passwörter erzwingen',
+          save: 'Passwort-Einstellungen speichern',
+          updateSuccess: 'Passwort-Richtlinien aktualisiert',
+          updateError: 'Fehler beim Aktualisieren der Passwort-Richtlinien',
+          saveError: 'Fehler beim Speichern der Einstellungen'
+        },
+        twoFactor: {
+          title: 'Zwei-Faktor-Authentifizierung',
+          description: 'Erhöhen Sie die Sicherheit mit 2FA',
+          enable: '2FA aktivieren',
+          setup: '2FA einrichten',
+          scanQR: 'Scannen Sie diesen QR-Code mit Ihrer Authenticator-App',
+          qrPlaceholder: '[QR-Code]',
+          activated: 'Zwei-Faktor-Authentifizierung aktiviert',
+          deactivated: 'Zwei-Faktor-Authentifizierung deaktiviert',
+          activationError: 'Fehler bei der 2FA-Aktivierung',
+          enableError: 'Fehler beim Aktivieren von 2FA'
+        },
+        session: {
+          title: 'Sitzungs-Verwaltung',
+          description: 'Konfigurieren Sie Sitzungs-Timeouts und Einstellungen',
+          timeout: 'Sitzungs-Timeout (Minuten)',
+          timeoutHelp: 'Automatische Abmeldung nach Inaktivität',
+          singleSession: 'Nur eine Sitzung pro Benutzer',
+          save: 'Sitzungseinstellungen speichern',
+          timeoutError: 'Timeout muss zwischen 5 und 1440 Minuten liegen',
+          saveError: 'Fehler beim Speichern der Sitzungseinstellungen'
+        },
+        access: {
+          title: 'Zugriffskontrolle',
+          description: 'Verwalten Sie Login-Versuche und IP-Beschränkungen',
+          maxAttempts: 'Maximale Login-Versuche',
+          maxAttemptsHelp: 'Konto wird nach zu vielen fehlgeschlagenen Versuchen gesperrt',
+          ipRestriction: 'IP-Beschränkung aktivieren',
+          ipRestrictionActive: 'IP-Beschränkung ist aktiv',
+          ipRestrictionHelp: 'Nur zugelassene IP-Adressen können zugreifen',
+          save: 'Zugriffskontrolle speichern',
+          attemptsError: 'Versuche müssen zwischen 1 und 10 liegen',
+          updateSuccess: 'Zugriffskontrolle aktualisiert',
+          updateError: 'Fehler beim Aktualisieren der Zugriffskontrolle',
+          saveError: 'Fehler beim Speichern der Einstellungen'
+        },
+        saveSuccess: 'Sicherheitseinstellungen gespeichert'
       },
       data: {
         title: 'Daten',
@@ -1948,58 +1992,6 @@ export const translations = {
       decimalPlaces: 'Dezimalstellen',
       hour24: '24 Stunden',
       hour12: '12 Stunden'
-    },
-    security: {
-      title: 'Sicherheit',
-      description: 'Sicherheits- und Passworteinstellungen',
-      password: {
-        title: 'Passwort-Richtlinien',
-        description: 'Konfigurieren Sie Passwortanforderungen und Ablaufzeiten',
-        expiry: 'Passwort-Ablaufzeit (Tage)',
-        expiryHelp: 'Passwörter müssen nach dieser Zeit erneuert werden',
-        enforceStrong: 'Starke Passwörter erzwingen',
-        save: 'Passwort-Einstellungen speichern',
-        updateSuccess: 'Passwort-Richtlinien aktualisiert',
-        updateError: 'Fehler beim Aktualisieren der Passwort-Richtlinien',
-        saveError: 'Fehler beim Speichern der Einstellungen'
-      },
-      twoFactor: {
-        title: 'Zwei-Faktor-Authentifizierung',
-        description: 'Erhöhen Sie die Sicherheit mit 2FA',
-        enable: '2FA aktivieren',
-        setup: '2FA einrichten',
-        scanQR: 'Scannen Sie diesen QR-Code mit Ihrer Authenticator-App',
-        qrPlaceholder: '[QR-Code]',
-        activated: 'Zwei-Faktor-Authentifizierung aktiviert',
-        deactivated: 'Zwei-Faktor-Authentifizierung deaktiviert',
-        activationError: 'Fehler bei der 2FA-Aktivierung',
-        enableError: 'Fehler beim Aktivieren von 2FA'
-      },
-      session: {
-        title: 'Sitzungs-Verwaltung',
-        description: 'Konfigurieren Sie Sitzungs-Timeouts und Einstellungen',
-        timeout: 'Sitzungs-Timeout (Minuten)',
-        timeoutHelp: 'Automatische Abmeldung nach Inaktivität',
-        singleSession: 'Nur eine Sitzung pro Benutzer',
-        save: 'Sitzungseinstellungen speichern',
-        timeoutError: 'Timeout muss zwischen 5 und 1440 Minuten liegen',
-        saveError: 'Fehler beim Speichern der Sitzungseinstellungen'
-      },
-      access: {
-        title: 'Zugriffskontrolle',
-        description: 'Verwalten Sie Login-Versuche und IP-Beschränkungen',
-        maxAttempts: 'Maximale Login-Versuche',
-        maxAttemptsHelp: 'Konto wird nach zu vielen fehlgeschlagenen Versuchen gesperrt',
-        ipRestriction: 'IP-Beschränkung aktivieren',
-        ipRestrictionActive: 'IP-Beschränkung ist aktiv',
-        ipRestrictionHelp: 'Nur zugelassene IP-Adressen können zugreifen',
-        save: 'Zugriffskontrolle speichern',
-        attemptsError: 'Versuche müssen zwischen 1 und 10 liegen',
-        updateSuccess: 'Zugriffskontrolle aktualisiert',
-        updateError: 'Fehler beim Aktualisieren der Zugriffskontrolle',
-        saveError: 'Fehler beim Speichern der Einstellungen'
-      },
-      saveSuccess: 'Sicherheitseinstellungen gespeichert'
     },
     fees: {
       title: 'Gebühren & Steuern',
