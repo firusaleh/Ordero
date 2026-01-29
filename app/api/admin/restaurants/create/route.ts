@@ -3,7 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
-import { sendWelcomeEmail } from '@/lib/email-sendgrid'
+import { sendEmail } from '@/lib/email-sendgrid'
 
 const createRestaurantSchema = z.object({
   name: z.string().min(2, 'Name muss mindestens 2 Zeichen lang sein'),
@@ -171,24 +171,119 @@ export async function POST(request: NextRequest) {
       return { user, restaurant }
     })
     
-    // Sende Willkommens-E-Mail an den Restaurant-Besitzer
+    // Sende Willkommens-E-Mail mit Login-Daten an den Restaurant-Besitzer
     try {
-      const emailResult = await sendWelcomeEmail({
-        email: validatedData.ownerEmail,
-        name: validatedData.ownerName,
-        restaurantName: validatedData.name,
-        password: tempPassword,
-        loginUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login`
+      const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+                .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+                .credentials { background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #667eea; }
+                .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white !important; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>Willkommen bei Oriido! 🎉</h1>
+                </div>
+                
+                <div class="content">
+                    <p>Hallo ${validatedData.ownerName},</p>
+                    
+                    <p>herzlich willkommen bei Oriido! Ihr Restaurant <strong>${validatedData.name}</strong> wurde erfolgreich registriert.</p>
+                    
+                    <div class="credentials">
+                        <h3 style="margin-top: 0;">🔐 Ihre Login-Daten:</h3>
+                        <p><strong>E-Mail:</strong> ${validatedData.ownerEmail}</p>
+                        <p><strong>Passwort:</strong> ${tempPassword}</p>
+                        <p style="color: #e74c3c; font-size: 14px; margin-top: 10px;">
+                            <strong>Wichtig:</strong> Bitte ändern Sie Ihr Passwort nach dem ersten Login!
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login" class="button">
+                            Zum Dashboard →
+                        </a>
+                    </div>
+                    
+                    <h3>🚀 Die nächsten Schritte:</h3>
+                    <ol>
+                        <li><strong>Menü einrichten:</strong> Fügen Sie Ihre Speisen und Getränke hinzu</li>
+                        <li><strong>QR-Codes generieren:</strong> Erstellen Sie QR-Codes für Ihre Tische</li>
+                        <li><strong>Design anpassen:</strong> Personalisieren Sie das Aussehen Ihrer digitalen Speisekarte</li>
+                        <li><strong>Zahlungen aktivieren:</strong> Verbinden Sie Ihr Stripe-Konto für Online-Zahlungen</li>
+                    </ol>
+                    
+                    <p>Bei Fragen stehen wir Ihnen jederzeit zur Verfügung:</p>
+                    <ul>
+                        <li>📧 E-Mail: <a href="mailto:support@oriido.com">support@oriido.com</a></li>
+                        <li>📚 Dokumentation: <a href="https://docs.oriido.com">docs.oriido.com</a></li>
+                    </ul>
+                    
+                    <p>Wir freuen uns, Sie bei Oriido begrüßen zu dürfen!</p>
+                    
+                    <p>Mit freundlichen Grüßen,<br>
+                    Ihr Oriido Team</p>
+                </div>
+                
+                <div class="footer">
+                    <p>© ${new Date().getFullYear()} Oriido. Alle Rechte vorbehalten.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+      `
+      
+      const emailText = `
+Willkommen bei Oriido!
+
+Hallo ${validatedData.ownerName},
+
+herzlich willkommen bei Oriido! Ihr Restaurant ${validatedData.name} wurde erfolgreich registriert.
+
+Ihre Login-Daten:
+E-Mail: ${validatedData.ownerEmail}
+Passwort: ${tempPassword}
+
+WICHTIG: Bitte ändern Sie Ihr Passwort nach dem ersten Login!
+
+Loggen Sie sich hier ein: ${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/login
+
+Die nächsten Schritte:
+1. Menü einrichten
+2. QR-Codes generieren  
+3. Design anpassen
+4. Zahlungen aktivieren
+
+Bei Fragen: support@oriido.com
+
+Mit freundlichen Grüßen,
+Ihr Oriido Team
+      `
+      
+      const emailResult = await sendEmail({
+        to: validatedData.ownerEmail,
+        subject: `Willkommen bei Oriido, ${validatedData.name}!`,
+        html: emailHtml,
+        text: emailText
       })
       
       if (emailResult.success) {
-        console.log('✅ Welcome email sent successfully to:', validatedData.ownerEmail)
+        console.log('✅ Welcome email with credentials sent to:', validatedData.ownerEmail)
       } else {
-        console.error('❌ Email failed:', emailResult.error, emailResult.details)
+        console.error('❌ Email failed:', emailResult.error)
       }
     } catch (emailError: any) {
-      console.error('❌ Failed to send welcome email:', emailError.message, emailError)
-      // Fahre fort, auch wenn E-Mail fehlschlägt
+      console.error('❌ Failed to send welcome email:', emailError.message)
+      // E-Mail-Fehler sollten den Prozess nicht abbrechen
     }
     
     return NextResponse.json({
