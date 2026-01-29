@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       email,
       name: 'Test User',
       restaurantName: 'Test Restaurant',
+      password: 'TestPassword123',
       loginUrl: 'https://www.oriido.com/login'
     })
     
@@ -45,8 +46,7 @@ export async function POST(request: NextRequest) {
           to: email,
           apiKeyExists: !!process.env.SENDGRID_API_KEY,
           fromEmail: process.env.EMAIL_FROM || 'info@oriido.com',
-          messageId: result.id,
-          data: result.data
+          messageId: result.messageId || result.id
         }
       })
     } else {
