@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
       email,
       name: 'Test User',
       restaurantName: 'Test Restaurant',
-      password: 'TestPass123',
       loginUrl: 'https://www.oriido.com/login'
     })
     
