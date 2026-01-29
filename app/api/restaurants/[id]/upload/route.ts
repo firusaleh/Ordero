@@ -46,10 +46,10 @@ export async function POST(
       )
     }
 
-    // Validiere Dateigröße (max 2MB für Base64)
-    if (file.size > 2 * 1024 * 1024) {
+    // Validiere Dateigröße (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json(
-        { error: 'Datei ist zu groß (max. 2MB)' },
+        { error: 'Datei ist zu groß (max. 5MB)' },
         { status: 400 }
       )
     }

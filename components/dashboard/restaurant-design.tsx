@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { compressImageToBase64 } from '@/lib/utils/image-compression'
 import { 
   Palette, 
   Save, 
@@ -58,8 +59,11 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
     customCss: initialData?.customCss || ''
   })
   const [loading, setLoading] = useState(false)
+  // Separate state for previews (can be base64) and URLs (from server)
   const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logo || null)
   const [coverPreview, setCoverPreview] = useState<string | null>(initialData?.coverImage || null)
+  const [logoUrl, setLogoUrl] = useState<string>(initialData?.logo || '')
+  const [bannerUrl, setBannerUrl] = useState<string>(initialData?.coverImage || '')
 
   const handleImageUpload = useCallback(async (file: File, type: 'logo' | 'cover') => {
     const formData = new FormData()
@@ -77,11 +81,11 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
       const { url } = await response.json()
       
       if (type === 'logo') {
+        setLogoUrl(url) // Save the URL, not base64
         setDesign(prev => ({ ...prev, logo: url }))
-        setLogoPreview(url)
       } else {
+        setBannerUrl(url) // Save the URL, not base64
         setDesign(prev => ({ ...prev, banner: url }))
-        setCoverPreview(url)
       }
 
       toast.success(`${type === 'logo' ? 'Logo' : 'Titelbild'} erfolgreich hochgeladen`)
@@ -90,13 +94,13 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
     }
   }, [restaurantId])
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'cover') => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validiere Dateigröße (max 2MB für Base64)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Datei ist zu groß (max. 2MB)')
+    // Validiere Dateigröße (max 10MB vor Komprimierung)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Datei ist zu groß (max. 10MB)')
       return
     }
 
@@ -106,39 +110,66 @@ export default function RestaurantDesign({ restaurantId, initialData }: Restaura
       return
     }
 
-    // Preview anzeigen
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      if (type === 'logo') {
-        setLogoPreview(reader.result as string)
-      } else {
-        setCoverPreview(reader.result as string)
-      }
-    }
-    reader.readAsDataURL(file)
+    try {
+      // Show loading state
+      toast.loading(`${type === 'logo' ? 'Logo' : 'Titelbild'} wird verarbeitet...`)
 
-    // Upload
-    handleImageUpload(file, type)
+      // Compress image for preview and upload
+      const maxWidth = type === 'logo' ? 500 : 1920
+      const maxHeight = type === 'logo' ? 500 : 1080
+      const compressedBase64 = await compressImageToBase64(file, maxWidth, maxHeight, 0.8)
+      
+      // Set preview immediately
+      if (type === 'logo') {
+        setLogoPreview(compressedBase64)
+      } else {
+        setCoverPreview(compressedBase64)
+      }
+
+      // Create a compressed file for upload
+      const response = await fetch(compressedBase64)
+      const blob = await response.blob()
+      const compressedFile = new File([blob], file.name, { type: file.type })
+
+      // Upload the compressed file
+      handleImageUpload(compressedFile, type)
+    } catch (error) {
+      console.error('Image processing error:', error)
+      toast.error('Fehler beim Verarbeiten des Bildes')
+    }
   }
 
   const saveDesign = async () => {
     setLoading(true)
     
     try {
+      // Only send non-image design data (images are already uploaded separately)
+      const designData = {
+        primaryColor: design.primaryColor,
+        secondaryColor: design.secondaryColor,
+        fontFamily: design.fontFamily,
+        customCss: design.customCss,
+        // Only send URLs if they exist, not base64 data
+        logo: logoUrl || '',
+        banner: bannerUrl || ''
+      }
+
       const response = await fetch(`/api/restaurants/${restaurantId}/design`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(design)
+        body: JSON.stringify(designData)
       })
 
       if (response.ok) {
         toast.success('Design-Einstellungen gespeichert')
       } else {
-        throw new Error('Fehler beim Speichern')
+        const error = await response.text()
+        throw new Error(error || 'Fehler beim Speichern')
       }
     } catch (error) {
+      console.error('Save error:', error)
       toast.error('Fehler beim Speichern der Design-Einstellungen')
     } finally {
       setLoading(false)
