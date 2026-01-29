@@ -64,6 +64,8 @@ interface Restaurant {
   slug: string
   description?: string | null
   primaryColor?: string | null
+  logo?: string | null
+  banner?: string | null
   cuisine?: string | null
   street?: string | null
   city?: string | null
@@ -372,21 +374,53 @@ export default function GuestMenuViewSimple({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Banner Image */}
+      {restaurant.banner && (
+        <div className="relative h-48 md:h-64 w-full overflow-hidden">
+          <img 
+            src={restaurant.banner} 
+            alt={restaurant.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          {/* Logo overlay on banner */}
+          {restaurant.logo && (
+            <div className="absolute bottom-4 left-4 bg-white rounded-lg p-2 shadow-lg">
+              <img 
+                src={restaurant.logo} 
+                alt={`${restaurant.name} Logo`}
+                className="h-16 w-16 object-contain"
+              />
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Mobile Optimized Header */}
       <div className="bg-white shadow-md sticky top-0 z-50 border-b">
         <div className="px-3 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-gray-900 truncate">
-                {/* Don't show generic menu names as restaurant name */}
-                {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
-                  ? t('common.welcome') || 'Welcome' 
-                  : restaurant.name}
-              </h1>
-              <div className="flex items-center gap-1 mt-0.5">
-                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                  {cuisineEmojis[restaurant.cuisine || 'other']} {getLocalizedTableName(tableNumber || 0, language)}
-                </Badge>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              {/* Logo in header if no banner */}
+              {restaurant.logo && !restaurant.banner && (
+                <img 
+                  src={restaurant.logo} 
+                  alt={`${restaurant.name} Logo`}
+                  className="h-8 w-8 object-contain rounded"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold text-gray-900 truncate">
+                  {/* Don't show generic menu names as restaurant name */}
+                  {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(restaurant.name) 
+                    ? t('common.welcome') || 'Welcome' 
+                    : restaurant.name}
+                </h1>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                    {cuisineEmojis[restaurant.cuisine || 'other']} {getLocalizedTableName(tableNumber || 0, language)}
+                  </Badge>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-1">

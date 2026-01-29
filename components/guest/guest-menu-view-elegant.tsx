@@ -75,6 +75,8 @@ interface Restaurant {
   slug: string
   description?: string | null
   cuisine?: string | null
+  logo?: string | null
+  banner?: string | null
   street?: string | null
   city?: string | null
   postalCode?: string | null
