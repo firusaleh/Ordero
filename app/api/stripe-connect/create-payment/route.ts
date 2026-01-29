@@ -152,15 +152,27 @@ export async function POST(req: NextRequest) {
       // NORMAL: Verwende Stripe Connect mit automatischem Transfer
       // Fixe Plattformgebühr von 0.45 EUR (45 Cents) pro Bestellung
       const platformFee = PLATFORM_FEE_CENTS;
-      
+
+      // Create statement descriptor from restaurant name (max 22 chars total)
+      // Format: "RESTAURANTNAME" for Apple Pay / Google Pay
+      const restaurantDescriptor = restaurant.name
+        .toUpperCase()
+        .replace(/[^A-Z0-9\s]/g, '') // Only letters, numbers, spaces
+        .replace(/\s+/g, ' ')
+        .trim()
+        .substring(0, 22);
+
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
         automatic_payment_methods: { enabled: true }, // Enables Apple Pay, Google Pay, Cards, etc.
         description: `${tableInfo} bei ${restaurant.name}`,
-        // WICHTIG: Explizit setzen um Default zu überschreiben
-        statement_descriptor: 'ORIIDO', // Überschreibt "ORIIDO SANDBOX" oder andere defaults
-        statement_descriptor_suffix: cleanRestaurantName,
+        // Statement descriptor für Kartenabrechnung
+        statement_descriptor: restaurantDescriptor || 'ORIIDO',
+        statement_descriptor_suffix: tableNumber ? `T${tableNumber}` : undefined,
+        // WICHTIG: on_behalf_of macht das Restaurant zum "merchant of record"
+        // Dies bewirkt, dass Apple Pay/Google Pay den Restaurant-Namen zeigen
+        on_behalf_of: restaurant.stripeAccountId,
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
         transfer_data: {
           destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
@@ -183,7 +195,9 @@ export async function POST(req: NextRequest) {
     console.log('Amount:', paymentIntent.amount);
     console.log('Statement Descriptor:', (paymentIntent as any).statement_descriptor || 'NOT SET');
     console.log('Statement Descriptor Suffix:', (paymentIntent as any).statement_descriptor_suffix || 'NOT SET');
+    console.log('On Behalf Of:', (paymentIntent as any).on_behalf_of || 'NOT SET');
     console.log('Connected Account:', restaurant.stripeAccountId || 'NONE (Direct Payment)');
+    console.log('Is Direct Payment:', isDirectPayment);
     console.log('=====================================');
     
     // Update PendingPayment with paymentIntentId
