@@ -96,6 +96,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.id = user.id
         token.role = user.role
+        token.createdAt = user.createdAt
       }
       
       if (trigger === "update" && session) {
@@ -108,6 +109,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as any
+        session.user.createdAt = token.createdAt as any
       }
       return session
     },

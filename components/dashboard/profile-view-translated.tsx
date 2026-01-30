@@ -131,7 +131,16 @@ export default function ProfileViewTranslated({ user }: ProfileViewProps) {
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Calendar className="h-4 w-4" />
               <span className="font-medium">{t('profile.memberSince')}:</span>
-              <span>{new Date(user.createdAt || Date.now()).toLocaleDateString()}</span>
+              <span>
+                {user.createdAt 
+                  ? new Date(user.createdAt).toLocaleDateString(language === 'de' ? 'de-DE' : language === 'ar' ? 'ar-SA' : 'en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                  : '-'
+                }
+              </span>
             </div>
           </CardContent>
         </Card>
