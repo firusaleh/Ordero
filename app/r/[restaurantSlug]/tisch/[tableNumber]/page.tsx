@@ -22,8 +22,8 @@ async function getRestaurantMenu(slug: string, tableNumber: string) {
               isAvailable: true 
             },
             orderBy: { sortOrder: 'asc' },
-            // variants und extras sind embedded documents in MongoDB,
-            // werden automatisch mit dem MenuItem geladen
+            // variants, extras und special properties sind embedded documents in MongoDB,
+            // werden automatisch mit dem MenuItem geladen (inkl. isDailySpecial, isFeatured, specialPrice)
           }
         }
       }
@@ -48,6 +48,26 @@ async function getRestaurantMenu(slug: string, tableNumber: string) {
     country: restaurant.country,
     settings: restaurant.settings,
     slug: restaurant.slug
+  })
+  
+  // Debug: Prüfe ob spezielle Properties vorhanden sind
+  const dailySpecials = restaurant.categories.flatMap(cat => 
+    cat.menuItems.filter(item => item.isDailySpecial)
+  )
+  const featuredItems = restaurant.categories.flatMap(cat => 
+    cat.menuItems.filter(item => item.isFeatured)
+  )
+  
+  console.log('Special menu items:', {
+    dailySpecials: dailySpecials.map(item => ({
+      name: item.name,
+      isDailySpecial: item.isDailySpecial,
+      specialPrice: item.specialPrice
+    })),
+    featuredItems: featuredItems.map(item => ({
+      name: item.name,
+      isFeatured: item.isFeatured
+    }))
   })
 
   // Prüfe ob Tisch existiert
