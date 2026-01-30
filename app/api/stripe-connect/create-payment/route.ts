@@ -19,6 +19,11 @@ const stripe = isValidKey ? new Stripe(stripeSecretKey!, {
 // Plattformgebühr als Fixbetrag in Cents
 const PLATFORM_FEE_CENTS = 45; // 0.45 EUR Fixgebühr pro Bestellung
 
+// WICHTIGE GEBÜHRENSTRUKTUR:
+// - Restaurant zahlt: Stripe-Transaktionsgebühren (ca. 1.5% + 0.25€)
+// - Plattform erhält: 0.45€ pro Bestellung (application_fee)
+// - Kunde zahlt: Nur den Bestellbetrag (keine zusätzlichen Gebühren)
+
 interface CartItem {
   menuItemId: string;
   name: string;
@@ -162,6 +167,10 @@ export async function POST(req: NextRequest) {
         .trim()
         .substring(0, 22);
 
+      // WICHTIG: Verwende "Direct Charges" anstatt "Destination Charges"
+      // Bei Direct Charges wird die Zahlung direkt auf dem Restaurant-Account erstellt
+      // Das Restaurant trägt alle Stripe-Gebühren
+      // Die Plattform erhält nur die application_fee
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
@@ -170,22 +179,22 @@ export async function POST(req: NextRequest) {
         // Statement descriptor für Kartenabrechnung
         statement_descriptor: restaurantDescriptor || 'ORIIDO',
         statement_descriptor_suffix: tableNumber ? `T${tableNumber}` : undefined,
-        // WICHTIG: on_behalf_of macht das Restaurant zum "merchant of record"
-        // Dies bewirkt, dass Apple Pay/Google Pay den Restaurant-Namen zeigen
-        on_behalf_of: restaurant.stripeAccountId,
-        application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR
-        transfer_data: {
-          destination: restaurant.stripeAccountId, // Geld geht an das Restaurant
-        },
+        // WICHTIG: Plattformgebühr - diese erhält die Plattform
+        application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR für Plattform
         metadata: {
           pendingPaymentId: pendingPayment.id,
           restaurantId: restaurantId,
           restaurantName: restaurant.name,
           tableNumber: tableNumber?.toString() || '',
           platform: 'Oriido',
-          paymentType: 'STRIPE_CONNECT',
-          platformFee: `${platformFee} cents`
+          paymentType: 'STRIPE_DIRECT_CHARGE',
+          platformFee: `${platformFee} cents`,
+          stripeFeePaidBy: 'restaurant'
         }
+      }, {
+        // WICHTIG: Dies erstellt die Zahlung direkt auf dem Restaurant-Account
+        // Das Restaurant trägt alle Stripe-Transaktionsgebühren
+        stripeAccount: restaurant.stripeAccountId
       });
     }
 

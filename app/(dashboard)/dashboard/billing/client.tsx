@@ -433,6 +433,30 @@ export default function BillingClient({ restaurant }: BillingClientProps) {
             </Card>
           )}
 
+          {/* Gebühren-Information für Deutschland */}
+          {country === 'DE' && currentPlan === 'DE_PAY_PER_ORDER' && (
+            <Card className="bg-amber-50 border-amber-200">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-amber-900 mb-1">
+                      Wichtige Information zu Zahlungsgebühren:
+                    </p>
+                    <ul className="text-sm text-amber-800 space-y-1 list-disc list-inside">
+                      <li><strong>Oriido-Gebühr:</strong> 0,45€ pro Bestellung</li>
+                      <li><strong>Stripe-Transaktionsgebühren:</strong> Ca. 1,5% + 0,25€ (vom Restaurant getragen)</li>
+                      <li><strong>Für Kunden:</strong> Keine zusätzlichen Gebühren</li>
+                    </ul>
+                    <p className="text-xs text-amber-700 mt-2">
+                      Die Stripe-Gebühren werden direkt von Ihren Einnahmen abgezogen.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Pricing Comparison Note für Deutschland */}
           {country === 'DE' && (!currentPlan || currentPlan === 'INACTIVE') && (
             <Card className="bg-blue-50 border-blue-200">
