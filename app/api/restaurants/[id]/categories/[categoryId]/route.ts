@@ -107,6 +107,61 @@ export async function PUT(
   }
 }
 
+// PATCH - Partially update a specific category
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string; categoryId: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id, categoryId } = await params
+    const body = await request.json()
+
+    // Check if user has access to this restaurant
+    const restaurant = await prisma.restaurant.findFirst({
+      where: {
+        id,
+        OR: [
+          { ownerId: session.user.id },
+          { staff: { some: { userId: session.user.id } } }
+        ]
+      }
+    })
+
+    if (!restaurant) {
+      return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 })
+    }
+
+    // Build update data object with only provided fields
+    const updateData: any = {}
+    if (body.name !== undefined) updateData.name = body.name
+    if (body.description !== undefined) updateData.description = body.description
+    if (body.icon !== undefined) updateData.icon = body.icon
+    if (body.color !== undefined) updateData.color = body.color
+    if (body.image !== undefined) updateData.image = body.image
+    if (body.sortOrder !== undefined) updateData.sortOrder = body.sortOrder
+    if (body.isActive !== undefined) updateData.isActive = body.isActive
+
+    // Update category
+    const category = await prisma.category.update({
+      where: { 
+        id: categoryId,
+        restaurantId: id
+      },
+      data: updateData
+    })
+
+    return NextResponse.json({ category })
+  } catch (error) {
+    console.error('Error updating category:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 // DELETE - Delete a specific category
 export async function DELETE(
   request: Request,

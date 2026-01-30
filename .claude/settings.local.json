@@ -13,7 +13,8 @@
       "Bash(git pull:*)",
       "Bash(git stash:*)",
       "Bash(curl:*)",
-      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://stripe.com/files/apple-pay/apple-developer-merchantid-domain-association'' -OutFile ''public/.well-known/apple-developer-merchantid-domain-association''\")"
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://stripe.com/files/apple-pay/apple-developer-merchantid-domain-association'' -OutFile ''public/.well-known/apple-developer-merchantid-domain-association''\")",
+      "Bash(open /Users/firashattab/Documents/GitHub/Ordero/oriido/public/demo-standalone.html)"
     ]
   }
 }

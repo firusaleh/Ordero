@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oriido - Restaurant Management Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #FFF5F0 0%, #FFFFFF 50%, #FEF2F2 100%);
+            min-height: 100vh;
+            color: #1F2937;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FB923C, #EA580C);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(251, 146, 60, 0.3);
+        }
+        
+        .logo svg {
+            width: 40px;
+            height: 40px;
+            fill: white;
+        }
+        
+        h1 {
+            font-size: 48px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #EA580C, #DC2626);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #6B7280;
+            margin-bottom: 30px;
+        }
+        
+        .demo-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 50px;
+        }
+        
+        @media (max-width: 968px) {
+            .demo-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .demo-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .step-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #FEF3C7;
+            color: #D97706;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #FB923C, #EA580C);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(251, 146, 60, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #E5E7EB;
+        }
+        
+        .demo-content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .demo-content .subtitle-text {
+            font-size: 18px;
+            color: #EA580C;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .demo-content .description {
+            color: #6B7280;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .features {
+            display: grid;
+            gap: 15px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 12px;
+            background: #FFF7ED;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            width: 30px;
+            height: 30px;
+            background: #FB923C;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FB923C, #EA580C);
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dots {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E5E7EB;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: #EA580C;
+        }
+        
+        .mockup-screen {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            animation: fadeInRight 0.8s ease-out;
+        }
+        
+        .browser-bar {
+            background: #1F2937;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .browser-dots {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .screen-content {
+            padding: 30px;
+            min-height: 450px;
+            background: #FAFAFA;
+        }
+        
+        /* Mockup Screens */
+        .welcome-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+        
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background: #1F2937;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .menu-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .menu-image {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #FED7AA, #FB923C);
+            border-radius: 10px;
+        }
+        
+        .menu-details {
+            flex: 1;
+        }
+        
+        .menu-name {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .menu-description {
+            color: #6B7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .menu-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #EA580C;
+        }
+        
+        .add-btn {
+            padding: 8px 16px;
+            background: #EA580C;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .add-btn:hover {
+            background: #DC2626;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FED7AA, #FB923C);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            color: #6B7280;
+            font-size: 14px;
+        }
+        
+        .order-list {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #FAFAFA;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .order-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-new {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+        
+        .badge-processing {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 50px 20px;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .cta-box {
+            background: linear-gradient(135deg, #FB923C, #EA580C);
+            color: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(251, 146, 60, 0.3);
+        }
+        
+        .cta-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .cta-description {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        
+        .cta-button {
+            padding: 15px 40px;
+            background: white;
+            color: #EA580C;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 2.01c1.1 0 2 .89 2 1.99v16c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V4c0-1.1.9-1.99 2-1.99h12zM12 13c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0-8C9.79 5 8 6.79 8 9s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+                </svg>
+            </div>
+            <h1>Oriido</h1>
+            <p class="subtitle">Die komplette Restaurant-Management-Lösung</p>
+        </div>
+        
+        <div class="demo-container">
+            <div class="demo-panel">
+                <div class="step-indicator">
+                    <span class="step-badge" id="stepBadge">Schritt 1 von 8</span>
+                    <div class="controls">
+                        <button class="btn btn-secondary" onclick="restartDemo()">
+                            <span>↻</span> Neustart
+                        </button>
+                        <button class="btn btn-primary" id="playBtn" onclick="togglePlay()">
+                            <span>▶</span> Abspielen
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="demo-content" id="demoContent">
+                    <!-- Content will be dynamically inserted here -->
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" onclick="previousStep()" id="prevBtn">
+                        ← Zurück
+                    </button>
+                    <div class="dots" id="dots">
+                        <!-- Dots will be dynamically inserted here -->
+                    </div>
+                    <button class="btn btn-primary" onclick="nextStep()" id="nextBtn">
+                        Weiter →
+                    </button>
+                </div>
+            </div>
+            
+            <div class="mockup-screen">
+                <div class="browser-bar">
+                    <div class="browser-dots">
+                        <div class="browser-dot" style="background: #EF4444"></div>
+                        <div class="browser-dot" style="background: #F59E0B"></div>
+                        <div class="browser-dot" style="background: #10B981"></div>
+                    </div>
+                    <span style="color: #9CA3AF; font-size: 14px">oriido.de</span>
+                </div>
+                <div class="screen-content" id="mockupScreen">
+                    <!-- Mockup content will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <div class="cta-box">
+                <h2 class="cta-title">Bereit, Ihr Restaurant zu digitalisieren?</h2>
+                <p class="cta-description">
+                    Starten Sie noch heute mit Oriido und erleben Sie die Zukunft der Gastronomie
+                </p>
+                <button class="cta-button" onclick="window.open('https://oriido.de', '_blank')">
+                    Jetzt kostenlos testen
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const demoSteps = [
+            {
+                title: "Willkommen bei Oriido",
+                subtitle: "Die komplette Restaurant-Management-Lösung",
+                description: "Digitalisieren Sie Ihr Restaurant mit QR-Code-Bestellungen, Echtzeit-Auftragsmanagement und nahtloser POS-Integration.",
+                features: [
+                    "QR-Code Bestellsystem",
+                    "Echtzeit Dashboard",
+                    "Multi-Restaurant Support",
+                    "POS Integration"
+                ],
+                mockScreen: "welcome"
+            },
+            {
+                title: "QR-Code Tischbestellung",
+                subtitle: "Gäste bestellen direkt vom Tisch",
+                description: "Ihre Gäste scannen einfach den QR-Code auf dem Tisch und können sofort bestellen - ohne App-Download, ohne Wartezeit.",
+                features: [
+                    "Kontaktlose Bestellung",
+                    "Mehrsprachiges Menü",
+                    "Echtzeit-Updates",
+                    "Mobile optimiert"
+                ],
+                mockScreen: "qr"
+            },
+            {
+                title: "Digitale Speisekarte",
+                subtitle: "Ansprechend und immer aktuell",
+                description: "Präsentieren Sie Ihre Speisen mit hochwertigen Bildern, detaillierten Beschreibungen und Allergeninformationen.",
+                features: [
+                    "Kategorisierte Menüs",
+                    "Produktbilder",
+                    "Allergene & Zusatzstoffe",
+                    "Preisanpassungen in Echtzeit"
+                ],
+                mockScreen: "menu"
+            },
+            {
+                title: "Echtzeit-Dashboard",
+                subtitle: "Alle Bestellungen im Blick",
+                description: "Verwalten Sie eingehende Bestellungen, verfolgen Sie den Status und behalten Sie den Überblick über Ihre Umsätze.",
+                features: [
+                    "Live-Bestellübersicht",
+                    "Statusverwaltung",
+                    "Küchen-Display",
+                    "Umsatzstatistiken"
+                ],
+                mockScreen: "dashboard"
+            },
+            {
+                title: "POS-Integration",
+                subtitle: "Nahtlose Verbindung zu Ihrem Kassensystem",
+                description: "Oriido integriert sich perfekt mit führenden POS-Systemen wie Lightspeed, Square und mehr.",
+                features: [
+                    "Automatische Synchronisation",
+                    "Bestandsverwaltung",
+                    "Unified Reporting",
+                    "Keine doppelte Dateneingabe"
+                ],
+                mockScreen: "pos"
+            },
+            {
+                title: "Analytics & Insights",
+                subtitle: "Datengetriebene Entscheidungen",
+                description: "Detaillierte Analysen zu Bestellverhalten, beliebten Gerichten und Umsatzentwicklung.",
+                features: [
+                    "Umsatzberichte",
+                    "Beliebte Produkte",
+                    "Kundenverhalten",
+                    "Trends & Prognosen"
+                ],
+                mockScreen: "analytics"
+            },
+            {
+                title: "Multi-Restaurant Management",
+                subtitle: "Verwalten Sie mehrere Standorte",
+                description: "Perfekt für Restaurantketten - verwalten Sie alle Ihre Standorte von einem zentralen Dashboard aus.",
+                features: [
+                    "Zentrale Verwaltung",
+                    "Standort-spezifische Menüs",
+                    "Übergreifende Berichte",
+                    "Rollen & Berechtigungen"
+                ],
+                mockScreen: "multi"
+            },
+            {
+                title: "Starten Sie heute!",
+                subtitle: "Bereit für die digitale Transformation?",
+                description: "Schließen Sie sich hunderten von Restaurants an, die bereits mit Oriido ihre Prozesse optimiert haben.",
+                features: [
+                    "100 Bestellungen kostenlos testen",
+                    "Keine Kreditkarte erforderlich",
+                    "Persönlicher Support",
+                    "Schnelle Einrichtung"
+                ],
+                mockScreen: "cta"
+            }
+        ];
+        
+        let currentStep = 0;
+        let isPlaying = false;
+        let progress = 0;
+        let progressInterval;
+        
+        function init() {
+            renderStep();
+            renderDots();
+        }
+        
+        function renderStep() {
+            const step = demoSteps[currentStep];
+            const content = document.getElementById('demoContent');
+            
+            content.innerHTML = `
+                <h2>${step.title}</h2>
+                <p class="subtitle-text">${step.subtitle}</p>
+                <p class="description">${step.description}</p>
+                <div class="features">
+                    ${step.features.map(feature => `
+                        <div class="feature-item">
+                            <div class="feature-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            </div>
+                            <span>${feature}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            document.getElementById('stepBadge').textContent = `Schritt ${currentStep + 1} von ${demoSteps.length}`;
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === demoSteps.length - 1;
+            
+            // Update mockup screen
+            renderMockupScreen(step.mockScreen);
+            
+            // Reset progress
+            progress = 0;
+            updateProgressBar();
+        }
+        
+        function renderMockupScreen(type) {
+            const screen = document.getElementById('mockupScreen');
+            
+            switch(type) {
+                case 'welcome':
+                    screen.innerHTML = `
+                        <div class="welcome-screen">
+                            <div class="logo" style="width: 100px; height: 100px; margin-bottom: 20px;">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 2.01c1.1 0 2 .89 2 1.99v16c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V4c0-1.1.9-1.99 2-1.99h12zM12 13c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm0-8C9.79 5 8 6.79 8 9s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 32px; font-weight: 700; margin-bottom: 10px;">Oriido</h3>
+                            <p style="color: #6B7280;">Restaurant Management System</p>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'qr':
+                    screen.innerHTML = `
+                        <div style="text-align: center; padding: 50px 0;">
+                            <div class="qr-code" style="margin: 0 auto;">
+                                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="white">
+                                    <rect x="10" y="10" width="30" height="30"/>
+                                    <rect x="60" y="10" width="30" height="30"/>
+                                    <rect x="10" y="60" width="30" height="30"/>
+                                    <rect x="45" y="45" width="10" height="10"/>
+                                    <rect x="60" y="45" width="10" height="10"/>
+                                    <rect x="45" y="60" width="10" height="10"/>
+                                </svg>
+                            </div>
+                            <p style="margin-top: 20px; color: #6B7280;">Scannen Sie den QR-Code</p>
+                            <p style="color: #10B981; font-weight: 600;">✓ Bereit zum Bestellen</p>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'menu':
+                    screen.innerHTML = `
+                        <div>
+                            <div class="menu-item">
+                                <div class="menu-image"></div>
+                                <div class="menu-details">
+                                    <div class="menu-name">Margherita Pizza</div>
+                                    <div class="menu-description">Tomaten, Mozzarella, Basilikum</div>
+                                    <div class="menu-footer">
+                                        <span class="price">€12.90</span>
+                                        <button class="add-btn">+ Hinzufügen</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-image" style="background: linear-gradient(135deg, #BBF7D0, #10B981)"></div>
+                                <div class="menu-details">
+                                    <div class="menu-name">Caesar Salat</div>
+                                    <div class="menu-description">Römersalat, Parmesan, Croutons</div>
+                                    <div class="menu-footer">
+                                        <span class="price">€9.50</span>
+                                        <button class="add-btn">+ Hinzufügen</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-image" style="background: linear-gradient(135deg, #FDE68A, #F59E0B)"></div>
+                                <div class="menu-details">
+                                    <div class="menu-name">Pasta Carbonara</div>
+                                    <div class="menu-description">Spaghetti, Ei, Pancetta, Parmesan</div>
+                                    <div class="menu-footer">
+                                        <span class="price">€14.50</span>
+                                        <button class="add-btn">+ Hinzufügen</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'dashboard':
+                    const orderCount = Math.floor(Math.random() * 20) + 10;
+                    const revenue = (Math.random() * 2000 + 1000).toFixed(2);
+                    screen.innerHTML = `
+                        <div>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="stat-icon"></div>
+                                    <div class="stat-value">${orderCount}</div>
+                                    <div class="stat-label">Bestellungen heute</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background: linear-gradient(135deg, #BBF7D0, #10B981)"></div>
+                                    <div class="stat-value">€${revenue}</div>
+                                    <div class="stat-label">Umsatz heute</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="background: linear-gradient(135deg, #BFDBFE, #3B82F6)"></div>
+                                    <div class="stat-value">18 min</div>
+                                    <div class="stat-label">Ø Bearbeitungszeit</div>
+                                </div>
+                            </div>
+                            <div class="order-list">
+                                <div class="order-item">
+                                    <div>
+                                        <span class="order-badge badge-new">NEU</span>
+                                        <span style="margin-left: 10px; font-weight: 600;">Tisch 12</span>
+                                    </div>
+                                    <button class="add-btn" style="background: #10B981;">Annehmen</button>
+                                </div>
+                                <div class="order-item">
+                                    <div>
+                                        <span class="order-badge badge-processing">IN BEARBEITUNG</span>
+                                        <span style="margin-left: 10px; font-weight: 600;">Tisch 8</span>
+                                    </div>
+                                    <button class="btn btn-secondary">Fertig</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'pos':
+                    screen.innerHTML = `
+                        <div style="text-align: center; padding: 80px 20px;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 30px; margin-bottom: 40px;">
+                                <div style="width: 80px; height: 80px; background: #E5E7EB; border-radius: 15px;"></div>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                                    <div style="width: 50px; height: 2px; background: #10B981;"></div>
+                                    <div style="width: 8px; height: 8px; background: #10B981; border-radius: 50%; animation: pulse 1s infinite;"></div>
+                                </div>
+                                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #FED7AA, #FB923C); border-radius: 15px;"></div>
+                            </div>
+                            <p style="color: #10B981; font-weight: 600; font-size: 18px;">✓ Verbunden mit Lightspeed POS</p>
+                            <p style="color: #6B7280; margin-top: 10px;">Automatische Synchronisation aktiv</p>
+                        </div>
+                        <style>
+                            @keyframes pulse {
+                                0%, 100% { opacity: 1; }
+                                50% { opacity: 0.5; }
+                            }
+                        </style>
+                    `;
+                    break;
+                    
+                case 'analytics':
+                    screen.innerHTML = `
+                        <div style="padding: 20px;">
+                            <h4 style="font-weight: 600; margin-bottom: 20px;">Umsatzentwicklung</h4>
+                            <div style="height: 150px; background: linear-gradient(to right, #FEF3C7, #FED7AA); border-radius: 10px; display: flex; align-items: flex-end; padding: 10px; gap: 5px;">
+                                ${[40, 65, 45, 70, 85, 90, 75, 95, 88, 92].map(height => `
+                                    <div style="flex: 1; background: #FB923C; border-radius: 5px 5px 0 0; height: ${height}%;"></div>
+                                `).join('')}
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;">
+                                <div class="stat-card">
+                                    <p style="color: #6B7280; font-size: 14px;">Beliebtestes Gericht</p>
+                                    <p style="font-weight: 600; font-size: 18px;">Margherita Pizza</p>
+                                    <p style="color: #10B981; font-size: 14px;">324 Bestellungen</p>
+                                </div>
+                                <div class="stat-card">
+                                    <p style="color: #6B7280; font-size: 14px;">Stoßzeit heute</p>
+                                    <p style="font-weight: 600; font-size: 18px;">19:00 - 20:00</p>
+                                    <p style="color: #3B82F6; font-size: 14px;">42 Bestellungen</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'multi':
+                    screen.innerHTML = `
+                        <div style="padding: 20px;">
+                            <div class="stat-card" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="font-weight: 600;">Berlin Mitte</h4>
+                                        <p style="color: #6B7280; font-size: 14px;">Hauptstraße 123</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="background: #D1FAE5; color: #065F46; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">ONLINE</span>
+                                        <p style="font-weight: 600; margin-top: 5px;">€2,842.50</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="font-weight: 600;">Berlin Friedrichshain</h4>
+                                        <p style="color: #6B7280; font-size: 14px;">Warschauer Str. 45</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="background: #D1FAE5; color: #065F46; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">ONLINE</span>
+                                        <p style="font-weight: 600; margin-top: 5px;">€1,923.75</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <h4 style="font-weight: 600;">München Schwabing</h4>
+                                        <p style="color: #6B7280; font-size: 14px;">Leopoldstraße 78</p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <span style="background: #D1FAE5; color: #065F46; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">ONLINE</span>
+                                        <p style="font-weight: 600; margin-top: 5px;">€3,156.00</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'cta':
+                    screen.innerHTML = `
+                        <div style="background: linear-gradient(135deg, #FB923C, #EA580C); color: white; padding: 80px 40px; text-align: center; border-radius: 10px; height: 100%;">
+                            <h3 style="font-size: 36px; font-weight: 700; margin-bottom: 20px;">Bereit loszulegen?</h3>
+                            <p style="font-size: 18px; margin-bottom: 30px; opacity: 0.95;">Keine Kreditkarte erforderlich • 100 Bestellungen kostenlos</p>
+                            <button style="padding: 15px 40px; background: white; color: #EA580C; border: none; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer;">
+                                Jetzt starten
+                            </button>
+                            <div style="display: flex; justify-content: center; gap: 50px; margin-top: 50px;">
+                                <div>
+                                    <p style="font-size: 36px; font-weight: 700;">500+</p>
+                                    <p style="font-size: 14px; opacity: 0.9;">Restaurants</p>
+                                </div>
+                                <div>
+                                    <p style="font-size: 36px; font-weight: 700;">50K+</p>
+                                    <p style="font-size: 14px; opacity: 0.9;">Bestellungen/Tag</p>
+                                </div>
+                                <div>
+                                    <p style="font-size: 36px; font-weight: 700;">4.9★</p>
+                                    <p style="font-size: 14px; opacity: 0.9;">Bewertung</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+        }
+        
+        function renderDots() {
+            const dotsContainer = document.getElementById('dots');
+            dotsContainer.innerHTML = '';
+            
+            for (let i = 0; i < demoSteps.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = i === currentStep ? 'dot active' : 'dot';
+                dot.onclick = () => goToStep(i);
+                dotsContainer.appendChild(dot);
+            }
+        }
+        
+        function updateProgressBar() {
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+        
+        function nextStep() {
+            if (currentStep < demoSteps.length - 1) {
+                currentStep++;
+                renderStep();
+                renderDots();
+            }
+        }
+        
+        function previousStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+                renderDots();
+            }
+        }
+        
+        function goToStep(step) {
+            currentStep = step;
+            renderStep();
+            renderDots();
+        }
+        
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const playBtn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                playBtn.innerHTML = '<span>⏸</span> Pause';
+                startAutoPlay();
+            } else {
+                playBtn.innerHTML = '<span>▶</span> Abspielen';
+                stopAutoPlay();
+            }
+        }
+        
+        function startAutoPlay() {
+            progressInterval = setInterval(() => {
+                progress += 2;
+                
+                if (progress >= 100) {
+                    progress = 0;
+                    if (currentStep < demoSteps.length - 1) {
+                        nextStep();
+                    } else {
+                        stopAutoPlay();
+                        isPlaying = false;
+                        document.getElementById('playBtn').innerHTML = '<span>▶</span> Abspielen';
+                    }
+                }
+                
+                updateProgressBar();
+            }, 100);
+        }
+        
+        function stopAutoPlay() {
+            clearInterval(progressInterval);
+        }
+        
+        function restartDemo() {
+            currentStep = 0;
+            progress = 0;
+            isPlaying = false;
+            stopAutoPlay();
+            document.getElementById('playBtn').innerHTML = '<span>▶</span> Abspielen';
+            renderStep();
+            renderDots();
+        }
+        
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>
