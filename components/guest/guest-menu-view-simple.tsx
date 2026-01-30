@@ -462,12 +462,24 @@ export default function GuestMenuViewSimple({
 
       {/* Tagesgerichte und Empfehlungen */}
       {(() => {
+        // Debug: Alle Menü-Items prüfen
+        const allItems = restaurant.categories.flatMap(cat => cat.menuItems)
+        console.log('DEBUG: Alle Menü-Items:', allItems.map(item => ({
+          name: item.name,
+          isDailySpecial: item.isDailySpecial,
+          isFeatured: item.isFeatured,
+          isActive: item.isActive
+        })))
+        
         const dailySpecials = restaurant.categories.flatMap(cat => 
-          cat.menuItems.filter(item => item.isDailySpecial && item.isActive)
+          cat.menuItems.filter(item => item.isDailySpecial && item.isActive !== false)
         )
         const featured = restaurant.categories.flatMap(cat => 
-          cat.menuItems.filter(item => item.isFeatured && item.isActive)
+          cat.menuItems.filter(item => item.isFeatured && item.isActive !== false)
         )
+        
+        console.log('DEBUG: Gefundene Tagesgerichte:', dailySpecials.length)
+        console.log('DEBUG: Gefundene Empfehlungen:', featured.length)
         
         return (dailySpecials.length > 0 || featured.length > 0) ? (
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b">

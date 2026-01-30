@@ -55,6 +55,11 @@ interface MenuItem {
   tags: string[]
   variants: MenuItemVariant[]
   extras: MenuItemExtra[]
+  isDailySpecial?: boolean
+  isFeatured?: boolean
+  specialPrice?: number | null
+  specialValidUntil?: Date | null
+  isActive?: boolean
 }
 
 interface Category {
@@ -383,6 +388,106 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
           </div>
         </div>
       </div>
+
+      {/* Tagesgerichte und Empfehlungen */}
+      {(() => {
+        const dailySpecials = restaurant.categories.flatMap(cat => 
+          cat.menuItems.filter(item => item.isDailySpecial && item.isActive !== false)
+        )
+        const featured = restaurant.categories.flatMap(cat => 
+          cat.menuItems.filter(item => item.isFeatured && item.isActive !== false)
+        )
+        
+        return (dailySpecials.length > 0 || featured.length > 0) ? (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-b">
+            <div className="px-5 py-4">
+              {/* Tagesgerichte */}
+              {dailySpecials.length > 0 && (
+                <div className="mb-4">
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="text-2xl">🍽️</span>
+                    {t('menu.dailySpecials') || 'Tagesgerichte'}
+                  </h2>
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {dailySpecials.slice(0, 3).map((item) => (
+                      <div 
+                        key={item.id}
+                        onClick={() => {
+                          setSelectedItem(item)
+                          setSelectedVariant(item.variants?.[0] || null)
+                          setSelectedExtras([])
+                          setItemNotes('')
+                          setItemQuantity(1)
+                        }}
+                        className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-amber-200"
+                      >
+                        <div className="p-3">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-base flex-1 pr-2">{item.name}</h3>
+                            <div className="text-right">
+                              {item.specialPrice && item.specialPrice < item.price ? (
+                                <>
+                                  <Badge className="bg-red-500 text-white mb-1">
+                                    {t('menu.specialOffer') || 'Angebot'}
+                                  </Badge>
+                                  <div>
+                                    <span className="text-sm text-gray-400 line-through">{formatPrice(item.price)}</span>
+                                    <span className="font-bold text-lg text-red-600 ml-2">{formatPrice(item.specialPrice)}</span>
+                                  </div>
+                                </>
+                              ) : (
+                                <span className="font-bold text-lg">{formatPrice(item.price)}</span>
+                              )}
+                            </div>
+                          </div>
+                          {item.description && (
+                            <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Restaurant-Empfehlungen */}
+              {featured.length > 0 && (
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <span className="text-2xl">⭐</span>
+                    {t('menu.ourRecommendations') || 'Unsere Empfehlungen'}
+                  </h2>
+                  <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {featured.slice(0, 3).map((item) => (
+                      <div 
+                        key={item.id}
+                        onClick={() => {
+                          setSelectedItem(item)
+                          setSelectedVariant(item.variants?.[0] || null)
+                          setSelectedExtras([])
+                          setItemNotes('')
+                          setItemQuantity(1)
+                        }}
+                        className="bg-white rounded-lg shadow-sm hover:shadow-lg transition-all cursor-pointer border-2 border-yellow-200"
+                      >
+                        <div className="p-3">
+                          <div className="flex justify-between items-start mb-2">
+                            <h3 className="font-semibold text-base flex-1 pr-2">{item.name}</h3>
+                            <span className="font-bold text-lg">{formatPrice(item.price)}</span>
+                          </div>
+                          {item.description && (
+                            <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null
+      })()}
 
       {/* Categories */}
       <div className="bg-white border-b border-gray-100 sticky top-[140px] z-40">
