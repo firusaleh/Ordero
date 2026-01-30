@@ -11,13 +11,15 @@ import {
   Settings,
   LogOut,
   Shield,
-  CheckSquare
+  CheckSquare,
+  Euro
 } from 'lucide-react'
 import { handleSignOut } from '@/app/actions/auth'
 
 const navigation = [
   { name: 'Übersicht', href: '/admin', icon: Home },
   { name: 'Restaurants', href: '/admin/restaurants', icon: Store },
+  { name: 'Finanzen', href: '/admin/finance', icon: Euro },
   { name: 'Freigaben', href: '/admin/approvals', icon: CheckSquare },
   { name: 'Rechnungen', href: '/admin/invoices', icon: FileText },
   { name: 'Statistiken', href: '/admin/stats', icon: BarChart3 },
