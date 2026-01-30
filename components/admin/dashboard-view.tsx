@@ -73,13 +73,21 @@ export default function AdminDashboardView({ stats, topRestaurants, recentActivi
   }
 
   const getPlanBadge = (plan: string) => {
-    const config = {
+    const config: Record<string, { color: string; label: string }> = {
       FREE: { color: 'bg-gray-700 text-gray-300', label: 'Free' },
       TRIAL: { color: 'bg-blue-700 text-blue-300', label: 'Trial' },
       STANDARD: { color: 'bg-purple-700 text-purple-300', label: 'Standard' },
-      PREMIUM: { color: 'bg-orange-700 text-orange-300', label: 'Premium' }
+      PREMIUM: { color: 'bg-orange-700 text-orange-300', label: 'Premium' },
+      // German Plans
+      PAY_PER_ORDER_DE: { color: 'bg-green-700 text-green-300', label: 'DE Pay per Order' },
+      FLATRATE_MONTHLY_DE: { color: 'bg-indigo-700 text-indigo-300', label: 'DE Flatrate Monatlich' },
+      FLATRATE_YEARLY_DE: { color: 'bg-indigo-700 text-indigo-300', label: 'DE Flatrate Jährlich' },
+      // Jordan Plans  
+      PAY_PER_ORDER_JO: { color: 'bg-yellow-700 text-yellow-300', label: 'JO Pay per Order' },
+      FLATRATE_MONTHLY_JO: { color: 'bg-pink-700 text-pink-300', label: 'JO Flatrate Monthly' },
+      FLATRATE_YEARLY_JO: { color: 'bg-pink-700 text-pink-300', label: 'JO Flatrate Yearly' }
     }
-    return config[plan as keyof typeof config] || config.FREE
+    return config[plan] || { color: 'bg-gray-700 text-gray-300', label: plan || 'Free' }
   }
 
   // System Health (kann später mit echten Daten verbunden werden)

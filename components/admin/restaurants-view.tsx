@@ -246,13 +246,21 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
   }
 
   const getPlanBadge = (plan: string) => {
-    const planConfig = {
+    const planConfig: Record<string, { color: string; label: string }> = {
       FREE: { color: 'bg-gray-700 text-gray-300', label: 'Free' },
       TRIAL: { color: 'bg-blue-700 text-blue-300', label: 'Trial' },
       STANDARD: { color: 'bg-purple-700 text-purple-300', label: 'Standard' },
-      PREMIUM: { color: 'bg-orange-700 text-orange-300', label: 'Premium' }
+      PREMIUM: { color: 'bg-orange-700 text-orange-300', label: 'Premium' },
+      // German Plans
+      PAY_PER_ORDER_DE: { color: 'bg-green-700 text-green-300', label: 'DE Pay per Order' },
+      FLATRATE_MONTHLY_DE: { color: 'bg-indigo-700 text-indigo-300', label: 'DE Flatrate Monatlich' },
+      FLATRATE_YEARLY_DE: { color: 'bg-indigo-700 text-indigo-300', label: 'DE Flatrate Jährlich' },
+      // Jordan Plans  
+      PAY_PER_ORDER_JO: { color: 'bg-yellow-700 text-yellow-300', label: 'JO Pay per Order' },
+      FLATRATE_MONTHLY_JO: { color: 'bg-pink-700 text-pink-300', label: 'JO Flatrate Monthly' },
+      FLATRATE_YEARLY_JO: { color: 'bg-pink-700 text-pink-300', label: 'JO Flatrate Yearly' }
     }
-    const config = planConfig[plan as keyof typeof planConfig] || planConfig.FREE
+    const config = planConfig[plan] || { color: 'bg-gray-700 text-gray-300', label: plan || 'Free' }
     return (
       <Badge variant="outline" className={config.color}>
         {config.label}
