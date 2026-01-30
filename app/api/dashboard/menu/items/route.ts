@@ -22,7 +22,10 @@ export async function POST(request: Request) {
       variants,
       extras,
       isActive,
-      isAvailable
+      isAvailable,
+      isDailySpecial,
+      isFeatured,
+      specialPrice
     } = body
 
     // Verifiziere Kategorie-Zugriff
@@ -66,6 +69,9 @@ export async function POST(request: Request) {
         tags: tags || [],
         isActive: isActive ?? true,
         isAvailable: isAvailable ?? true,
+        isDailySpecial: isDailySpecial ?? false,
+        isFeatured: isFeatured ?? false,
+        specialPrice: specialPrice || null,
         sortOrder: lastItem ? lastItem.sortOrder + 1 : 0
       }
     })

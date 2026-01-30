@@ -43,6 +43,9 @@ export async function PATCH(
         tags: data.tags || [],
         isActive: data.isActive !== undefined ? data.isActive : true,
         isAvailable: data.isAvailable !== undefined ? data.isAvailable : true,
+        isDailySpecial: data.isDailySpecial !== undefined ? data.isDailySpecial : false,
+        isFeatured: data.isFeatured !== undefined ? data.isFeatured : false,
+        specialPrice: data.specialPrice || null,
         // In MongoDB werden Varianten und Extras als embedded documents gespeichert
         variants: data.variants?.map((v: any) => ({
           id: v.id || new Date().getTime().toString() + Math.random().toString(36).substr(2, 9),
