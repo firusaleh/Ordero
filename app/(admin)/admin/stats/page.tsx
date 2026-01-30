@@ -156,9 +156,9 @@ async function getAdminStats() {
     revenue: restaurant.orders.reduce((sum, order) => sum + (order.total || 0), 0)
   }))
 
-  // Get subscription plan distribution
+  // Get subscription plan distribution (use plan field as it's the main field)
   const planDistribution = await prisma.restaurant.groupBy({
-    by: ['subscriptionPlan'],
+    by: ['plan'],
     _count: true
   })
 
@@ -314,19 +314,38 @@ export default async function AdminStatsPage() {
           <CardContent>
             <div className="space-y-4">
               {stats.planDistribution.map(plan => {
-                const planName = plan.subscriptionPlan || 'Free'
+                const planName = plan.plan || 'FREE'
                 const percentage = ((plan._count / stats.totalRestaurants) * 100).toFixed(1)
-                const colors: Record<string, string> = {
-                  'PREMIUM': 'bg-green-500',
-                  'STANDARD': 'bg-blue-500',
-                  'TRIAL': 'bg-yellow-500',
-                  'FREE': 'bg-gray-500'
+                
+                const planConfig: Record<string, { color: string; label: string }> = {
+                  'FREE': { color: 'bg-gray-500', label: 'Free' },
+                  'TRIAL': { color: 'bg-yellow-500', label: 'Trial' },
+                  'STANDARD': { color: 'bg-blue-500', label: 'Standard' },
+                  'PREMIUM': { color: 'bg-green-500', label: 'Premium' },
+                  // German Plans (with underscores - as stored in DB)
+                  'DE_PAY_PER_ORDER': { color: 'bg-emerald-500', label: 'DE Pay per Order' },
+                  'DE_MONTHLY': { color: 'bg-indigo-500', label: 'DE Flatrate Monatlich' },
+                  'DE_YEARLY': { color: 'bg-purple-500', label: 'DE Flatrate Jährlich' },
+                  // Jordan Plans (with underscores - as stored in DB)
+                  'JO_PAY_PER_ORDER': { color: 'bg-orange-500', label: 'JO Pay per Order' },
+                  'JO_MONTHLY': { color: 'bg-pink-500', label: 'JO Flatrate Monthly' },
+                  'JO_YEARLY': { color: 'bg-rose-500', label: 'JO Flatrate Yearly' },
+                  // Alternative naming (with hyphens)
+                  'PAY_PER_ORDER_DE': { color: 'bg-emerald-500', label: 'DE Pay per Order' },
+                  'FLATRATE_MONTHLY_DE': { color: 'bg-indigo-500', label: 'DE Flatrate Monatlich' },
+                  'FLATRATE_YEARLY_DE': { color: 'bg-purple-500', label: 'DE Flatrate Jährlich' },
+                  'PAY_PER_ORDER_JO': { color: 'bg-orange-500', label: 'JO Pay per Order' },
+                  'FLATRATE_MONTHLY_JO': { color: 'bg-pink-500', label: 'JO Flatrate Monthly' },
+                  'FLATRATE_YEARLY_JO': { color: 'bg-rose-500', label: 'JO Flatrate Yearly' }
                 }
+                
+                const config = planConfig[planName] || { color: 'bg-gray-500', label: planName }
+                
                 return (
                   <div key={planName} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 ${colors[planName] || 'bg-gray-500'} rounded-full`}></div>
-                      <span className="text-gray-300">{planName}</span>
+                      <div className={`w-3 h-3 ${config.color} rounded-full`}></div>
+                      <span className="text-gray-300">{config.label}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-white font-medium">{plan._count}</span>
