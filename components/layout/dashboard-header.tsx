@@ -14,12 +14,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import MobileNav from './mobile-nav'
-import { signOut } from 'next-auth/react'
 import { useLanguage } from '@/contexts/language-context'
 import NotificationsDropdown from './notifications-dropdown'
+import { handleSignOut } from '@/app/actions/auth'
 
 export default function DashboardHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
   const router = useRouter()
   const { t } = useLanguage()
 
@@ -60,9 +61,13 @@ export default function DashboardHeader() {
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-red-600"
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                disabled={isSigningOut}
+                onClick={async () => {
+                  setIsSigningOut(true)
+                  await handleSignOut()
+                }}
               >
-                {t('common.logout')}
+                {isSigningOut ? 'Abmelden...' : t('common.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

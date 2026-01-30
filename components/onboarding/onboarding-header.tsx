@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { LogOut, Loader2 } from 'lucide-react'
-import { signOut } from 'next-auth/react'
 import { toast } from 'sonner'
+import { handleSignOut as signOutAction } from '@/app/actions/auth'
 
 export default function OnboardingHeader() {
   const [isSigningOut, setIsSigningOut] = useState(false)
@@ -12,7 +12,7 @@ export default function OnboardingHeader() {
   const handleSignOut = async () => {
     setIsSigningOut(true)
     try {
-      await signOut({ callbackUrl: '/login' })
+      await signOutAction()
     } catch (error) {
       toast.error('Fehler beim Abmelden')
       setIsSigningOut(false)

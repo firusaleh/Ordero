@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -14,7 +15,7 @@ import {
   BarChart,
   LogOut
 } from 'lucide-react'
-import { signOut } from 'next-auth/react'
+import { handleSignOut } from '@/app/actions/auth'
 
 const navigation = [
   { name: 'Übersicht', href: '/dashboard', icon: Home },
@@ -33,6 +34,7 @@ interface MobileNavProps {
 
 export default function MobileNav({ onClose }: MobileNavProps) {
   const pathname = usePathname()
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -70,14 +72,15 @@ export default function MobileNav({ onClose }: MobileNavProps) {
           })}
           <li className="mt-auto">
             <button
-              onClick={() => {
-                signOut({ callbackUrl: '/login' })
-                onClose()
+              onClick={async () => {
+                setIsSigningOut(true)
+                await handleSignOut()
               }}
-              className="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-50 hover:text-red-600 w-full transition-colors"
+              disabled={isSigningOut}
+              className="group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 text-gray-700 hover:bg-gray-50 hover:text-red-600 w-full transition-colors disabled:opacity-50"
             >
               <LogOut className="h-5 w-5 shrink-0 text-gray-400 group-hover:text-red-600 transition-colors" />
-              Abmelden
+              {isSigningOut ? 'Abmelden...' : 'Abmelden'}
             </button>
           </li>
         </ul>
