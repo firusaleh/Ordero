@@ -65,12 +65,15 @@ async function getAdminStats() {
     })
   ])
 
-  // Get revenue (sum of all orders)
+  // Get revenue (sum of all orders including CASH)
   const [revenueThisMonth, revenueLastMonth] = await Promise.all([
     prisma.order.aggregate({
       where: {
         createdAt: { gte: startOfMonth },
-        status: { in: ['COMPLETED', 'READY'] }
+        OR: [
+          { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
+          { paymentStatus: 'PAID' }
+        ]
       },
       _sum: {
         total: true
@@ -82,7 +85,10 @@ async function getAdminStats() {
           gte: startOfLastMonth,
           lte: endOfLastMonth
         },
-        status: { in: ['COMPLETED', 'READY'] }
+        OR: [
+          { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
+          { paymentStatus: 'PAID' }
+        ]
       },
       _sum: {
         total: true
@@ -127,7 +133,10 @@ async function getAdminStats() {
       orders: {
         where: {
           createdAt: { gte: startOfMonth },
-          status: { in: ['COMPLETED', 'READY'] }
+          OR: [
+            { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
+            { paymentStatus: 'PAID' }
+          ]
         },
         select: {
           total: true

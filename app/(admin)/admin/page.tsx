@@ -71,7 +71,8 @@ async function getDashboardStats() {
   const suspendedRestaurants = restaurants.filter(r => r.status === 'SUSPENDED' || r.status === 'CANCELLED').length
   
   const totalRevenue = orders.reduce((sum, order) => {
-    if (order.paymentStatus === 'PAID' && order.total) {
+    // Include all completed orders (CASH orders may have PENDING payment status)
+    if (order.total && (order.status === 'COMPLETED' || order.status === 'READY' || order.status === 'DELIVERED' || order.paymentStatus === 'PAID')) {
       return sum + order.total
     }
     return sum
