@@ -1,12 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { 
   CreditCard, 
@@ -14,50 +12,49 @@ import {
   Smartphone,
   Globe,
   Save,
-  Info,
-  Shield,
-  QrCode,
-  Building
+  Loader2
 } from 'lucide-react'
+import { useLanguage } from '@/contexts/language-context'
 
 interface PaymentMethodsProps {
   restaurantId: string
-  initialData?: {
-    acceptCash?: boolean
-    acceptCard?: boolean
-    acceptMobile?: boolean
-    acceptOnline?: boolean
-    minimumOrder?: number
-    serviceFee?: number
-    tipOptions?: number[]
-    bankDetails?: {
-      bankName?: string
-      iban?: string
-      bic?: string
-    }
-    stripePublicKey?: string
-    paypalEmail?: string
-  }
+  initialData?: any
 }
 
 export default function PaymentMethods({ restaurantId, initialData }: PaymentMethodsProps) {
+  const { t } = useLanguage()
   const [settings, setSettings] = useState({
-    acceptCash: initialData?.acceptCash ?? true,
-    acceptCard: initialData?.acceptCard ?? false,
-    acceptMobile: initialData?.acceptMobile ?? false,
-    acceptOnline: initialData?.acceptOnline ?? false,
-    minimumOrder: initialData?.minimumOrder || 0,
-    serviceFee: initialData?.serviceFee || 0,
-    tipOptions: initialData?.tipOptions || [5, 10, 15, 20],
-    bankDetails: {
-      bankName: initialData?.bankDetails?.bankName || '',
-      iban: initialData?.bankDetails?.iban || '',
-      bic: initialData?.bankDetails?.bic || ''
-    },
-    stripePublicKey: initialData?.stripePublicKey || '',
-    paypalEmail: initialData?.paypalEmail || ''
+    acceptCash: true,
+    acceptCard: false,
+    acceptPaypal: false,
+    acceptStripe: false
   })
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
+
+  // Lade aktuelle Einstellungen beim Start
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const response = await fetch(`/api/restaurants/${restaurantId}/payment-settings`)
+        if (response.ok) {
+          const data = await response.json()
+          setSettings({
+            acceptCash: data.acceptCash ?? true,
+            acceptCard: data.acceptCard ?? false,
+            acceptPaypal: data.acceptPaypal ?? false,
+            acceptStripe: data.acceptStripe ?? false
+          })
+        }
+      } catch (error) {
+        console.error('Error loading payment settings:', error)
+      } finally {
+        setInitialLoading(false)
+      }
+    }
+
+    loadSettings()
+  }, [restaurantId])
 
   const saveSettings = async () => {
     setLoading(true)
@@ -72,21 +69,28 @@ export default function PaymentMethods({ restaurantId, initialData }: PaymentMet
       })
 
       if (response.ok) {
-        toast.success('Zahlungseinstellungen gespeichert')
+        toast.success(t('settings.payments.saved') || 'Zahlungseinstellungen gespeichert')
       } else {
         throw new Error('Fehler beim Speichern')
       }
     } catch (error) {
-      toast.error('Fehler beim Speichern der Zahlungseinstellungen')
+      toast.error(t('settings.payments.saveError') || 'Fehler beim Speichern der Zahlungseinstellungen')
     } finally {
       setLoading(false)
     }
   }
 
-  const updateTipOption = (index: number, value: number) => {
-    const newTipOptions = [...settings.tipOptions]
-    newTipOptions[index] = value
-    setSettings(prev => ({ ...prev, tipOptions: newTipOptions }))
+  if (initialLoading) {
+    return (
+      <Card>
+        <CardContent className="py-8">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span className="ml-2">{t('common.loading') || 'Lädt...'}</span>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -96,10 +100,10 @@ export default function PaymentMethods({ restaurantId, initialData }: PaymentMet
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
-            Akzeptierte Zahlungsarten
+            {t('settings.payments.acceptedMethods') || 'Akzeptierte Zahlungsarten'}
           </CardTitle>
           <CardDescription>
-            Wählen Sie aus, welche Zahlungsmethoden Sie akzeptieren
+            {t('settings.payments.description') || 'Wählen Sie aus, welche Zahlungsmethoden Sie akzeptieren'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -110,8 +114,10 @@ export default function PaymentMethods({ restaurantId, initialData }: PaymentMet
                 <Banknote className="w-5 h-5 text-green-600" />
               </div>
               <div>
-                <Label className="text-base">Bargeld</Label>
-                <p className="text-sm text-gray-500">Barzahlung bei Lieferung oder Abholung</p>
+                <Label className="text-base">{t('settings.payments.cash') || 'Bargeld'}</Label>
+                <p className="text-sm text-gray-500">
+                  {t('settings.payments.cashDescription') || 'Barzahlung bei Lieferung oder Abholung'}
+                </p>
               </div>
             </div>
             <Switch
@@ -129,8 +135,10 @@ export default function PaymentMethods({ restaurantId, initialData }: PaymentMet
                 <CreditCard className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <Label className="text-base">Kartenzahlung</Label>
-                <p className="text-sm text-gray-500">Kredit- und Debitkarten vor Ort</p>
+                <Label className="text-base">{t('settings.payments.card') || 'Kartenzahlung'}</Label>
+                <p className="text-sm text-gray-500">
+                  {t('settings.payments.cardDescription') || 'Kredit- und Debitkarten vor Ort'}
+                </p>
               </div>
             </div>
             <Switch
@@ -141,270 +149,67 @@ export default function PaymentMethods({ restaurantId, initialData }: PaymentMet
             />
           </div>
 
-          {/* Mobile Payment */}
+          {/* Online Payment (Stripe) */}
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-100 rounded-lg">
-                <Smartphone className="w-5 h-5 text-purple-600" />
+                <Globe className="w-5 h-5 text-purple-600" />
               </div>
               <div>
-                <Label className="text-base">Mobile Payment</Label>
-                <p className="text-sm text-gray-500">Apple Pay, Google Pay, Samsung Pay</p>
+                <Label className="text-base">{t('settings.payments.stripe') || 'Stripe (Online)'}</Label>
+                <p className="text-sm text-gray-500">
+                  {t('settings.payments.stripeDescription') || 'Online-Zahlung mit Kreditkarte'}
+                </p>
               </div>
             </div>
             <Switch
-              checked={settings.acceptMobile}
+              checked={settings.acceptStripe}
               onCheckedChange={(checked) => 
-                setSettings(prev => ({ ...prev, acceptMobile: checked }))
+                setSettings(prev => ({ ...prev, acceptStripe: checked }))
               }
             />
           </div>
 
-          {/* Online Payment */}
+          {/* PayPal */}
           <div className="flex items-center justify-between p-4 border rounded-lg">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <Globe className="w-5 h-5 text-indigo-600" />
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Smartphone className="w-5 h-5 text-yellow-600" />
               </div>
               <div>
-                <Label className="text-base">Online-Zahlung</Label>
-                <p className="text-sm text-gray-500">Stripe, PayPal, Sofortüberweisung</p>
+                <Label className="text-base">PayPal</Label>
+                <p className="text-sm text-gray-500">
+                  {t('settings.payments.paypalDescription') || 'PayPal Online-Zahlungen (Kommt bald)'}
+                </p>
               </div>
             </div>
             <Switch
-              checked={settings.acceptOnline}
+              checked={settings.acceptPaypal}
               onCheckedChange={(checked) => 
-                setSettings(prev => ({ ...prev, acceptOnline: checked }))
+                setSettings(prev => ({ ...prev, acceptPaypal: checked }))
               }
+              disabled
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* Online Payment Configuration */}
-      {settings.acceptOnline && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              Online-Zahlungsanbieter
-            </CardTitle>
-            <CardDescription>
-              Konfigurieren Sie Ihre Online-Zahlungsanbieter
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Stripe */}
-            <div>
-              <Label htmlFor="stripeKey">Stripe Public Key</Label>
-              <Input
-                id="stripeKey"
-                type="text"
-                placeholder="pk_live_..."
-                value={settings.stripePublicKey}
-                onChange={(e) => 
-                  setSettings(prev => ({ ...prev, stripePublicKey: e.target.value }))
-                }
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Erhalten Sie von Ihrem Stripe Dashboard
-              </p>
-            </div>
-
-            {/* PayPal */}
-            <div>
-              <Label htmlFor="paypalEmail">PayPal E-Mail</Label>
-              <Input
-                id="paypalEmail"
-                type="email"
-                placeholder="ihr-restaurant@beispiel.de"
-                value={settings.paypalEmail}
-                onChange={(e) => 
-                  setSettings(prev => ({ ...prev, paypalEmail: e.target.value }))
-                }
-                className="mt-1"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Ihre PayPal Business E-Mail-Adresse
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Bankverbindung */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="w-5 h-5" />
-            Bankverbindung
-          </CardTitle>
-          <CardDescription>
-            Für Überweisungen und Rechnungen
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="bankName">Bank</Label>
-            <Input
-              id="bankName"
-              type="text"
-              placeholder="z.B. Deutsche Bank"
-              value={settings.bankDetails.bankName}
-              onChange={(e) => 
-                setSettings(prev => ({ 
-                  ...prev, 
-                  bankDetails: { ...prev.bankDetails, bankName: e.target.value }
-                }))
-              }
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="iban">IBAN</Label>
-            <Input
-              id="iban"
-              type="text"
-              placeholder="DE89 3704 0044 0532 0130 00"
-              value={settings.bankDetails.iban}
-              onChange={(e) => 
-                setSettings(prev => ({ 
-                  ...prev, 
-                  bankDetails: { ...prev.bankDetails, iban: e.target.value }
-                }))
-              }
-              className="mt-1"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="bic">BIC/SWIFT</Label>
-            <Input
-              id="bic"
-              type="text"
-              placeholder="DEUTDEDBFRA"
-              value={settings.bankDetails.bic}
-              onChange={(e) => 
-                setSettings(prev => ({ 
-                  ...prev, 
-                  bankDetails: { ...prev.bankDetails, bic: e.target.value }
-                }))
-              }
-              className="mt-1"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bestelleinstellungen */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="w-5 h-5" />
-            Bestelleinstellungen
-          </CardTitle>
-          <CardDescription>
-            Mindestbestellwert und Gebühren
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="minimumOrder">Mindestbestellwert (€)</Label>
-            <Input
-              id="minimumOrder"
-              type="number"
-              min="0"
-              step="0.50"
-              value={settings.minimumOrder}
-              onChange={(e) => 
-                setSettings(prev => ({ ...prev, minimumOrder: parseFloat(e.target.value) || 0 }))
-              }
-              className="mt-1"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              0 = Kein Mindestbestellwert
-            </p>
-          </div>
-
-          <div>
-            <Label htmlFor="serviceFee">Servicegebühr (€)</Label>
-            <Input
-              id="serviceFee"
-              type="number"
-              min="0"
-              step="0.10"
-              value={settings.serviceFee}
-              onChange={(e) => 
-                setSettings(prev => ({ ...prev, serviceFee: parseFloat(e.target.value) || 0 }))
-              }
-              className="mt-1"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Wird zu jeder Bestellung hinzugefügt
-            </p>
-          </div>
-
-          <div>
-            <Label>Trinkgeld-Optionen (%)</Label>
-            <div className="grid grid-cols-4 gap-2 mt-2">
-              {settings.tipOptions.map((tip, index) => (
-                <Input
-                  key={index}
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={tip}
-                  onChange={(e) => updateTipOption(index, parseInt(e.target.value) || 0)}
-                  className="text-center"
-                />
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Vorschläge für Trinkgeld beim Checkout
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Info Box */}
-      <Card className="bg-blue-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-blue-900 flex items-center gap-2">
-            <Info className="w-5 h-5" />
-            Wichtige Informationen
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-sm text-blue-800">
-            • Online-Zahlungen erfordern ein verifiziertes Geschäftskonto beim Anbieter
-          </p>
-          <p className="text-sm text-blue-800">
-            • Testen Sie alle Zahlungsmethoden gründlich vor dem Live-Gang
-          </p>
-          <p className="text-sm text-blue-800">
-            • Beachten Sie die Gebühren der verschiedenen Zahlungsanbieter
-          </p>
-          <p className="text-sm text-blue-800">
-            • Stellen Sie sicher, dass Ihre Bankdaten korrekt sind
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
+      {/* Speichern Button */}
       <div className="flex justify-end">
-        <Button
-          size="lg"
-          onClick={saveSettings}
+        <Button 
+          onClick={saveSettings} 
           disabled={loading}
+          className="flex items-center gap-2"
         >
           {loading ? (
-            <>Speichern...</>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {t('common.saving') || 'Speichert...'}
+            </>
           ) : (
             <>
-              <Save className="w-4 h-4 mr-2" />
-              Zahlungseinstellungen speichern
+              <Save className="w-4 h-4" />
+              {t('common.save') || 'Speichern'}
             </>
           )}
         </Button>
