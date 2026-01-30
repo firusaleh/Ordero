@@ -281,6 +281,12 @@ model MenuItem {
   isActive     Boolean  @default(true)
   isAvailable  Boolean  @default(true)
   
+  // Tagesgerichte und Empfehlungen
+  isDailySpecial Boolean @default(false)  // Tagesgericht
+  isFeatured     Boolean @default(false)  // Restaurant-Empfehlung
+  specialPrice   Float?  // Sonderpreis für Tagesgericht
+  specialValidUntil DateTime? // Gültigkeit des Tagesgerichts
+  
   // POS Integration
   posId        String?  // ID im POS-System
   

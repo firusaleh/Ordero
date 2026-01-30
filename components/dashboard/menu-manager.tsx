@@ -60,6 +60,9 @@ interface MenuItem {
   image?: string | null
   isActive: boolean
   isAvailable: boolean
+  isDailySpecial?: boolean
+  isFeatured?: boolean
+  specialPrice?: number | null
   allergens: string[]
   tags: string[]
   variants: MenuItemVariant[]
@@ -154,6 +157,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
     tags: '',
     isActive: true,
     isAvailable: true,
+    isDailySpecial: false,
+    isFeatured: false,
+    specialPrice: '',
     variants: [] as MenuItemVariant[],
     extras: [] as MenuItemExtra[]
   })
@@ -235,7 +241,10 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
         allergens: itemForm.allergens.split(',').filter(Boolean).map(a => a.trim()),
         tags: itemForm.tags.split(',').filter(Boolean).map(t => t.trim()),
         variants: itemForm.variants,
-        extras: itemForm.extras
+        extras: itemForm.extras,
+        isDailySpecial: itemForm.isDailySpecial,
+        isFeatured: itemForm.isFeatured,
+        specialPrice: itemForm.specialPrice ? parseFloat(itemForm.specialPrice) : null
       }
       
       const response = await fetch(url, {
@@ -398,6 +407,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
       tags: '',
       isActive: true,
       isAvailable: true,
+      isDailySpecial: false,
+      isFeatured: false,
+      specialPrice: '',
       variants: [],
       extras: []
     })
@@ -470,6 +482,9 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
       tags: item.tags.join(', '),
       isActive: item.isActive,
       isAvailable: item.isAvailable,
+      isDailySpecial: item.isDailySpecial || false,
+      isFeatured: item.isFeatured || false,
+      specialPrice: item.specialPrice ? item.specialPrice.toString() : '',
       variants: item.variants || [],
       extras: item.extras || []
     })
@@ -642,6 +657,12 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
                                 <h4 className="font-medium">{item.name}</h4>
+                                {item.isDailySpecial && (
+                                  <Badge className="bg-amber-100 text-amber-800">🍽️ {t('menu.dailySpecial') || 'Tagesgericht'}</Badge>
+                                )}
+                                {item.isFeatured && (
+                                  <Badge className="bg-yellow-100 text-yellow-800">⭐ {t('menu.featured') || 'Empfehlung'}</Badge>
+                                )}
                                 {!item.isAvailable && (
                                   <Badge variant="secondary">{t('menu.outOfStock')}</Badge>
                                 )}
@@ -865,6 +886,42 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
                   onCheckedChange={(checked) => setItemForm({ ...itemForm, isAvailable: checked })}
                 />
                 <Label htmlFor="itemAvailable">{t('menu.available')}</Label>
+              </div>
+            </div>
+            
+            {/* Tagesgerichte und Empfehlungen */}
+            <div className="space-y-3 border-t pt-3">
+              <h4 className="font-medium text-sm">{t('menu.specialFeatures') || 'Besondere Kennzeichnungen'}</h4>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isDailySpecial"
+                  checked={itemForm.isDailySpecial}
+                  onCheckedChange={(checked) => setItemForm({ ...itemForm, isDailySpecial: checked })}
+                />
+                <Label htmlFor="isDailySpecial">🍽️ {t('menu.dailySpecial') || 'Tagesgericht'}</Label>
+              </div>
+              {itemForm.isDailySpecial && (
+                <div className="ml-6 space-y-2">
+                  <div>
+                    <Label htmlFor="specialPrice">{t('menu.specialPrice') || 'Sonderpreis (optional)'}</Label>
+                    <Input
+                      id="specialPrice"
+                      type="number"
+                      step="0.01"
+                      placeholder={`${t('menu.leavesEmptyForNormalPrice') || 'Leer lassen für Normalpreis'}`}
+                      value={itemForm.specialPrice}
+                      onChange={(e) => setItemForm({ ...itemForm, specialPrice: e.target.value })}
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="isFeatured"
+                  checked={itemForm.isFeatured}
+                  onCheckedChange={(checked) => setItemForm({ ...itemForm, isFeatured: checked })}
+                />
+                <Label htmlFor="isFeatured">⭐ {t('menu.featuredItem') || 'Restaurant-Empfehlung'}</Label>
               </div>
             </div>
             </TabsContent>
