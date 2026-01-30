@@ -2691,6 +2691,34 @@ export const translations = {
       newOrders: 'Neue Bestellungen',
       cancelledOrders: 'Stornierte Bestellungen',
       lowStock: 'Niedrige Lagerbestände'
+    },
+    // Admin
+    admin: {
+      restaurants: {
+        title: 'Restaurants verwalten',
+        description: 'Alle Restaurants verwalten und überwachen',
+        addRestaurant: 'Restaurant hinzufügen',
+        search: 'Restaurants durchsuchen...',
+        total: 'Gesamt',
+        totalRestaurants: 'Restaurants insgesamt',
+        active: 'Aktiv',
+        payingCustomers: 'Zahlende Kunden',
+        trialPending: 'Testphase/Ausstehend',
+        testPhaseOnboarding: 'Testphase/Einrichtung',
+        monthlyRevenue: 'Monatsumsatz',
+        totalPlatform: 'Plattform-Gesamt',
+        restaurant: 'Restaurant',
+        owner: 'Inhaber',
+        country: 'Land',
+        plan: 'Tarif',
+        status: 'Status',
+        created: 'Erstellt',
+        actions: 'Aktionen',
+        free: 'Kostenlos',
+        trial: 'Testversion',
+        ausstehend: 'Ausstehend',
+        aktiv: 'Aktiv'
+      }
     }
   },
   en: {
