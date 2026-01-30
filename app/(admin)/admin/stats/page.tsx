@@ -31,7 +31,7 @@ async function getAdminStats() {
   startOfWeek.setDate(now.getDate() - 7)
 
   // Get restaurants count
-  const [totalRestaurants, activeRestaurants, newRestaurantsThisWeek] = await Promise.all([
+  const [totalRestaurants, activeRestaurants, newRestaurantsThisWeek, germanyRestaurants, jordanRestaurants] = await Promise.all([
     prisma.restaurant.count(),
     prisma.restaurant.count({
       where: { status: 'ACTIVE' }
@@ -40,6 +40,12 @@ async function getAdminStats() {
       where: {
         createdAt: { gte: startOfWeek }
       }
+    }),
+    prisma.restaurant.count({
+      where: { country: 'DE' }
+    }),
+    prisma.restaurant.count({
+      where: { country: 'JO' }
     })
   ])
 
@@ -162,16 +168,60 @@ async function getAdminStats() {
     _count: true
   })
 
+  // Get country-specific stats
+  const [germanyOrders, jordanOrders, germanyRevenue, jordanRevenue] = await Promise.all([
+    prisma.order.count({
+      where: {
+        createdAt: { gte: startOfMonth },
+        restaurant: { country: 'DE' }
+      }
+    }),
+    prisma.order.count({
+      where: {
+        createdAt: { gte: startOfMonth },
+        restaurant: { country: 'JO' }
+      }
+    }),
+    prisma.order.aggregate({
+      where: {
+        createdAt: { gte: startOfMonth },
+        restaurant: { country: 'DE' },
+        OR: [
+          { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
+          { paymentStatus: 'PAID' }
+        ]
+      },
+      _sum: { total: true }
+    }),
+    prisma.order.aggregate({
+      where: {
+        createdAt: { gte: startOfMonth },
+        restaurant: { country: 'JO' },
+        OR: [
+          { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
+          { paymentStatus: 'PAID' }
+        ]
+      },
+      _sum: { total: true }
+    })
+  ])
+
   return {
     totalRestaurants,
     activeRestaurants,
     newRestaurantsThisWeek,
+    germanyRestaurants,
+    jordanRestaurants,
     totalOrdersThisMonth,
     totalOrdersThisWeek,
+    germanyOrders,
+    jordanOrders,
     orderGrowth: totalOrdersLastMonth > 0
       ? ((totalOrdersThisMonth - totalOrdersLastMonth) / totalOrdersLastMonth * 100).toFixed(1)
       : 0,
     monthlyRevenue,
+    germanyRevenue: germanyRevenue._sum.total || 0,
+    jordanRevenue: jordanRevenue._sum.total || 0,
     revenueGrowth,
     totalUsersThisWeek,
     userGrowth,
@@ -264,6 +314,81 @@ export default async function AdminStatsPage() {
                 <ArrowDown className="h-3 w-3 mr-1" />
               )}
               {Math.abs(Number(stats.userGrowth))}% zur Vorwoche
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Country Statistics */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Deutschland Statistiken */}
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <span className="text-2xl">🇩🇪</span>
+              Deutschland Statistiken
+            </CardTitle>
+            <CardDescription className="text-gray-400">
+              Aktivität in Deutschland
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Restaurants</span>
+                <span className="text-white font-medium">{stats.germanyRestaurants}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Bestellungen (Monat)</span>
+                <span className="text-white font-medium">{stats.germanyOrders.toLocaleString('de-DE')}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Umsatz (Monat)</span>
+                <span className="text-green-500 font-medium">{formatCurrency(stats.germanyRevenue)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Durchschnitt pro Bestellung</span>
+                <span className="text-white font-medium">
+                  {stats.germanyOrders > 0 ? formatCurrency(stats.germanyRevenue / stats.germanyOrders) : '€0,00'}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Jordanien Statistiken */}
+        <Card className="bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <span className="text-2xl">🇯🇴</span>
+              Jordanien Statistiken
+            </CardTitle>
+            <CardDescription className="text-gray-400">
+              Aktivität in Jordanien
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Restaurants</span>
+                <span className="text-white font-medium">{stats.jordanRestaurants}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Bestellungen (Monat)</span>
+                <span className="text-white font-medium">{stats.jordanOrders.toLocaleString('de-DE')}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Umsatz (Monat)</span>
+                <span className="text-green-500 font-medium">
+                  {new Intl.NumberFormat('ar-JO', { style: 'currency', currency: 'JOD' }).format(stats.jordanRevenue)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-300">Durchschnitt pro Bestellung</span>
+                <span className="text-white font-medium">
+                  {stats.jordanOrders > 0 ? new Intl.NumberFormat('ar-JO', { style: 'currency', currency: 'JOD' }).format(stats.jordanRevenue / stats.jordanOrders) : 'JD 0.00'}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
