@@ -443,7 +443,7 @@ export default function RestaurantFinanceDetailView({ data }: Props) {
       </Card>
 
       {/* Billing Information */}
-      {data.restaurant.payPerOrderEnabled && (
+      {(data.restaurant.payPerOrderEnabled || data.restaurant.plan === 'TRIAL') && (
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader>
             <CardTitle className="text-white">Abrechnungsinformationen</CardTitle>

@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Oriido - Instagram Story Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', Arial, sans-serif;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .story-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 414px;
+            max-height: 896px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 415px) {
+            .story-container {
+                border-radius: 40px;
+                box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            }
+        }
+        
+        .story-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        
+        .story-slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Progress bar */
+        .story-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+            z-index: 1000;
+        }
+        
+        .progress-segment {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 0;
+            transition: width 0.1s linear;
+        }
+        
+        .progress-segment.completed .progress-fill {
+            width: 100%;
+        }
+        
+        /* Story 1 - Welcome */
+        .story-1 {
+            background: linear-gradient(135deg, #FB923C, #EA580C);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+        }
+        
+        .story-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            animation: logoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes logoEntry {
+            from {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+        
+        .story-title {
+            font-size: 52px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            animation: slideUp 0.6s ease-out 0.3s both;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Story 2 - Das Problem */
+        .story-2 {
+            background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
+            color: white;
+            padding: 80px 40px;
+            justify-content: center;
+        }
+        
+        .problem-icon {
+            font-size: 80px;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .problem-title {
+            font-size: 36px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .problem-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .problem-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            animation: slideInLeft 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .problem-item:nth-child(1) { animation-delay: 0.1s; }
+        .problem-item:nth-child(2) { animation-delay: 0.2s; }
+        .problem-item:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Story 3 - Schritt 1: QR-Code auf Tisch */
+        .story-3 {
+            background: white;
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .step-badge {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #D97706;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .step-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1F2937;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-out 0.1s both;
+        }
+        
+        .step-description {
+            font-size: 18px;
+            color: #6B7280;
+            line-height: 1.5;
+            margin-bottom: 40px;
+            animation: fadeIn 0.5s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .table-mock {
+            width: 250px;
+            height: 150px;
+            background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .qr-sticker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+        
+        /* Story 4 - Schritt 2: Gast scannt QR-Code */
+        .story-4 {
+            background: linear-gradient(180deg, #FFF5F0 0%, white 100%);
+            padding: 60px 30px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .phone-mock {
+            width: 200px;
+            height: 400px;
+            background: #000;
+            border-radius: 30px;
+            padding: 10px;
+            margin-bottom: 30px;
+            position: relative;
+            animation: phoneSlide 0.8s ease-out;
+        }
+        
+        @keyframes phoneSlide {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .camera-view {
+            width: 150px;
+            height: 150px;
+            border: 3px solid #10B981;
+            border-radius: 15px;
+            position: relative;
+            animation: scanPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes scanPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
+            }
+        }
+        
+        .scan-line-horizontal {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #10B981;
+            animation: scanLineMove 2s linear infinite;
+        }
+        
+        @keyframes scanLineMove {
+            0% { top: 0; }
+            100% { top: calc(100% - 2px); }
+        }
+        
+        /* Story 5 - Schritt 3: Speisekarte öffnet sich */
+        .story-5 {
+            background: white;
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .menu-open-animation {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .browser-bar {
+            background: #F3F4F6;
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .browser-dots {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .browser-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #D1D5DB;
+        }
+        
+        .menu-preview {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 20px;
+            animation: expandDown 0.6s ease-out;
+        }
+        
+        @keyframes expandDown {
+            from {
+                max-height: 0;
+                opacity: 0;
+            }
+            to {
+                max-height: 500px;
+                opacity: 1;
+            }
+        }
+        
+        /* Story 6 - Schritt 4: Gast wählt Gerichte */
+        .story-6 {
+            background: linear-gradient(180deg, #FFF5F0 0%, white 100%);
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .selection-demo {
+            width: 100%;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+        
+        .menu-item-select {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .menu-item-select.selected {
+            border: 2px solid #10B981;
+            animation: selectPop 0.3s ease-out;
+        }
+        
+        @keyframes selectPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .check-mark {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 30px;
+            height: 30px;
+            background: #10B981;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            animation: checkIn 0.3s ease-out;
+        }
+        
+        @keyframes checkIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Story 7 - Schritt 5: Warenkorb */
+        .story-7 {
+            background: white;
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .cart-preview {
+            background: #FAFAFA;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .quantity-badge {
+            background: #EA580C;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 2px solid #E5E7EB;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        /* Story 8 - Schritt 6: Bezahlung */
+        .story-8 {
+            background: linear-gradient(180deg, #F0FDF4 0%, white 100%);
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .payment-method {
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method.selected {
+            border-color: #10B981;
+            background: #F0FDF4;
+        }
+        
+        .payment-icon {
+            width: 40px;
+            height: 40px;
+            background: #F3F4F6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        /* Story 9 - Schritt 7: Bestellung aufgegeben */
+        .story-9 {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 60px 30px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .success-check {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes successPop {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .success-check svg {
+            width: 50px;
+            height: 50px;
+            fill: #10B981;
+            animation: checkDraw 0.6s ease-out 0.3s both;
+        }
+        
+        @keyframes checkDraw {
+            from {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 100;
+            }
+            to {
+                stroke-dasharray: 100;
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        .order-number {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        /* Story 10 - Restaurant Dashboard */
+        .story-10 {
+            background: white;
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .dashboard-notification {
+            background: #FEF3C7;
+            border-left: 4px solid #F59E0B;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: notificationSlide 0.5s ease-out;
+        }
+        
+        @keyframes notificationSlide {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .notification-badge {
+            background: #F59E0B;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        /* Story 11 - Küche erhält Bestellung */
+        .story-11 {
+            background: linear-gradient(180deg, #FFF5F0 0%, white 100%);
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .kitchen-display {
+            background: #1F2937;
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+        }
+        
+        .kitchen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #374151;
+        }
+        
+        .kitchen-order {
+            background: #374151;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .prep-time {
+            display: inline-block;
+            background: #F59E0B;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        /* Story 12 - Vorteile */
+        .story-12 {
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+            color: white;
+            padding: 60px 30px;
+            justify-content: center;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            animation: benefitPop 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .benefit-card:nth-child(1) { animation-delay: 0.1s; }
+        .benefit-card:nth-child(2) { animation-delay: 0.2s; }
+        .benefit-card:nth-child(3) { animation-delay: 0.3s; }
+        .benefit-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        @keyframes benefitPop {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .benefit-number {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .benefit-text {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Story 13 - CTA */
+        .story-13 {
+            background: linear-gradient(135deg, #EA580C, #DC2626);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .cta-title {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            animation: scaleIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 20px 50px;
+            background: white;
+            color: #EA580C;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 20px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s both;
+        }
+        
+        @keyframes bounceIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Touch areas */
+        .touch-area {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 30%;
+            z-index: 100;
+            cursor: pointer;
+        }
+        
+        .touch-area.prev {
+            left: 0;
+        }
+        
+        .touch-area.next {
+            right: 0;
+        }
+        
+        /* Username mock */
+        .story-username {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1001;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FB923C, #EA580C);
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
+        .user-name {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="story-container" id="storyContainer">
+        <!-- Progress bar -->
+        <div class="story-progress">
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+        </div>
+        
+        <!-- Username -->
+        <div class="story-username">
+            <div class="user-avatar"></div>
+            <div class="user-name">oriido.de</div>
+        </div>
+        
+        <!-- Story 1: Welcome -->
+        <div class="story-slide story-1 active">
+            <div class="story-logo">
+                <svg viewBox="0 0 24 24" fill="#EA580C">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+            </div>
+            <h1 class="story-title">Oriido</h1>
+            <p style="font-size: 20px; text-align: center; line-height: 1.4; opacity: 0.95;">
+                So funktioniert digitales<br>Bestellen im Restaurant
+            </p>
+        </div>
+        
+        <!-- Story 2: Das Problem -->
+        <div class="story-slide story-2">
+            <div class="problem-icon">😫</div>
+            <h2 class="problem-title">Das kennen wir alle...</h2>
+            <div class="problem-list">
+                <div class="problem-item">
+                    <span style="font-size: 24px;">⏰</span>
+                    <span>Lange Wartezeiten auf Bedienung</span>
+                </div>
+                <div class="problem-item">
+                    <span style="font-size: 24px;">🙋</span>
+                    <span>Kellner schwer erreichbar</span>
+                </div>
+                <div class="problem-item">
+                    <span style="font-size: 24px;">💳</span>
+                    <span>Umständlicher Bezahlvorgang</span>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 30px; opacity: 0.8;">
+                Mit Oriido gehört das der<br>Vergangenheit an! →
+            </p>
+        </div>
+        
+        <!-- Story 3: Schritt 1 - QR-Code auf Tisch -->
+        <div class="story-slide story-3">
+            <span class="step-badge">SCHRITT 1</span>
+            <h2 class="step-title">QR-Code auf dem Tisch</h2>
+            <p class="step-description">
+                Jeder Tisch hat einen eigenen QR-Code Aufkleber
+            </p>
+            <div class="table-mock">
+                <div class="qr-sticker">
+                    <span style="font-size: 40px;">📱</span>
+                </div>
+            </div>
+            <p style="text-align: center; color: #6B7280;">
+                Klein, elegant und immer griffbereit
+            </p>
+        </div>
+        
+        <!-- Story 4: Schritt 2 - Gast scannt -->
+        <div class="story-slide story-4">
+            <span class="step-badge">SCHRITT 2</span>
+            <h2 class="step-title" style="color: #1F2937; margin-bottom: 30px;">Gast scannt mit Kamera</h2>
+            <div class="phone-mock">
+                <div class="phone-screen">
+                    <div class="camera-view">
+                        <div class="scan-line-horizontal"></div>
+                    </div>
+                    <p style="margin-top: 20px; color: #10B981; font-weight: 600;">
+                        Scannen...
+                    </p>
+                </div>
+            </div>
+            <p style="text-align: center; color: #6B7280;">
+                Keine App nötig - funktioniert mit<br>jeder Smartphone-Kamera!
+            </p>
+        </div>
+        
+        <!-- Story 5: Schritt 3 - Speisekarte öffnet sich -->
+        <div class="story-slide story-5">
+            <span class="step-badge">SCHRITT 3</span>
+            <h2 class="step-title">Speisekarte öffnet sich</h2>
+            <div class="menu-open-animation">
+                <div class="browser-bar">
+                    <div class="browser-dots">
+                        <div class="browser-dot"></div>
+                        <div class="browser-dot"></div>
+                        <div class="browser-dot"></div>
+                    </div>
+                    <span style="font-size: 12px; color: #6B7280;">oriido.de/tisch-12</span>
+                </div>
+                <div class="menu-preview">
+                    <h3 style="margin-bottom: 15px;">🍔 Speisekarte</h3>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <span style="padding: 5px 10px; background: #FEF3C7; border-radius: 15px; font-size: 12px;">Pizza</span>
+                        <span style="padding: 5px 10px; background: #FEF3C7; border-radius: 15px; font-size: 12px;">Pasta</span>
+                        <span style="padding: 5px 10px; background: #FEF3C7; border-radius: 15px; font-size: 12px;">Salate</span>
+                    </div>
+                    <p style="color: #6B7280; font-size: 14px;">Mit Bildern, Preisen und Allergenen</p>
+                </div>
+            </div>
+            <p style="text-align: center; color: #6B7280; margin-top: 20px;">
+                Automatisch in der richtigen Sprache!
+            </p>
+        </div>
+        
+        <!-- Story 6: Schritt 4 - Gast wählt Gerichte -->
+        <div class="story-slide story-6">
+            <span class="step-badge">SCHRITT 4</span>
+            <h2 class="step-title" style="color: #1F2937;">Gerichte auswählen</h2>
+            <div class="selection-demo">
+                <div class="menu-item-select">
+                    <span style="font-size: 32px;">🍕</span>
+                    <div>
+                        <div style="font-weight: 600;">Pizza Margherita</div>
+                        <div style="color: #EA580C; font-weight: 600;">€12.90</div>
+                    </div>
+                </div>
+                <div class="menu-item-select selected">
+                    <span style="font-size: 32px;">🥗</span>
+                    <div>
+                        <div style="font-weight: 600;">Caesar Salat</div>
+                        <div style="color: #EA580C; font-weight: 600;">€9.50</div>
+                    </div>
+                    <div class="check-mark">✓</div>
+                </div>
+                <div class="menu-item-select selected">
+                    <span style="font-size: 32px;">🥤</span>
+                    <div>
+                        <div style="font-weight: 600;">Cola</div>
+                        <div style="color: #EA580C; font-weight: 600;">€3.50</div>
+                    </div>
+                    <div class="check-mark">✓</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Story 7: Schritt 5 - Warenkorb -->
+        <div class="story-slide story-7">
+            <span class="step-badge">SCHRITT 5</span>
+            <h2 class="step-title" style="color: #1F2937;">Warenkorb prüfen</h2>
+            <div class="cart-preview">
+                <div class="cart-item">
+                    <div>
+                        <span class="quantity-badge">1x</span>
+                        <span style="margin-left: 10px;">Caesar Salat</span>
+                    </div>
+                    <span>€9.50</span>
+                </div>
+                <div class="cart-item">
+                    <div>
+                        <span class="quantity-badge">1x</span>
+                        <span style="margin-left: 10px;">Cola</span>
+                    </div>
+                    <span>€3.50</span>
+                </div>
+                <div class="cart-total">
+                    <span>Gesamt</span>
+                    <span style="color: #EA580C;">€13.00</span>
+                </div>
+            </div>
+            <button style="width: 100%; padding: 15px; background: #EA580C; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
+                Weiter zur Zahlung →
+            </button>
+        </div>
+        
+        <!-- Story 8: Schritt 6 - Bezahlung -->
+        <div class="story-slide story-8">
+            <span class="step-badge">SCHRITT 6</span>
+            <h2 class="step-title" style="color: #1F2937;">Bezahlen</h2>
+            <div class="payment-options">
+                <div class="payment-method selected">
+                    <div class="payment-icon">💳</div>
+                    <span>Kreditkarte</span>
+                </div>
+                <div class="payment-method">
+                    <div class="payment-icon">📱</div>
+                    <span>Apple Pay / Google Pay</span>
+                </div>
+                <div class="payment-method">
+                    <div class="payment-icon">💰</div>
+                    <span>Bar beim Kellner</span>
+                </div>
+            </div>
+            <p style="text-align: center; color: #6B7280;">
+                Sicher und schnell bezahlen
+            </p>
+        </div>
+        
+        <!-- Story 9: Schritt 7 - Bestellung erfolgreich -->
+        <div class="story-slide story-9">
+            <div class="success-check">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </div>
+            <h2 style="font-size: 32px; margin-bottom: 20px;">Bestellung aufgegeben!</h2>
+            <div class="order-number">#0042</div>
+            <p style="opacity: 0.9;">
+                Ihre Bestellung wird<br>
+                in ca. 15 Minuten serviert
+            </p>
+        </div>
+        
+        <!-- Story 10: Restaurant Dashboard -->
+        <div class="story-slide story-10">
+            <span class="step-badge" style="background: #DBEAFE; color: #1E40AF;">FÜR DAS RESTAURANT</span>
+            <h2 class="step-title" style="color: #1F2937;">Live im Dashboard</h2>
+            <div class="dashboard-notification">
+                <div class="notification-header">
+                    <span style="font-weight: 600;">Neue Bestellung</span>
+                    <span class="notification-badge">TISCH 12</span>
+                </div>
+                <div style="color: #6B7280;">
+                    1x Caesar Salat<br>
+                    1x Cola
+                </div>
+            </div>
+            <p style="text-align: center; color: #6B7280;">
+                Personal wird sofort benachrichtigt
+            </p>
+        </div>
+        
+        <!-- Story 11: Küche -->
+        <div class="story-slide story-11">
+            <span class="step-badge" style="background: #FEE2E2; color: #DC2626;">KÜCHE</span>
+            <h2 class="step-title" style="color: #1F2937;">Direkt in der Küche</h2>
+            <div class="kitchen-display">
+                <div class="kitchen-header">
+                    <span style="font-weight: 600;">Küchen-Display</span>
+                    <span style="color: #10B981;">● LIVE</span>
+                </div>
+                <div class="kitchen-order">
+                    <div style="margin-bottom: 10px;">
+                        <span style="background: #F59E0B; padding: 2px 8px; border-radius: 5px; font-size: 12px;">NEU</span>
+                        <span style="margin-left: 10px; font-weight: 600;">Tisch 12</span>
+                    </div>
+                    <div>1x Caesar Salat</div>
+                    <div class="prep-time">⏱️ 10 Min</div>
+                </div>
+            </div>
+            <p style="text-align: center; color: #6B7280; margin-top: 20px;">
+                Keine Zettel mehr - alles digital!
+            </p>
+        </div>
+        
+        <!-- Story 12: Vorteile -->
+        <div class="story-slide story-12">
+            <h2 style="font-size: 36px; text-align: center; margin-bottom: 10px;">Die Vorteile</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-number">40%</div>
+                    <div class="benefit-text">Schneller</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">25%</div>
+                    <div class="benefit-text">Mehr Umsatz</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">100%</div>
+                    <div class="benefit-text">Kontaktlos</div>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-number">24/7</div>
+                    <div class="benefit-text">Verfügbar</div>
+                </div>
+            </div>
+            <p style="text-align: center; margin-top: 30px; opacity: 0.9;">
+                Zufriedenere Gäste & Personal!
+            </p>
+        </div>
+        
+        <!-- Story 13: CTA -->
+        <div class="story-slide story-13">
+            <h2 class="cta-title">Jetzt starten!</h2>
+            <p style="font-size: 20px; margin-bottom: 40px; opacity: 0.95;">
+                100 Bestellungen<br>kostenlos testen
+            </p>
+            <a href="#" class="cta-button">Los geht's!</a>
+            <p style="margin-top: 30px; font-size: 14px; opacity: 0.8;">
+                Keine Kreditkarte erforderlich<br>
+                In 5 Minuten eingerichtet
+            </p>
+        </div>
+        
+        <!-- Touch areas -->
+        <div class="touch-area prev" onclick="previousStory()"></div>
+        <div class="touch-area next" onclick="nextStory()"></div>
+    </div>
+    
+    <script>
+        const stories = document.querySelectorAll('.story-slide');
+        const progressSegments = document.querySelectorAll('.progress-segment');
+        let currentStory = 0;
+        let storyTimer;
+        const STORY_DURATION = 6000; // 6 seconds per story for more reading time
+        
+        function showStory(index) {
+            stories.forEach(story => {
+                story.classList.remove('active');
+            });
+            stories[index].classList.add('active');
+            updateProgress(index);
+        }
+        
+        function updateProgress(index) {
+            progressSegments.forEach((segment, i) => {
+                if (i < index) {
+                    segment.classList.add('completed');
+                    segment.querySelector('.progress-fill').style.width = '100%';
+                } else if (i === index) {
+                    segment.classList.remove('completed');
+                    animateProgress(segment);
+                } else {
+                    segment.classList.remove('completed');
+                    segment.querySelector('.progress-fill').style.width = '0';
+                }
+            });
+        }
+        
+        function animateProgress(segment) {
+            const fill = segment.querySelector('.progress-fill');
+            fill.style.width = '0';
+            fill.style.transition = `width ${STORY_DURATION}ms linear`;
+            setTimeout(() => {
+                fill.style.width = '100%';
+            }, 10);
+        }
+        
+        function nextStory() {
+            clearTimeout(storyTimer);
+            currentStory = (currentStory + 1) % stories.length;
+            showStory(currentStory);
+            startAutoAdvance();
+        }
+        
+        function previousStory() {
+            clearTimeout(storyTimer);
+            currentStory = (currentStory - 1 + stories.length) % stories.length;
+            showStory(currentStory);
+            startAutoAdvance();
+        }
+        
+        function startAutoAdvance() {
+            storyTimer = setTimeout(nextStory, STORY_DURATION);
+        }
+        
+        // Initialize
+        showStory(0);
+        startAutoAdvance();
+        
+        // Touch handling
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    nextStory();
+                } else {
+                    previousStory();
+                }
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextStory();
+            } else if (e.key === 'ArrowLeft') {
+                previousStory();
+            }
+        });
+        
+        // Pause on hold
+        let holdTimer;
+        const pauseStory = () => {
+            holdTimer = setTimeout(() => clearTimeout(storyTimer), 200);
+        };
+        
+        const resumeStory = () => {
+            clearTimeout(holdTimer);
+            startAutoAdvance();
+        };
+        
+        document.addEventListener('mousedown', pauseStory);
+        document.addEventListener('mouseup', resumeStory);
+        document.addEventListener('touchstart', pauseStory);
+        document.addEventListener('touchend', resumeStory);
+    </script>
+</body>
+</html>

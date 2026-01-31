@@ -107,12 +107,14 @@ async function getRestaurantFinanceData(restaurantId: string) {
   
   if (restaurant.country === 'JO') {
     currency = 'JOD'
-    if (restaurant.plan?.includes('PAY_PER_ORDER')) {
+    // TRIAL und PAY_PER_ORDER Pläne zahlen pro Bestellung
+    if (restaurant.plan?.includes('PAY_PER_ORDER') || restaurant.plan === 'TRIAL') {
       orderRate = 0.10
     }
   } else if (restaurant.country === 'DE') {
     currency = 'EUR'
-    if (restaurant.plan?.includes('PAY_PER_ORDER')) {
+    // TRIAL und PAY_PER_ORDER Pläne zahlen pro Bestellung
+    if (restaurant.plan?.includes('PAY_PER_ORDER') || restaurant.plan === 'TRIAL') {
       orderRate = 0.45
     }
   }

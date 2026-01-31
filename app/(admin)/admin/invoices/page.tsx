@@ -82,7 +82,8 @@ async function getInvoicesData(): Promise<{
 
   // Generate invoices for each restaurant for the last 12 months
   for (const restaurant of restaurants) {
-    if (!restaurant.payPerOrderEnabled || !restaurant.plan?.includes('PAY_PER_ORDER')) {
+    // TRIAL und PAY_PER_ORDER Pläne generieren Rechnungen
+    if (!restaurant.payPerOrderEnabled && restaurant.plan !== 'TRIAL' && !restaurant.plan?.includes('PAY_PER_ORDER')) {
       continue
     }
 

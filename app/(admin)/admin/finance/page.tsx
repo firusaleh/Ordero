@@ -60,12 +60,14 @@ async function getFinanceData() {
     
     if (restaurant.country === 'JO') {
       currency = 'JOD'
-      if (restaurant.plan?.includes('PAY_PER_ORDER')) {
+      // TRIAL und PAY_PER_ORDER Pläne zahlen pro Bestellung
+      if (restaurant.plan?.includes('PAY_PER_ORDER') || restaurant.plan === 'TRIAL') {
         orderRate = 0.10 // 0.10 JOD per order
       }
     } else if (restaurant.country === 'DE') {
       currency = 'EUR'
-      if (restaurant.plan?.includes('PAY_PER_ORDER')) {
+      // TRIAL und PAY_PER_ORDER Pläne zahlen pro Bestellung
+      if (restaurant.plan?.includes('PAY_PER_ORDER') || restaurant.plan === 'TRIAL') {
         orderRate = 0.45 // 0.45 EUR per order
       }
     }
@@ -140,11 +142,11 @@ async function getFinanceData() {
   })
 
   const lastMonthFeesDE = lastMonthRestaurants
-    .filter(r => r.country === 'DE' && r.plan?.includes('PAY_PER_ORDER'))
+    .filter(r => r.country === 'DE' && (r.plan?.includes('PAY_PER_ORDER') || r.plan === 'TRIAL'))
     .reduce((sum, r) => sum + (r.orders.length * 0.45), 0)
   
   const lastMonthFeesJO = lastMonthRestaurants
-    .filter(r => r.country === 'JO' && r.plan?.includes('PAY_PER_ORDER'))
+    .filter(r => r.country === 'JO' && (r.plan?.includes('PAY_PER_ORDER') || r.plan === 'TRIAL'))
     .reduce((sum, r) => sum + (r.orders.length * 0.10), 0)
 
   return {
