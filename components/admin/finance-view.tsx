@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -44,7 +45,8 @@ import {
   ArrowDown,
   Calendar,
   CreditCard,
-  AlertCircle
+  AlertCircle,
+  Eye
 } from 'lucide-react'
 import { toast } from 'sonner'
 import jsPDF from 'jspdf'
@@ -497,47 +499,63 @@ export default function AdminFinanceView({ data }: { data: FinanceData }) {
                       )}
                     </TableCell>
                     <TableCell>
-                      {restaurant.totalFees > 0 && (
-                        <div className="flex gap-1">
+                      <div className="flex gap-1">
+                        <Link href={`/admin/finance/${restaurant.id}`}>
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {
-                              setSelectedRestaurant(restaurant)
-                              setShowInvoiceDialog(true)
-                            }}
                             className="text-gray-400 hover:text-white"
+                            title="Details anzeigen"
                           >
-                            <FileText className="w-4 h-4" />
+                            <Eye className="w-4 h-4" />
                           </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => generateInvoice(restaurant)}
-                            className="text-gray-400 hover:text-white"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => sendInvoiceEmail(restaurant)}
-                            className="text-gray-400 hover:text-white"
-                          >
-                            <Mail className="w-4 h-4" />
-                          </Button>
-                          {!restaurant.isPaid && (
+                        </Link>
+                        {restaurant.totalFees > 0 && (
+                          <>
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => markAsPaid(restaurant.id)}
-                              className="text-green-400 hover:text-green-300"
+                              onClick={() => {
+                                setSelectedRestaurant(restaurant)
+                                setShowInvoiceDialog(true)
+                              }}
+                              className="text-gray-400 hover:text-white"
+                              title="Rechnung senden"
                             >
-                              <CheckCircle className="w-4 h-4" />
+                              <FileText className="w-4 h-4" />
                             </Button>
-                          )}
-                        </div>
-                      )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => generateInvoice(restaurant)}
+                              className="text-gray-400 hover:text-white"
+                              title="Rechnung herunterladen"
+                            >
+                              <Download className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => sendInvoiceEmail(restaurant)}
+                              className="text-gray-400 hover:text-white"
+                              title="Rechnung per E-Mail senden"
+                            >
+                              <Mail className="w-4 h-4" />
+                            </Button>
+                            {!restaurant.isPaid && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => markAsPaid(restaurant.id)}
+                                className="text-green-400 hover:text-green-300"
+                                title="Als bezahlt markieren"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
