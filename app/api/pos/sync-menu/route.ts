@@ -287,6 +287,12 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    // Get category map entries for debugging
+    const categoryMapEntries: Record<string, string> = {}
+    categoryMap.forEach((value, key) => {
+      categoryMapEntries[key] = value
+    })
+
     return NextResponse.json({
       success: true,
       imported,
@@ -301,7 +307,10 @@ export async function POST(req: NextRequest) {
         categoriesUpdated,
         sampleCategory: syncResult.categories?.[0] || null,
         sampleItem: syncResult.items?.[0] || null,
-        categoryMapSize: categoryMap.size
+        categoryMapSize: categoryMap.size,
+        categoryMapEntries: categoryMapEntries,
+        rawFirstGroup: (syncResult as any).rawFirstGroup || null,
+        rawFirstProduct: (syncResult as any).rawFirstProduct || null
       }
     })
   } catch (error: any) {

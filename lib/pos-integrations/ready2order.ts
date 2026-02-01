@@ -112,6 +112,10 @@ export class Ready2OrderAdapter extends POSAdapter {
 
       console.log('Converted categories:', JSON.stringify(categories.slice(0, 3), null, 2))
 
+      // Store raw data for debugging
+      const rawFirstGroup = groups.length > 0 ? groups[0] : null
+      const rawFirstProduct = products.length > 0 ? products[0] : null
+
       // ready2order returns prices in euros (not cents), e.g., 4.5 for €4.50
       const items: POSMenuItem[] = products.map((product: any) => {
         // Extract category ID from various possible locations
@@ -175,6 +179,10 @@ export class Ready2OrderAdapter extends POSAdapter {
       result.items = items
       result.success = true
       result.imported = items.length
+
+      // Add raw data for debugging (will be included in response)
+      ;(result as any).rawFirstGroup = rawFirstGroup
+      ;(result as any).rawFirstProduct = rawFirstProduct
 
       return result
     } catch (error: any) {
