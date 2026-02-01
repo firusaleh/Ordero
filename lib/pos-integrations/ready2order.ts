@@ -38,9 +38,9 @@ export class Ready2OrderAdapter extends POSAdapter {
     }
 
     try {
-      // Fetch all products from ready2order
+      // Fetch all products from ready2order with productgroup included
       console.log('Fetching products from Ready2Order...')
-      const productsResponse = await fetch(`${this.baseUrl}/products`, {
+      const productsResponse = await fetch(`${this.baseUrl}/products?include=productgroup`, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Accept': 'application/json'
@@ -71,6 +71,8 @@ export class Ready2OrderAdapter extends POSAdapter {
       console.log(`Ready2Order: Found ${products.length} products`)
       if (products.length > 0) {
         console.log('First product raw:', JSON.stringify(products[0], null, 2))
+        // Log all keys to see what fields are available
+        console.log('Product keys:', Object.keys(products[0]))
       }
 
       // Fetch all product groups (categories)
@@ -103,11 +105,74 @@ export class Ready2OrderAdapter extends POSAdapter {
         console.warn('Ready2Order: Could not fetch product groups, using embedded group data from products')
       }
 
-      // Convert to our format - handle various field names from ready2order
+      // Check if products include productgroup info - if not, try fetching products per group
+      const firstProductHasGroup = products.length > 0 && (
+        products[0].productgroup_id ||
+        products[0].product_productgroup_id ||
+        products[0].productgroup?.productgroup_id
+      )
+
+      if (!firstProductHasGroup && groups.length > 0) {
+        console.log('Products do not include productgroup_id, fetching products per group...')
+        // Try to fetch products for each group
+        const productsWithGroups: any[] = []
+
+        for (const group of groups) {
+          const groupId = group.productgroup_id || group.id
+          if (!groupId) continue
+
+          try {
+            // Try fetching products for this specific group
+            const groupProductsResponse = await fetch(
+              `${this.baseUrl}/productgroups/${groupId}/products`,
+              {
+                headers: {
+                  'Authorization': `Bearer ${this.apiKey}`,
+                  'Accept': 'application/json'
+                }
+              }
+            )
+
+            if (groupProductsResponse.ok) {
+              const groupProductsRaw = await groupProductsResponse.json()
+              let groupProducts: any[] = []
+
+              if (Array.isArray(groupProductsRaw)) {
+                groupProducts = groupProductsRaw
+              } else if (groupProductsRaw?.data) {
+                groupProducts = groupProductsRaw.data
+              } else if (groupProductsRaw?.products) {
+                groupProducts = groupProductsRaw.products
+              }
+
+              // Add group info to each product
+              for (const product of groupProducts) {
+                productsWithGroups.push({
+                  ...product,
+                  productgroup_id: groupId,
+                  productgroup_name: group.productgroup_name || group.name
+                })
+              }
+
+              console.log(`Fetched ${groupProducts.length} products for group "${group.productgroup_name || group.name}"`)
+            }
+          } catch (e) {
+            console.warn(`Could not fetch products for group ${groupId}:`, e)
+          }
+        }
+
+        // If we got products this way, use them instead
+        if (productsWithGroups.length > 0) {
+          console.log(`Using ${productsWithGroups.length} products fetched per group`)
+          products = productsWithGroups
+        }
+      }
+
+      // Convert to our format - ready2order uses productgroup_ prefix
       const categories: POSCategory[] = groups.map((group: any) => ({
         id: (group.productgroup_id || group.id || group._id)?.toString(),
-        name: group.name || group.productgroup_name || group.groupName || group.title || '',
-        sortOrder: group.position || group.sort || group.sortOrder || 0
+        name: group.productgroup_name || group.name || group.groupName || group.title || '',
+        sortOrder: group.productgroup_sortIndex || group.position || group.sort || group.sortOrder || 0
       })).filter(cat => cat.name) // Filter out categories without names
 
       console.log('Converted categories:', JSON.stringify(categories.slice(0, 3), null, 2))
@@ -117,50 +182,50 @@ export class Ready2OrderAdapter extends POSAdapter {
       const rawFirstProduct = products.length > 0 ? products[0] : null
 
       // ready2order returns prices in euros (not cents), e.g., 4.5 for €4.50
+      // ready2order uses product_ prefix for all product fields
       const items: POSMenuItem[] = products.map((product: any) => {
-        // Extract category ID from various possible locations
-        // Also check for nested productgroup object with name for matching later
+        // Extract category ID - ready2order may include productgroup object when using ?include=productgroup
         const categoryId = (
           product.productgroup_id ||
+          product.product_productgroup_id ||
           product.productgroup?.productgroup_id ||
-          product.productgroup?.id ||
-          product.category_id ||
-          product.categoryId
+          product.productgroup?.id
         )?.toString()
 
         // Store the category name from embedded productgroup if available
-        const categoryName = product.productgroup?.name || product.productgroup_name || null
+        const categoryName = product.productgroup?.productgroup_name ||
+                            product.productgroup?.name ||
+                            product.productgroup_name || null
 
-        // Extract name from various possible locations
-        const itemName = product.name || product.product_name || product.productName || product.title || ''
+        // Extract name - ready2order uses product_name
+        const itemName = product.product_name || product.name || ''
 
-        // Extract price - handle both number and string
-        const priceValue = product.price ?? product.product_price ?? product.unitPrice ?? 0
+        // Extract price - ready2order uses product_price, handle both number and string
+        const priceValue = product.product_price ?? product.price ?? 0
         const price = typeof priceValue === 'string' ? parseFloat(priceValue) : priceValue
 
-        // Parse active state - handle various formats (0/1, "0"/"1", true/false, "true"/"false")
-        const activeValue = product.active ?? product.isActive ?? product.status ?? 1
+        // Parse active state - ready2order uses product_active (0/1 or "0"/"1")
+        const activeValue = product.product_active ?? product.active ?? 1
         const isActive = activeValue === 1 || activeValue === '1' ||
-                        activeValue === true || activeValue === 'true' ||
-                        activeValue === 'active' || activeValue === 'ACTIVE'
+                        activeValue === true || activeValue === 'true'
 
         return {
-          id: (product.product_id || product.id || product._id)?.toString(),
+          id: (product.product_id || product.id)?.toString(),
           name: itemName,
-          description: product.description || product.product_description || '',
+          description: product.product_description || product.description || '',
           price: price || 0, // Price is already in euros
           categoryId,
           categoryName, // Include for fallback matching
-          image: product.image_url || product.image || product.imageUrl,
+          image: product.product_image || product.image_url || product.image,
           isActive,
           variants: (product.variations || product.variants || []).map((v: any) => ({
             id: (v.variation_id || v.id)?.toString(),
-            name: v.name || v.variation_name || '',
+            name: v.variation_name || v.name || '',
             price: parseFloat(v.price) || 0
           })),
           extras: (product.extras || []).map((e: any) => ({
             id: (e.extra_id || e.id)?.toString(),
-            name: e.name || e.extra_name || '',
+            name: e.extra_name || e.name || '',
             price: parseFloat(e.price) || 0
           }))
         }
