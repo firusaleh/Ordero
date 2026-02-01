@@ -115,6 +115,7 @@ export class Ready2OrderAdapter extends POSAdapter {
       // ready2order returns prices in euros (not cents), e.g., 4.5 for €4.50
       const items: POSMenuItem[] = products.map((product: any) => {
         // Extract category ID from various possible locations
+        // Also check for nested productgroup object with name for matching later
         const categoryId = (
           product.productgroup_id ||
           product.productgroup?.productgroup_id ||
@@ -123,6 +124,9 @@ export class Ready2OrderAdapter extends POSAdapter {
           product.categoryId
         )?.toString()
 
+        // Store the category name from embedded productgroup if available
+        const categoryName = product.productgroup?.name || product.productgroup_name || null
+
         // Extract name from various possible locations
         const itemName = product.name || product.product_name || product.productName || product.title || ''
 
@@ -130,14 +134,21 @@ export class Ready2OrderAdapter extends POSAdapter {
         const priceValue = product.price ?? product.product_price ?? product.unitPrice ?? 0
         const price = typeof priceValue === 'string' ? parseFloat(priceValue) : priceValue
 
+        // Parse active state - handle various formats (0/1, "0"/"1", true/false, "true"/"false")
+        const activeValue = product.active ?? product.isActive ?? product.status ?? 1
+        const isActive = activeValue === 1 || activeValue === '1' ||
+                        activeValue === true || activeValue === 'true' ||
+                        activeValue === 'active' || activeValue === 'ACTIVE'
+
         return {
           id: (product.product_id || product.id || product._id)?.toString(),
           name: itemName,
           description: product.description || product.product_description || '',
           price: price || 0, // Price is already in euros
           categoryId,
+          categoryName, // Include for fallback matching
           image: product.image_url || product.image || product.imageUrl,
-          isActive: product.active === 1 || product.active === true || product.isActive === true,
+          isActive,
           variants: (product.variations || product.variants || []).map((v: any) => ({
             id: (v.variation_id || v.id)?.toString(),
             name: v.name || v.variation_name || '',

@@ -5,6 +5,7 @@ export interface POSMenuItem {
   description: string
   price: number
   categoryId?: string
+  categoryName?: string  // For fallback category matching by name
   image?: string
   isActive: boolean
   variants?: POSVariant[]

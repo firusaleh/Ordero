@@ -163,19 +163,30 @@ export async function POST(req: NextRequest) {
           continue
         }
 
-        // Find category by posId first, then by name from the POS category data
+        // Find category by posId first, then by name
         let categoryId: string | null = null
 
+        // Method 1: Direct posId lookup
         if (posItem.categoryId) {
           categoryId = categoryMap.get(posItem.categoryId) || null
         }
 
-        // If not found by posId, try to find by matching category name
-        if (!categoryId && syncResult.categories) {
+        // Method 2: Look up by category name embedded in the item (from productgroup.name)
+        if (!categoryId && posItem.categoryName) {
+          categoryId = categoryMap.get(posItem.categoryName.toLowerCase()) || null
+        }
+
+        // Method 3: Find matching category from categories list and use its name
+        if (!categoryId && syncResult.categories && posItem.categoryId) {
           const posCategory = syncResult.categories.find(c => c.id === posItem.categoryId)
           if (posCategory?.name) {
             categoryId = categoryMap.get(posCategory.name.toLowerCase()) || null
           }
+        }
+
+        // Log for debugging
+        if (!categoryId) {
+          console.log(`No category found for item "${posItem.name}" (categoryId: ${posItem.categoryId}, categoryName: ${posItem.categoryName})`)
         }
 
         // Build OR conditions - only include posId if it's defined
