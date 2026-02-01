@@ -96,11 +96,11 @@ async function getInvoicesData(): Promise<{
       // Skip future months
       if (startOfMonth > now) continue
 
-      // Get orders for this month
+      // Get orders for this month (alle außer stornierte)
       const monthOrders = restaurant.orders.filter(order => {
         const orderDate = new Date(order.createdAt)
         return orderDate >= startOfMonth && orderDate <= endOfMonth &&
-               (order.status === 'COMPLETED' || order.status === 'READY' || order.status === 'DELIVERED' || order.paymentStatus === 'PAID')
+               order.status !== 'CANCELLED'
       })
 
       // Skip if no orders

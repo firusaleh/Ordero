@@ -32,10 +32,10 @@ async function getFinanceData() {
             gte: startOfMonth,
             lte: endOfMonth
           },
-          OR: [
-            { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
-            { paymentStatus: 'PAID' }
-          ]
+          // Alle Bestellungen außer stornierten zählen
+          NOT: {
+            status: 'CANCELLED'
+          }
         },
         select: {
           id: true,
@@ -117,10 +117,10 @@ async function getFinanceData() {
         gte: startOfLastMonth,
         lte: endOfLastMonth
       },
-      OR: [
-        { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
-        { paymentStatus: 'PAID' }
-      ]
+      // Alle Bestellungen außer stornierten zählen
+      NOT: {
+        status: 'CANCELLED'
+      }
     }
   })
 
@@ -132,10 +132,10 @@ async function getFinanceData() {
             gte: startOfLastMonth,
             lte: endOfLastMonth
           },
-          OR: [
-            { status: { in: ['COMPLETED', 'READY', 'DELIVERED'] } },
-            { paymentStatus: 'PAID' }
-          ]
+          // Alle Bestellungen außer stornierten zählen
+          NOT: {
+            status: 'CANCELLED'
+          }
         }
       }
     }

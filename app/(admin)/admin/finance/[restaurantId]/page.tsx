@@ -74,21 +74,21 @@ async function getRestaurantFinanceData(restaurantId: string) {
     notFound()
   }
 
-  // Filter orders by different periods
+  // Filter orders by different periods (alle außer stornierte)
   const thisMonthOrders = restaurant.orders.filter(order => {
     const orderDate = new Date(order.createdAt)
     return orderDate >= startOfMonth && orderDate <= endOfMonth &&
-           (order.status === 'COMPLETED' || order.status === 'READY' || order.status === 'DELIVERED' || order.paymentStatus === 'PAID')
+           order.status !== 'CANCELLED'
   })
 
   const lastMonthOrders = restaurant.orders.filter(order => {
     const orderDate = new Date(order.createdAt)
     return orderDate >= startOfLastMonth && orderDate <= endOfLastMonth &&
-           (order.status === 'COMPLETED' || order.status === 'READY' || order.status === 'DELIVERED' || order.paymentStatus === 'PAID')
+           order.status !== 'CANCELLED'
   })
 
   const allValidOrders = restaurant.orders.filter(order => 
-    order.status === 'COMPLETED' || order.status === 'READY' || order.status === 'DELIVERED' || order.paymentStatus === 'PAID'
+    order.status !== 'CANCELLED'
   )
 
   // Calculate payment method breakdown for this month
