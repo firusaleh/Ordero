@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -46,7 +47,9 @@ import {
   Calendar,
   CreditCard,
   AlertCircle,
-  Eye
+  Eye,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react'
 import { toast } from 'sonner'
 import jsPDF from 'jspdf'
@@ -108,6 +111,44 @@ export default function AdminFinanceView({ data }: { data: FinanceData }) {
   const [filterPayment, setFilterPayment] = useState('all')
   const [selectedRestaurant, setSelectedRestaurant] = useState<RestaurantBilling | null>(null)
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false)
+  
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Get current month/year from URL or use current date
+  const currentDate = new Date()
+  const selectedMonth = searchParams.get('month') 
+    ? parseInt(searchParams.get('month')!) 
+    : currentDate.getMonth()
+  const selectedYear = searchParams.get('year') 
+    ? parseInt(searchParams.get('year')!) 
+    : currentDate.getFullYear()
+    
+  const handleMonthChange = (direction: 'prev' | 'next' | 'current') => {
+    if (direction === 'current') {
+      router.push('/admin/finance')
+      return
+    }
+    
+    let newMonth = selectedMonth
+    let newYear = selectedYear
+    
+    if (direction === 'prev') {
+      newMonth--
+      if (newMonth < 0) {
+        newMonth = 11
+        newYear--
+      }
+    } else {
+      newMonth++
+      if (newMonth > 11) {
+        newMonth = 0
+        newYear++
+      }
+    }
+    
+    router.push(`/admin/finance?month=${newMonth}&year=${newYear}`)
+  }
 
   // Filter restaurants
   const filteredRestaurants = data.restaurants.filter(restaurant => {
@@ -279,7 +320,41 @@ export default function AdminFinanceView({ data }: { data: FinanceData }) {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-white">Finanzübersicht</h1>
-          <p className="text-gray-400 mt-1">Abrechnungszeitraum: {billingPeriodText}</p>
+          <div className="flex items-center gap-4 mt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleMonthChange('prev')}
+              className="bg-gray-700 hover:bg-gray-600 text-gray-300"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <p className="text-gray-400">
+              {new Date(selectedYear, selectedMonth).toLocaleDateString('de-DE', { 
+                month: 'long', 
+                year: 'numeric' 
+              })}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleMonthChange('next')}
+              className="bg-gray-700 hover:bg-gray-600 text-gray-300"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+            {(selectedMonth !== currentDate.getMonth() || selectedYear !== currentDate.getFullYear()) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleMonthChange('current')}
+                className="bg-blue-600 hover:bg-blue-700 text-white ml-2"
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Aktueller Monat
+              </Button>
+            )}
+          </div>
         </div>
         <div className="flex gap-2">
           <Button

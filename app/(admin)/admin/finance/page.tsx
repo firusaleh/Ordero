@@ -3,19 +3,29 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import AdminFinanceView from '@/components/admin/finance-view'
 
-async function getFinanceData() {
+interface PageProps {
+  searchParams: Promise<{
+    month?: string
+    year?: string
+  }>
+}
+
+async function getFinanceData(selectedMonth?: number, selectedYear?: number) {
   const session = await auth()
   
   if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'SUPER_ADMIN')) {
     redirect('/login')
   }
 
-  // Get current date info for billing period
+  // Use provided month/year or current date
   const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
+  const year = selectedYear || now.getFullYear()
+  const month = selectedMonth !== undefined ? selectedMonth : now.getMonth()
+  
+  const startOfMonth = new Date(year, month, 1)
+  const endOfMonth = new Date(year, month + 1, 0)
+  const startOfLastMonth = new Date(year, month - 1, 1)
+  const endOfLastMonth = new Date(year, month, 0)
 
   // Get all restaurants with their billing information
   const restaurants = await prisma.restaurant.findMany({
@@ -180,8 +190,12 @@ async function getFinanceData() {
   }
 }
 
-export default async function AdminFinancePage() {
-  const financeData = await getFinanceData()
+export default async function AdminFinancePage({ searchParams }: PageProps) {
+  const params = await searchParams
+  const month = params.month ? parseInt(params.month) : undefined
+  const year = params.year ? parseInt(params.year) : undefined
+  
+  const financeData = await getFinanceData(month, year)
   
   return <AdminFinanceView data={financeData} />
 }
