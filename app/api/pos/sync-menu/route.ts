@@ -76,9 +76,21 @@ export async function POST(req: NextRequest) {
 
     let imported = 0
     let updated = 0
+    let categoriesCreated = 0
+    let categoriesUpdated = 0
 
     // Verarbeite Kategorien
     console.log(`Processing ${syncResult.categories?.length || 0} categories from POS...`)
+
+    // Log sample category for debugging
+    if (syncResult.categories && syncResult.categories.length > 0) {
+      console.log('Sample category from POS:', JSON.stringify(syncResult.categories[0], null, 2))
+    }
+
+    // Log sample item for debugging
+    if (syncResult.items && syncResult.items.length > 0) {
+      console.log('Sample item from POS:', JSON.stringify(syncResult.items[0], null, 2))
+    }
 
     if (syncResult.categories) {
       for (const posCategory of syncResult.categories) {
@@ -112,6 +124,7 @@ export async function POST(req: NextRequest) {
               sortOrder: posCategory.sortOrder || 0
             }
           })
+          categoriesCreated++
           console.log(`Created new category: ${category.name} (id: ${category.id})`)
         } else {
           await prisma.category.update({
@@ -121,6 +134,7 @@ export async function POST(req: NextRequest) {
               sortOrder: posCategory.sortOrder || category.sortOrder
             }
           })
+          categoriesUpdated++
           console.log(`Updated existing category: ${category.name} (id: ${category.id})`)
         }
       }
@@ -271,7 +285,12 @@ export async function POST(req: NextRequest) {
       debug: {
         categoriesFromPOS: syncResult.categories?.length || 0,
         itemsFromPOS: syncResult.items?.length || 0,
-        categoriesInDB: allCategories.length
+        categoriesInDB: allCategories.length,
+        categoriesCreated,
+        categoriesUpdated,
+        sampleCategory: syncResult.categories?.[0] || null,
+        sampleItem: syncResult.items?.[0] || null,
+        categoryMapSize: categoryMap.size
       }
     })
   } catch (error: any) {

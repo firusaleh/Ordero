@@ -103,12 +103,14 @@ export class Ready2OrderAdapter extends POSAdapter {
         console.warn('Ready2Order: Could not fetch product groups, using embedded group data from products')
       }
 
-      // Convert to our format - handle both flat response and nested productgroup
+      // Convert to our format - handle various field names from ready2order
       const categories: POSCategory[] = groups.map((group: any) => ({
-        id: (group.productgroup_id || group.id)?.toString(),
-        name: group.name,
-        sortOrder: group.position || group.sort || 0
-      }))
+        id: (group.productgroup_id || group.id || group._id)?.toString(),
+        name: group.name || group.productgroup_name || group.groupName || group.title || '',
+        sortOrder: group.position || group.sort || group.sortOrder || 0
+      })).filter(cat => cat.name) // Filter out categories without names
+
+      console.log('Converted categories:', JSON.stringify(categories.slice(0, 3), null, 2))
 
       // ready2order returns prices in euros (not cents), e.g., 4.5 for €4.50
       const items: POSMenuItem[] = products.map((product: any) => {
@@ -116,29 +118,40 @@ export class Ready2OrderAdapter extends POSAdapter {
         const categoryId = (
           product.productgroup_id ||
           product.productgroup?.productgroup_id ||
-          product.productgroup?.id
+          product.productgroup?.id ||
+          product.category_id ||
+          product.categoryId
         )?.toString()
 
+        // Extract name from various possible locations
+        const itemName = product.name || product.product_name || product.productName || product.title || ''
+
+        // Extract price - handle both number and string
+        const priceValue = product.price ?? product.product_price ?? product.unitPrice ?? 0
+        const price = typeof priceValue === 'string' ? parseFloat(priceValue) : priceValue
+
         return {
-          id: (product.product_id || product.id)?.toString(),
-          name: product.name,
-          description: product.description || '',
-          price: parseFloat(product.price) || 0, // Price is already in euros
+          id: (product.product_id || product.id || product._id)?.toString(),
+          name: itemName,
+          description: product.description || product.product_description || '',
+          price: price || 0, // Price is already in euros
           categoryId,
-          image: product.image_url || product.image,
-          isActive: product.active === 1 || product.active === true,
+          image: product.image_url || product.image || product.imageUrl,
+          isActive: product.active === 1 || product.active === true || product.isActive === true,
           variants: (product.variations || product.variants || []).map((v: any) => ({
             id: (v.variation_id || v.id)?.toString(),
-            name: v.name,
+            name: v.name || v.variation_name || '',
             price: parseFloat(v.price) || 0
           })),
           extras: (product.extras || []).map((e: any) => ({
             id: (e.extra_id || e.id)?.toString(),
-            name: e.name,
+            name: e.name || e.extra_name || '',
             price: parseFloat(e.price) || 0
           }))
         }
-      })
+      }).filter(item => item.name) // Filter out items without names
+
+      console.log('Converted items:', JSON.stringify(items.slice(0, 3), null, 2))
 
       console.log(`Ready2Order sync complete: ${items.length} items, ${categories.length} categories`)
 
