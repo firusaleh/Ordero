@@ -82,15 +82,24 @@ export async function POST(req: NextRequest) {
 
     if (syncResult.categories) {
       for (const posCategory of syncResult.categories) {
+        // Skip categories without name
+        if (!posCategory.name) {
+          console.warn('Skipping category without name:', posCategory)
+          continue
+        }
+
         console.log(`Processing category: ${posCategory.name} (posId: ${posCategory.id})`)
+
+        // Build OR conditions - only include posId if it's defined
+        const orConditions: any[] = [{ name: posCategory.name }]
+        if (posCategory.id) {
+          orConditions.push({ posId: posCategory.id })
+        }
 
         let category = await prisma.category.findFirst({
           where: {
             restaurantId: restaurant.id,
-            OR: [
-              { posId: posCategory.id },
-              { name: posCategory.name }
-            ]
+            OR: orConditions
           }
         })
 
@@ -99,8 +108,8 @@ export async function POST(req: NextRequest) {
             data: {
               restaurantId: restaurant.id,
               name: posCategory.name,
-              posId: posCategory.id,
-              sortOrder: posCategory.sortOrder
+              posId: posCategory.id || null,
+              sortOrder: posCategory.sortOrder || 0
             }
           })
           console.log(`Created new category: ${category.name} (id: ${category.id})`)
@@ -108,8 +117,8 @@ export async function POST(req: NextRequest) {
           await prisma.category.update({
             where: { id: category.id },
             data: {
-              posId: posCategory.id,
-              sortOrder: posCategory.sortOrder
+              posId: posCategory.id || category.posId,
+              sortOrder: posCategory.sortOrder || category.sortOrder
             }
           })
           console.log(`Updated existing category: ${category.name} (id: ${category.id})`)
@@ -134,6 +143,12 @@ export async function POST(req: NextRequest) {
     // Verarbeite Menü-Items
     if (syncResult.items) {
       for (const posItem of syncResult.items) {
+        // Skip items without name
+        if (!posItem.name) {
+          console.warn('Skipping item without name:', posItem)
+          continue
+        }
+
         // Find category by posId first, then by name from the POS category data
         let categoryId: string | null = null
 
@@ -149,14 +164,17 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        // Build OR conditions - only include posId if it's defined
+        const orConditions: any[] = [{ name: posItem.name }]
+        if (posItem.id) {
+          orConditions.push({ posId: posItem.id })
+        }
+
         // Prüfe ob Item existiert
         const existingItem = await prisma.menuItem.findFirst({
           where: {
             restaurantId: restaurant.id,
-            OR: [
-              { posId: posItem.id },
-              { name: posItem.name }
-            ]
+            OR: orConditions
           }
         })
 
@@ -167,12 +185,12 @@ export async function POST(req: NextRequest) {
             data: {
               name: posItem.name,
               description: posItem.description || '',
-              price: posItem.price,
+              price: posItem.price || 0,
               categoryId: categoryId || existingItem.categoryId,
-              posId: posItem.id,
-              image: posItem.image,
-              isActive: posItem.isActive,
-              isAvailable: posItem.isActive
+              posId: posItem.id || existingItem.posId,
+              image: posItem.image || existingItem.image,
+              isActive: posItem.isActive !== undefined ? posItem.isActive : true,
+              isAvailable: posItem.isActive !== undefined ? posItem.isActive : true
             }
           })
           updated++
@@ -184,11 +202,11 @@ export async function POST(req: NextRequest) {
               categoryId: categoryId,
               name: posItem.name,
               description: posItem.description || '',
-              price: posItem.price,
-              posId: posItem.id,
-              image: posItem.image || undefined,
-              isActive: posItem.isActive,
-              isAvailable: posItem.isActive
+              price: posItem.price || 0,
+              posId: posItem.id || null,
+              image: posItem.image || null,
+              isActive: posItem.isActive !== undefined ? posItem.isActive : true,
+              isAvailable: posItem.isActive !== undefined ? posItem.isActive : true
             }
           })
           imported++
@@ -218,11 +236,11 @@ export async function POST(req: NextRequest) {
               categoryId: defaultCategory.id,
               name: posItem.name,
               description: posItem.description || '',
-              price: posItem.price,
-              posId: posItem.id,
-              image: posItem.image || undefined,
-              isActive: posItem.isActive,
-              isAvailable: posItem.isActive
+              price: posItem.price || 0,
+              posId: posItem.id || null,
+              image: posItem.image || null,
+              isActive: posItem.isActive !== undefined ? posItem.isActive : true,
+              isAvailable: posItem.isActive !== undefined ? posItem.isActive : true
             }
           })
           imported++
@@ -251,10 +269,14 @@ export async function POST(req: NextRequest) {
       total: imported + updated,
       message: `${imported} neue Artikel importiert, ${updated} aktualisiert`
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Menü-Sync Fehler:', error)
     return NextResponse.json(
-      { error: 'Fehler beim Synchronisieren des Menüs' },
+      {
+        error: 'Fehler beim Synchronisieren des Menüs',
+        details: error?.message || String(error),
+        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+      },
       { status: 500 }
     )
   }
