@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oriido Demo mit Recorder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        .recorder-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 15px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        .btn-record {
+            background: #EA580C;
+            color: white;
+            flex: 1;
+        }
+        .btn-record:hover {
+            background: #DC2626;
+            transform: translateY(-2px);
+        }
+        .btn-stop {
+            background: #DC2626;
+            color: white;
+            flex: 1;
+        }
+        .btn-download {
+            background: #10B981;
+            color: white;
+            flex: 1;
+        }
+        .btn-download:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .status {
+            text-align: center;
+            padding: 15px;
+            background: #FEF3C7;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #92400E;
+        }
+        .demo-frame {
+            width: 100%;
+            height: 600px;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .recording-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: #DC2626;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: pulse 1s ease-in-out infinite;
+        }
+        .recording-indicator.active {
+            display: flex;
+        }
+        .rec-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .instructions {
+            background: #F0FDF4;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #10B981;
+        }
+        h1 {
+            text-align: center;
+            color: #1F2937;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6B7280;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Oriido Demo Recorder</h1>
+        <p class="subtitle">Nehmen Sie Ihre Demo direkt im Browser auf!</p>
+        
+        <div class="instructions">
+            <strong>So funktioniert's:</strong>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Klicken Sie auf "Aufnahme starten"</li>
+                <li>Wählen Sie "Diesen Tab" oder "Fenster"</li>
+                <li>Die Demo läuft automatisch</li>
+                <li>Klicken Sie "Aufnahme stoppen"</li>
+                <li>Video herunterladen - fertig!</li>
+            </ol>
+        </div>
+        
+        <div class="status" id="status">Bereit zur Aufnahme</div>
+        
+        <div class="recording-indicator" id="recordingIndicator">
+            <div class="rec-dot"></div>
+            <span>AUFNAHME LÄUFT</span>
+        </div>
+        
+        <div class="recorder-controls">
+            <button class="btn btn-record" id="startBtn" onclick="startRecording()">
+                🔴 Aufnahme starten
+            </button>
+            <button class="btn btn-stop" id="stopBtn" onclick="stopRecording()" disabled>
+                ⏹ Aufnahme stoppen
+            </button>
+            <button class="btn btn-download" id="downloadBtn" onclick="downloadRecording()" disabled>
+                ⬇️ Video herunterladen
+            </button>
+        </div>
+        
+        <iframe 
+            class="demo-frame" 
+            id="demoFrame"
+            src="demo-bilingual.html">
+        </iframe>
+    </div>
+    
+    <script>
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        
+        async function startRecording() {
+            try {
+                // Request screen capture
+                stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: {
+                        mediaSource: 'screen',
+                        width: 1920,
+                        height: 1080
+                    },
+                    audio: false
+                });
+                
+                // Setup MediaRecorder
+                const options = {
+                    mimeType: 'video/webm;codecs=vp9',
+                    videoBitsPerSecond: 5000000
+                };
+                
+                mediaRecorder = new MediaRecorder(stream, options);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, {
+                        type: 'video/webm'
+                    });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Enable download button
+                    document.getElementById('downloadBtn').disabled = false;
+                    
+                    // Store URL for download
+                    window.recordingURL = url;
+                    window.recordingBlob = blob;
+                    
+                    updateStatus('Aufnahme abgeschlossen! Video kann heruntergeladen werden.');
+                };
+                
+                // Start recording
+                mediaRecorder.start();
+                
+                // Update UI
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('recordingIndicator').classList.add('active');
+                updateStatus('Aufnahme läuft...');
+                
+            } catch (err) {
+                console.error('Fehler beim Starten der Aufnahme:', err);
+                updateStatus('Fehler: Bitte erlauben Sie den Bildschirmzugriff');
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                
+                // Stop all tracks
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Update UI
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                document.getElementById('recordingIndicator').classList.remove('active');
+            }
+        }
+        
+        function downloadRecording() {
+            if (window.recordingBlob) {
+                // Create download link
+                const a = document.createElement('a');
+                a.href = window.recordingURL;
+                a.download = `oriido-demo-${new Date().getTime()}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                updateStatus('Video wurde heruntergeladen! Check your Downloads folder.');
+            }
+        }
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+        
+        // Check browser compatibility
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+            updateStatus('⚠️ Ihr Browser unterstützt keine Bildschirmaufnahme. Bitte nutzen Sie Chrome, Edge oder Firefox.');
+        }
+    </script>
+</body>
+</html>

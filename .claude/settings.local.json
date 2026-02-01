@@ -16,7 +16,12 @@
       "Bash(powershell -Command \"Invoke-WebRequest -Uri ''https://stripe.com/files/apple-pay/apple-developer-merchantid-domain-association'' -OutFile ''public/.well-known/apple-developer-merchantid-domain-association''\")",
       "Bash(open /Users/firashattab/Documents/GitHub/Ordero/oriido/public/demo-standalone.html)",
       "Bash(open /Users/firashattab/Documents/GitHub/Ordero/oriido/public/demo-instagram-feed.html)",
-      "Bash(open /Users/firashattab/Documents/GitHub/Ordero/oriido/public/demo-instagram-story.html)"
+      "Bash(open /Users/firashattab/Documents/GitHub/Ordero/oriido/public/demo-instagram-story.html)",
+      "Bash(find:*)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(chmod:*)",
+      "Bash(./record-demo.sh:*)"
     ]
   }
 }

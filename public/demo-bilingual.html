@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="de" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>Oriido - Demo (DE/AR)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        
+        body.rtl {
+            direction: rtl;
+            font-family: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+        }
+        
+        .story-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 414px;
+            max-height: 896px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 415px) {
+            .story-container {
+                border-radius: 40px;
+                box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            }
+        }
+        
+        /* Language Selector */
+        .language-selector {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            z-index: 2000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .rtl .language-selector {
+            right: auto;
+            left: 20px;
+        }
+        
+        .lang-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .lang-btn.active {
+            background: white;
+            color: #EA580C;
+            border-color: white;
+        }
+        
+        .story-slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        
+        .story-slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Progress bar */
+        .story-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+            z-index: 1000;
+        }
+        
+        .progress-segment {
+            flex: 1;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: white;
+            width: 0;
+            transition: width 0.1s linear;
+        }
+        
+        .progress-segment.completed .progress-fill {
+            width: 100%;
+        }
+        
+        /* Story Styles */
+        .story-1 {
+            background: linear-gradient(135deg, #FB923C, #EA580C);
+            color: white;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        .story-logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            animation: logoEntry 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes logoEntry {
+            from {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1) rotate(0);
+                opacity: 1;
+            }
+        }
+        
+        .story-title {
+            font-size: 52px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            animation: slideUp 0.6s ease-out 0.3s both;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .story-2 {
+            background: linear-gradient(180deg, #1F2937 0%, #111827 100%);
+            color: white;
+            padding: 80px 40px;
+            justify-content: center;
+        }
+        
+        .problem-icon {
+            font-size: 80px;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .problem-title {
+            font-size: 36px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .problem-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .problem-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            animation: slideInLeft 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .rtl .problem-item {
+            flex-direction: row-reverse;
+            animation: slideInRight 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .step-badge {
+            display: inline-block;
+            background: #FEF3C7;
+            color: #D97706;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .step-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1F2937;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out 0.1s both;
+        }
+        
+        .step-description {
+            font-size: 18px;
+            color: #6B7280;
+            line-height: 1.5;
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.5s ease-out 0.2s both;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Common Story Styles */
+        .story-3, .story-4, .story-5, .story-6, .story-7, .story-8, .story-10, .story-11 {
+            background: white;
+            padding: 60px 30px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .story-9 {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: white;
+            padding: 60px 30px;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .story-12 {
+            background: linear-gradient(135deg, #3B82F6 0%, #1E40AF 100%);
+            color: white;
+            padding: 60px 30px;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .story-13 {
+            background: linear-gradient(135deg, #EA580C, #DC2626);
+            color: white;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        /* Visual Elements */
+        .table-mock {
+            width: 250px;
+            height: 150px;
+            background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+            border-radius: 20px;
+            margin: 0 auto 30px;
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .qr-sticker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+        }
+        
+        .phone-mock {
+            width: 200px;
+            height: 400px;
+            background: #000;
+            border-radius: 30px;
+            padding: 10px;
+            margin-bottom: 30px;
+            position: relative;
+            animation: phoneSlide 0.8s ease-out;
+        }
+        
+        @keyframes phoneSlide {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .success-check {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes successPop {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 20px 50px;
+            background: white;
+            color: #EA580C;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 20px;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: bounceIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.6s both;
+        }
+        
+        @keyframes bounceIn {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* Touch areas */
+        .touch-area {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 30%;
+            z-index: 100;
+            cursor: pointer;
+        }
+        
+        .touch-area.prev {
+            left: 0;
+        }
+        
+        .rtl .touch-area.prev {
+            left: auto;
+            right: 0;
+        }
+        
+        .touch-area.next {
+            right: 0;
+        }
+        
+        .rtl .touch-area.next {
+            right: auto;
+            left: 0;
+        }
+        
+        /* Recording indicator */
+        .recording-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+        }
+        
+        .recording-indicator.active {
+            display: flex;
+        }
+        
+        .rec-dot {
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        /* Benefits grid for RTL */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="story-container" id="storyContainer">
+        <!-- Language Selector -->
+        <div class="language-selector">
+            <button class="lang-btn active" onclick="setLanguage('de')">DE</button>
+            <button class="lang-btn" onclick="setLanguage('ar')">AR</button>
+        </div>
+        
+        <!-- Progress bar -->
+        <div class="story-progress">
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+            <div class="progress-segment"><div class="progress-fill"></div></div>
+        </div>
+        
+        <!-- Story Slides will be dynamically generated -->
+        
+        <!-- Touch areas -->
+        <div class="touch-area prev" onclick="previousStory()"></div>
+        <div class="touch-area next" onclick="nextStory()"></div>
+        
+        <!-- Recording indicator -->
+        <div class="recording-indicator" id="recordingIndicator">
+            <div class="rec-dot"></div>
+            <span class="rec-text">RECORDING</span>
+        </div>
+    </div>
+    
+    <script>
+        // Translations
+        const translations = {
+            de: {
+                title: "Oriido",
+                subtitle: "So funktioniert digitales<br>Bestellen im Restaurant",
+                problem_title: "Das kennen wir alle...",
+                problem_1: "Lange Wartezeiten auf Bedienung",
+                problem_2: "Kellner schwer erreichbar",
+                problem_3: "Umständlicher Bezahlvorgang",
+                problem_footer: "Mit Oriido gehört das der<br>Vergangenheit an! →",
+                step1_badge: "SCHRITT 1",
+                step1_title: "QR-Code auf dem Tisch",
+                step1_desc: "Jeder Tisch hat einen eigenen QR-Code Aufkleber",
+                step1_footer: "Klein, elegant und immer griffbereit",
+                step2_badge: "SCHRITT 2",
+                step2_title: "Gast scannt mit Kamera",
+                step2_scan: "Scannen...",
+                step2_footer: "Keine App nötig - funktioniert mit<br>jeder Smartphone-Kamera!",
+                step3_badge: "SCHRITT 3",
+                step3_title: "Speisekarte öffnet sich",
+                step3_menu: "🍔 Speisekarte",
+                step3_categories: ["Pizza", "Pasta", "Salate"],
+                step3_desc: "Mit Bildern, Preisen und Allergenen",
+                step3_footer: "Automatisch in der richtigen Sprache!",
+                step4_badge: "SCHRITT 4",
+                step4_title: "Gerichte auswählen",
+                step4_items: [
+                    {name: "Pizza Margherita", price: "€12.90"},
+                    {name: "Caesar Salat", price: "€9.50"},
+                    {name: "Cola", price: "€3.50"}
+                ],
+                step5_badge: "SCHRITT 5",
+                step5_title: "Warenkorb prüfen",
+                step5_total: "Gesamt",
+                step5_button: "Weiter zur Zahlung →",
+                step6_badge: "SCHRITT 6",
+                step6_title: "Bezahlen",
+                step6_methods: ["Kreditkarte", "Apple Pay / Google Pay", "Bar beim Kellner"],
+                step6_footer: "Sicher und schnell bezahlen",
+                step7_title: "Bestellung aufgegeben!",
+                step7_desc: "Ihre Bestellung wird<br>in ca. 15 Minuten serviert",
+                restaurant_badge: "FÜR DAS RESTAURANT",
+                restaurant_title: "Live im Dashboard",
+                restaurant_new: "Neue Bestellung",
+                restaurant_table: "TISCH 12",
+                restaurant_footer: "Personal wird sofort benachrichtigt",
+                kitchen_badge: "KÜCHE",
+                kitchen_title: "Direkt in der Küche",
+                kitchen_display: "Küchen-Display",
+                kitchen_new: "NEU",
+                kitchen_time: "⏱️ 10 Min",
+                kitchen_footer: "Keine Zettel mehr - alles digital!",
+                benefits_title: "Die Vorteile",
+                benefits: [
+                    {value: "40%", text: "Schneller"},
+                    {value: "25%", text: "Mehr Umsatz"},
+                    {value: "100%", text: "Kontaktlos"},
+                    {value: "24/7", text: "Verfügbar"}
+                ],
+                benefits_footer: "Zufriedenere Gäste & Personal!",
+                cta_title: "Jetzt starten!",
+                cta_subtitle: "100 Bestellungen<br>kostenlos testen",
+                cta_button: "Los geht's!",
+                cta_footer: "Keine Kreditkarte erforderlich<br>In 5 Minuten eingerichtet",
+                recording: "AUFNAHME"
+            },
+            ar: {
+                title: "أوريدو",
+                subtitle: "هكذا يعمل الطلب الرقمي<br>في المطعم",
+                problem_title: "كلنا نعرف هذه المشاكل...",
+                problem_1: "أوقات انتظار طويلة للخدمة",
+                problem_2: "صعوبة الوصول للنادل",
+                problem_3: "عملية دفع معقدة",
+                problem_footer: "مع أوريدو، هذا من<br>الماضي! ←",
+                step1_badge: "الخطوة 1",
+                step1_title: "رمز QR على الطاولة",
+                step1_desc: "كل طاولة لديها ملصق رمز QR خاص بها",
+                step1_footer: "صغير، أنيق ومتاح دائماً",
+                step2_badge: "الخطوة 2",
+                step2_title: "الضيف يمسح بالكاميرا",
+                step2_scan: "جاري المسح...",
+                step2_footer: "لا حاجة لتطبيق - يعمل مع<br>أي كاميرا هاتف ذكي!",
+                step3_badge: "الخطوة 3",
+                step3_title: "قائمة الطعام تفتح",
+                step3_menu: "🍔 قائمة الطعام",
+                step3_categories: ["بيتزا", "باستا", "سلطات"],
+                step3_desc: "مع الصور والأسعار والمواد المسببة للحساسية",
+                step3_footer: "تلقائياً باللغة الصحيحة!",
+                step4_badge: "الخطوة 4",
+                step4_title: "اختيار الأطباق",
+                step4_items: [
+                    {name: "بيتزا مارغريتا", price: "€12.90"},
+                    {name: "سلطة سيزر", price: "€9.50"},
+                    {name: "كولا", price: "€3.50"}
+                ],
+                step5_badge: "الخطوة 5",
+                step5_title: "مراجعة السلة",
+                step5_total: "المجموع",
+                step5_button: "متابعة للدفع ←",
+                step6_badge: "الخطوة 6",
+                step6_title: "الدفع",
+                step6_methods: ["بطاقة ائتمان", "Apple Pay / Google Pay", "نقداً للنادل"],
+                step6_footer: "دفع آمن وسريع",
+                step7_title: "تم تقديم الطلب!",
+                step7_desc: "سيتم تقديم طلبك<br>في حوالي 15 دقيقة",
+                restaurant_badge: "للمطعم",
+                restaurant_title: "مباشر في لوحة التحكم",
+                restaurant_new: "طلب جديد",
+                restaurant_table: "طاولة 12",
+                restaurant_footer: "يتم إشعار الموظفين فوراً",
+                kitchen_badge: "المطبخ",
+                kitchen_title: "مباشرة في المطبخ",
+                kitchen_display: "شاشة المطبخ",
+                kitchen_new: "جديد",
+                kitchen_time: "⏱️ 10 دقائق",
+                kitchen_footer: "لا مزيد من الأوراق - كل شيء رقمي!",
+                benefits_title: "المزايا",
+                benefits: [
+                    {value: "40%", text: "أسرع"},
+                    {value: "25%", text: "مبيعات أكثر"},
+                    {value: "100%", text: "بدون تلامس"},
+                    {value: "24/7", text: "متاح"}
+                ],
+                benefits_footer: "ضيوف وموظفون أكثر رضا!",
+                cta_title: "ابدأ الآن!",
+                cta_subtitle: "100 طلب<br>تجربة مجانية",
+                cta_button: "هيا بنا!",
+                cta_footer: "لا حاجة لبطاقة ائتمان<br>الإعداد في 5 دقائق",
+                recording: "تسجيل"
+            }
+        };
+        
+        let currentLang = 'de';
+        let currentStory = 0;
+        let storyTimer;
+        const STORY_DURATION = 6000;
+        
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update RTL for Arabic
+            if (lang === 'ar') {
+                document.body.classList.add('rtl');
+                document.querySelector('.story-container').dir = 'rtl';
+            } else {
+                document.body.classList.remove('rtl');
+                document.querySelector('.story-container').dir = 'ltr';
+            }
+            
+            // Update recording indicator text
+            document.querySelector('.rec-text').textContent = translations[lang].recording;
+            
+            // Regenerate stories with new language
+            generateStories();
+            showStory(currentStory);
+        }
+        
+        function generateStories() {
+            const container = document.getElementById('storyContainer');
+            const t = translations[currentLang];
+            
+            // Remove existing stories
+            container.querySelectorAll('.story-slide').forEach(slide => slide.remove());
+            
+            // Generate new stories
+            const storiesHTML = `
+                <!-- Story 1: Welcome -->
+                <div class="story-slide story-1 ${currentStory === 0 ? 'active' : ''}">
+                    <div class="story-logo">
+                        <svg viewBox="0 0 24 24" fill="#EA580C">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <h1 class="story-title">${t.title}</h1>
+                    <p style="font-size: 20px; line-height: 1.4; opacity: 0.95;">
+                        ${t.subtitle}
+                    </p>
+                </div>
+                
+                <!-- Story 2: Problem -->
+                <div class="story-slide story-2">
+                    <div class="problem-icon">😫</div>
+                    <h2 class="problem-title">${t.problem_title}</h2>
+                    <div class="problem-list">
+                        <div class="problem-item">
+                            <span style="font-size: 24px;">⏰</span>
+                            <span>${t.problem_1}</span>
+                        </div>
+                        <div class="problem-item" style="animation-delay: 0.2s;">
+                            <span style="font-size: 24px;">🙋</span>
+                            <span>${t.problem_2}</span>
+                        </div>
+                        <div class="problem-item" style="animation-delay: 0.3s;">
+                            <span style="font-size: 24px;">💳</span>
+                            <span>${t.problem_3}</span>
+                        </div>
+                    </div>
+                    <p style="text-align: center; margin-top: 30px; opacity: 0.8;">
+                        ${t.problem_footer}
+                    </p>
+                </div>
+                
+                <!-- Story 3: Step 1 -->
+                <div class="story-slide story-3">
+                    <span class="step-badge">${t.step1_badge}</span>
+                    <h2 class="step-title">${t.step1_title}</h2>
+                    <p class="step-description">${t.step1_desc}</p>
+                    <div class="table-mock">
+                        <div class="qr-sticker">
+                            <span style="font-size: 40px;">📱</span>
+                        </div>
+                    </div>
+                    <p style="color: #6B7280;">${t.step1_footer}</p>
+                </div>
+                
+                <!-- Story 4: Step 2 -->
+                <div class="story-slide story-4">
+                    <span class="step-badge">${t.step2_badge}</span>
+                    <h2 class="step-title" style="color: #1F2937; margin-bottom: 30px;">${t.step2_title}</h2>
+                    <div class="phone-mock">
+                        <div style="width: 100%; height: 100%; background: white; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <div style="width: 150px; height: 150px; border: 3px solid #10B981; border-radius: 15px; position: relative;">
+                                <div style="position: absolute; width: 100%; height: 2px; background: #10B981; animation: scanLineMove 2s linear infinite;"></div>
+                            </div>
+                            <p style="margin-top: 20px; color: #10B981; font-weight: 600;">${t.step2_scan}</p>
+                        </div>
+                    </div>
+                    <p style="color: #6B7280;">${t.step2_footer}</p>
+                </div>
+                
+                <!-- Story 5: Step 3 -->
+                <div class="story-slide story-5">
+                    <span class="step-badge">${t.step3_badge}</span>
+                    <h2 class="step-title">${t.step3_title}</h2>
+                    <div style="width: 100%; max-width: 300px; margin: 0 auto;">
+                        <div style="background: #F3F4F6; padding: 10px; border-radius: 10px 10px 0 0; display: flex; align-items: center; gap: 10px;">
+                            <div style="display: flex; gap: 5px;">
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #D1D5DB;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #D1D5DB;"></div>
+                                <div style="width: 8px; height: 8px; border-radius: 50%; background: #D1D5DB;"></div>
+                            </div>
+                            <span style="font-size: 12px; color: #6B7280;">oriido.de/tisch-12</span>
+                        </div>
+                        <div style="background: white; border: 1px solid #E5E7EB; border-top: none; border-radius: 0 0 10px 10px; padding: 20px;">
+                            <h3 style="margin-bottom: 15px;">${t.step3_menu}</h3>
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                                ${t.step3_categories.map(cat => 
+                                    `<span style="padding: 5px 10px; background: #FEF3C7; border-radius: 15px; font-size: 12px;">${cat}</span>`
+                                ).join('')}
+                            </div>
+                            <p style="color: #6B7280; font-size: 14px;">${t.step3_desc}</p>
+                        </div>
+                    </div>
+                    <p style="color: #6B7280; margin-top: 20px;">${t.step3_footer}</p>
+                </div>
+                
+                <!-- Story 6: Step 4 -->
+                <div class="story-slide story-6">
+                    <span class="step-badge">${t.step4_badge}</span>
+                    <h2 class="step-title" style="color: #1F2937;">${t.step4_title}</h2>
+                    <div style="width: 100%; max-width: 320px; margin: 0 auto;">
+                        ${t.step4_items.map((item, i) => `
+                            <div style="background: white; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); display: flex; align-items: center; gap: 15px; position: relative; ${i > 0 ? 'border: 2px solid #10B981;' : ''} ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                                <span style="font-size: 32px;">${i === 0 ? '🍕' : i === 1 ? '🥗' : '🥤'}</span>
+                                <div style="${currentLang === 'ar' ? 'text-align: right;' : ''}">
+                                    <div style="font-weight: 600;">${item.name}</div>
+                                    <div style="color: #EA580C; font-weight: 600;">${item.price}</div>
+                                </div>
+                                ${i > 0 ? `<div style="position: absolute; ${currentLang === 'ar' ? 'left' : 'right'}: 15px; top: 15px; width: 30px; height: 30px; background: #10B981; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">✓</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <!-- Story 7: Step 5 -->
+                <div class="story-slide story-7">
+                    <span class="step-badge">${t.step5_badge}</span>
+                    <h2 class="step-title" style="color: #1F2937;">${t.step5_title}</h2>
+                    <div style="background: #FAFAFA; border-radius: 20px; padding: 20px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #E5E7EB; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                            <div style="${currentLang === 'ar' ? 'display: flex; flex-direction: row-reverse; gap: 10px;' : ''}">
+                                <span style="background: #EA580C; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">1x</span>
+                                <span style="${currentLang === 'ar' ? 'margin-right: 10px;' : 'margin-left: 10px;'}">${t.step4_items[1].name}</span>
+                            </div>
+                            <span>${t.step4_items[1].price}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #E5E7EB; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                            <div style="${currentLang === 'ar' ? 'display: flex; flex-direction: row-reverse; gap: 10px;' : ''}">
+                                <span style="background: #EA580C; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600;">1x</span>
+                                <span style="${currentLang === 'ar' ? 'margin-right: 10px;' : 'margin-left: 10px;'}">${t.step4_items[2].name}</span>
+                            </div>
+                            <span>${t.step4_items[2].price}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 15px; margin-top: 15px; border-top: 2px solid #E5E7EB; font-weight: 700; font-size: 20px; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                            <span>${t.step5_total}</span>
+                            <span style="color: #EA580C;">€13.00</span>
+                        </div>
+                    </div>
+                    <button style="width: 100%; padding: 15px; background: #EA580C; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 16px;">
+                        ${t.step5_button}
+                    </button>
+                </div>
+                
+                <!-- Story 8: Step 6 -->
+                <div class="story-slide story-8">
+                    <span class="step-badge">${t.step6_badge}</span>
+                    <h2 class="step-title" style="color: #1F2937;">${t.step6_title}</h2>
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px;">
+                        ${t.step6_methods.map((method, i) => `
+                            <div style="background: white; border: 2px solid ${i === 0 ? '#10B981' : '#E5E7EB'}; ${i === 0 ? 'background: #F0FDF4;' : ''} border-radius: 15px; padding: 20px; display: flex; align-items: center; gap: 15px; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                                <div style="width: 40px; height: 40px; background: #F3F4F6; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                                    ${i === 0 ? '💳' : i === 1 ? '📱' : '💰'}
+                                </div>
+                                <span>${method}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p style="color: #6B7280;">${t.step6_footer}</p>
+                </div>
+                
+                <!-- Story 9: Success -->
+                <div class="story-slide story-9">
+                    <div class="success-check">
+                        <svg viewBox="0 0 24 24" width="50" height="50" fill="#10B981">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                    </div>
+                    <h2 style="font-size: 32px; margin-bottom: 20px;">${t.step7_title}</h2>
+                    <div style="display: inline-block; background: rgba(255, 255, 255, 0.2); padding: 10px 30px; border-radius: 30px; font-size: 24px; font-weight: 700; margin-bottom: 20px;">
+                        #0042
+                    </div>
+                    <p style="opacity: 0.9;">${t.step7_desc}</p>
+                </div>
+                
+                <!-- Story 10: Restaurant Dashboard -->
+                <div class="story-slide story-10">
+                    <span class="step-badge" style="background: #DBEAFE; color: #1E40AF;">${t.restaurant_badge}</span>
+                    <h2 class="step-title" style="color: #1F2937;">${t.restaurant_title}</h2>
+                    <div style="background: #FEF3C7; border-${currentLang === 'ar' ? 'right' : 'left'}: 4px solid #F59E0B; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                            <span style="font-weight: 600;">${t.restaurant_new}</span>
+                            <span style="background: #F59E0B; color: white; padding: 4px 12px; border-radius: 15px; font-size: 12px; font-weight: 700;">${t.restaurant_table}</span>
+                        </div>
+                        <div style="color: #6B7280; ${currentLang === 'ar' ? 'text-align: right;' : ''}">
+                            1x ${t.step4_items[1].name}<br>
+                            1x ${t.step4_items[2].name}
+                        </div>
+                    </div>
+                    <p style="color: #6B7280;">${t.restaurant_footer}</p>
+                </div>
+                
+                <!-- Story 11: Kitchen -->
+                <div class="story-slide story-11">
+                    <span class="step-badge" style="background: #FEE2E2; color: #DC2626;">${t.kitchen_badge}</span>
+                    <h2 class="step-title" style="color: #1F2937;">${t.kitchen_title}</h2>
+                    <div style="background: #1F2937; border-radius: 20px; padding: 20px; color: white;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #374151; ${currentLang === 'ar' ? 'flex-direction: row-reverse;' : ''}">
+                            <span style="font-weight: 600;">${t.kitchen_display}</span>
+                            <span style="color: #10B981;">● LIVE</span>
+                        </div>
+                        <div style="background: #374151; padding: 15px; border-radius: 10px;">
+                            <div style="margin-bottom: 10px; ${currentLang === 'ar' ? 'text-align: right;' : ''}">
+                                <span style="background: #F59E0B; padding: 2px 8px; border-radius: 5px; font-size: 12px;">${t.kitchen_new}</span>
+                                <span style="${currentLang === 'ar' ? 'margin-right' : 'margin-left'}: 10px; font-weight: 600;">${t.restaurant_table}</span>
+                            </div>
+                            <div style="${currentLang === 'ar' ? 'text-align: right;' : ''}">1x ${t.step4_items[1].name}</div>
+                            <div style="display: inline-block; background: #F59E0B; padding: 5px 10px; border-radius: 5px; font-size: 14px; font-weight: 600; margin-top: 10px;">
+                                ${t.kitchen_time}
+                            </div>
+                        </div>
+                    </div>
+                    <p style="color: #6B7280; margin-top: 20px;">${t.kitchen_footer}</p>
+                </div>
+                
+                <!-- Story 12: Benefits -->
+                <div class="story-slide story-12">
+                    <h2 style="font-size: 36px; margin-bottom: 10px;">${t.benefits_title}</h2>
+                    <div class="benefits-grid">
+                        ${t.benefits.map((benefit, i) => `
+                            <div class="benefit-card" style="animation: benefitPop 0.5s ease-out ${0.1 * (i + 1)}s both;">
+                                <div style="font-size: 36px; font-weight: 800; margin-bottom: 5px;">${benefit.value}</div>
+                                <div style="font-size: 14px; opacity: 0.9;">${benefit.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <p style="margin-top: 30px; opacity: 0.9;">${t.benefits_footer}</p>
+                </div>
+                
+                <!-- Story 13: CTA -->
+                <div class="story-slide story-13">
+                    <h2 style="font-size: 48px; font-weight: 900; margin-bottom: 20px; line-height: 1.1; animation: scaleIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;">
+                        ${t.cta_title}
+                    </h2>
+                    <p style="font-size: 20px; margin-bottom: 40px; opacity: 0.95;">
+                        ${t.cta_subtitle}
+                    </p>
+                    <a href="#" class="cta-button">${t.cta_button}</a>
+                    <p style="margin-top: 30px; font-size: 14px; opacity: 0.8;">
+                        ${t.cta_footer}
+                    </p>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', storiesHTML);
+        }
+        
+        // Animation keyframe
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes scanLineMove {
+                0% { top: 0; }
+                100% { top: calc(100% - 2px); }
+            }
+            @keyframes scaleIn {
+                from { transform: scale(0); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+            @keyframes benefitPop {
+                from { transform: scale(0); opacity: 0; }
+                to { transform: scale(1); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+        
+        // Story navigation
+        const stories = () => document.querySelectorAll('.story-slide');
+        const progressSegments = document.querySelectorAll('.progress-segment');
+        
+        function showStory(index) {
+            stories().forEach(story => {
+                story.classList.remove('active');
+            });
+            stories()[index].classList.add('active');
+            updateProgress(index);
+        }
+        
+        function updateProgress(index) {
+            progressSegments.forEach((segment, i) => {
+                if (i < index) {
+                    segment.classList.add('completed');
+                    segment.querySelector('.progress-fill').style.width = '100%';
+                } else if (i === index) {
+                    segment.classList.remove('completed');
+                    animateProgress(segment);
+                } else {
+                    segment.classList.remove('completed');
+                    segment.querySelector('.progress-fill').style.width = '0';
+                }
+            });
+        }
+        
+        function animateProgress(segment) {
+            const fill = segment.querySelector('.progress-fill');
+            fill.style.width = '0';
+            fill.style.transition = `width ${STORY_DURATION}ms linear`;
+            setTimeout(() => {
+                fill.style.width = '100%';
+            }, 10);
+        }
+        
+        function nextStory() {
+            clearTimeout(storyTimer);
+            currentStory = (currentStory + 1) % stories().length;
+            showStory(currentStory);
+            startAutoAdvance();
+        }
+        
+        function previousStory() {
+            clearTimeout(storyTimer);
+            currentStory = (currentStory - 1 + stories().length) % stories().length;
+            showStory(currentStory);
+            startAutoAdvance();
+        }
+        
+        function startAutoAdvance() {
+            storyTimer = setTimeout(nextStory, STORY_DURATION);
+        }
+        
+        // Initialize
+        generateStories();
+        showStory(0);
+        startAutoAdvance();
+        
+        // Touch handling
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > 50) {
+                if (currentLang === 'ar') {
+                    // Reverse for RTL
+                    if (diff > 0) {
+                        previousStory();
+                    } else {
+                        nextStory();
+                    }
+                } else {
+                    if (diff > 0) {
+                        nextStory();
+                    } else {
+                        previousStory();
+                    }
+                }
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                if (currentLang === 'ar') {
+                    previousStory();
+                } else {
+                    nextStory();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                if (currentLang === 'ar') {
+                    nextStory();
+                } else {
+                    previousStory();
+                }
+            } else if (e.key === ' ') {
+                nextStory();
+            }
+        });
+        
+        // Recording simulation (press R to toggle)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'r' || e.key === 'R') {
+                const indicator = document.getElementById('recordingIndicator');
+                indicator.classList.toggle('active');
+            }
+        });
+    </script>
+</body>
+</html>

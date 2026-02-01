@@ -75,12 +75,13 @@ function CheckoutFormContent({
   onError,
   isProcessingCash,
   pendingPaymentId,
+  clientSecret,
   primaryColor = '#FF6B35',
   t,
   formatPrice,
   showSplitBill,
   onSplitBillToggle
-}: IntegratedCheckoutProps & { pendingPaymentId: string }) {
+}: IntegratedCheckoutProps & { pendingPaymentId: string; clientSecret: string }) {
   const stripe = useStripe()
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -148,6 +149,25 @@ function CheckoutFormContent({
     setErrorMessage(null)
 
     try {
+      // Update payment intent with final amount including tip
+      const finalAmount = Math.round((subtotal + serviceFee + tipAmount) * 100)
+      const paymentIntentId = clientSecret.split('_secret_')[0]
+
+      const updateResponse = await fetch('/api/stripe-connect/update-payment-amount', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentIntentId,
+          amount: finalAmount
+        })
+      })
+
+      if (!updateResponse.ok) {
+        const errorData = await updateResponse.json()
+        throw new Error(errorData.error || 'Fehler beim Aktualisieren des Betrags')
+      }
+
+      // Confirm payment with updated amount
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
@@ -641,8 +661,10 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
   useEffect(() => {
     const createPaymentIntent = async () => {
       try {
-        const total = subtotal + serviceFee + tipAmount
-        const amountInCents = Math.round(total * 100)
+        // Use initial tip amount (0) for payment intent creation
+        // Tip will be updated when the payment is confirmed
+        const initialTotal = subtotal + serviceFee
+        const amountInCents = Math.round(initialTotal * 100)
 
         const response = await fetch('/api/stripe-connect/create-payment', {
           method: 'POST',
@@ -657,7 +679,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
               items: cartItems,
               subtotal,
               tax: serviceFee,
-              tip: tipAmount
+              tip: 0 // Initial tip is 0, will be updated on payment
             }
           })
         })
@@ -679,7 +701,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
     }
 
     createPaymentIntent()
-  }, [restaurantId, tableId, tableNumber, subtotal, serviceFee, tipAmount, currency, cartItems])
+  }, [restaurantId, tableId, tableNumber, subtotal, serviceFee, currency, cartItems]) // Removed tipAmount from dependencies
 
   if (isLoading) {
     return (
@@ -731,7 +753,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
 
   return (
     <Elements stripe={stripePromise} options={stripeOptions}>
-      <CheckoutFormContent {...props} pendingPaymentId={pendingPaymentId} />
+      <CheckoutFormContent {...props} pendingPaymentId={pendingPaymentId} clientSecret={clientSecret} />
     </Elements>
   )
 }
