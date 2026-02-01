@@ -52,8 +52,26 @@ export class Ready2OrderAdapter extends POSAdapter {
         throw new Error(`Products API Error: ${productsResponse.status} - ${errorText}`)
       }
 
-      const products = await productsResponse.json()
-      console.log(`Ready2Order: Found ${Array.isArray(products) ? products.length : 0} products`)
+      const productsRaw = await productsResponse.json()
+
+      // Handle different response formats (array or wrapped in object)
+      let products: any[] = []
+      if (Array.isArray(productsRaw)) {
+        products = productsRaw
+      } else if (productsRaw?.data && Array.isArray(productsRaw.data)) {
+        products = productsRaw.data
+      } else if (productsRaw?.products && Array.isArray(productsRaw.products)) {
+        products = productsRaw.products
+      } else if (productsRaw?.items && Array.isArray(productsRaw.items)) {
+        products = productsRaw.items
+      } else {
+        console.log('Ready2Order raw response structure:', JSON.stringify(productsRaw, null, 2).substring(0, 500))
+      }
+
+      console.log(`Ready2Order: Found ${products.length} products`)
+      if (products.length > 0) {
+        console.log('First product raw:', JSON.stringify(products[0], null, 2))
+      }
 
       // Fetch all product groups (categories)
       console.log('Fetching product groups from Ready2Order...')
@@ -66,8 +84,21 @@ export class Ready2OrderAdapter extends POSAdapter {
 
       let groups: any[] = []
       if (groupsResponse.ok) {
-        groups = await groupsResponse.json()
-        console.log(`Ready2Order: Found ${Array.isArray(groups) ? groups.length : 0} product groups`)
+        const groupsRaw = await groupsResponse.json()
+        // Handle different response formats
+        if (Array.isArray(groupsRaw)) {
+          groups = groupsRaw
+        } else if (groupsRaw?.data && Array.isArray(groupsRaw.data)) {
+          groups = groupsRaw.data
+        } else if (groupsRaw?.productgroups && Array.isArray(groupsRaw.productgroups)) {
+          groups = groupsRaw.productgroups
+        } else {
+          console.log('Ready2Order groups raw response structure:', JSON.stringify(groupsRaw, null, 2).substring(0, 500))
+        }
+        console.log(`Ready2Order: Found ${groups.length} product groups`)
+        if (groups.length > 0) {
+          console.log('First group raw:', JSON.stringify(groups[0], null, 2))
+        }
       } else {
         console.warn('Ready2Order: Could not fetch product groups, using embedded group data from products')
       }

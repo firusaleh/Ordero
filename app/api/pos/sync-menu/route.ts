@@ -267,7 +267,12 @@ export async function POST(req: NextRequest) {
       imported,
       updated,
       total: imported + updated,
-      message: `${imported} neue Artikel importiert, ${updated} aktualisiert`
+      message: `${imported} neue Artikel importiert, ${updated} aktualisiert`,
+      debug: {
+        categoriesFromPOS: syncResult.categories?.length || 0,
+        itemsFromPOS: syncResult.items?.length || 0,
+        categoriesInDB: allCategories.length
+      }
     })
   } catch (error: any) {
     console.error('Menü-Sync Fehler:', error)
