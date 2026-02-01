@@ -75,13 +75,14 @@ function CheckoutFormContent({
   onError,
   isProcessingCash,
   pendingPaymentId,
+  paymentIntentId,
   clientSecret,
   primaryColor = '#FF6B35',
   t,
   formatPrice,
   showSplitBill,
   onSplitBillToggle
-}: IntegratedCheckoutProps & { pendingPaymentId: string; clientSecret: string }) {
+}: IntegratedCheckoutProps & { pendingPaymentId: string; paymentIntentId: string; clientSecret: string }) {
   const stripe = useStripe()
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -151,7 +152,6 @@ function CheckoutFormContent({
     try {
       // Update payment intent with final amount including tip
       const finalAmount = Math.round((subtotal + serviceFee + tipAmount) * 100)
-      const paymentIntentId = clientSecret.split('_secret_')[0]
 
       const updateResponse = await fetch('/api/stripe-connect/update-payment-amount', {
         method: 'POST',
@@ -626,6 +626,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
   const { t } = useGuestLanguage()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null)
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -689,6 +690,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
         if (result.clientSecret && result.pendingPaymentId) {
           setClientSecret(result.clientSecret)
           setPendingPaymentId(result.pendingPaymentId)
+          setPaymentIntentId(result.paymentIntentId)
         } else {
           throw new Error(result.error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
         }
@@ -712,7 +714,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
     )
   }
 
-  if (error || !clientSecret || !pendingPaymentId) {
+  if (error || !clientSecret || !pendingPaymentId || !paymentIntentId) {
     return (
       <div className="p-6">
         <Alert variant="destructive" className="mb-4">
@@ -753,7 +755,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
 
   return (
     <Elements stripe={stripePromise} options={stripeOptions}>
-      <CheckoutFormContent {...props} pendingPaymentId={pendingPaymentId} clientSecret={clientSecret} />
+      <CheckoutFormContent {...props} pendingPaymentId={pendingPaymentId} paymentIntentId={paymentIntentId} clientSecret={clientSecret} />
     </Elements>
   )
 }

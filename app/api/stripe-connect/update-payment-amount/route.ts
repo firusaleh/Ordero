@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { prisma } from '@/lib/prisma'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20' as any,
+  apiVersion: '2024-11-20.acacia' as any,
 })
 
 export async function POST(request: NextRequest) {
@@ -16,13 +17,34 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Update the payment intent with new amount
-    const paymentIntent = await stripe.paymentIntents.update(
-      paymentIntentId,
-      {
-        amount: Math.round(amount), // Amount in cents
-      }
-    )
+    // Get the pending payment to find the restaurant
+    const pendingPayment = await prisma.pendingPayment.findFirst({
+      where: { paymentIntentId },
+      include: { restaurant: true }
+    })
+
+    let paymentIntent
+
+    if (pendingPayment?.restaurant?.stripeAccountId && pendingPayment.restaurant.stripeOnboardingCompleted) {
+      // Update on the connected account
+      paymentIntent = await stripe.paymentIntents.update(
+        paymentIntentId,
+        {
+          amount: Math.round(amount), // Amount in cents
+        },
+        {
+          stripeAccount: pendingPayment.restaurant.stripeAccountId
+        }
+      )
+    } else {
+      // Update on the platform account (direct payment)
+      paymentIntent = await stripe.paymentIntents.update(
+        paymentIntentId,
+        {
+          amount: Math.round(amount), // Amount in cents
+        }
+      )
+    }
 
     return NextResponse.json({
       success: true,
