@@ -6,19 +6,22 @@ export class Ready2OrderAdapter extends POSAdapter {
 
   async testConnection(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/company`, {
+      // Use /products endpoint instead of /company which requires internal Account-Tokens
+      const response = await fetch(`${this.baseUrl}/products?limit=1`, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
           'Accept': 'application/json'
         }
       })
-      
+
       if (response.ok) {
         const data = await response.json()
-        console.log('Ready2Order connected to:', data.name)
+        console.log('Ready2Order connection successful, found', Array.isArray(data) ? data.length : 0, 'products')
         return true
       }
-      
+
+      const errorText = await response.text()
+      console.error('Ready2Order connection failed:', response.status, errorText)
       return false
     } catch (error) {
       console.error('Ready2Order connection error:', error)
@@ -35,7 +38,8 @@ export class Ready2OrderAdapter extends POSAdapter {
     }
 
     try {
-      // Hole alle Produkte von ready2order
+      // Fetch all products from ready2order
+      console.log('Fetching products from Ready2Order...')
       const productsResponse = await fetch(`${this.baseUrl}/products`, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -44,12 +48,15 @@ export class Ready2OrderAdapter extends POSAdapter {
       })
 
       if (!productsResponse.ok) {
-        throw new Error(`API Error: ${productsResponse.status}`)
+        const errorText = await productsResponse.text()
+        throw new Error(`Products API Error: ${productsResponse.status} - ${errorText}`)
       }
 
       const products = await productsResponse.json()
-      
-      // Hole alle Produktgruppen (Kategorien)
+      console.log(`Ready2Order: Found ${Array.isArray(products) ? products.length : 0} products`)
+
+      // Fetch all product groups (categories)
+      console.log('Fetching product groups from Ready2Order...')
       const groupsResponse = await fetch(`${this.baseUrl}/productgroups`, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
@@ -57,34 +64,57 @@ export class Ready2OrderAdapter extends POSAdapter {
         }
       })
 
-      const groups = groupsResponse.ok ? await groupsResponse.json() : []
+      let groups: any[] = []
+      if (groupsResponse.ok) {
+        groups = await groupsResponse.json()
+        console.log(`Ready2Order: Found ${Array.isArray(groups) ? groups.length : 0} product groups`)
+      } else {
+        console.warn('Ready2Order: Could not fetch product groups, using embedded group data from products')
+      }
 
-      // Konvertiere zu unserem Format
+      // Convert to our format - handle both flat response and nested productgroup
       const categories: POSCategory[] = groups.map((group: any) => ({
-        id: group.productgroup_id,
+        id: (group.productgroup_id || group.id)?.toString(),
         name: group.name,
-        sortOrder: group.position || 0
+        sortOrder: group.position || group.sort || 0
       }))
 
-      const items: POSMenuItem[] = products.map((product: any) => ({
-        id: product.product_id,
-        name: product.name,
-        description: product.description || '',
-        price: product.price / 100, // ready2order speichert in Cent
-        categoryId: product.productgroup_id,
-        image: product.image_url,
-        isActive: product.active === 1,
-        variants: product.variations?.map((v: any) => ({
-          id: v.variation_id,
-          name: v.name,
-          price: v.price / 100
-        })) || [],
-        extras: product.extras?.map((e: any) => ({
-          id: e.extra_id,
-          name: e.name,
-          price: e.price / 100
-        })) || []
-      }))
+      // ready2order returns prices in euros (not cents), e.g., 4.5 for €4.50
+      const items: POSMenuItem[] = products.map((product: any) => {
+        // Extract category ID from various possible locations
+        const categoryId = (
+          product.productgroup_id ||
+          product.productgroup?.productgroup_id ||
+          product.productgroup?.id
+        )?.toString()
+
+        return {
+          id: (product.product_id || product.id)?.toString(),
+          name: product.name,
+          description: product.description || '',
+          price: parseFloat(product.price) || 0, // Price is already in euros
+          categoryId,
+          image: product.image_url || product.image,
+          isActive: product.active === 1 || product.active === true,
+          variants: (product.variations || product.variants || []).map((v: any) => ({
+            id: (v.variation_id || v.id)?.toString(),
+            name: v.name,
+            price: parseFloat(v.price) || 0
+          })),
+          extras: (product.extras || []).map((e: any) => ({
+            id: (e.extra_id || e.id)?.toString(),
+            name: e.name,
+            price: parseFloat(e.price) || 0
+          }))
+        }
+      })
+
+      console.log(`Ready2Order sync complete: ${items.length} items, ${categories.length} categories`)
+
+      // Log a sample item for debugging
+      if (items.length > 0) {
+        console.log('Sample item:', JSON.stringify(items[0], null, 2))
+      }
 
       result.categories = categories
       result.items = items
@@ -101,7 +131,7 @@ export class Ready2OrderAdapter extends POSAdapter {
 
   async sendOrder(order: any): Promise<boolean> {
     try {
-      // Erstelle ready2order Bestellung
+      // Create ready2order order - prices are in euros (same as API responses)
       const r2oOrder = {
         table_id: order.tableNumber ? parseInt(order.tableNumber) : null,
         order_type: order.orderType || 'dine_in',
@@ -114,25 +144,27 @@ export class Ready2OrderAdapter extends POSAdapter {
           product_id: item.posId || null,
           name: item.name,
           quantity: item.quantity,
-          price: Math.round(item.unitPrice * 100), // In Cent
+          price: item.unitPrice, // Price in euros
           comment: item.notes || '',
           variations: item.selectedVariants?.map((v: any) => ({
             variation_id: v.posId,
             name: v.name,
-            price: Math.round(v.price * 100)
+            price: v.price // Price in euros
           })) || [],
           extras: item.selectedExtras?.map((e: any) => ({
             extra_id: e.posId,
             name: e.name,
-            price: Math.round(e.price * 100)
+            price: e.price // Price in euros
           })) || []
         })),
         payment_method: this.mapPaymentMethod(order.paymentMethod),
-        total_amount: Math.round(order.total * 100),
-        tip_amount: order.tipAmount ? Math.round(order.tipAmount * 100) : 0,
+        total_amount: order.total, // Total in euros
+        tip_amount: order.tipAmount || 0,
         external_id: order.id,
         notes: order.notes || ''
       }
+
+      console.log('Sending order to Ready2Order:', JSON.stringify(r2oOrder, null, 2))
 
       const response = await fetch(`${this.baseUrl}/orders`, {
         method: 'POST',
@@ -146,12 +178,12 @@ export class Ready2OrderAdapter extends POSAdapter {
 
       if (response.ok) {
         const data = await response.json()
-        console.log('Ready2Order order created:', data.order_id)
+        console.log('Ready2Order order created:', data.order_id || data.id)
         return true
       }
 
-      const error = await response.text()
-      console.error('Ready2Order order error:', error)
+      const errorText = await response.text()
+      console.error('Ready2Order order error:', response.status, errorText)
       return false
     } catch (error) {
       console.error('Ready2Order send order error:', error)
