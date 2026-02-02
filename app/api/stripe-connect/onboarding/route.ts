@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { registerApplePayDomains } from '@/lib/stripe/register-apple-pay-domains';
 
 // Prüfe ob Stripe konfiguriert ist
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
@@ -260,17 +261,32 @@ export async function GET(req: NextRequest) {
     }
 
     // Update lokale Datenbank mit aktuellen Stripe-Daten
+    const wasOnboardingCompleted = restaurant.stripeOnboardingCompleted;
+    const isNowComplete = account.charges_enabled && account.details_submitted;
+    
     await prisma.restaurant.update({
       where: { id: restaurantId },
       data: {
         stripeChargesEnabled: account.charges_enabled,
         stripePayoutsEnabled: account.payouts_enabled,
         stripeDetailsSubmitted: account.details_submitted,
-        stripeOnboardingCompleted: account.charges_enabled && account.details_submitted,
+        stripeOnboardingCompleted: isNowComplete,
         stripeAccountStatus: account.charges_enabled ? 'enabled' : 
                             account.details_submitted ? 'complete' : 'restricted'
       }
     });
+
+    // Registriere Apple Pay Domains wenn Onboarding abgeschlossen wurde
+    if (!wasOnboardingCompleted && isNowComplete) {
+      console.log('🍎 Onboarding abgeschlossen - Registriere Apple Pay Domains');
+      try {
+        await registerApplePayDomains(restaurant.stripeAccountId);
+        console.log('✅ Apple Pay Domains erfolgreich registriert');
+      } catch (error) {
+        console.error('⚠️ Fehler beim Registrieren der Apple Pay Domains:', error);
+        // Fehler nicht weiterwerfen, da es das Onboarding nicht blockieren soll
+      }
+    }
 
     return NextResponse.json({
       connected: true,
