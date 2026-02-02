@@ -21,7 +21,8 @@
       "WebSearch",
       "Bash(npm install:*)",
       "Bash(chmod:*)",
-      "Bash(./record-demo.sh:*)"
+      "Bash(./record-demo.sh:*)",
+      "Bash(vercel:*)"
     ]
   }
 }

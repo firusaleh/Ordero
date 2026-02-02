@@ -154,10 +154,11 @@ export async function POST(req: NextRequest) {
       console.warn('WICHTIG: Direktzahlung erstellt. Manueller Transfer an Restaurant erforderlich!');
 
     } else {
-      // NORMAL: Verwende Stripe Connect mit Destination Charges
-      // Bei Destination Charges wird die Zahlung auf dem Platform-Account erstellt
-      // und automatisch an das Restaurant weitergeleitet
-      // Vorteil: Apple Pay funktioniert, da Domain auf Platform registriert ist
+      // NORMAL: Verwende Stripe Connect mit DIRECT CHARGES
+      // Bei Direct Charges:
+      // - Die Zahlung wird DIREKT auf dem Restaurant-Account erstellt
+      // - Das Restaurant zahlt ALLE Stripe-Gebühren
+      // - Oriido erhält NUR die application_fee (0.45 EUR)
       const platformFee = PLATFORM_FEE_CENTS;
 
       // Create statement descriptor from restaurant name (max 22 chars total)
@@ -169,8 +170,7 @@ export async function POST(req: NextRequest) {
         .trim()
         .substring(0, 22);
 
-      // WICHTIG: Verwende "Destination Charges" für Apple Pay Kompatibilität
-      // Payment wird auf Platform erstellt, Geld wird an Restaurant transferiert
+      // WICHTIG: Direct Charge erstellen - auf dem RESTAURANT Account
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
@@ -179,36 +179,37 @@ export async function POST(req: NextRequest) {
         // Statement descriptor für Kartenabrechnung
         statement_descriptor: restaurantDescriptor || 'ORIIDO',
         statement_descriptor_suffix: tableNumber ? `T${tableNumber}` : undefined,
-        // WICHTIG: Plattformgebühr - diese erhält die Plattform
-        application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR für Plattform
-        // Destination Charges: Transfer an Restaurant
-        transfer_data: {
-          destination: restaurant.stripeAccountId!
-        },
-        // on_behalf_of zeigt Restaurant-Name auf Kundenabrechnung
-        on_behalf_of: restaurant.stripeAccountId!,
+        // WICHTIG: application_fee_amount geht an die Plattform (Oriido)
+        application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR für Oriido
         metadata: {
           pendingPaymentId: pendingPayment.id,
           restaurantId: restaurantId,
           restaurantName: restaurant.name,
           tableNumber: tableNumber?.toString() || '',
           platform: 'Oriido',
-          paymentType: 'STRIPE_DESTINATION_CHARGE',
+          paymentType: 'STRIPE_DIRECT_CHARGE',
           platformFee: `${platformFee} cents`,
-          stripeFeePaidBy: 'platform_then_deducted'
+          stripeFeePaidBy: 'restaurant',
+          chargeType: 'direct_on_connected_account'
         }
+      }, {
+        // KRITISCH: Dies ist der Schlüssel für Direct Charges!
+        // Die Zahlung wird DIREKT auf dem Restaurant-Account erstellt
+        // Das Restaurant zahlt alle Stripe-Transaktionsgebühren
+        stripeAccount: restaurant.stripeAccountId
       });
     }
 
     // Log what was actually created
     console.log('====== CREATED PAYMENT INTENT ======');
     console.log('Payment Intent ID:', paymentIntent.id);
-    console.log('Amount:', paymentIntent.amount);
+    console.log('Amount:', paymentIntent.amount, 'cents');
+    console.log('Application Fee:', isDirectPayment ? 0 : platformFee, 'cents (for Oriido)');
     console.log('Statement Descriptor:', (paymentIntent as any).statement_descriptor || 'NOT SET');
     console.log('Statement Descriptor Suffix:', (paymentIntent as any).statement_descriptor_suffix || 'NOT SET');
-    console.log('On Behalf Of:', (paymentIntent as any).on_behalf_of || 'NOT SET');
     console.log('Connected Account:', restaurant.stripeAccountId || 'NONE (Direct Payment)');
-    console.log('Is Direct Payment:', isDirectPayment);
+    console.log('Charge Type:', isDirectPayment ? 'DIRECT_FALLBACK (on Oriido account)' : 'DIRECT_CHARGE (on Restaurant account)');
+    console.log('Who pays Stripe fees:', isDirectPayment ? 'Oriido (manual transfer needed)' : 'Restaurant');
     console.log('=====================================');
     
     // Update PendingPayment with paymentIntentId
@@ -218,19 +219,18 @@ export async function POST(req: NextRequest) {
     });
 
     // Bei Direktzahlung keine Gebühr, sonst fixe 0.45 EUR
-    const platformFee = isDirectPayment ? 0 : PLATFORM_FEE_CENTS;
+    const platformFeeAmount = isDirectPayment ? 0 : PLATFORM_FEE_CENTS;
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,
       pendingPaymentId: pendingPayment.id,
       paymentIntentId: paymentIntent.id,
       amount: amount,
-      platformFee: platformFee,
-      platformFeeEUR: platformFee / 100, // Gebühr in EUR für Frontend-Anzeige
-      restaurantAmount: amount - platformFee,
+      platformFee: platformFeeAmount,
+      platformFeeEUR: platformFeeAmount / 100, // Gebühr in EUR für Frontend-Anzeige
+      restaurantAmount: amount - platformFeeAmount,
       isDirectPayment: isDirectPayment,
-      // Mit Destination Charges wird Payment auf Platform erstellt, daher kein stripeAccountId nötig
-      // Apple Pay funktioniert, da Domain auf Platform registriert ist
-      stripeAccountId: null, // Nicht mehr benötigt für Destination Charges
+      // Für Direct Charges brauchen wir den stripeAccountId im Frontend
+      stripeAccountId: restaurant.stripeAccountId || null,
       warning: isDirectPayment ? 'Restaurant hat kein Stripe Connect. Zahlung erfolgt direkt an Plattform.' : null
     });
   } catch (error: any) {
