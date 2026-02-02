@@ -6,13 +6,41 @@ import { prisma } from "@/lib/prisma"
 export async function POST(req: NextRequest) {
   try {
     const session = await auth()
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 })
     }
-    
-    const body = await req.json()
-    const { socket_id, channel_name } = body
+
+    // Pusher can send data as either form-urlencoded or JSON
+    const contentType = req.headers.get("content-type") || ""
+    let socket_id: string | undefined
+    let channel_name: string | undefined
+
+    // Read body as text first to handle both formats
+    const bodyText = await req.text()
+
+    // Try JSON first if content type suggests it
+    if (contentType.includes("application/json") && bodyText.startsWith("{")) {
+      try {
+        const body = JSON.parse(bodyText)
+        socket_id = body.socket_id
+        channel_name = body.channel_name
+      } catch {
+        // JSON parsing failed, will try form-urlencoded
+      }
+    }
+
+    // If not JSON or JSON parsing failed, try form-urlencoded
+    if (!socket_id || !channel_name) {
+      const params = new URLSearchParams(bodyText)
+      socket_id = params.get("socket_id") || undefined
+      channel_name = params.get("channel_name") || undefined
+    }
+
+    if (!socket_id || !channel_name) {
+      console.error("Pusher Auth: Missing params. ContentType:", contentType, "Body:", bodyText.substring(0, 200))
+      return NextResponse.json({ error: "socket_id und channel_name erforderlich" }, { status: 400 })
+    }
     
     // Validiere Channel-Zugriff
     const channelParts = channel_name.split("-")
@@ -59,10 +87,11 @@ export async function POST(req: NextRequest) {
     const authResponse = pusherServer.authenticate(socket_id, channel_name)
     
     return NextResponse.json(authResponse)
-  } catch (error) {
-    console.error("Pusher Auth Fehler:", error)
+  } catch (error: any) {
+    console.error("Pusher Auth Fehler:", error?.message || error)
+    console.error("Pusher Auth Stack:", error?.stack)
     return NextResponse.json(
-      { error: "Autorisierung fehlgeschlagen" }, 
+      { error: "Autorisierung fehlgeschlagen", details: error?.message || "Unknown error" },
       { status: 500 }
     )
   }
