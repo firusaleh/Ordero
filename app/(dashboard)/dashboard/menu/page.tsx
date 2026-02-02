@@ -50,8 +50,8 @@ async function getMenuData(userId: string) {
     restaurant,
     categories,
     posSettings: hasPOS ? {
-      posSystem: restaurant.settings?.posSystem,
-      lastSync: restaurant.settings?.posLastSync
+      posSystem: restaurant.settings!.posSystem!,
+      lastSync: restaurant.settings!.posLastSync ?? null
     } : null
   }
 }
