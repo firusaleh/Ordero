@@ -234,19 +234,19 @@ export function StripeConnectSettings({ restaurantId, restaurantCountry = 'DE' }
             <div className="space-y-3">
               <div className="flex justify-between items-center py-2 border-b">
                 <span className="text-sm">Stripe Transaktionsgebühr</span>
-                <span className="text-sm font-medium">1.5% + 0.25€</span>
+                <span className="text-sm font-medium">1,5% + 0,25€</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b">
                 <span className="text-sm">Oriido Plattformgebühr</span>
-                <span className="text-sm font-medium">2.5%</span>
+                <span className="text-sm font-medium">0,45€ (fix)</span>
               </div>
               <div className="flex justify-between items-center py-2 font-medium">
                 <span>Gesamtgebühren</span>
-                <span>4% + 0.25€</span>
+                <span>1,5% + 0,70€</span>
               </div>
               <Alert>
                 <AlertDescription className="text-xs">
-                  Bei einer Bestellung von 50€ erhalten Sie 47.75€ (nach Abzug aller Gebühren)
+                  Bei einer Bestellung von 50€ erhalten Sie 48,55€ (nach Abzug aller Gebühren: 0,75€ Stripe + 0,25€ + 0,45€ Oriido)
                 </AlertDescription>
               </Alert>
             </div>
