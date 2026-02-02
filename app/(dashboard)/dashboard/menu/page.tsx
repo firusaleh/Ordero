@@ -10,6 +10,16 @@ async function getMenuData(userId: string) {
         { ownerId: userId },
         { staff: { some: { userId } } }
       ]
+    },
+    include: {
+      settings: {
+        select: {
+          posSystem: true,
+          posApiKey: true,
+          posSyncEnabled: true,
+          posLastSync: true
+        }
+      }
     }
   })
 
@@ -33,7 +43,17 @@ async function getMenuData(userId: string) {
     }
   })
 
-  return { restaurant, categories }
+  // Check if POS is configured and active
+  const hasPOS = !!(restaurant.settings?.posSystem && restaurant.settings?.posApiKey)
+
+  return {
+    restaurant,
+    categories,
+    posSettings: hasPOS ? {
+      posSystem: restaurant.settings?.posSystem,
+      lastSync: restaurant.settings?.posLastSync
+    } : null
+  }
 }
 
 export default async function MenuPage() {
@@ -49,8 +69,9 @@ export default async function MenuPage() {
     redirect('/onboarding')
   }
 
-  return <MenuWrapper 
-    restaurantId={data.restaurant.id} 
+  return <MenuWrapper
+    restaurantId={data.restaurant.id}
     initialCategories={data.categories}
+    posSettings={data.posSettings}
   />
 }
