@@ -186,9 +186,12 @@ export async function POST(req: NextRequest) {
             orderNumber,
             restaurantId: pendingPayment.restaurantId,
             tableId: pendingPayment.tableId,
+            tableNumber: pendingPayment.tableNumber,
             status: 'PENDING',
             paymentStatus: 'PAID',
             paymentMethod: 'CARD',
+            paymentIntentId: paymentIntent.id, // Store for refunds
+            paidAt: new Date(),
             subtotal: pendingPayment.subtotal,
             tax: pendingPayment.tax,
             tip: pendingPayment.tip,
