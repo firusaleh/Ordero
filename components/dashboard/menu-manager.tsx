@@ -528,9 +528,31 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        {posSettings ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={syncMenu}
+            disabled={isSyncing}
+          >
+            {isSyncing ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Synchronisiere...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                POS Sync
+              </>
+            )}
+          </Button>
+        ) : (
+          <div />
+        )}
         <div className="flex gap-2">
-          <Button 
+          <Button
             variant="outline"
             onClick={() => {
               resetCategoryForm()
@@ -540,7 +562,7 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
             <Plus className="mr-2 h-4 w-4" />
             {t('menu.addCategory')}
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               if (!selectedCategory && categories.length > 0) {
                 toast.error(t('menu.selectCategory'))
@@ -580,28 +602,10 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>{t('menu.categories')}</CardTitle>
-                    <CardDescription>
-                      {categories.length} {categories.length === 1 ? t('menu.category') : t('menu.categories')}
-                    </CardDescription>
-                  </div>
-                  {posSettings && (
-                    <Button
-                      onClick={syncMenu}
-                      disabled={isSyncing}
-                      variant="outline"
-                      size="sm"
-                    >
-                      {isSyncing ? (
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
-                </div>
+                <CardTitle>{t('menu.categories')}</CardTitle>
+                <CardDescription>
+                  {categories.length} {categories.length === 1 ? t('menu.category') : t('menu.categories')}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
                 {categories.map((category) => {
