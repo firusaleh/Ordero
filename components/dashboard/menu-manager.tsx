@@ -19,10 +19,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Edit,
+  Trash2,
   GripVertical,
   Image as ImageIcon,
   Euro,
@@ -34,7 +34,8 @@ import {
   Soup,
   Wine,
   IceCream,
-  Salad
+  Salad,
+  RefreshCw
 } from 'lucide-react'
 import { toast } from 'sonner'
 import EmptyState from '@/components/shared/empty-state'
@@ -79,22 +80,54 @@ interface Category {
   menuItems: MenuItem[]
 }
 
+interface POSSettings {
+  posSystem: string | null
+  lastSync: Date | null
+}
+
 interface MenuManagerProps {
   restaurantId: string
   initialCategories: Category[]
+  posSettings?: POSSettings | null
 }
 
 const iconComponents: { [key: string]: any } = {
   Salad, Pizza, Soup, IceCream, Coffee, Wine, ChefHat
 }
 
-export default function MenuManager({ restaurantId, initialCategories }: MenuManagerProps) {
+export default function MenuManager({ restaurantId, initialCategories, posSettings }: MenuManagerProps) {
   const { t } = useLanguage()
   const { formatPrice, getCurrencySymbol, currency } = useRestaurantCurrency(restaurantId)
   const [categories, setCategories] = useState<Category[]>(initialCategories)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categories[0]?.id || null
   )
+  const [isSyncing, setIsSyncing] = useState(false)
+
+  const syncMenu = async () => {
+    setIsSyncing(true)
+
+    try {
+      const response = await fetch('/api/pos/sync-menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        toast.success(data.message || 'Menü synchronisiert')
+        // Reload page to show updated menu
+        window.location.reload()
+      } else {
+        toast.error(data.error || 'Synchronisation fehlgeschlagen')
+      }
+    } catch (error) {
+      toast.error('Fehler bei der Menü-Synchronisation')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
   
   // Helper function to translate category names
   const translateCategoryName = (name: string): string => {
@@ -547,10 +580,28 @@ export default function MenuManager({ restaurantId, initialCategories }: MenuMan
           <div className="lg:col-span-1">
             <Card>
               <CardHeader>
-                <CardTitle>{t('menu.categories')}</CardTitle>
-                <CardDescription>
-                  {categories.length} {categories.length === 1 ? t('menu.category') : t('menu.categories')}
-                </CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{t('menu.categories')}</CardTitle>
+                    <CardDescription>
+                      {categories.length} {categories.length === 1 ? t('menu.category') : t('menu.categories')}
+                    </CardDescription>
+                  </div>
+                  {posSettings && (
+                    <Button
+                      onClick={syncMenu}
+                      disabled={isSyncing}
+                      variant="outline"
+                      size="sm"
+                    >
+                      {isSyncing ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent className="space-y-2">
                 {categories.map((category) => {
