@@ -154,8 +154,10 @@ export async function POST(req: NextRequest) {
       console.warn('WICHTIG: Direktzahlung erstellt. Manueller Transfer an Restaurant erforderlich!');
 
     } else {
-      // NORMAL: Verwende Stripe Connect mit automatischem Transfer
-      // Fixe Plattformgebühr von 0.45 EUR (45 Cents) pro Bestellung
+      // NORMAL: Verwende Stripe Connect mit Destination Charges
+      // Bei Destination Charges wird die Zahlung auf dem Platform-Account erstellt
+      // und automatisch an das Restaurant weitergeleitet
+      // Vorteil: Apple Pay funktioniert, da Domain auf Platform registriert ist
       const platformFee = PLATFORM_FEE_CENTS;
 
       // Create statement descriptor from restaurant name (max 22 chars total)
@@ -167,10 +169,8 @@ export async function POST(req: NextRequest) {
         .trim()
         .substring(0, 22);
 
-      // WICHTIG: Verwende "Direct Charges" anstatt "Destination Charges"
-      // Bei Direct Charges wird die Zahlung direkt auf dem Restaurant-Account erstellt
-      // Das Restaurant trägt alle Stripe-Gebühren
-      // Die Plattform erhält nur die application_fee
+      // WICHTIG: Verwende "Destination Charges" für Apple Pay Kompatibilität
+      // Payment wird auf Platform erstellt, Geld wird an Restaurant transferiert
       paymentIntent = await stripe.paymentIntents.create({
         amount: amount, // Betrag in Cents
         currency: currency,
@@ -181,20 +181,22 @@ export async function POST(req: NextRequest) {
         statement_descriptor_suffix: tableNumber ? `T${tableNumber}` : undefined,
         // WICHTIG: Plattformgebühr - diese erhält die Plattform
         application_fee_amount: platformFee, // Fixe Plattformgebühr von 0.45 EUR für Plattform
+        // Destination Charges: Transfer an Restaurant
+        transfer_data: {
+          destination: restaurant.stripeAccountId!
+        },
+        // on_behalf_of zeigt Restaurant-Name auf Kundenabrechnung
+        on_behalf_of: restaurant.stripeAccountId!,
         metadata: {
           pendingPaymentId: pendingPayment.id,
           restaurantId: restaurantId,
           restaurantName: restaurant.name,
           tableNumber: tableNumber?.toString() || '',
           platform: 'Oriido',
-          paymentType: 'STRIPE_DIRECT_CHARGE',
+          paymentType: 'STRIPE_DESTINATION_CHARGE',
           platformFee: `${platformFee} cents`,
-          stripeFeePaidBy: 'restaurant'
+          stripeFeePaidBy: 'platform_then_deducted'
         }
-      }, {
-        // WICHTIG: Dies erstellt die Zahlung direkt auf dem Restaurant-Account
-        // Das Restaurant trägt alle Stripe-Transaktionsgebühren
-        stripeAccount: restaurant.stripeAccountId
       });
     }
 
@@ -226,8 +228,9 @@ export async function POST(req: NextRequest) {
       platformFeeEUR: platformFee / 100, // Gebühr in EUR für Frontend-Anzeige
       restaurantAmount: amount - platformFee,
       isDirectPayment: isDirectPayment,
-      // WICHTIG: Connected Account ID für Direct Charges - Frontend muss dies bei Stripe.js Initialisierung verwenden
-      stripeAccountId: isDirectPayment ? null : restaurant.stripeAccountId,
+      // Mit Destination Charges wird Payment auf Platform erstellt, daher kein stripeAccountId nötig
+      // Apple Pay funktioniert, da Domain auf Platform registriert ist
+      stripeAccountId: null, // Nicht mehr benötigt für Destination Charges
       warning: isDirectPayment ? 'Restaurant hat kein Stripe Connect. Zahlung erfolgt direkt an Plattform.' : null
     });
   } catch (error: any) {
