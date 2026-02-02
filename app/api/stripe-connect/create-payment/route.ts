@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
     console.log('====== CREATED PAYMENT INTENT ======');
     console.log('Payment Intent ID:', paymentIntent.id);
     console.log('Amount:', paymentIntent.amount, 'cents');
-    console.log('Application Fee:', isDirectPayment ? 0 : platformFee, 'cents (for Oriido)');
+    console.log('Application Fee:', isDirectPayment ? 0 : PLATFORM_FEE_CENTS, 'cents (for Oriido)');
     console.log('Statement Descriptor:', (paymentIntent as any).statement_descriptor || 'NOT SET');
     console.log('Statement Descriptor Suffix:', (paymentIntent as any).statement_descriptor_suffix || 'NOT SET');
     console.log('Connected Account:', restaurant.stripeAccountId || 'NONE (Direct Payment)');
