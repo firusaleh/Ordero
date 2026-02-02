@@ -7,8 +7,17 @@
   "functions": {
     "app/**/*": {
       "maxDuration": 30
+    },
+    "app/api/cron/pos-sync/route.ts": {
+      "maxDuration": 300
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/pos-sync",
+      "schedule": "0 */6 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/dashboard/(.*)",
