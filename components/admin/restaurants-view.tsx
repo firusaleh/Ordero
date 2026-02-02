@@ -640,13 +640,35 @@ export default function AdminRestaurantsView({ restaurants }: AdminRestaurantsVi
           </DialogHeader>
           {selectedRestaurant && (
             <div className="space-y-4">
+              {/* Restaurant ID prominent anzeigen */}
+              <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-600">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Restaurant ID</p>
+                    <p className="font-mono text-lg text-white">{selectedRestaurant.id}</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-gray-600 hover:bg-gray-700"
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedRestaurant.id);
+                      toast.success('Restaurant ID kopiert!');
+                    }}
+                  >
+                    📋 Kopieren
+                  </Button>
+                </div>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-gray-400">
                     <Store className="w-4 h-4" />
-                    <span className="text-sm">Name</span>
+                    <span className="text-sm">Name / Slug</span>
                   </div>
                   <p className="font-medium">{selectedRestaurant.name}</p>
+                  <p className="text-sm text-gray-500">/{selectedRestaurant.slug}</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-gray-400">
