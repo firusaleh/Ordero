@@ -229,7 +229,7 @@ export class Ready2OrderAdapter extends POSAdapter {
             price: parseFloat(e.price) || 0
           }))
         }
-      }).filter(item => item.name) // Filter out items without names
+      }).filter(item => item.name && item.price >= 0) // Filter out items without names or with negative prices
 
       console.log('Converted items:', JSON.stringify(items.slice(0, 3), null, 2))
 
