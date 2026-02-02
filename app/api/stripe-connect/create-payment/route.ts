@@ -226,6 +226,8 @@ export async function POST(req: NextRequest) {
       platformFeeEUR: platformFee / 100, // Gebühr in EUR für Frontend-Anzeige
       restaurantAmount: amount - platformFee,
       isDirectPayment: isDirectPayment,
+      // WICHTIG: Connected Account ID für Direct Charges - Frontend muss dies bei Stripe.js Initialisierung verwenden
+      stripeAccountId: isDirectPayment ? null : restaurant.stripeAccountId,
       warning: isDirectPayment ? 'Restaurant hat kein Stripe Connect. Zahlung erfolgt direkt an Plattform.' : null
     });
   } catch (error: any) {

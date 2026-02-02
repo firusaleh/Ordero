@@ -24,10 +24,23 @@ import {
 import { useGuestLanguage } from '@/contexts/guest-language-context'
 import { toast } from 'sonner'
 
-// Initialize Stripe
-const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
-  : null
+// Stripe publishable key
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+// Helper to load Stripe with optional connected account
+const getStripePromise = (stripeAccountId?: string | null) => {
+  if (!stripePublishableKey) return null
+
+  // For Direct Charges, we need to specify the connected account
+  if (stripeAccountId) {
+    return loadStripe(stripePublishableKey, {
+      stripeAccount: stripeAccountId
+    })
+  }
+
+  // Fallback for direct payments (no connected account)
+  return loadStripe(stripePublishableKey)
+}
 
 interface CartItem {
   menuItemId: string
@@ -567,6 +580,7 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
   const { t } = useGuestLanguage()
   const [clientSecret, setClientSecret] = useState<string | null>(null)
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null)
+  const [stripeAccountId, setStripeAccountId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -587,7 +601,7 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
   } = props
 
   // Check if Stripe is available
-  if (!stripePromise) {
+  if (!stripePublishableKey) {
     return (
       <div className="p-4">
         <Alert variant="destructive">
@@ -635,6 +649,8 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
         if (result.clientSecret && result.pendingPaymentId) {
           setClientSecret(result.clientSecret)
           setPendingPaymentId(result.pendingPaymentId)
+          // Store connected account ID for Stripe initialization
+          setStripeAccountId(result.stripeAccountId || null)
         } else {
           throw new Error(result.error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
         }
@@ -690,6 +706,9 @@ export default function UnifiedCheckout(props: UnifiedCheckoutProps) {
     },
     loader: 'auto' as const
   }
+
+  // Get Stripe promise with connected account (for Direct Charges)
+  const stripePromise = getStripePromise(stripeAccountId)
 
   return (
     <Elements stripe={stripePromise} options={stripeOptions}>
