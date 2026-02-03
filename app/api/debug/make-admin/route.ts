@@ -3,18 +3,21 @@ import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(req: NextRequest) {
-  try {
-    const session = await auth();
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ 
-        error: 'Nicht eingeloggt'
-      }, { status: 401 });
-    }
+  const session = await auth();
+  
+  if (!session?.user?.email) {
+    return NextResponse.json({ 
+      error: 'Nicht eingeloggt'
+    }, { status: 401 });
+  }
 
+  const userEmail = session.user.email;
+  const userName = session.user.name;
+
+  try {
     // Update User auf ADMIN Rolle
     const updatedUser = await prisma.user.update({
-      where: { email: session.user.email },
+      where: { email: userEmail },
       data: { role: 'ADMIN' },
       select: {
         id: true,
@@ -38,8 +41,8 @@ export async function POST(req: NextRequest) {
       try {
         const newUser = await prisma.user.create({
           data: {
-            email: session!.user!.email!,
-            name: session!.user!.name || 'Admin',
+            email: userEmail,
+            name: userName || 'Admin',
             role: 'ADMIN',
             password: 'temp-password-change-me' // Sollte geändert werden
           },
