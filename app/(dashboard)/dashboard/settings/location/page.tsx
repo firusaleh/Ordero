@@ -15,23 +15,7 @@ export default async function LocationSettingsPage() {
   }
 
   // Restaurant für den aktuellen User finden
-  let restaurant = await getSelectedRestaurant()
-
-  // Falls nicht Owner, prüfe ob Staff
-  if (!restaurant) {
-    const staffRelation = await prisma.restaurantStaff.findFirst({
-      where: {
-        userId: session.user.id
-      },
-      include: {
-        restaurant: true
-      }
-    })
-
-    if (staffRelation) {
-      restaurant = staffRelation.restaurant
-    }
-  }
+  const restaurant = await getSelectedRestaurant()
 
   if (!restaurant) {
     return (
