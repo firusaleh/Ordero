@@ -88,7 +88,15 @@ export async function getSelectedRestaurant() {
         ]
       },
       include: {
-        settings: true
+        settings: true,
+        _count: {
+          select: {
+            orders: true,
+            menuItems: true,
+            tables: true,
+            categories: true,
+          }
+        }
       }
     })
   }
@@ -103,7 +111,15 @@ export async function getSelectedRestaurant() {
         ]
       },
       include: {
-        settings: true
+        settings: true,
+        _count: {
+          select: {
+            orders: true,
+            menuItems: true,
+            tables: true,
+            categories: true,
+          }
+        }
       }
     })
   }

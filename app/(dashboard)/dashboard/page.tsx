@@ -5,28 +5,12 @@ import DashboardContent from '@/components/dashboard/dashboard-content'
 import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 async function getDashboardData(userId: string) {
-  // Hole das ausgewählte Restaurant
+  // Hole das ausgewählte Restaurant (inkl. _count)
   const restaurant = await getSelectedRestaurant()
   
   if (!restaurant) {
     return null
   }
-  
-  // Füge die fehlenden Daten hinzu
-  const restaurantWithCounts = await prisma.restaurant.findUnique({
-    where: { id: restaurant.id },
-    include: {
-      settings: true,
-      _count: {
-        select: {
-          orders: true,
-          menuItems: true,
-          tables: true,
-          categories: true,
-        }
-      }
-    }
-  })
 
   // Hole heutige Statistiken
   const today = new Date()
@@ -53,7 +37,7 @@ async function getDashboardData(userId: string) {
       : 0
   }
 
-  return { restaurant: restaurantWithCounts || restaurant, stats, recentOrders: todayOrders.slice(0, 5) }
+  return { restaurant, stats, recentOrders: todayOrders.slice(0, 5) }
 }
 
 export default async function DashboardPage() {
