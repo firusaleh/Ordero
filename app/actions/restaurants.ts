@@ -23,7 +23,9 @@ export async function getUserRestaurants() {
       id: true,
       name: true,
       slug: true,
-      logo: true
+      logo: true,
+      country: true,
+      language: true
     }
   })
 
@@ -45,6 +47,13 @@ export async function switchRestaurant(restaurantId: string) {
         { ownerId: session.user.id },
         { staff: { some: { userId: session.user.id } } }
       ]
+    },
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      country: true,
+      language: true
     }
   })
 

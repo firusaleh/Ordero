@@ -20,12 +20,15 @@ import {
 import { getUserRestaurants, switchRestaurant } from '@/app/actions/restaurants'
 import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useLanguage } from '@/contexts/language-context'
 
 interface Restaurant {
   id: string
   name: string
   slug: string
   logo?: string | null
+  country?: string | null
+  language?: string | null
 }
 
 interface RestaurantSwitcherProps {
@@ -38,6 +41,7 @@ export default function RestaurantSwitcher({ currentRestaurantId }: RestaurantSw
   const [selectedRestaurant, setSelectedRestaurant] = useState<Restaurant | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { setLanguage } = useLanguage()
 
   useEffect(() => {
     loadRestaurants()
@@ -53,9 +57,27 @@ export default function RestaurantSwitcher({ currentRestaurantId }: RestaurantSw
         const current = data.find(r => r.id === currentRestaurantId)
         if (current) {
           setSelectedRestaurant(current)
+          
+          // Setze initiale Sprache basierend auf Restaurant
+          if (current.country === 'JO' || current.language === 'ar') {
+            setLanguage('ar')
+          } else if (current.country === 'DE' || current.language === 'de') {
+            setLanguage('de')
+          } else if (current.language === 'en') {
+            setLanguage('en')
+          }
         }
       } else if (data.length > 0) {
         setSelectedRestaurant(data[0])
+        
+        // Setze initiale Sprache basierend auf erstem Restaurant
+        if (data[0].country === 'JO' || data[0].language === 'ar') {
+          setLanguage('ar')
+        } else if (data[0].country === 'DE' || data[0].language === 'de') {
+          setLanguage('de')
+        } else if (data[0].language === 'en') {
+          setLanguage('en')
+        }
       }
     } catch (error) {
       console.error('Fehler beim Laden der Restaurants:', error)
@@ -70,8 +92,18 @@ export default function RestaurantSwitcher({ currentRestaurantId }: RestaurantSw
 
     setLoading(true)
     try {
-      await switchRestaurant(restaurant.id)
+      const result = await switchRestaurant(restaurant.id)
       setSelectedRestaurant(restaurant)
+      
+      // Automatisch Sprache basierend auf Land ändern
+      if (result.country === 'JO' || result.language === 'ar') {
+        setLanguage('ar')
+      } else if (result.country === 'DE' || result.language === 'de') {
+        setLanguage('de')
+      } else if (result.language === 'en') {
+        setLanguage('en')
+      }
+      
       setOpen(false)
       router.refresh()
     } catch (error) {
