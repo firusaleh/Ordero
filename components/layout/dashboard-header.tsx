@@ -17,8 +17,13 @@ import MobileNav from './mobile-nav'
 import { useLanguage } from '@/contexts/language-context'
 import NotificationsDropdown from './notifications-dropdown'
 import { handleSignOut } from '@/app/actions/auth'
+import RestaurantSwitcher from './restaurant-switcher'
 
-export default function DashboardHeader() {
+interface DashboardHeaderProps {
+  currentRestaurantId?: string
+}
+
+export default function DashboardHeader({ currentRestaurantId }: DashboardHeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [isSigningOut, setIsSigningOut] = useState(false)
   const router = useRouter()
@@ -36,8 +41,9 @@ export default function DashboardHeader() {
       </Button>
 
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-        <div className="flex flex-1 items-center">
+        <div className="flex flex-1 items-center gap-4">
           <h1 className="text-lg font-semibold text-gray-900">{t('dashboard.title')}</h1>
+          <RestaurantSwitcher currentRestaurantId={currentRestaurantId} />
         </div>
         
         <div className="flex items-center gap-x-4 lg:gap-x-6">
