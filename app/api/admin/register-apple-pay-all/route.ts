@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { registerApplePayDomains } from '@/lib/stripe/register-apple-pay-domains';
+import { isAdminRole } from '@/lib/auth/check-admin';
 
 /**
  * Admin-Endpoint zum Registrieren von Apple Pay Domains für ALLE Restaurants
@@ -19,8 +20,12 @@ export async function POST(req: NextRequest) {
       where: { email: session.user.email }
     });
 
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Nur Administratoren haben Zugriff' }, { status: 403 });
+    if (!user || !isAdminRole(user.role)) {
+      return NextResponse.json({ 
+        error: 'Nur Administratoren haben Zugriff',
+        yourRole: user?.role || 'NO_ROLE',
+        acceptedRoles: ['ADMIN', 'SUPER_ADMIN', 'Super_Admin'] 
+      }, { status: 403 });
     }
 
     // Hole alle Restaurants mit abgeschlossenem Stripe Connect
@@ -104,8 +109,12 @@ export async function GET(req: NextRequest) {
       where: { email: session.user.email }
     });
 
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Nur Administratoren haben Zugriff' }, { status: 403 });
+    if (!user || !isAdminRole(user.role)) {
+      return NextResponse.json({ 
+        error: 'Nur Administratoren haben Zugriff',
+        yourRole: user?.role || 'NO_ROLE',
+        acceptedRoles: ['ADMIN', 'SUPER_ADMIN', 'Super_Admin'] 
+      }, { status: 403 });
     }
 
     // Hole alle Restaurants mit ihrem Stripe-Status
