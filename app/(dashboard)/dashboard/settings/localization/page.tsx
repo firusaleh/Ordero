@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import LocalizationSettingsClient from './client'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 export default async function LocalizationSettingsPage() {
   const session = await auth()
@@ -10,17 +11,7 @@ export default async function LocalizationSettingsPage() {
     redirect('/login')
   }
 
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: session.user.id },
-        { staff: { some: { userId: session.user.id } } }
-      ]
-    },
-    include: {
-      settings: true
-    }
-  })
+  const restaurant = await getSelectedRestaurant()
 
   if (!restaurant) {
     redirect('/onboarding')

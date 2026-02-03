@@ -2,6 +2,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import StaffManager from '@/components/dashboard/staff-manager'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 export default async function StaffWrapper() {
   const session = await auth()
@@ -11,22 +12,7 @@ export default async function StaffWrapper() {
   }
 
   // Hole das erste Restaurant des Nutzers
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: session.user.id },
-        { staff: { some: { userId: session.user.id } } }
-      ]
-    },
-    include: {
-      staff: {
-        include: {
-          user: true
-        }
-      },
-      owner: true
-    }
-  }) as any
+  const restaurant = await getSelectedRestaurant() as any
 
   if (!restaurant) {
     redirect('/dashboard/restaurant-setup')

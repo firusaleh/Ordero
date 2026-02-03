@@ -2,26 +2,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import MenuWrapper from '@/components/dashboard/menu-wrapper'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 async function getMenuData(userId: string) {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: userId },
-        { staff: { some: { userId } } }
-      ]
-    },
-    include: {
-      settings: {
-        select: {
-          posSystem: true,
-          posApiKey: true,
-          posSyncEnabled: true,
-          posLastSync: true
-        }
-      }
-    }
-  })
+  const restaurant = await getSelectedRestaurant()
 
   if (!restaurant) {
     return null

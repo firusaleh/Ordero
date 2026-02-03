@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import FeesSettingsClient from "./client"
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 export default async function FeesSettingsPage() {
   const session = await auth()
@@ -10,14 +11,7 @@ export default async function FeesSettingsPage() {
     redirect("/login")
   }
   
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      ownerId: session.user.id
-    },
-    include: {
-      settings: true
-    }
-  })
+  const restaurant = await getSelectedRestaurant()
   
   if (!restaurant) {
     redirect("/dashboard")

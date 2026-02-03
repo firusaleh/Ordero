@@ -2,17 +2,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import StatsClient from '@/components/dashboard/stats-client'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 async function getRestaurantId(userId: string) {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: userId },
-        { staff: { some: { userId } } }
-      ]
-    },
-    select: { id: true }
-  })
+  const restaurant = await getSelectedRestaurant()
   
   return restaurant?.id
 }

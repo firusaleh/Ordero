@@ -5,6 +5,7 @@ import { RestaurantLocationSettings } from '@/components/dashboard/restaurant-lo
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 export default async function LocationSettingsPage() {
   const session = await auth()
@@ -14,11 +15,7 @@ export default async function LocationSettingsPage() {
   }
 
   // Restaurant für den aktuellen User finden
-  let restaurant = await prisma.restaurant.findFirst({
-    where: {
-      ownerId: session.user.id
-    }
-  })
+  let restaurant = await getSelectedRestaurant()
 
   // Falls nicht Owner, prüfe ob Staff
   if (!restaurant) {

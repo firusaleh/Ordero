@@ -2,19 +2,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import GeneralSettingsClient from './client'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 async function getRestaurantData(userId: string) {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: userId },
-        { staff: { some: { userId } } }
-      ]
-    },
-    include: {
-      settings: true
-    }
-  })
+  const restaurant = await getSelectedRestaurant()
 
   if (!restaurant) {
     return null

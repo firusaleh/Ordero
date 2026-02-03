@@ -2,16 +2,10 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { ReservationsManager } from '@/components/dashboard/reservations-manager'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 async function getReservationsData(userId: string) {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: userId },
-        { staff: { some: { userId } } }
-      ]
-    }
-  })
+  const restaurant = await getSelectedRestaurant()
 
   if (!restaurant) {
     return null

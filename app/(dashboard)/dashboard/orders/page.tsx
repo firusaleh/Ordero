@@ -2,17 +2,11 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import OrdersViewRealtime from '@/components/dashboard/orders-view-realtime'
+import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
 async function getRestaurantData(userId: string) {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: {
-      OR: [
-        { ownerId: userId },
-        { staff: { some: { userId } } }
-      ]
-    }
-  })
-
+  const restaurant = await getSelectedRestaurant()
+  
   return restaurant
 }
 
