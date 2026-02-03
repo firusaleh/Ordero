@@ -316,7 +316,7 @@ async function createDemoRestaurants() {
     await prisma.menuItem.create({
       data: {
         name: 'حمص',
-        description: 'حمص مع زيت الزيتون والطحينة',
+        description: 'حمص بالطحينة مع زيت الزيتون والخبز العربي',
         price: 2.50,
         image: 'https://images.unsplash.com/photo-1481931098730-318b6f776db0?w=800',
         isAvailable: true,
@@ -330,7 +330,7 @@ async function createDemoRestaurants() {
     await prisma.menuItem.create({
       data: {
         name: 'فلافل',
-        description: '6 قطع فلافل مع الطحينة',
+        description: 'ست قطع فلافل مقرمشة مع صلصة الطحينة والخضار',
         price: 3.00,
         image: 'https://images.unsplash.com/photo-1593001872117-56a5d3b6e7b1?w=800',
         isAvailable: true,
@@ -343,8 +343,22 @@ async function createDemoRestaurants() {
 
     await prisma.menuItem.create({
       data: {
+        name: 'متبل',
+        description: 'باذنجان مشوي مع الطحينة والثوم وزيت الزيتون',
+        price: 2.75,
+        image: 'https://images.unsplash.com/photo-1530469912745-a215c6b256ea?w=800',
+        isAvailable: true,
+        isActive: true,
+        categoryId: mezze.id,
+        restaurantId: restaurantJO.id,
+        sortOrder: 3
+      }
+    });
+
+    await prisma.menuItem.create({
+      data: {
         name: 'كباب لحم',
-        description: 'سيخين كباب لحم مع الأرز',
+        description: 'ثلاث أسياخ كباب لحم مشوي مع الأرز والخضار المشوية',
         price: 8.50,
         image: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=800',
         isAvailable: true,
@@ -357,8 +371,8 @@ async function createDemoRestaurants() {
 
     await prisma.menuItem.create({
       data: {
-        name: 'شاورما',
-        description: 'شاورما لحم أو دجاج',
+        name: 'شاورما عربي',
+        description: 'شاورما لحم أو دجاج بالطريقة الأردنية الأصيلة',
         price: 4.00,
         image: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=800',
         isAvailable: true,
@@ -371,8 +385,22 @@ async function createDemoRestaurants() {
 
     await prisma.menuItem.create({
       data: {
-        name: 'كنافة',
-        description: 'كنافة نابلسية بالجبنة',
+        name: 'مشاوي مشكلة',
+        description: 'طبق مشاوي مشكل: كباب، شيش طاووق، ريش لحم مع الأرز',
+        price: 12.50,
+        image: 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=800',
+        isAvailable: true,
+        isActive: true,
+        categoryId: grills.id,
+        restaurantId: restaurantJO.id,
+        sortOrder: 3
+      }
+    });
+
+    await prisma.menuItem.create({
+      data: {
+        name: 'كنافة نابلسية',
+        description: 'كنافة ساخنة بالجبنة النابلسية والقطر',
         price: 4.00,
         image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=800',
         isAvailable: true,
@@ -385,8 +413,22 @@ async function createDemoRestaurants() {
 
     await prisma.menuItem.create({
       data: {
-        name: 'شاي أردني',
-        description: 'شاي بالميرمية',
+        name: 'بقلاوة',
+        description: 'حلوى البقلاوة بالفستق الحلبي والعسل',
+        price: 3.50,
+        image: 'https://images.unsplash.com/photo-1519676867240-f03562e64548?w=800',
+        isAvailable: true,
+        isActive: true,
+        categoryId: sweets.id,
+        restaurantId: restaurantJO.id,
+        sortOrder: 2
+      }
+    });
+
+    await prisma.menuItem.create({
+      data: {
+        name: 'شاي بالميرمية',
+        description: 'شاي أردني أصيل بالميرمية الطبيعية',
         price: 1.50,
         image: 'https://images.unsplash.com/photo-1594631661960-34762327295a?w=800',
         isAvailable: true,
@@ -394,6 +436,20 @@ async function createDemoRestaurants() {
         categoryId: drinks.id,
         restaurantId: restaurantJO.id,
         sortOrder: 1
+      }
+    });
+
+    await prisma.menuItem.create({
+      data: {
+        name: 'قهوة عربية',
+        description: 'قهوة عربية أصيلة بالهيل',
+        price: 2.00,
+        image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=800',
+        isAvailable: true,
+        isActive: true,
+        categoryId: drinks.id,
+        restaurantId: restaurantJO.id,
+        sortOrder: 2
       }
     });
 
