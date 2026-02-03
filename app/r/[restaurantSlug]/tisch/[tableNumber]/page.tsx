@@ -4,6 +4,9 @@ import GuestMenuViewWrapped from '@/components/guest/guest-menu-view-wrapped'
 import TableNotFound from '@/components/guest/table-not-found'
 import { GuestLanguageProvider } from '@/contexts/guest-language-context'
 
+// Revalidate every 60 seconds to ensure fresh menu data
+export const revalidate = 60
+
 async function getRestaurantMenu(slug: string, tableNumber: string) {
   const restaurant = await prisma.restaurant.findUnique({
     where: { 

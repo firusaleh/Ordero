@@ -4,6 +4,9 @@ import { GuestLanguageProvider } from '@/contexts/guest-language-context'
 import RestaurantOffline from '@/components/guest/restaurant-offline'
 import RestaurantOnlineContent from '@/components/guest/restaurant-online-content'
 
+// Revalidate every 60 seconds to ensure fresh data
+export const revalidate = 60
+
 interface RestaurantPageProps {
   params: Promise<{ restaurantSlug: string }>
 }
