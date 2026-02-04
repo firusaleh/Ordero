@@ -80,9 +80,11 @@ export const guestTranslationsAr = {
   // Cart
   cart: {
     title: 'سلة التسوق',
+    yourOrder: 'طلبك',
     empty: 'سلتك فارغة',
     emptyMessage: 'أضف بعض الأصناف اللذيذة لبدء طلبك',
     items: 'الأصناف',
+    each: 'للقطعة',
     subtotal: 'المجموع الفرعي',
     tax: 'الضريبة',
     serviceFee: 'رسوم الخدمة',
