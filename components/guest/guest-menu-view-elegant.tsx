@@ -778,7 +778,7 @@ export default function GuestMenuViewElegant({ restaurant, table, tableNumber }:
         open={showSuccessDialog}
         onClose={() => setShowSuccessDialog(false)}
         orderNumber={orderNumber}
-        estimatedTime="15-20 Minuten"
+        estimatedTime={language === 'ar' ? '١٥-٢٠ دقيقة' : language === 'en' ? '15-20 minutes' : '15-20 Minuten'}
         primaryColor="#10B981"
       />
 
