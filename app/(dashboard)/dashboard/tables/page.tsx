@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation'
 import TablesManagerTranslated from '@/components/dashboard/tables-manager-translated'
 import { getSelectedRestaurant } from '@/app/actions/restaurants'
 
+// Revalidate every 60 seconds to ensure fresh data
+export const revalidate = 60
+
 async function getTablesData(userId: string) {
   const restaurant = await getSelectedRestaurant()
 
