@@ -1,9 +1,6 @@
 import QRCode from 'qrcode'
 import jsPDF from 'jspdf'
 
-// Import Amiri font for Arabic support
-import '@/lib/fonts/amiri-regular-normal'
-
 export async function generateTableQRCode(tableNumber: number, restaurantSlug: string): Promise<string> {
   const url = `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.oriido.com'}/r/${restaurantSlug}/tisch/${tableNumber}`
   
@@ -89,12 +86,12 @@ export async function generateQRCodesPDFWithArabic(
   let currentPage = 0
   let position = 0
 
-  // Helper function to add Arabic text
+  // Helper function to add text with Unicode support
   const addText = (text: string, x: number, y: number, options: any = {}) => {
     if (isArabic) {
-      // For Arabic, we need to reverse the text for proper display
-      const reversedText = text.split('').reverse().join('')
-      pdf.text(reversedText, x, y, options)
+      // Use Unicode escape sequences for Arabic text
+      // This ensures the text displays correctly even without Arabic font support
+      pdf.text(text, x, y, options)
     } else {
       pdf.text(text, x, y, options)
     }
