@@ -37,10 +37,18 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
     notFound()
   }
 
+  // Determine initial language based on restaurant country or language settings
+  let initialLanguage: 'de' | 'en' | 'ar' = 'de'
+  if (restaurant.country === 'JO' || restaurant.language === 'ar') {
+    initialLanguage = 'ar'
+  } else if (restaurant.language === 'en') {
+    initialLanguage = 'en'
+  }
+
   // Check if restaurant is offline
   if (restaurant.status !== 'ACTIVE') {
     return (
-      <GuestLanguageProvider>
+      <GuestLanguageProvider initialLanguage={initialLanguage}>
         <RestaurantOffline restaurant={restaurant} />
       </GuestLanguageProvider>
     )
@@ -48,7 +56,7 @@ export default async function RestaurantPage({ params }: RestaurantPageProps) {
 
   // Restaurant is online, show normal page
   return (
-    <GuestLanguageProvider>
+    <GuestLanguageProvider initialLanguage={initialLanguage}>
       <RestaurantOnlineContent restaurant={restaurant} />
     </GuestLanguageProvider>
   )

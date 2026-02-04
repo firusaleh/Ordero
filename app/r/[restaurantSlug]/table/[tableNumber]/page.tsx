@@ -79,10 +79,18 @@ export default async function GuestMenuPage({
 
   const { restaurant, table, tableNumber: tableNum } = data
 
+  // Determine initial language based on restaurant country or language settings
+  let initialLanguage: 'de' | 'en' | 'ar' = 'de'
+  if (restaurant.country === 'JO' || restaurant.language === 'ar') {
+    initialLanguage = 'ar'
+  } else if (restaurant.language === 'en') {
+    initialLanguage = 'en'
+  }
+
   // Wenn Tischnummer erforderlich ist und Tisch nicht existiert
   if (restaurant.settings?.requireTableNumber && !table) {
     return (
-      <GuestLanguageProvider>
+      <GuestLanguageProvider initialLanguage={initialLanguage}>
         <TableNotFound tableNumber={tableNum} restaurantSlug={restaurantSlug} />
       </GuestLanguageProvider>
     )

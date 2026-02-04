@@ -11,8 +11,13 @@ interface GuestLanguageContextType {
 
 const GuestLanguageContext = createContext<GuestLanguageContextType | undefined>(undefined)
 
-export function GuestLanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<GuestLanguage>('de')
+interface GuestLanguageProviderProps {
+  children: ReactNode
+  initialLanguage?: GuestLanguage
+}
+
+export function GuestLanguageProvider({ children, initialLanguage }: GuestLanguageProviderProps) {
+  const [language, setLanguageState] = useState<GuestLanguage>(initialLanguage || 'de')
 
   useEffect(() => {
     // Load saved language from localStorage
@@ -28,10 +33,18 @@ export function GuestLanguageProvider({ children }: { children: ReactNode }) {
         document.documentElement.dir = 'ltr'
         document.documentElement.lang = savedLang
       }
-    }
-    
-    // Check browser language
-    if (!savedLang) {
+    } else if (initialLanguage) {
+      // Use initial language from restaurant settings
+      setLanguageState(initialLanguage)
+      if (initialLanguage === 'ar') {
+        document.documentElement.dir = 'rtl'
+        document.documentElement.lang = 'ar'
+      } else {
+        document.documentElement.dir = 'ltr'
+        document.documentElement.lang = initialLanguage
+      }
+    } else {
+      // Check browser language as fallback
       const browserLang = navigator.language.toLowerCase()
       if (browserLang.startsWith('en')) {
         setLanguageState('en')
@@ -41,7 +54,7 @@ export function GuestLanguageProvider({ children }: { children: ReactNode }) {
         document.documentElement.lang = 'ar'
       }
     }
-  }, [])
+  }, [initialLanguage])
 
   const setLanguage = (lang: GuestLanguage) => {
     setLanguageState(lang)
