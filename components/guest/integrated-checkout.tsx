@@ -667,7 +667,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
           {props.isProcessingCash ? (
             <Loader2 className="h-5 w-5 animate-spin mr-2" />
           ) : null}
-          {t('payment.placeOrder')} - {t('payment.cash')}
+          {t('checkout.placeOrder') || 'Bestellung aufgeben'} - {t('payment.cash') || 'Bar'}
         </Button>
       </div>
     )
@@ -756,7 +756,7 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
           className="w-full"
           style={{ backgroundColor: props.primaryColor }}
         >
-          {t('payment.placeOrder')} - {t('payment.cash')}
+          {t('checkout.placeOrder') || 'Bestellung aufgeben'} - {t('payment.cash') || 'Bar'}
         </Button>
       </div>
     )
