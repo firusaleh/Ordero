@@ -615,7 +615,7 @@ function CheckoutFormContent({
               </>
             ) : (
               <>
-                {selectedPaymentMethod === 'CASH' ? t('payment.placeOrder') : t('payment.payNow')}
+                {selectedPaymentMethod === 'CASH' ? t('checkout.placeOrder') || 'Bestellung aufgeben' : t('payment.payNow') || 'Jetzt bezahlen'}
                 {' • '}{formatPrice(total)}
                 <span className="ml-1">→</span>
               </>
