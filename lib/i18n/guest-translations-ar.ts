@@ -315,6 +315,31 @@ export const guestTranslationsAr = {
     tooManyRequests: 'طلبات كثيرة جداً'
   },
 
+  // Checkout
+  checkout: {
+    title: 'الدفع',
+    orderSummary: 'ملخص الطلب',
+    customerInfo: 'معلومات العميل',
+    name: 'الاسم',
+    email: 'البريد الإلكتروني',
+    phone: 'الهاتف',
+    specialInstructions: 'تعليمات خاصة',
+    paymentMethod: 'طريقة الدفع',
+    payNow: 'ادفع الآن',
+    payLater: 'ادفع لاحقاً',
+    placeOrder: 'إتمام الطلب',
+    proceedToCheckout: 'المتابعة إلى الدفع',
+    orderSuccess: 'تم الطلب بنجاح!',
+    orderFailed: 'فشل الطلب',
+    tryAgain: 'حاول مرة أخرى',
+    processing: 'جاري المعالجة...',
+    termsAndConditions: 'الشروط والأحكام',
+    privacyPolicy: 'سياسة الخصوصية',
+    agreeToTerms: 'أوافق على الشروط والأحكام',
+    taxes: 'ضريبة القيمة المضافة',
+    preparingPayment: 'جاري تجهيز الدفع...'
+  },
+
   // Common
   common: {
     loading: 'جاري التحميل...',
