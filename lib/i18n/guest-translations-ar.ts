@@ -189,6 +189,45 @@ export const guestTranslationsAr = {
       emailPlaceholder: 'your.email@example.com',
       notesPlaceholder: 'أي طلبات أو ملاحظات خاصة...',
       minAdvanceTime: 'يجب الطلب قبل ساعتين على الأقل'
+    },
+    reservationForm: {
+      title: 'حجز طاولة',
+      subtitle: 'احجز طاولتك بسهولة عبر الإنترنت',
+      yourData: 'بياناتك',
+      name: 'الاسم',
+      namePlaceholder: 'أدخل اسمك الكامل',
+      phone: 'الهاتف',
+      phonePlaceholder: '+962 7 9999 9999',
+      email: 'البريد الإلكتروني',
+      emailPlaceholder: 'example@email.com',
+      details: 'تفاصيل الحجز',
+      numberOfGuests: 'عدد الضيوف',
+      person: 'شخص',
+      persons: 'أشخاص',
+      date: 'التاريخ',
+      time: 'الوقت',
+      selectTime: 'اختر الوقت',
+      loadingSlots: 'جاري تحميل الأوقات المتاحة...',
+      selectDateFirst: 'يرجى اختيار التاريخ أولاً',
+      additionalInfo: 'معلومات إضافية (اختياري)',
+      specialRequests: 'طلبات خاصة',
+      specialRequestsPlaceholder: 'مثل: كرسي أطفال، طاولة بجانب النافذة...',
+      notes: 'ملاحظات',
+      notesPlaceholder: 'معلومات إضافية للمطعم...',
+      submit: 'احجز الآن',
+      loading: 'جاري المعالجة...',
+      success: {
+        title: 'تم تأكيد الحجز!',
+        message: 'شكراً لحجزك. ستتلقى رسالة تأكيد عبر البريد الإلكتروني قريباً.',
+        confirmationCode: 'رمز التأكيد:',
+        newReservation: 'حجز جديد'
+      },
+      errors: {
+        selectTime: 'يرجى اختيار الوقت',
+        network: 'خطأ في الشبكة. يرجى المحاولة مرة أخرى لاحقاً.',
+        general: 'خطأ في الحجز',
+        loading: 'خطأ في تحميل الأوقات المتاحة'
+      }
     }
   },
 
