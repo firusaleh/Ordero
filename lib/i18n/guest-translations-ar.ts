@@ -1,4 +1,14 @@
 export const guestTranslationsAr = {
+  // Guest specific
+  guest: {
+    reservation: {
+      title: 'حجز طاولة'
+    },
+    preorder: {
+      title: 'الطلب المسبق'
+    }
+  },
+
   // Header
   header: {
     table: 'الطاولة',

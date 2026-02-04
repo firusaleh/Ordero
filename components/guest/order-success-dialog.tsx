@@ -18,10 +18,17 @@ export default function OrderSuccessDialog({
   open,
   onClose,
   orderNumber,
-  estimatedTime = '15-20 Minuten',
+  estimatedTime,
   primaryColor = '#2EC4B6'
 }: OrderSuccessDialogProps) {
-  const { t } = useGuestLanguage()
+  const { t, language } = useGuestLanguage()
+  
+  // Set default estimated time based on language
+  const defaultTime = language === 'ar' ? '١٥-٢٠ دقيقة' : 
+                       language === 'en' ? '15-20 minutes' : 
+                       '15-20 Minuten'
+  
+  const displayTime = estimatedTime || defaultTime
   useEffect(() => {
     if (open) {
       // Auto-close after 5 seconds
@@ -80,7 +87,7 @@ export default function OrderSuccessDialog({
             </div>
             <div className="pt-4 border-t border-white/20">
               <div className="text-xs text-white/60 mb-1">{t('order.estimatedTime') || 'Geschätzte Zeit'}</div>
-              <div className="text-lg font-semibold">{estimatedTime}</div>
+              <div className="text-lg font-semibold">{displayTime}</div>
             </div>
           </div>
         </div>
