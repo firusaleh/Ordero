@@ -52,17 +52,25 @@ export default async function PreOrderPage({ params }: PreOrderPageProps) {
     notFound()
   }
 
+  // Determine initial language based on restaurant country or language settings
+  let initialLanguage: 'de' | 'en' | 'ar' = 'de'
+  if (restaurant.country === 'JO' || restaurant.language === 'ar') {
+    initialLanguage = 'ar'
+  } else if (restaurant.language === 'en') {
+    initialLanguage = 'en'
+  }
+
   // Check if restaurant is offline
   if (restaurant.status !== 'ACTIVE') {
     return (
-      <GuestLanguageProvider>
+      <GuestLanguageProvider initialLanguage={initialLanguage}>
         <RestaurantOffline restaurant={restaurant} />
       </GuestLanguageProvider>
     )
   }
 
   return (
-    <GuestLanguageProvider>
+    <GuestLanguageProvider initialLanguage={initialLanguage}>
       <PreOrderMenuView restaurant={restaurant} />
     </GuestLanguageProvider>
   )

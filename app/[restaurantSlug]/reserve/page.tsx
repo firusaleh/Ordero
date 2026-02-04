@@ -21,6 +21,8 @@ async function getRestaurant(slug: string) {
       street: true,
       city: true,
       postalCode: true,
+      country: true,
+      language: true,
       settings: {
         select: {
           language: true,

@@ -17,6 +17,8 @@ interface Restaurant {
   street?: string | null
   city?: string | null
   postalCode?: string | null
+  country?: string | null
+  language?: string | null
   settings?: {
     language?: string | null
     currency?: string | null
@@ -108,8 +110,16 @@ function ClientPageContent({ restaurant, restaurantSlug }: ClientPageContentProp
 }
 
 export default function ClientReservePage({ restaurant, restaurantSlug }: ClientPageContentProps) {
+  // Determine initial language based on restaurant country or language settings
+  let initialLanguage: 'de' | 'en' | 'ar' = 'de'
+  if (restaurant.country === 'JO' || restaurant.language === 'ar') {
+    initialLanguage = 'ar'
+  } else if (restaurant.language === 'en') {
+    initialLanguage = 'en'
+  }
+  
   return (
-    <GuestLanguageProvider>
+    <GuestLanguageProvider initialLanguage={initialLanguage}>
       <ClientPageContent restaurant={restaurant} restaurantSlug={restaurantSlug} />
     </GuestLanguageProvider>
   )
