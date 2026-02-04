@@ -376,14 +376,14 @@ export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: 
               className="flex items-center justify-center gap-2 bg-white hover:bg-blue-50 border-2 border-blue-300 hover:border-blue-400 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
             >
               <Calendar className="h-5 w-5 text-blue-600" />
-              <span className="text-sm font-semibold text-blue-900">{t('guest.actions.reserve')}</span>
+              <span className="text-sm font-semibold text-blue-900">{t('guest.reservation.title') || 'Tisch reservieren'}</span>
             </a>
             <a
               href={`/${restaurant.slug}/preorder`}
               className="flex items-center justify-center gap-2 bg-white hover:bg-green-50 border-2 border-green-300 hover:border-green-400 rounded-lg p-3 transition-all shadow-sm hover:shadow-md"
             >
               <ShoppingBag className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-semibold text-green-900">{t('guest.actions.preorder')}</span>
+              <span className="text-sm font-semibold text-green-900">{t('guest.preorder.title') || 'Vorbestellen'}</span>
             </a>
           </div>
         </div>
