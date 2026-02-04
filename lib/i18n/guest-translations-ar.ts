@@ -467,7 +467,7 @@ export const guestTranslationsAr = {
     for: 'لمدة',
     in: 'في',
     at: 'في',
-    on: 'على',
+    onPreposition: 'على',
     with: 'مع',
     without: 'بدون',
     all: 'الكل',
