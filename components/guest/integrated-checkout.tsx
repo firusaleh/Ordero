@@ -708,11 +708,21 @@ export default function IntegratedCheckout(props: IntegratedCheckoutProps) {
           // Store connected account ID for Stripe initialization
           setStripeAccountId(result.stripeAccountId || null)
         } else {
-          throw new Error(result.error || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
+          // Translate known backend errors
+          let errorMessage = result.error
+          if (errorMessage === 'Fehler beim Erstellen der Zahlung') {
+            errorMessage = t('errors.paymentError') || errorMessage
+          }
+          throw new Error(errorMessage || t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
         }
       } catch (err) {
         console.error('Create payment intent failed:', err)
-        setError(err instanceof Error ? err.message : t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden')
+        // Translate known backend errors
+        let errorMessage = err instanceof Error ? err.message : t('errors.paymentInitError') || 'Payment konnte nicht initialisiert werden'
+        if (errorMessage === 'Fehler beim Erstellen der Zahlung') {
+          errorMessage = t('errors.paymentError') || errorMessage
+        }
+        setError(errorMessage)
       } finally {
         setIsLoading(false)
       }
