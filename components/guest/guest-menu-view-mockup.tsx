@@ -107,7 +107,7 @@ interface GuestMenuViewProps {
 }
 
 export default function GuestMenuViewMockup({ restaurant, table, tableNumber }: GuestMenuViewProps) {
-  const { t } = useGuestLanguage()
+  const { t, language } = useGuestLanguage()
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isOrdering, setIsOrdering] = useState(false)
