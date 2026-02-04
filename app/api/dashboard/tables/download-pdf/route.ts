@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateQRCodesPDF } from '@/lib/qr-code'
+import { generateQRCodesPDFWithArabic } from '@/lib/qr-code-arabic'
 
 // POST /api/dashboard/tables/download-pdf - Download all QR codes as PDF
 export async function POST(request: NextRequest) {
@@ -19,7 +20,10 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    const pdfBlob = await generateQRCodesPDF(tables, restaurantSlug, restaurantName, language)
+    // Use Arabic-supported PDF generator for Arabic language
+    const pdfBlob = language === 'ar' 
+      ? await generateQRCodesPDFWithArabic(tables, restaurantSlug, restaurantName, language)
+      : await generateQRCodesPDF(tables, restaurantSlug, restaurantName, language)
     
     // Convert Blob to ArrayBuffer for response
     const arrayBuffer = await pdfBlob.arrayBuffer()
