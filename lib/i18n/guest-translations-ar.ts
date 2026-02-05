@@ -403,7 +403,7 @@ export const guestTranslationsAr = {
     clear: 'مسح',
     addToCart: 'أضف إلى السلة',
     select: 'اختر',
-    currency: 'د.أ',
+    currencySymbol: 'د.أ',
     reset: 'إعادة تعيين',
     submit: 'إرسال',
     send: 'إرسال',
