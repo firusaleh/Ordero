@@ -228,6 +228,26 @@ export const guestTranslationsAr = {
         general: 'خطأ في الحجز',
         loading: 'خطأ في تحميل الأوقات المتاحة'
       }
+    },
+    restaurantPage: {
+      restaurantInfo: 'معلومات المطعم',
+      address: 'العنوان',
+      phone: 'الهاتف',
+      website: 'الموقع الإلكتروني',
+      openingHours: 'ساعات العمل',
+      seeDetails: 'عرض التفاصيل',
+      orderOnline: 'الطلب عبر الإنترنت',
+      scanQR: 'امسح رمز QR على طاولتك أو أدخل رقم الطاولة',
+      scanTableQR: 'امسح رمز QR على طاولتك',
+      or: 'أو',
+      enterTableNumber: 'أدخل رقم طاولتك:',
+      tableNumber: 'رقم الطاولة',
+      continue: 'متابعة',
+      items: 'صنف',
+      categories: 'فئات',
+      dishes: 'أطباق',
+      tables: 'طاولات',
+      cuisine: 'المطبخ'
     }
   },
 
