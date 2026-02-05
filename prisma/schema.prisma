@@ -31,6 +31,7 @@ model User {
   ownedRestaurants Restaurant[] @relation("RestaurantOwner")
   approvedRestaurants Restaurant[] @relation("ApprovedRestaurants")
   staffAt          RestaurantStaff[]
+  notifications    Notification[]
   
   // Timestamps
   // Passwort-Zurücksetzen
@@ -126,6 +127,7 @@ model Restaurant {
   reservations Reservation[]
   preOrders   PreOrder[]
   pendingPayments PendingPayment[]
+  notifications Notification[]
 
   // Stripe Platform (für Abonnements)
   stripeCustomerId       String?
@@ -722,4 +724,36 @@ model PendingPayment {
   // Timestamps
   createdAt       DateTime @default(now())
   expiresAt       DateTime // Auto-cleanup after 1 hour
+}
+
+// ============================================
+// BENACHRICHTIGUNGEN
+// ============================================
+
+model Notification {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String   @db.ObjectId
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Notification content
+  type            String   // order, payment, alert, info, reservation, preorder
+  title           String
+  message         String
+  
+  // Related entities (optional)
+  restaurantId    String?  @db.ObjectId
+  restaurant      Restaurant? @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderId         String?  @db.ObjectId
+  reservationId   String?  @db.ObjectId
+  preOrderId      String?  @db.ObjectId
+  
+  // Status
+  read            Boolean  @default(false)
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId, read])
+  @@index([createdAt])
 }

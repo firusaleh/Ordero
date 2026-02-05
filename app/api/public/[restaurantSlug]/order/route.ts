@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { sendNewOrderNotification, sendOrderConfirmation } from '@/lib/email'
 import { orderRateLimiter, checkRateLimit, getIpAddress } from '@/lib/rate-limit'
 import { getPOSAdapter } from '@/lib/pos-integrations'
+import { notifyRestaurantUsers } from '@/lib/notifications'
 
 export async function POST(
   request: Request,
@@ -282,6 +283,23 @@ export async function POST(
         console.error('[POS SYNC] Fehler bei POS-Integration:', posError)
         // POS-Fehler sollten die Bestellung nicht verhindern
       }
+    }
+
+    // Erstelle Datenbank-Benachrichtigung für Restaurant-Besitzer und Staff
+    try {
+      const tableInfo = order.tableNumber 
+        ? `Tisch ${order.tableNumber}` 
+        : order.type === 'TAKEAWAY' ? 'Abholung' : 'Lieferung'
+      
+      await notifyRestaurantUsers(restaurant.id, {
+        type: 'order',
+        title: '🛍️ Neue Bestellung',
+        message: `${tableInfo} - ${order.total.toFixed(2)} €`,
+        orderId: order.id
+      })
+    } catch (notificationError) {
+      console.error('Fehler beim Erstellen der Benachrichtigung:', notificationError)
+      // Benachrichtigungs-Fehler sollten die Bestellung nicht verhindern
     }
 
     // E-Mail-Benachrichtigungen senden

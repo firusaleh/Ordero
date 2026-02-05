@@ -66,24 +66,103 @@ export default function NotificationsDropdown() {
     setUnreadCount(notifications.filter(n => !n.read).length)
   }, [notifications])
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
+    // Update UI optimistically
     setNotifications(prev => 
       prev.map(n => n.id === id ? { ...n, read: true } : n)
     )
+    
+    // Persist to database
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ notificationId: id })
+      })
+      
+      if (!response.ok) {
+        // Revert on error
+        setNotifications(prev => 
+          prev.map(n => n.id === id ? { ...n, read: false } : n)
+        )
+      }
+    } catch (error) {
+      console.error('Fehler beim Markieren als gelesen:', error)
+      // Revert on error
+      setNotifications(prev => 
+        prev.map(n => n.id === id ? { ...n, read: false } : n)
+      )
+    }
   }
 
-  const markAllAsRead = () => {
+  const markAllAsRead = async () => {
+    // Update UI optimistically
+    const previousNotifications = [...notifications]
     setNotifications(prev => 
       prev.map(n => ({ ...n, read: true }))
     )
+    
+    // Persist to database
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markAllRead: true })
+      })
+      
+      if (!response.ok) {
+        // Revert on error
+        setNotifications(previousNotifications)
+      }
+    } catch (error) {
+      console.error('Fehler beim Markieren aller als gelesen:', error)
+      // Revert on error
+      setNotifications(previousNotifications)
+    }
   }
 
-  const deleteNotification = (id: string) => {
+  const deleteNotification = async (id: string) => {
+    // Update UI optimistically
+    const previousNotifications = [...notifications]
     setNotifications(prev => prev.filter(n => n.id !== id))
+    
+    // Delete from database
+    try {
+      const response = await fetch(`/api/notifications?id=${id}`, {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        // Revert on error
+        setNotifications(previousNotifications)
+      }
+    } catch (error) {
+      console.error('Fehler beim Löschen der Benachrichtigung:', error)
+      // Revert on error
+      setNotifications(previousNotifications)
+    }
   }
 
-  const clearAll = () => {
+  const clearAll = async () => {
+    // Update UI optimistically
+    const previousNotifications = [...notifications]
     setNotifications([])
+    
+    // Delete all from database
+    try {
+      const response = await fetch('/api/notifications?clearAll=true', {
+        method: 'DELETE'
+      })
+      
+      if (!response.ok) {
+        // Revert on error
+        setNotifications(previousNotifications)
+      }
+    } catch (error) {
+      console.error('Fehler beim Löschen aller Benachrichtigungen:', error)
+      // Revert on error
+      setNotifications(previousNotifications)
+    }
   }
 
   const getIconForType = (type: string) => {
