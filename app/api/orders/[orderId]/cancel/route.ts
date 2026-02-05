@@ -70,50 +70,77 @@ export async function POST(
 
     if (order.paymentStatus === "PAID" && order.paymentIntentId && stripe) {
       console.log(`Processing refund for order ${orderId}, PaymentIntent: ${order.paymentIntentId}`)
+      console.log(`Restaurant stripeAccountId: ${order.restaurant.stripeAccountId || 'NONE'}`)
+
+      // Helper function to process refund
+      const processRefund = async (stripeAccountId?: string) => {
+        const options = stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
+
+        // Retrieve the PaymentIntent (possibly from connected account)
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          order.paymentIntentId!,
+          options
+        )
+
+        if (paymentIntent.status !== 'succeeded') {
+          return { success: false, error: `Zahlung Status: ${paymentIntent.status}` }
+        }
+
+        const latestChargeId = paymentIntent.latest_charge as string
+        if (!latestChargeId) {
+          return { success: false, error: 'Keine Charge gefunden' }
+        }
+
+        // Create refund - different params for platform vs connected account
+        const refundParams: Stripe.RefundCreateParams = {
+          charge: latestChargeId,
+          reason: 'requested_by_customer',
+          metadata: {
+            orderId: orderId,
+            restaurantId: order.restaurantId,
+            reason: reason || 'Order cancelled'
+          }
+        }
+
+        // For platform payments (Destination Charges), reverse the transfer
+        if (!stripeAccountId) {
+          refundParams.reverse_transfer = true
+          refundParams.refund_application_fee = true
+        }
+
+        const refund = await stripe.refunds.create(refundParams, options)
+        return { success: true, refundId: refund.id }
+      }
 
       try {
-        // Retrieve the PaymentIntent to get the charge
-        const paymentIntent = await stripe.paymentIntents.retrieve(order.paymentIntentId)
-
-        if (paymentIntent.status === 'succeeded') {
-          // Get the latest charge from the PaymentIntent
-          const latestChargeId = paymentIntent.latest_charge as string
-
-          if (latestChargeId) {
-            // Create refund with reverse_transfer to also refund the connected account
-            const refund = await stripe.refunds.create({
-              charge: latestChargeId,
-              reason: 'requested_by_customer',
-              reverse_transfer: true, // Reverse the transfer to the connected restaurant account
-              refund_application_fee: true, // Also refund the platform fee
-              metadata: {
-                orderId: orderId,
-                restaurantId: order.restaurantId,
-                reason: reason || 'Order cancelled'
-              }
-            })
-
-            refundResult = {
-              success: true,
-              refundId: refund.id
-            }
+        // First, try as a platform payment (Destination Charges - new system)
+        try {
+          console.log('Trying refund as platform payment (Destination Charges)...')
+          const result = await processRefund()
+          refundResult = result
+          if (result.success) {
             newPaymentStatus = "REFUNDED"
-
-            console.log(`Refund successful: ${refund.id} for order ${orderId}`)
-          } else {
-            console.warn(`No charge found for PaymentIntent ${order.paymentIntentId}`)
-            refundResult = { success: false, error: 'Keine Charge gefunden' }
+            console.log(`Refund successful (platform): ${result.refundId} for order ${orderId}`)
           }
-        } else {
-          console.warn(`PaymentIntent ${order.paymentIntentId} status is ${paymentIntent.status}, not succeeded`)
-          refundResult = { success: false, error: `Zahlung Status: ${paymentIntent.status}` }
+        } catch (platformError: any) {
+          // If PaymentIntent not found on platform, try connected account (Direct Charges - old system)
+          if (platformError.code === 'resource_missing' && order.restaurant.stripeAccountId) {
+            console.log('PaymentIntent not on platform, trying connected account (Direct Charges)...')
+            const result = await processRefund(order.restaurant.stripeAccountId)
+            refundResult = result
+            if (result.success) {
+              newPaymentStatus = "REFUNDED"
+              console.log(`Refund successful (connected account): ${result.refundId} for order ${orderId}`)
+            }
+          } else {
+            throw platformError
+          }
         }
       } catch (stripeError: any) {
         console.error('Stripe refund error:', stripeError)
 
         // Handle specific Stripe errors
         if (stripeError.code === 'charge_already_refunded') {
-          // Already refunded - update status anyway
           newPaymentStatus = "REFUNDED"
           refundResult = { success: true, error: 'Bereits erstattet' }
         } else {
