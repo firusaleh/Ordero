@@ -123,15 +123,23 @@ export async function POST(
             console.log(`Refund successful (platform): ${result.refundId} for order ${orderId}`)
           }
         } catch (platformError: any) {
+          console.log('Platform refund failed:', platformError.code, platformError.message)
+          console.log('Restaurant stripeAccountId for fallback:', order.restaurant.stripeAccountId || 'NOT SET')
+
           // If PaymentIntent not found on platform, try connected account (Direct Charges - old system)
           if (platformError.code === 'resource_missing' && order.restaurant.stripeAccountId) {
             console.log('PaymentIntent not on platform, trying connected account (Direct Charges)...')
+            console.log('Using stripeAccount:', order.restaurant.stripeAccountId)
             const result = await processRefund(order.restaurant.stripeAccountId)
             refundResult = result
             if (result.success) {
               newPaymentStatus = "REFUNDED"
               console.log(`Refund successful (connected account): ${result.refundId} for order ${orderId}`)
             }
+          } else if (platformError.code === 'resource_missing' && !order.restaurant.stripeAccountId) {
+            console.error('REFUND FAILED: PaymentIntent not on platform AND restaurant has no stripeAccountId!')
+            console.error('This payment was likely made before Stripe Connect was set up for this restaurant.')
+            throw new Error('Rückerstattung nicht möglich: Restaurant hat keine Stripe Connect Verbindung')
           } else {
             throw platformError
           }
