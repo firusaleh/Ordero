@@ -41,6 +41,7 @@ import { toast } from 'sonner'
 import EmptyState from '@/components/shared/empty-state'
 import { ImageUpload } from '@/components/image-upload'
 import { cn } from '@/lib/utils'
+import MenuManagerDnD from './menu-manager-dnd'
 
 interface MenuItemVariant {
   id: string
@@ -104,6 +105,7 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
     categories[0]?.id || null
   )
   const [isSyncing, setIsSyncing] = useState(false)
+  const [useDragAndDrop, setUseDragAndDrop] = useState(true) // Default to drag and drop view
 
   const syncMenu = async () => {
     setIsSyncing(true)
@@ -600,6 +602,34 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
             />
           </CardContent>
         </Card>
+      ) : useDragAndDrop ? (
+        <MenuManagerDnD
+          restaurantId={restaurantId}
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+          onEditCategory={openEditCategory}
+          onDeleteCategory={handleDeleteCategory}
+          onAddItem={() => {
+            if (!selectedCategory && categories.length > 0) {
+              toast.error(t('menu.selectCategory'))
+              return
+            }
+            resetItemForm()
+            setShowItemDialog(true)
+          }}
+          onEditItem={openEditItem}
+          onDeleteItem={handleDeleteItem}
+          onToggleItemAvailability={handleToggleItemAvailability}
+          onItemsReorder={(items) => {
+            // Update local state with reordered items
+            setCategories(prev => prev.map(cat => 
+              cat.id === selectedCategory 
+                ? { ...cat, menuItems: items }
+                : cat
+            ))
+          }}
+        />
       ) : (
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Kategorien Sidebar */}
