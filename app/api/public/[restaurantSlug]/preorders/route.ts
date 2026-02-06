@@ -71,19 +71,21 @@ export async function GET(
     const maxPreOrderTime = new Date()
     maxPreOrderTime.setHours(maxPreOrderTime.getHours() + 24) // Max 24 Stunden im Voraus
 
-    // Konvertiere menuItems für bessere Kompatibilität
-    const categoriesWithPrices = categories.map(category => ({
-      ...category,
-      menuItems: category.menuItems.map(item => ({
-        ...item,
-        price: Number(item.price) || 0, // Stelle sicher, dass price eine Zahl ist
-        variants: item.variants ? (item.variants as any[]).map((v: any) => ({
-          ...v,
-          price: Number(v.price) || 0
-        })) : [],
-        extras: item.extras || []
+    // Konvertiere menuItems für bessere Kompatibilität und filtere leere Kategorien
+    const categoriesWithPrices = categories
+      .filter(category => category.menuItems.length > 0) // Nur Kategorien mit Artikeln
+      .map(category => ({
+        ...category,
+        menuItems: category.menuItems.map(item => ({
+          ...item,
+          price: Number(item.price) || 0, // Stelle sicher, dass price eine Zahl ist
+          variants: item.variants ? (item.variants as any[]).map((v: any) => ({
+            ...v,
+            price: Number(v.price) || 0
+          })) : [],
+          extras: item.extras || []
+        }))
       }))
-    }))
 
     return NextResponse.json({
       restaurant: {

@@ -40,6 +40,7 @@ import {
 import { toast } from 'sonner'
 import EmptyState from '@/components/shared/empty-state'
 import { ImageUpload } from '@/components/image-upload'
+import { cn } from '@/lib/utils'
 
 interface MenuItemVariant {
   id: string
@@ -178,7 +179,8 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
     name: '',
     description: '',
     icon: 'ChefHat',
-    color: '#3b82f6'
+    color: '#3b82f6',
+    isActive: true
   })
   
   const [itemForm, setItemForm] = useState({
@@ -425,7 +427,8 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
       name: '',
       description: '',
       icon: 'ChefHat',
-      color: '#3b82f6'
+      color: '#3b82f6',
+      isActive: true
     })
     setEditingCategory(null)
   }
@@ -499,7 +502,8 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
       name: category.name,
       description: category.description || '',
       icon: category.icon || 'ChefHat',
-      color: category.color || '#3b82f6'
+      color: category.color || '#3b82f6',
+      isActive: category.isActive !== undefined ? category.isActive : true
     })
     setShowCategoryDialog(true)
   }
@@ -636,7 +640,14 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
                           )}
                         </div>
                         <div>
-                          <p className="font-medium">{translateCategoryName(category?.name || '')}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium">{translateCategoryName(category?.name || '')}</p>
+                            {!category?.isActive && (
+                              <Badge variant="secondary" className="text-xs">
+                                {t('menu.inactive')}
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-sm text-gray-500">
                             {category?.menuItems?.length || 0} {t('menu.itemsInCategory')}
                           </p>
@@ -830,6 +841,19 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
                 onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
                 placeholder={t('menu.categoryDescPlaceholder')}
                 rows={3}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <Label htmlFor="categoryActive">{t('menu.categoryActive')}</Label>
+                <p className="text-sm text-muted-foreground">
+                  {t('menu.categoryActiveDescription')}
+                </p>
+              </div>
+              <Switch
+                id="categoryActive"
+                checked={categoryForm.isActive}
+                onCheckedChange={(checked) => setCategoryForm({ ...categoryForm, isActive: checked })}
               />
             </div>
           </div>
@@ -1108,8 +1132,4 @@ export default function MenuManager({ restaurantId, initialCategories, posSettin
       </Dialog>
     </div>
   )
-}
-
-function cn(...classes: (string | boolean | undefined)[]) {
-  return classes.filter(Boolean).join(' ')
 }
