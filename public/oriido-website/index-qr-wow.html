@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>Oriido - Enter the Digital Dining Universe</title>
+    <meta name="description" content="A revolutionary dining experience that begins with a simple scan">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --accent: #00D9FF;
+            --dark: #000000;
+            --light: #ffffff;
+        }
+
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            background: #000;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--light);
+            position: relative;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            position: fixed;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: exclusion;
+        }
+
+        .cursor-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.2s ease;
+        }
+
+        .cursor-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            border: 2px solid white;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+
+        .cursor.hover .cursor-ring {
+            width: 60px;
+            height: 60px;
+            border-color: var(--primary);
+        }
+
+        .cursor.hover .cursor-dot {
+            transform: translate(-50%, -50%) scale(2);
+            background: var(--primary);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-qr {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateQR 2s linear infinite;
+        }
+
+        @keyframes rotateQR {
+            from { transform: rotateY(0deg) rotateX(0deg); }
+            to { transform: rotateY(360deg) rotateX(360deg); }
+        }
+
+        .loading-qr-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            opacity: 0.3;
+        }
+
+        .loading-qr-face:nth-child(1) { transform: translateZ(50px); }
+        .loading-qr-face:nth-child(2) { transform: rotateY(90deg) translateZ(50px); }
+        .loading-qr-face:nth-child(3) { transform: rotateY(180deg) translateZ(50px); }
+        .loading-qr-face:nth-child(4) { transform: rotateY(-90deg) translateZ(50px); }
+        .loading-qr-face:nth-child(5) { transform: rotateX(90deg) translateZ(50px); }
+        .loading-qr-face:nth-child(6) { transform: rotateX(-90deg) translateZ(50px); }
+
+        /* Scene Container */
+        .scene-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            perspective: 1500px;
+            overflow: hidden;
+        }
+
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 1s ease;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        /* Navigation */
+        .nav-indicators {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.5);
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        /* Scene 1: QR Portal */
+        .scene-1 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+        }
+
+        .qr-portal {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            transform-style: preserve-3d;
+            animation: floatPortal 6s ease-in-out infinite;
+        }
+
+        @keyframes floatPortal {
+            0%, 100% { transform: translateY(0) rotateX(5deg) rotateY(5deg); }
+            50% { transform: translateY(-20px) rotateX(-5deg) rotateY(-5deg); }
+        }
+
+        .qr-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--primary);
+            border-radius: 20px;
+            background: rgba(255, 107, 53, 0.03);
+        }
+
+        .qr-layer:nth-child(1) { transform: translateZ(0px); }
+        .qr-layer:nth-child(2) { transform: translateZ(20px); opacity: 0.8; }
+        .qr-layer:nth-child(3) { transform: translateZ(40px); opacity: 0.6; }
+        .qr-layer:nth-child(4) { transform: translateZ(60px); opacity: 0.4; }
+        .qr-layer:nth-child(5) { transform: translateZ(80px); opacity: 0.2; }
+
+        .qr-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            background: #000;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 2px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .qr-pixel {
+            background: var(--primary);
+            opacity: 0;
+            transform: scale(0);
+            animation: pixelAppear 0.5s ease forwards;
+        }
+
+        @keyframes pixelAppear {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .scene-title {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(-20px);
+            }
+        }
+
+        .scene-title h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -2px;
+        }
+
+        .scene-title p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        /* Scene 2: Menu Universe */
+        .scene-2 {
+            display: none;
+            position: relative;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            overflow: hidden;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .menu-planet {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            animation: rotatePlanet 20s linear infinite;
+        }
+
+        @keyframes rotatePlanet {
+            from { transform: rotateY(0deg) rotateX(10deg); }
+            to { transform: rotateY(360deg) rotateX(10deg); }
+        }
+
+        .menu-planet-1 {
+            top: 20%;
+            left: 10%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 0 60px rgba(102, 126, 234, 0.6);
+        }
+
+        .menu-planet-2 {
+            top: 50%;
+            right: 15%;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 0 40px rgba(240, 147, 251, 0.6);
+        }
+
+        .menu-planet-3 {
+            bottom: 20%;
+            left: 30%;
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.6);
+        }
+
+        .menu-card {
+            position: absolute;
+            width: 350px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: translateZ(50px);
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .menu-card:hover {
+            transform: translateZ(100px) scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 60px rgba(255, 107, 53, 0.3);
+        }
+
+        .menu-card-1 {
+            top: 35%;
+            left: 50%;
+            transform: translateX(-50%) translateZ(50px);
+        }
+
+        .menu-card h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            animation: slideInLeft 0.6s ease forwards;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .menu-item:nth-child(2) { animation-delay: 0.1s; }
+        .menu-item:nth-child(3) { animation-delay: 0.2s; }
+        .menu-item:nth-child(4) { animation-delay: 0.3s; }
+
+        .menu-item-name {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .menu-item-price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Scene 3: Order Flow */
+        .scene-3 {
+            display: none;
+            position: relative;
+            background: linear-gradient(180deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+            overflow: hidden;
+        }
+
+        .order-flow-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 1200px;
+        }
+
+        .order-timeline {
+            position: relative;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            margin: 4rem 0;
+        }
+
+        .order-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            width: 0;
+            animation: progressGrow 3s ease forwards 1s;
+            box-shadow: 0 0 20px var(--primary);
+        }
+
+        @keyframes progressGrow {
+            to { width: 100%; }
+        }
+
+        .order-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+        }
+
+        .order-step {
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: stepReveal 0.8s ease forwards;
+        }
+
+        .order-step:nth-child(1) { animation-delay: 0.5s; }
+        .order-step:nth-child(2) { animation-delay: 1.5s; }
+        .order-step:nth-child(3) { animation-delay: 2.5s; }
+        .order-step:nth-child(4) { animation-delay: 3.5s; }
+
+        @keyframes stepReveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 2.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.3), transparent);
+            animation: shimmer 2s linear infinite;
+        }
+
+        @keyframes shimmer {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .step-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-description {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+
+        .floating-qr {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            opacity: 0.1;
+        }
+
+        .floating-qr-1 {
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .floating-qr-2 {
+            top: 70%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        .floating-qr-3 {
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 10s;
+        }
+
+        /* Scene 4: Success Celebration */
+        .scene-4 {
+            display: none;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f1e 100%);
+            overflow: hidden;
+        }
+
+        .success-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .success-checkmark {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .checkmark-circle {
+            stroke-dasharray: 500;
+            stroke-dashoffset: 500;
+            animation: drawCircle 1s ease forwards;
+        }
+
+        .checkmark-check {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: drawCheck 0.8s ease forwards 0.8s;
+        }
+
+        @keyframes drawCircle {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .success-text {
+            opacity: 0;
+            animation: fadeInScale 1s ease forwards 1.5s;
+        }
+
+        @keyframes fadeInScale {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+        }
+
+        .success-text h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 3rem;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--primary);
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Scene 5: CTA */
+        .scene-5 {
+            display: none;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .cta-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+        }
+
+        .cta-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 1rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .cta-subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.2s;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 0.4s;
+        }
+
+        .btn {
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Particle Background */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: particleFloat 20s linear infinite;
+        }
+
+        @keyframes particleFloat {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Sound Button */
+        .sound-toggle {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .sound-icon {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .sound-wave {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: white;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .sound-wave:nth-child(1) {
+            left: 30%;
+            height: 10px;
+            animation: soundWave 0.5s ease-in-out infinite;
+        }
+
+        .sound-wave:nth-child(2) {
+            animation: soundWave 0.5s ease-in-out infinite 0.1s;
+        }
+
+        .sound-wave:nth-child(3) {
+            left: 70%;
+            height: 15px;
+            animation: soundWave 0.5s ease-in-out infinite 0.2s;
+        }
+
+        @keyframes soundWave {
+            0%, 100% { transform: translate(-50%, -50%) scaleY(1); }
+            50% { transform: translate(-50%, -50%) scaleY(1.5); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .scene-title h1 {
+                font-size: 2.5rem;
+            }
+
+            .qr-portal {
+                width: 300px;
+                height: 300px;
+            }
+
+            .menu-card {
+                width: 90%;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+            }
+
+            .order-steps {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .cta-title {
+                font-size: 2.5rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                width: 100%;
+                padding: 0 2rem;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Scroll Hint */
+        .scroll-hint {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            animation: pulse 2s ease-in-out infinite;
+            z-index: 50;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Skip Intro */
+        .skip-intro {
+            position: fixed;
+            top: 30px;
+            left: 30px;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .skip-intro:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor">
+        <div class="cursor-dot"></div>
+        <div class="cursor-ring"></div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loader">
+        <div class="loading-qr">
+            <div class="loading-qr-face"></div>
+            <div class="loading-qr-face"></div>
+            <div class="loading-qr-face"></div>
+            <div class="loading-qr-face"></div>
+            <div class="loading-qr-face"></div>
+            <div class="loading-qr-face"></div>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressBar"></div>
+    </div>
+
+    <!-- Skip Intro -->
+    <a href="#" class="skip-intro" id="skipIntro">Skip Intro →</a>
+
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" id="soundToggle">
+        <div class="sound-icon">
+            <div class="sound-wave"></div>
+            <div class="sound-wave"></div>
+            <div class="sound-wave"></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="nav-indicators">
+        <div class="nav-dot active" data-scene="1"></div>
+        <div class="nav-dot" data-scene="2"></div>
+        <div class="nav-dot" data-scene="3"></div>
+        <div class="nav-dot" data-scene="4"></div>
+        <div class="nav-dot" data-scene="5"></div>
+    </div>
+
+    <!-- Scroll Hint -->
+    <div class="scroll-hint">Scroll to explore ↓</div>
+
+    <!-- Scene Container -->
+    <div class="scene-container">
+        <!-- Scene 1: QR Portal -->
+        <div class="scene scene-1" id="scene1">
+            <div class="scene-title">
+                <h1>SCAN TO ENTER</h1>
+                <p>Your digital dining journey begins here</p>
+            </div>
+            
+            <div class="qr-portal">
+                <div class="qr-layer"></div>
+                <div class="qr-layer"></div>
+                <div class="qr-layer"></div>
+                <div class="qr-layer"></div>
+                <div class="qr-layer"></div>
+                
+                <div class="qr-content" id="qrContent"></div>
+            </div>
+            
+            <!-- Floating Elements -->
+            <div class="floating-element floating-qr floating-qr-1"></div>
+            <div class="floating-element floating-qr floating-qr-2"></div>
+            <div class="floating-element floating-qr floating-qr-3"></div>
+        </div>
+
+        <!-- Scene 2: Menu Universe -->
+        <div class="scene scene-2" id="scene2">
+            <div class="stars" id="stars"></div>
+            
+            <div class="menu-planet menu-planet-1"></div>
+            <div class="menu-planet menu-planet-2"></div>
+            <div class="menu-planet menu-planet-3"></div>
+            
+            <div class="menu-card menu-card-1">
+                <h3>Today's Specials</h3>
+                <div class="menu-item">
+                    <span class="menu-item-name">Cosmic Burger</span>
+                    <span class="menu-item-price">$15</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-item-name">Galaxy Salad</span>
+                    <span class="menu-item-price">$12</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-item-name">Nebula Pasta</span>
+                    <span class="menu-item-price">$18</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 3: Order Flow -->
+        <div class="scene scene-3" id="scene3">
+            <div class="particles" id="particles"></div>
+            
+            <div class="order-flow-container">
+                <div class="order-timeline">
+                    <div class="order-progress"></div>
+                </div>
+                
+                <div class="order-steps">
+                    <div class="order-step">
+                        <div class="step-icon">📱</div>
+                        <div class="step-title">Scan</div>
+                        <div class="step-description">QR Code at your table</div>
+                    </div>
+                    <div class="order-step">
+                        <div class="step-icon">🍽️</div>
+                        <div class="step-title">Select</div>
+                        <div class="step-description">Browse & customize</div>
+                    </div>
+                    <div class="order-step">
+                        <div class="step-icon">💳</div>
+                        <div class="step-title">Pay</div>
+                        <div class="step-description">Secure & instant</div>
+                    </div>
+                    <div class="order-step">
+                        <div class="step-icon">✨</div>
+                        <div class="step-title">Enjoy</div>
+                        <div class="step-description">Delivered to your table</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 4: Success Celebration -->
+        <div class="scene scene-4" id="scene4">
+            <div class="success-container">
+                <div class="success-checkmark">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <circle class="checkmark-circle" cx="100" cy="100" r="90" 
+                                stroke="#4CAF50" stroke-width="8" fill="none"/>
+                        <path class="checkmark-check" d="M60 100 L85 125 L140 70" 
+                              stroke="#4CAF50" stroke-width="8" fill="none" 
+                              stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                
+                <div class="success-text">
+                    <h2>Order Confirmed!</h2>
+                    <p style="color: rgba(255,255,255,0.8); font-size: 1.2rem;">
+                        Your culinary experience begins now
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 5: CTA -->
+        <div class="scene scene-5" id="scene5">
+            <div class="cta-container">
+                <h2 class="cta-title">Ready to Transform?</h2>
+                <p class="cta-subtitle">Join the dining revolution</p>
+                
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-primary">Start Free Trial</a>
+                    <a href="#" class="btn btn-secondary">Watch Demo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentScene = 1;
+        const totalScenes = 5;
+        let isScrolling = false;
+        let soundEnabled = false;
+        
+        // Custom Cursor
+        const cursor = document.getElementById('cursor');
+        const interactiveElements = document.querySelectorAll('a, button, .menu-card, .btn, .nav-dot, .sound-toggle, .skip-intro');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        
+        interactiveElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+        
+        // Loading Screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('hidden');
+                initScene1();
+            }, 2000);
+        });
+        
+        // Initialize Scene 1 - QR Portal
+        function initScene1() {
+            const qrContent = document.getElementById('qrContent');
+            const pixelCount = 81;
+            
+            for (let i = 0; i < pixelCount; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'qr-pixel';
+                pixel.style.animationDelay = `${Math.random() * 2}s`;
+                if (Math.random() > 0.5) {
+                    pixel.style.opacity = '0';
+                }
+                qrContent.appendChild(pixel);
+            }
+        }
+        
+        // Scene Navigation
+        function goToScene(sceneNumber) {
+            if (isScrolling || sceneNumber < 1 || sceneNumber > totalScenes) return;
+            isScrolling = true;
+            
+            // Hide current scene
+            document.getElementById(`scene${currentScene}`).style.display = 'none';
+            
+            // Show new scene
+            const newScene = document.getElementById(`scene${sceneNumber}`);
+            newScene.style.display = 'flex';
+            
+            // Initialize scene-specific animations
+            if (sceneNumber === 2) initScene2();
+            if (sceneNumber === 3) initScene3();
+            if (sceneNumber === 4) initScene4();
+            
+            // Update navigation
+            document.querySelectorAll('.nav-dot').forEach(dot => dot.classList.remove('active'));
+            document.querySelector(`.nav-dot[data-scene="${sceneNumber}"]`).classList.add('active');
+            
+            // Update progress bar
+            const progress = (sceneNumber / totalScenes) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            currentScene = sceneNumber;
+            
+            setTimeout(() => {
+                isScrolling = false;
+            }, 1500);
+        }
+        
+        // Initialize Scene 2 - Menu Universe
+        function initScene2() {
+            const stars = document.getElementById('stars');
+            stars.innerHTML = '';
+            
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 'px';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                stars.appendChild(star);
+            }
+        }
+        
+        // Initialize Scene 3 - Order Flow
+        function initScene3() {
+            const particles = document.getElementById('particles');
+            particles.innerHTML = '';
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                particles.appendChild(particle);
+            }
+        }
+        
+        // Initialize Scene 4 - Success
+        function initScene4() {
+            // Create confetti
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.top = '-10px';
+                    confetti.style.background = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    confetti.style.animation = `confettiFall ${2 + Math.random() * 2}s ease-out forwards`;
+                    document.getElementById('scene4').appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 100);
+            }
+        }
+        
+        // Scroll Navigation
+        let lastScrollTime = 0;
+        window.addEventListener('wheel', (e) => {
+            const now = Date.now();
+            if (now - lastScrollTime < 1500) return;
+            lastScrollTime = now;
+            
+            if (e.deltaY > 0 && currentScene < totalScenes) {
+                goToScene(currentScene + 1);
+            } else if (e.deltaY < 0 && currentScene > 1) {
+                goToScene(currentScene - 1);
+            }
+        });
+        
+        // Touch Navigation for Mobile
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+        
+        window.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0 && currentScene < totalScenes) {
+                    goToScene(currentScene + 1);
+                } else if (diff < 0 && currentScene > 1) {
+                    goToScene(currentScene - 1);
+                }
+            }
+        });
+        
+        // Keyboard Navigation
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                if (currentScene < totalScenes) goToScene(currentScene + 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (currentScene > 1) goToScene(currentScene - 1);
+            }
+        });
+        
+        // Nav Dots Click
+        document.querySelectorAll('.nav-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const scene = parseInt(dot.dataset.scene);
+                goToScene(scene);
+            });
+        });
+        
+        // Skip Intro
+        document.getElementById('skipIntro').addEventListener('click', (e) => {
+            e.preventDefault();
+            goToScene(totalScenes);
+        });
+        
+        // Sound Toggle (Visual only - no actual sound implementation)
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            // Here you would toggle actual sound
+            console.log('Sound:', soundEnabled ? 'ON' : 'OFF');
+        });
+        
+        // Initialize progress bar
+        document.getElementById('progressBar').style.width = '20%';
+        
+        // Parallax effect on mouse move
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 2;
+            const y = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            // Move floating elements
+            document.querySelectorAll('.floating-element').forEach((el, index) => {
+                const speed = (index + 1) * 10;
+                el.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+            
+            // Move menu planets
+            document.querySelectorAll('.menu-planet').forEach((el, index) => {
+                const speed = (index + 1) * 5;
+                el.style.transform = `translate(${x * speed}px, ${y * speed}px) rotateY(${x * 20}deg) rotateX(${y * 20}deg)`;
+            });
+        });
+    </script>
+</body>
+</html>

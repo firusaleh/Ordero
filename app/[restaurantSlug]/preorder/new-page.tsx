@@ -31,6 +31,11 @@ async function getRestaurantMenu(slug: string) {
     return null
   }
   
+  // Filtere leere Kategorien heraus
+  restaurant.categories = restaurant.categories.filter(
+    category => category.menuItems && category.menuItems.length > 0
+  )
+  
   // Stelle sicher, dass Settings geladen sind
   if (!restaurant.settings) {
     const settings = await prisma.restaurantSettings.findUnique({
