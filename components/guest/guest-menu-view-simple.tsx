@@ -296,6 +296,96 @@ export default function GuestMenuViewSimple({
     return cart.reduce((sum, item) => sum + item.quantity, 0)
   }
 
+  // Translate category names based on common patterns
+  const translateCategoryName = (name: string): string => {
+    const lowerName = name.toLowerCase()
+    
+    // German to current language
+    if (lowerName === 'vorspeisen' || lowerName === 'starters' || lowerName === 'appetizers') {
+      return language === 'ar' ? 'المقبلات' : 
+             language === 'en' ? 'Appetizers' : 
+             'Vorspeisen'
+    }
+    if (lowerName === 'hauptgerichte' || lowerName === 'hauptspeisen' || lowerName === 'main courses' || lowerName === 'mains') {
+      return language === 'ar' ? 'الأطباق الرئيسية' : 
+             language === 'en' ? 'Main Courses' : 
+             'Hauptgerichte'
+    }
+    if (lowerName === 'nachspeisen' || lowerName === 'desserts' || lowerName === 'nachtisch') {
+      return language === 'ar' ? 'الحلويات' : 
+             language === 'en' ? 'Desserts' : 
+             'Nachspeisen'
+    }
+    if (lowerName === 'getränke' || lowerName === 'beverages' || lowerName === 'drinks') {
+      return language === 'ar' ? 'المشروبات' : 
+             language === 'en' ? 'Beverages' : 
+             'Getränke'
+    }
+    if (lowerName === 'salate' || lowerName === 'salads') {
+      return language === 'ar' ? 'السلطات' : 
+             language === 'en' ? 'Salads' : 
+             'Salate'
+    }
+    if (lowerName === 'suppen' || lowerName === 'soups') {
+      return language === 'ar' ? 'الشوربات' : 
+             language === 'en' ? 'Soups' : 
+             'Suppen'
+    }
+    if (lowerName === 'pizza') {
+      return language === 'ar' ? 'البيتزا' : 'Pizza'
+    }
+    if (lowerName === 'pasta') {
+      return language === 'ar' ? 'المعكرونة' : 'Pasta'
+    }
+    if (lowerName === 'burger' || lowerName === 'burgers') {
+      return language === 'ar' ? 'البرجر' : 'Burger'
+    }
+    if (lowerName === 'sandwiches' || lowerName === 'sandwich') {
+      return language === 'ar' ? 'السندويشات' : 'Sandwiches'
+    }
+    if (lowerName === 'frühstück' || lowerName === 'breakfast') {
+      return language === 'ar' ? 'الإفطار' : 
+             language === 'en' ? 'Breakfast' : 
+             'Frühstück'
+    }
+    if (lowerName === 'mittagessen' || lowerName === 'lunch') {
+      return language === 'ar' ? 'الغداء' : 
+             language === 'en' ? 'Lunch' : 
+             'Mittagessen'
+    }
+    if (lowerName === 'abendessen' || lowerName === 'dinner') {
+      return language === 'ar' ? 'العشاء' : 
+             language === 'en' ? 'Dinner' : 
+             'Abendessen'
+    }
+    if (lowerName === 'beilagen' || lowerName === 'sides' || lowerName === 'side dishes') {
+      return language === 'ar' ? 'الأطباق الجانبية' : 
+             language === 'en' ? 'Side Dishes' : 
+             'Beilagen'
+    }
+    if (lowerName === 'snacks') {
+      return language === 'ar' ? 'الوجبات الخفيفة' : 'Snacks'
+    }
+    if (lowerName === 'kaffee' || lowerName === 'coffee') {
+      return language === 'ar' ? 'القهوة' : 
+             language === 'en' ? 'Coffee' : 
+             'Kaffee'
+    }
+    if (lowerName === 'tee' || lowerName === 'tea') {
+      return language === 'ar' ? 'الشاي' : 
+             language === 'en' ? 'Tea' : 
+             'Tee'
+    }
+    if (lowerName === 'säfte' || lowerName === 'juices') {
+      return language === 'ar' ? 'العصائر' : 
+             language === 'en' ? 'Juices' : 
+             'Säfte'
+    }
+    
+    // Return original name if no translation found
+    return name
+  }
+
   // Handle cash order (called from IntegratedCheckout)
   const handleCashOrder = async () => {
     if (cart.length === 0) return
@@ -644,7 +734,7 @@ export default function GuestMenuViewSimple({
                     {/* Avoid showing generic menu names as category names */}
                     {['قائمة الطعام', 'Speisekarte', 'Menu'].includes(category.name) 
                       ? (language === 'ar' ? 'الأصناف' : language === 'de' ? 'Gerichte' : 'Dishes')
-                      : category.name}
+                      : translateCategoryName(category.name)}
                   </span>
                   <Badge 
                     variant={isSelected ? "secondary" : "outline"}
