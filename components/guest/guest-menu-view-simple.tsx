@@ -298,25 +298,70 @@ export default function GuestMenuViewSimple({
 
   // Translate category names based on common patterns
   const translateCategoryName = (name: string): string => {
-    const lowerName = name.toLowerCase()
+    if (!name) return name
     
-    // German to current language
-    if (lowerName === 'vorspeisen' || lowerName === 'starters' || lowerName === 'appetizers') {
+    // Trim and normalize the name
+    const normalizedName = name.trim()
+    const lowerName = normalizedName.toLowerCase()
+    
+    // Debug logging in development
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      console.log('Translating category:', name, 'Language:', language, 'Normalized:', lowerName)
+    }
+    
+    // Check exact match first (case-insensitive)
+    const exactMatches: Record<string, { ar: string, en: string, de: string }> = {
+      'vorspeisen': { ar: 'المقبلات', en: 'Appetizers', de: 'Vorspeisen' },
+      'hauptgerichte': { ar: 'الأطباق الرئيسية', en: 'Main Courses', de: 'Hauptgerichte' },
+      'nachspeisen': { ar: 'الحلويات', en: 'Desserts', de: 'Nachspeisen' },
+      'getränke': { ar: 'المشروبات', en: 'Beverages', de: 'Getränke' },
+      'salate': { ar: 'السلطات', en: 'Salads', de: 'Salate' },
+      'suppen': { ar: 'الشوربات', en: 'Soups', de: 'Suppen' },
+      'pizza': { ar: 'البيتزا', en: 'Pizza', de: 'Pizza' },
+      'pasta': { ar: 'المعكرونة', en: 'Pasta', de: 'Pasta' },
+      'burger': { ar: 'البرجر', en: 'Burger', de: 'Burger' },
+      'sandwiches': { ar: 'السندويشات', en: 'Sandwiches', de: 'Sandwiches' },
+      'frühstück': { ar: 'الإفطار', en: 'Breakfast', de: 'Frühstück' },
+      'mittagessen': { ar: 'الغداء', en: 'Lunch', de: 'Mittagessen' },
+      'abendessen': { ar: 'العشاء', en: 'Dinner', de: 'Abendessen' },
+      'snacks': { ar: 'الوجبات الخفيفة', en: 'Snacks', de: 'Snacks' },
+      'beilagen': { ar: 'الأطباق الجانبية', en: 'Side Dishes', de: 'Beilagen' },
+      'vegetarisch': { ar: 'نباتي', en: 'Vegetarian', de: 'Vegetarisch' },
+      'vegan': { ar: 'نباتي صرف', en: 'Vegan', de: 'Vegan' },
+      'kinderspeisen': { ar: 'وجبات الأطفال', en: 'Kids Menu', de: 'Kinderspeisen' },
+      'alkoholische getränke': { ar: 'المشروبات الكحولية', en: 'Alcoholic Beverages', de: 'Alkoholische Getränke' },
+      'alkoholfrei': { ar: 'بدون كحول', en: 'Non-Alcoholic', de: 'Alkoholfrei' },
+      'heißgetränke': { ar: 'المشروبات الساخنة', en: 'Hot Beverages', de: 'Heißgetränke' },
+      'kaffee': { ar: 'القهوة', en: 'Coffee', de: 'Kaffee' },
+      'tee': { ar: 'الشاي', en: 'Tea', de: 'Tee' },
+    }
+    
+    // Check if we have an exact match (case-insensitive)
+    if (exactMatches[lowerName]) {
+      const translation = exactMatches[lowerName][language] || normalizedName
+      if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+        console.log('Exact match found, returning:', translation)
+      }
+      return translation
+    }
+    
+    // German to current language - broader pattern matching
+    if (lowerName === 'vorspeisen' || lowerName === 'starters' || lowerName === 'appetizers' || lowerName === 'vorspeise' || lowerName === 'starter') {
       return language === 'ar' ? 'المقبلات' : 
              language === 'en' ? 'Appetizers' : 
              'Vorspeisen'
     }
-    if (lowerName === 'hauptgerichte' || lowerName === 'hauptspeisen' || lowerName === 'main courses' || lowerName === 'mains') {
+    if (lowerName === 'hauptgerichte' || lowerName === 'hauptspeisen' || lowerName === 'main courses' || lowerName === 'mains' || lowerName === 'hauptgericht') {
       return language === 'ar' ? 'الأطباق الرئيسية' : 
              language === 'en' ? 'Main Courses' : 
              'Hauptgerichte'
     }
-    if (lowerName === 'nachspeisen' || lowerName === 'desserts' || lowerName === 'nachtisch') {
+    if (lowerName === 'nachspeisen' || lowerName === 'desserts' || lowerName === 'nachtisch' || lowerName === 'nachspeise' || lowerName === 'dessert') {
       return language === 'ar' ? 'الحلويات' : 
              language === 'en' ? 'Desserts' : 
              'Nachspeisen'
     }
-    if (lowerName === 'getränke' || lowerName === 'beverages' || lowerName === 'drinks') {
+    if (lowerName === 'getränke' || lowerName === 'beverages' || lowerName === 'drinks' || lowerName === 'getränk' || lowerName === 'drink' || lowerName === 'beverage') {
       return language === 'ar' ? 'المشروبات' : 
              language === 'en' ? 'Beverages' : 
              'Getränke'

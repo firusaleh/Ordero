@@ -20,22 +20,17 @@ export function GuestLanguageProvider({ children, initialLanguage }: GuestLangua
   const [language, setLanguageState] = useState<GuestLanguage>(initialLanguage || 'de')
 
   useEffect(() => {
-    // Load saved language from localStorage
-    const savedLang = localStorage.getItem('guestLanguage') as GuestLanguage
-    if (savedLang && guestTranslations[savedLang]) {
-      setLanguageState(savedLang)
-      
-      // Set RTL direction for Arabic
-      if (savedLang === 'ar') {
-        document.documentElement.dir = 'rtl'
-        document.documentElement.lang = 'ar'
-      } else {
-        document.documentElement.dir = 'ltr'
-        document.documentElement.lang = savedLang
-      }
-    } else if (initialLanguage) {
-      // Use initial language from restaurant settings
+    // If initial language is provided (e.g., for country-specific restaurants), use it
+    if (initialLanguage) {
       setLanguageState(initialLanguage)
+      
+      // Save to localStorage with restaurant-specific key to avoid conflicts
+      const currentPath = window.location.pathname
+      const restaurantSlug = currentPath.split('/')[1] // Get restaurant slug from URL
+      if (restaurantSlug) {
+        localStorage.setItem(`guestLanguage_${restaurantSlug}`, initialLanguage)
+      }
+      
       if (initialLanguage === 'ar') {
         document.documentElement.dir = 'rtl'
         document.documentElement.lang = 'ar'
@@ -44,21 +39,47 @@ export function GuestLanguageProvider({ children, initialLanguage }: GuestLangua
         document.documentElement.lang = initialLanguage
       }
     } else {
-      // Check browser language as fallback
-      const browserLang = navigator.language.toLowerCase()
-      if (browserLang.startsWith('en')) {
-        setLanguageState('en')
-      } else if (browserLang.startsWith('ar')) {
-        setLanguageState('ar')
-        document.documentElement.dir = 'rtl'
-        document.documentElement.lang = 'ar'
+      // Load saved language from localStorage
+      const currentPath = window.location.pathname
+      const restaurantSlug = currentPath.split('/')[1]
+      const savedLang = localStorage.getItem(`guestLanguage_${restaurantSlug}`) as GuestLanguage || 
+                       localStorage.getItem('guestLanguage') as GuestLanguage
+      
+      if (savedLang && guestTranslations[savedLang]) {
+        setLanguageState(savedLang)
+        
+        // Set RTL direction for Arabic
+        if (savedLang === 'ar') {
+          document.documentElement.dir = 'rtl'
+          document.documentElement.lang = 'ar'
+        } else {
+          document.documentElement.dir = 'ltr'
+          document.documentElement.lang = savedLang
+        }
+      } else {
+        // Check browser language as fallback
+        const browserLang = navigator.language.toLowerCase()
+        if (browserLang.startsWith('en')) {
+          setLanguageState('en')
+        } else if (browserLang.startsWith('ar')) {
+          setLanguageState('ar')
+          document.documentElement.dir = 'rtl'
+          document.documentElement.lang = 'ar'
+        }
       }
     }
   }, [initialLanguage])
 
   const setLanguage = (lang: GuestLanguage) => {
     setLanguageState(lang)
-    localStorage.setItem('guestLanguage', lang)
+    
+    // Save with restaurant-specific key
+    const currentPath = window.location.pathname
+    const restaurantSlug = currentPath.split('/')[1]
+    if (restaurantSlug) {
+      localStorage.setItem(`guestLanguage_${restaurantSlug}`, lang)
+    }
+    localStorage.setItem('guestLanguage', lang) // Also save globally as fallback
     
     // Set RTL direction for Arabic
     if (lang === 'ar') {
